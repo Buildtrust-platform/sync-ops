@@ -49,6 +49,13 @@ const schema = a.schema({
     aiTags: a.string().array(), // Labels detected by Rekognition (e.g., ["Person", "Car", "Building"])
     aiConfidence: a.float(), // Average confidence score from Rekognition (0-100)
     aiProcessedAt: a.datetime(), // When Rekognition analysis completed
+
+    // File metadata
+    fileSize: a.integer(), // File size in bytes
+    mimeType: a.string(), // MIME type (e.g., "image/jpeg", "video/mp4")
+    dimensions: a.string(), // Image/video dimensions (e.g., "1920x1080")
+    duration: a.float(), // Video duration in seconds
+    thumbnailKey: a.string(), // S3 key for thumbnail image
   })
   .authorization(allow => [
     allow.owner(),

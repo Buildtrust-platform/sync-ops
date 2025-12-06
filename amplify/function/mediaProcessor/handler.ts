@@ -5,12 +5,14 @@ import { getAmplifyDataClientConfig } from '@aws-amplify/backend/function/runtim
 import { env } from '$amplify/env/mediaProcessor';
 import type { Schema } from '../../data/resource';
 import { RekognitionClient, DetectLabelsCommand } from '@aws-sdk/client-rekognition';
+import { S3Client, HeadObjectCommand } from '@aws-sdk/client-s3';
 
 const { resourceConfig, libraryOptions } = await getAmplifyDataClientConfig(env);
 Amplify.configure(resourceConfig, libraryOptions);
 
 const client = generateClient<Schema>();
 const rekognitionClient = new RekognitionClient({ region: process.env.AWS_REGION });
+const s3Client = new S3Client({ region: process.env.AWS_REGION });
 
 
 export const handler = async (event: any) => {
@@ -37,7 +39,19 @@ export const handler = async (event: any) => {
 
       const assetToUpdate = assetResult.data[0];
 
-      // 2. UPDATE STATUS: Mark as processing
+      // 2. EXTRACT FILE METADATA from S3
+      const headCommand = new HeadObjectCommand({
+        Bucket: bucketName,
+        Key: key
+      });
+      const headResponse = await s3Client.send(headCommand);
+
+      const fileSize = headResponse.ContentLength || 0;
+      const mimeType = headResponse.ContentType || 'application/octet-stream';
+
+      console.log(`File metadata: ${fileSize} bytes, ${mimeType}`);
+
+      // 3. UPDATE STATUS: Mark as processing
       await client.models.Asset.update({
         id: assetToUpdate.id,
         type: 'PROCESSING'
@@ -71,13 +85,15 @@ export const handler = async (event: any) => {
       console.log(`Rekognition detected ${aiTags.length} labels with avg confidence ${aiConfidence.toFixed(2)}%`);
       console.log(`Tags: ${aiTags.join(', ')}`);
 
-      // 5. UPDATE ASSET: Save AI tags to database
+      // 5. UPDATE ASSET: Save AI tags and metadata to database
       await client.models.Asset.update({
         id: assetToUpdate.id,
         type: 'MASTER', // Processing complete, mark as MASTER
         aiTags: aiTags,
         aiConfidence: aiConfidence,
         aiProcessedAt: new Date().toISOString(),
+        fileSize: fileSize,
+        mimeType: mimeType,
       });
 
       console.log(`SUCCESS: Asset [${assetToUpdate.id}] updated with AI tags`);
