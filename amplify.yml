@@ -4,11 +4,7 @@ frontend:
     preBuild:
       commands:
         - npm ci --legacy-peer-deps
-        # Generate production backend outputs
-        - npx ampx generate outputs --branch $AWS_BRANCH --app-id $AWS_APP_ID
-        # Install dependencies for Lambda functions
-        - cd amplify/function/mediaProcessor && npm ci && cd ../../..
-        - cd amplify/function/smartBriefAI && npm ci && cd ../../..
+        - npx ampx generate outputs --branch main --app-id d1o4v1dcvd0u6g
     build:
       commands:
         - npm run build
