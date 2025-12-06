@@ -11,10 +11,11 @@ import { Authenticator } from "@aws-amplify/ui-react";
 import Link from "next/link";
 import SmartBrief from "./components/SmartBrief";
 
-// Configure Amplify only on client side
-if (typeof window !== 'undefined') {
-  Amplify.configure(outputs, { ssr: true });
-}
+// Force dynamic rendering - no static generation
+export const dynamic = 'force-dynamic';
+
+// Configure Amplify
+Amplify.configure(outputs, { ssr: true });
 
 const client = generateClient<Schema>();
 
