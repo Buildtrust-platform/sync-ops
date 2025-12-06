@@ -23,9 +23,22 @@ export default function App() {
   const [showSmartBrief, setShowSmartBrief] = useState(false);
 
   function listProjects() {
-    client.models.Project.observeQuery().subscribe({
-      next: (data) => setProjects([...data.items]),
-    });
+    try {
+      client.models.Project.observeQuery().subscribe({
+        next: (data) => {
+          if (data?.items) {
+            setProjects([...data.items]);
+          }
+        },
+        error: (error) => {
+          console.error('Error fetching projects:', error);
+          setProjects([]);
+        },
+      });
+    } catch (error) {
+      console.error('Error setting up project subscription:', error);
+      setProjects([]);
+    }
   }
 
   useEffect(() => {
@@ -77,7 +90,7 @@ export default function App() {
           </div>
 
           {/* PROJECT GRID */}
-          {projects.length === 0 ? (
+          {!projects || projects.length === 0 ? (
             <div className="text-center py-24 bg-slate-800 rounded-2xl border-2 border-dashed border-slate-700">
               <p className="text-2xl text-slate-500 font-medium">System Idle.</p>
               <p className="text-slate-400 mt-2">Create a project to initialize the supply chain.</p>
