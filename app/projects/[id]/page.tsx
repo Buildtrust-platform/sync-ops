@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
-import { uploadData, list } from "aws-amplify/storage";
+import { uploadData } from "aws-amplify/storage";
 import type { Schema } from "@/amplify/data/resource";
 import { Amplify } from "aws-amplify";
 import outputs from "@/amplify_outputs.json";
@@ -50,7 +50,7 @@ export default function ProjectDetail() {
     // Search filter - check if search query matches filename or AI tags
     const matchesSearch = searchQuery === "" ||
       asset.s3Key.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (asset.aiTags && asset.aiTags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())));
+      (asset.aiTags && asset.aiTags.some(tag => tag?.toLowerCase().includes(searchQuery.toLowerCase())));
 
     // Type filter
     const matchesType = filterType === "ALL" || asset.type === filterType;
@@ -191,8 +191,23 @@ export default function ProjectDetail() {
         {filteredAssets.map((asset) => (
           <div key={asset.id} className="bg-slate-800 p-5 rounded-xl border border-slate-700 hover:border-teal-500/50 transition-all">
             {/* File Preview */}
-            <div className="bg-black/50 h-32 flex items-center justify-center mb-3 rounded text-slate-600 text-xs">
-              {asset.s3Key.split('/').pop()}
+            <div className="bg-black/50 h-32 flex items-center justify-center mb-3 rounded text-slate-600 text-xs relative">
+              {asset.mimeType?.startsWith('video/') && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-6xl">🎬</div>
+                </div>
+              )}
+              {asset.mimeType?.startsWith('image/') && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-6xl">🖼️</div>
+                </div>
+              )}
+              {asset.mimeType?.startsWith('application/') && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-6xl">📄</div>
+                </div>
+              )}
+              {!asset.mimeType && <span className="text-xs">{asset.s3Key.split('/').pop()}</span>}
             </div>
 
             {/* File Name & Metadata */}

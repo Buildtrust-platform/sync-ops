@@ -51,6 +51,10 @@ export const handler = async (event: any) => {
 
       console.log(`File metadata: ${fileSize} bytes, ${mimeType}`);
 
+      // Determine if file is an image or video
+      const isImage = mimeType.startsWith('image/');
+      const isVideo = mimeType.startsWith('video/');
+
       // 3. UPDATE STATUS: Mark as processing
       await client.models.Asset.update({
         id: assetToUpdate.id,
@@ -59,31 +63,40 @@ export const handler = async (event: any) => {
 
       console.log(`Asset [${assetToUpdate.id}] marked as PROCESSING`);
 
-      // 3. RUN REKOGNITION: Detect labels in the image/video frame
-      const rekognitionParams = {
-        Image: {
-          S3Object: {
-            Bucket: bucketName,
-            Name: key,
+      // 4. AI ANALYSIS (Images only for now)
+      let aiTags: string[] = [];
+      let aiConfidence = 0;
+
+      if (isImage) {
+        // RUN REKOGNITION: Detect labels in images
+        const rekognitionParams = {
+          Image: {
+            S3Object: {
+              Bucket: bucketName,
+              Name: key,
+            },
           },
-        },
-        MaxLabels: 20,
-        MinConfidence: 70, // Only return labels with 70%+ confidence
-      };
+          MaxLabels: 20,
+          MinConfidence: 70,
+        };
 
-      console.log(`Calling Rekognition for ${key}...`);
-      const rekognitionCommand = new DetectLabelsCommand(rekognitionParams);
-      const rekognitionResponse = await rekognitionClient.send(rekognitionCommand);
+        console.log(`Calling Rekognition for image ${key}...`);
+        const rekognitionCommand = new DetectLabelsCommand(rekognitionParams);
+        const rekognitionResponse = await rekognitionClient.send(rekognitionCommand);
 
-      // 4. EXTRACT TAGS: Process Rekognition results
-      const labels = rekognitionResponse.Labels || [];
-      const aiTags = labels.map((label: any) => label.Name || '').filter(Boolean);
-      const aiConfidence = labels.length > 0
-        ? labels.reduce((sum: number, label: any) => sum + (label.Confidence || 0), 0) / labels.length
-        : 0;
+        const labels = rekognitionResponse.Labels || [];
+        aiTags = labels.map((label: any) => label.Name || '').filter(Boolean);
+        aiConfidence = labels.length > 0
+          ? labels.reduce((sum: number, label: any) => sum + (label.Confidence || 0), 0) / labels.length
+          : 0;
 
-      console.log(`Rekognition detected ${aiTags.length} labels with avg confidence ${aiConfidence.toFixed(2)}%`);
-      console.log(`Tags: ${aiTags.join(', ')}`);
+        console.log(`Rekognition detected ${aiTags.length} labels with avg confidence ${aiConfidence.toFixed(2)}%`);
+        console.log(`Tags: ${aiTags.join(', ')}`);
+      } else if (isVideo) {
+        console.log(`Video file detected: ${key}. Skipping AI analysis (videos require async processing)`);
+      } else {
+        console.log(`Document file detected: ${key}. No AI analysis needed`);
+      }
 
       // 5. UPDATE ASSET: Save AI tags and metadata to database
       await client.models.Asset.update({
