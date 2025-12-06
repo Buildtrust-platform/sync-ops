@@ -2,12 +2,11 @@
 import { Amplify } from 'aws-amplify';
 import { generateClient } from 'aws-amplify/data';
 import { getAmplifyDataClientConfig } from '@aws-amplify/backend/function/runtime';
-import { env } from '$amplify/env/mediaProcessor';
 import type { Schema } from '../../data/resource';
 import { RekognitionClient, DetectLabelsCommand } from '@aws-sdk/client-rekognition';
 import { S3Client, HeadObjectCommand } from '@aws-sdk/client-s3';
 
-const { resourceConfig, libraryOptions } = await getAmplifyDataClientConfig(env);
+const { resourceConfig, libraryOptions } = await getAmplifyDataClientConfig(process.env as any);
 Amplify.configure(resourceConfig, libraryOptions);
 
 const client = generateClient<Schema>();
