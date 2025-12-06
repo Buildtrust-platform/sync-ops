@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import ConfigureAmplify from "./amplify-config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -11,9 +12,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Force dynamic rendering for all pages
-export const dynamic = 'force-dynamic';
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -24,7 +22,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ConfigureAmplify>{children}</ConfigureAmplify>
       </body>
     </html>
   );

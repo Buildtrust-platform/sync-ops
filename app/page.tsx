@@ -3,19 +3,10 @@
 import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
-import { Amplify } from "aws-amplify";
-import outputs from "@/amplify_outputs.json";
 import "@aws-amplify/ui-react/styles.css";
-// 1. IMPORT THE AUTH LIBRARY
 import { Authenticator } from "@aws-amplify/ui-react";
 import Link from "next/link";
 import SmartBrief from "./components/SmartBrief";
-
-// Force dynamic rendering - no static generation
-export const dynamic = 'force-dynamic';
-
-// Configure Amplify
-Amplify.configure(outputs, { ssr: true });
 
 const client = generateClient<Schema>();
 
