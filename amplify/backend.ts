@@ -50,3 +50,14 @@ backend.smartBriefAI.resources.lambda.addToRolePolicy(
     ],
   })
 );
+
+// Grant AWS Marketplace permissions for Bedrock model access
+backend.smartBriefAI.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: [
+      'aws-marketplace:ViewSubscriptions',
+      'aws-marketplace:Subscribe',
+    ],
+    resources: ['*'],
+  })
+);
