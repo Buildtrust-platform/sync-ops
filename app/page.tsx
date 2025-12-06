@@ -9,9 +9,12 @@ import "@aws-amplify/ui-react/styles.css";
 // 1. IMPORT THE AUTH LIBRARY
 import { Authenticator } from "@aws-amplify/ui-react";
 import Link from "next/link";
-import SmartBrief from "./components/SmartBrief"; 
+import SmartBrief from "./components/SmartBrief";
 
-Amplify.configure(outputs);
+// Configure Amplify only on client side
+if (typeof window !== 'undefined') {
+  Amplify.configure(outputs, { ssr: true });
+}
 
 const client = generateClient<Schema>();
 
