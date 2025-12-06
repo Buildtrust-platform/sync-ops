@@ -3,7 +3,7 @@ backend:
   phases:
     preBuild:
       commands:
-        - npm ci
+        - npm ci --legacy-peer-deps
         # Install dependencies for all Lambda functions
         - cd amplify/function/mediaProcessor && npm ci && cd ../../..
         - cd amplify/function/smartBriefAI && npm ci && cd ../../..
@@ -14,7 +14,7 @@ frontend:
   phases:
     preBuild:
       commands:
-        - npm ci
+        - npm ci --legacy-peer-deps
     build:
       commands:
         - npm run build
