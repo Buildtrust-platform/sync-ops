@@ -1,20 +1,12 @@
 version: 1
-backend:
-  phases:
-    preBuild:
-      commands:
-        - npm ci --legacy-peer-deps
-        # Install dependencies for all Lambda functions
-        - cd amplify/function/mediaProcessor && npm ci && cd ../../..
-        - cd amplify/function/smartBriefAI && npm ci && cd ../../..
-    build:
-      commands:
-        - npx ampx pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID
 frontend:
   phases:
     preBuild:
       commands:
         - npm ci --legacy-peer-deps
+        # Install dependencies for Lambda functions
+        - cd amplify/function/mediaProcessor && npm ci && cd ../../..
+        - cd amplify/function/smartBriefAI && npm ci && cd ../../..
     build:
       commands:
         - npm run build
