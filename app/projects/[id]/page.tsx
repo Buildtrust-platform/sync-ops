@@ -19,6 +19,7 @@ export default function ProjectDetail() {
   
   const [project, setProject] = useState<Schema["Project"]["type"] | null>(null);
   const [assets, setAssets] = useState<Array<Schema["Asset"]["type"]>>([]);
+  const [activityLogs, setActivityLogs] = useState<Array<Schema["ActivityLog"]["type"]>>([]);
   const [uploadStatus, setUploadStatus] = useState("");
 
   // SEARCH & FILTER STATE
@@ -35,13 +36,25 @@ export default function ProjectDetail() {
       });
 
       // B. Load Assets with real-time updates
-      const subscription = client.models.Asset.observeQuery({
+      const assetSubscription = client.models.Asset.observeQuery({
         filter: { projectId: { eq: projectId } }
       }).subscribe({
         next: (data) => setAssets([...data.items]),
       });
 
-      return () => subscription.unsubscribe();
+      // C. Load Activity Logs with real-time updates
+      const activitySubscription = client.models.ActivityLog.observeQuery({
+        filter: { projectId: { eq: projectId } }
+      }).subscribe({
+        next: (data) => setActivityLogs([...data.items].sort((a, b) =>
+          new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+        )),
+      });
+
+      return () => {
+        assetSubscription.unsubscribe();
+        activitySubscription.unsubscribe();
+      };
     }
   }, [projectId]);
 
@@ -92,7 +105,7 @@ export default function ProjectDetail() {
 
     try {
       // A. Create DynamoDB record FIRST (before S3 upload triggers Lambda)
-      await client.models.Asset.create({
+      const newAsset = await client.models.Asset.create({
         projectId: projectId,
         s3Key: `media/${projectId}/${file.name}`,
         type: 'RAW',
@@ -105,6 +118,21 @@ export default function ProjectDetail() {
         path: `media/${projectId}/${file.name}`,
         data: file,
       }).result;
+
+      // C. Log upload activity
+      if (newAsset.data) {
+        await client.models.ActivityLog.create({
+          projectId: projectId,
+          userId: 'USER',
+          userEmail: 'user@syncops.app',
+          userRole: 'Editor',
+          action: 'ASSET_UPLOADED',
+          targetType: 'Asset',
+          targetId: newAsset.data.id,
+          targetName: file.name,
+          metadata: { fileSize: file.size, fileType: file.type },
+        });
+      }
 
       setUploadStatus("Done! AI processing...");
 
@@ -340,6 +368,73 @@ export default function ProjectDetail() {
             )}
           </div>
         ))}
+      </div>
+
+      {/* ACTIVITY LOG */}
+      <div className="mt-12">
+        <h2 className="text-xl font-bold mb-4 border-b border-slate-700 pb-2">Activity Log</h2>
+        <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+          {activityLogs.length === 0 ? (
+            <div className="p-8 text-center text-slate-500">
+              No activity recorded yet
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-700">
+              {activityLogs.slice(0, 10).map((log) => (
+                <div key={log.id} className="p-4 hover:bg-slate-700/30 transition-colors">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-1">
+                        {/* Action Icon */}
+                        <span className="text-lg">
+                          {log.action === 'ASSET_UPLOADED' && '📤'}
+                          {log.action === 'ASSET_DELETED' && '🗑️'}
+                          {log.action === 'ASSET_UPDATED' && '✏️'}
+                          {log.action === 'PROJECT_CREATED' && '🎬'}
+                          {log.action === 'PROJECT_UPDATED' && '📝'}
+                          {log.action === 'AI_PROCESSING_STARTED' && '🤖'}
+                          {log.action === 'AI_PROCESSING_COMPLETED' && '✅'}
+                        </span>
+
+                        {/* Action Description */}
+                        <div>
+                          <p className="text-sm text-white font-medium">
+                            {log.action === 'ASSET_UPLOADED' && 'Asset uploaded'}
+                            {log.action === 'ASSET_DELETED' && 'Asset deleted'}
+                            {log.action === 'ASSET_UPDATED' && 'Asset updated'}
+                            {log.action === 'PROJECT_CREATED' && 'Project created'}
+                            {log.action === 'PROJECT_UPDATED' && 'Project updated'}
+                            {log.action === 'AI_PROCESSING_STARTED' && 'AI processing started'}
+                            {log.action === 'AI_PROCESSING_COMPLETED' && 'AI processing completed'}
+                            {' '}
+                            <span className="text-teal-400">{log.targetName}</span>
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            by {log.userEmail} ({log.userRole})
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Metadata */}
+                      {log.metadata && (
+                        <div className="ml-9 mt-2">
+                          <pre className="text-[10px] text-slate-400 bg-slate-900 p-2 rounded font-mono">
+                            {JSON.stringify(log.metadata, null, 2)}
+                          </pre>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Timestamp */}
+                    <div className="text-xs text-slate-500 ml-4">
+                      {log.createdAt ? new Date(log.createdAt).toLocaleString() : 'N/A'}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </main>
   );

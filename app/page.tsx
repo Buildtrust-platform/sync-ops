@@ -27,18 +27,33 @@ export default function App() {
     listProjects();
   }, []);
 
-  function createProject() {
+  async function createProject() {
     const projectName = window.prompt("Project Name?");
     const dept = window.prompt("Department? (Marketing, HR, etc)");
-    
+
     if (projectName && dept) {
-      client.models.Project.create({
+      const newProject = await client.models.Project.create({
         name: projectName,
         department: dept,
         status: 'INITIATION',
         budgetCap: 5000.00,
         deadline: new Date().toISOString().split('T')[0],
       });
+
+      // Log project creation activity
+      if (newProject.data) {
+        await client.models.ActivityLog.create({
+          projectId: newProject.data.id,
+          userId: 'USER',
+          userEmail: 'user@syncops.app',
+          userRole: 'Admin',
+          action: 'PROJECT_CREATED',
+          targetType: 'Project',
+          targetId: newProject.data.id,
+          targetName: projectName,
+          metadata: { department: dept, status: 'INITIATION' },
+        });
+      }
     }
   }
 

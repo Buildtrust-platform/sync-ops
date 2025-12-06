@@ -63,6 +63,19 @@ export const handler = async (event: any) => {
 
       console.log(`Asset [${assetToUpdate.id}] marked as PROCESSING`);
 
+      // 3a. LOG ACTIVITY: AI Processing Started
+      await client.models.ActivityLog.create({
+        projectId: assetToUpdate.projectId,
+        userId: 'SYSTEM',
+        userEmail: 'ai-processor@syncops.system',
+        userRole: 'System',
+        action: 'AI_PROCESSING_STARTED',
+        targetType: 'Asset',
+        targetId: assetToUpdate.id,
+        targetName: key.split('/').pop() || key,
+        metadata: { fileSize, mimeType },
+      });
+
       // 4. AI ANALYSIS (Images only for now)
       let aiTags: string[] = [];
       let aiConfidence = 0;
@@ -110,6 +123,23 @@ export const handler = async (event: any) => {
       });
 
       console.log(`SUCCESS: Asset [${assetToUpdate.id}] updated with AI tags`);
+
+      // 5a. LOG ACTIVITY: AI Processing Completed
+      await client.models.ActivityLog.create({
+        projectId: assetToUpdate.projectId,
+        userId: 'SYSTEM',
+        userEmail: 'ai-processor@syncops.system',
+        userRole: 'System',
+        action: 'AI_PROCESSING_COMPLETED',
+        targetType: 'Asset',
+        targetId: assetToUpdate.id,
+        targetName: key.split('/').pop() || key,
+        metadata: {
+          tagsDetected: aiTags.length,
+          confidence: aiConfidence.toFixed(2),
+          processingType: isImage ? 'image' : isVideo ? 'video' : 'document'
+        },
+      });
 
     } catch (e: any) {
       console.error(`ERROR processing ${key}:`, e);

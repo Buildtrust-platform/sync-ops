@@ -11,22 +11,23 @@ const schema = a.schema({
     name: a.string().required(),
     description: a.string(),
     status: a.enum([
-      'INITIATION', 
-      'PRE_PROD', 
-      'PRODUCTION', 
-      'POST', 
-      'LEGAL_REVIEW', 
-      'APPROVED', 
+      'INITIATION',
+      'PRE_PROD',
+      'PRODUCTION',
+      'POST',
+      'LEGAL_REVIEW',
+      'APPROVED',
       'ARCHIVED'
     ]),
     budgetCap: a.float(), // For the "Burn Rate" bar
     deadline: a.date(),   // Drives the Timeline
     department: a.string(), // "Marketing", "HR"
-    
+
     // Relationships
     assets: a.hasMany('Asset', 'projectId'),
     brief: a.hasOne('Brief', 'projectId'),
     callSheets: a.hasMany('CallSheet', 'projectId'),
+    activityLogs: a.hasMany('ActivityLog', 'projectId'),
   })
   .authorization(allow => [
     allow.owner(), // Creator can do anything
@@ -60,8 +61,8 @@ const schema = a.schema({
   .authorization(allow => [
     allow.owner(),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
-    // Legal can only READ assets, unless they are in review (handled by UI logic)
-    allow.groups(['Legal']).to(['read']),
+    allow.groups(['Editor']).to(['create', 'read', 'update']), // Editors can upload, view, and edit
+    allow.groups(['Legal']).to(['read']), // Legal can only view
   ]),
 
   // 3. LOGISTICS (Pre-Prod)
@@ -82,6 +83,41 @@ const schema = a.schema({
     crewList: a.string().array(), // Simple list of names for now
   })
   .authorization(allow => [allow.authenticated()]),
+
+  // 4. ACTIVITY LOG (Audit Trail)
+  ActivityLog: a.model({
+    projectId: a.id().required(),
+    project: a.belongsTo('Project', 'projectId'),
+
+    userId: a.string().required(), // Cognito user ID
+    userEmail: a.string(), // User email for display
+    userRole: a.string(), // User's role at time of action
+
+    action: a.enum([
+      'ASSET_UPLOADED',
+      'ASSET_DELETED',
+      'ASSET_UPDATED',
+      'PROJECT_CREATED',
+      'PROJECT_UPDATED',
+      'PROJECT_DELETED',
+      'USER_ADDED',
+      'USER_REMOVED',
+      'PERMISSION_CHANGED',
+      'AI_PROCESSING_STARTED',
+      'AI_PROCESSING_COMPLETED',
+    ]),
+
+    targetType: a.string(), // 'Asset', 'Project', 'User'
+    targetId: a.string(), // ID of affected resource
+    targetName: a.string(), // Friendly name for display
+
+    metadata: a.json(), // Additional context (e.g., old/new values)
+    ipAddress: a.string(), // Security tracking
+  })
+  .authorization(allow => [
+    allow.authenticated().to(['read']),
+    allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+  ]),
 })
 .authorization(allow => [allow.resource(mediaProcessor)]);
 
