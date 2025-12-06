@@ -70,7 +70,21 @@ export default function ProjectDetail() {
     return matchesSearch && matchesType && matchesConfidence;
   });
 
-  // 3. HANDLE UPLOAD
+  // 3. CALCULATE ANALYTICS
+  const analytics = {
+    totalAssets: assets.length,
+    totalStorage: assets.reduce((sum, asset) => sum + (asset.fileSize || 0), 0),
+    assetsByType: {
+      images: assets.filter(a => a.mimeType?.startsWith('image/')).length,
+      videos: assets.filter(a => a.mimeType?.startsWith('video/')).length,
+      documents: assets.filter(a => a.mimeType?.startsWith('application/')).length,
+    },
+    aiAnalyzed: assets.filter(a => a.aiTags && a.aiTags.length > 0).length,
+    avgConfidence: assets.filter(a => a.aiConfidence).reduce((sum, a) => sum + (a.aiConfidence || 0), 0) /
+                   (assets.filter(a => a.aiConfidence).length || 1),
+  };
+
+  // 4. HANDLE UPLOAD
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     if (!e.target.files?.[0]) return;
     const file = e.target.files[0];
@@ -111,6 +125,72 @@ export default function ProjectDetail() {
         <span className="text-teal-400 font-mono text-sm border border-teal-900 bg-slate-800 px-2 py-1 rounded mt-2 inline-block">
           {project.status}
         </span>
+      </div>
+
+      {/* ANALYTICS DASHBOARD */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {/* Total Assets */}
+        <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs text-slate-500 uppercase tracking-wider">Total Assets</p>
+            <span className="text-2xl">📦</span>
+          </div>
+          <p className="text-3xl font-bold text-white">{analytics.totalAssets}</p>
+          <p className="text-xs text-slate-500 mt-1">
+            {analytics.aiAnalyzed} AI-analyzed
+          </p>
+        </div>
+
+        {/* Storage Used */}
+        <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs text-slate-500 uppercase tracking-wider">Storage Used</p>
+            <span className="text-2xl">💾</span>
+          </div>
+          <p className="text-3xl font-bold text-white">
+            {(analytics.totalStorage / 1024 / 1024 / 1024).toFixed(2)}
+          </p>
+          <p className="text-xs text-slate-500 mt-1">GB</p>
+        </div>
+
+        {/* Asset Types */}
+        <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs text-slate-500 uppercase tracking-wider">Asset Types</p>
+            <span className="text-2xl">📊</span>
+          </div>
+          <div className="space-y-1">
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-400">Images</span>
+              <span className="text-white font-semibold">{analytics.assetsByType.images}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-400">Videos</span>
+              <span className="text-white font-semibold">{analytics.assetsByType.videos}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-400">Docs</span>
+              <span className="text-white font-semibold">{analytics.assetsByType.documents}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* AI Confidence */}
+        <div className="bg-slate-800 p-5 rounded-xl border border-slate-700">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs text-slate-500 uppercase tracking-wider">Avg AI Confidence</p>
+            <span className="text-2xl">🤖</span>
+          </div>
+          <p className="text-3xl font-bold text-white">
+            {analytics.avgConfidence.toFixed(0)}%
+          </p>
+          <div className="w-full bg-slate-700 h-2 rounded-full mt-2 overflow-hidden">
+            <div
+              className="bg-teal-500 h-full transition-all"
+              style={{ width: `${analytics.avgConfidence}%` }}
+            />
+          </div>
+        </div>
       </div>
 
       {/* UPLOAD ZONE */}
