@@ -90,7 +90,7 @@ export default function App() {
                     <h2 className="text-2xl font-bold mb-2 text-white">{project.name}</h2>
                     <div className="text-sm text-slate-400 mb-6 flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-teal-500"></span>
-                      Deadline: {project.deadline ? new Date(project.deadline).toLocaleDateString() : 'N/A'}
+                      Deadline: {project.deadline || 'N/A'}
                     </div>
                     <div className="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
                       <div className="bg-teal-500 h-full w-[10%]"></div>
