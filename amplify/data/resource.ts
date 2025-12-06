@@ -1,5 +1,6 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
 import { mediaProcessor } from '../function/mediaProcessor/resource';
+import { smartBriefAI } from '../function/smartBriefAI/resource';
 
 /* * SYNC OPS - DATA SCHEMA
  * This defines the Database (DynamoDB) and Permissions (Cognito)
@@ -69,9 +70,38 @@ const schema = a.schema({
   Brief: a.model({
     projectId: a.id().required(),
     project: a.belongsTo('Project', 'projectId'),
+
+    // Original user input
+    projectDescription: a.string(),
+    scriptOrNotes: a.string(),
+
+    // AI-extracted fields
+    deliverables: a.string().array(),
+    estimatedDuration: a.string(),
     targetAudience: a.string(),
+    tone: a.string(),
+    budgetRange: a.string(),
+    crewRoles: a.string().array(),
     distributionChannels: a.string().array(),
-    riskLevel: a.enum(['LOW', 'MEDIUM', 'HIGH']), // For Drone/Hazard checks
+
+    // Risk assessment
+    riskLevel: a.enum(['LOW', 'MEDIUM', 'HIGH']),
+    hasDroneRisk: a.boolean(),
+    hasMinorRisk: a.boolean(),
+    hasPublicSpaceRisk: a.boolean(),
+    hasStuntRisk: a.boolean(),
+    hasHazardousLocationRisk: a.boolean(),
+    requiredPermits: a.string().array(),
+
+    // Scene breakdown
+    scenes: a.json(), // Array of {description, location, props}
+    complexity: a.enum(['LOW', 'MEDIUM', 'HIGH']),
+
+    // Approval tracking
+    aiProcessedAt: a.datetime(),
+    approvedByProducer: a.boolean(),
+    approvedByLegal: a.boolean(),
+    approvedByFinance: a.boolean(),
   })
   .authorization(allow => [allow.authenticated()]),
 
@@ -118,6 +148,17 @@ const schema = a.schema({
     allow.authenticated().to(['read']),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
   ]),
+
+  // 5. CUSTOM QUERIES
+  analyzeProjectBrief: a
+    .query()
+    .arguments({
+      projectDescription: a.string().required(),
+      scriptOrNotes: a.string(),
+    })
+    .returns(a.json())
+    .handler(a.handler.function(smartBriefAI))
+    .authorization(allow => [allow.authenticated()]),
 })
 .authorization(allow => [allow.resource(mediaProcessor)]);
 

@@ -8,7 +8,8 @@ import outputs from "@/amplify_outputs.json";
 import "@aws-amplify/ui-react/styles.css";
 // 1. IMPORT THE AUTH LIBRARY
 import { Authenticator } from "@aws-amplify/ui-react";
-import Link from "next/link"; 
+import Link from "next/link";
+import SmartBrief from "./components/SmartBrief"; 
 
 Amplify.configure(outputs);
 
@@ -16,6 +17,7 @@ const client = generateClient<Schema>();
 
 export default function App() {
   const [projects, setProjects] = useState<Array<Schema["Project"]["type"]>>([]);
+  const [showSmartBrief, setShowSmartBrief] = useState(false);
 
   function listProjects() {
     client.models.Project.observeQuery().subscribe({
@@ -27,34 +29,17 @@ export default function App() {
     listProjects();
   }, []);
 
-  async function createProject() {
-    const projectName = window.prompt("Project Name?");
-    const dept = window.prompt("Department? (Marketing, HR, etc)");
+  function openSmartBrief() {
+    setShowSmartBrief(true);
+  }
 
-    if (projectName && dept) {
-      const newProject = await client.models.Project.create({
-        name: projectName,
-        department: dept,
-        status: 'INITIATION',
-        budgetCap: 5000.00,
-        deadline: new Date().toISOString().split('T')[0],
-      });
+  function closeSmartBrief() {
+    setShowSmartBrief(false);
+  }
 
-      // Log project creation activity
-      if (newProject.data) {
-        await client.models.ActivityLog.create({
-          projectId: newProject.data.id,
-          userId: 'USER',
-          userEmail: 'user@syncops.app',
-          userRole: 'Admin',
-          action: 'PROJECT_CREATED',
-          targetType: 'Project',
-          targetId: newProject.data.id,
-          targetName: projectName,
-          metadata: { department: dept, status: 'INITIATION' },
-        });
-      }
-    }
+  function handleBriefComplete() {
+    setShowSmartBrief(false);
+    listProjects(); // Refresh the project list
   }
 
   return (
@@ -70,13 +55,16 @@ export default function App() {
               <p className="text-xs text-slate-500 mt-1">User: {user?.signInDetails?.loginId}</p>
             </div>
             <div className="flex gap-4">
-              <button 
-                onClick={createProject}
-                className="bg-teal-500 hover:bg-teal-600 text-black font-bold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-teal-500/20"
+              <button
+                onClick={openSmartBrief}
+                className="bg-teal-500 hover:bg-teal-600 text-black font-bold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-teal-500/20 flex items-center gap-2"
               >
-                + New Project
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Smart Brief
               </button>
-              <button 
+              <button
                 onClick={signOut}
                 className="bg-slate-700 hover:bg-red-500 hover:text-white text-slate-300 font-bold py-3 px-6 rounded-lg transition-all"
               >
@@ -114,6 +102,14 @@ export default function App() {
                 </Link>
               ))}
             </div>
+          )}
+
+          {/* Smart Brief Modal */}
+          {showSmartBrief && (
+            <SmartBrief
+              onComplete={handleBriefComplete}
+              onCancel={closeSmartBrief}
+            />
           )}
         </main>
       )}
