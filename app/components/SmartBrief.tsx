@@ -110,11 +110,11 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
         crewRoles: editableFields.crewRoles || aiResults.crewRoles,
         distributionChannels: [], // Could be added to AI extraction
         riskLevel: calculateRiskLevel(editableFields.risks || aiResults.risks),
-        hasDroneRisk: editableFields.risks?.drones ?? aiResults.risks.drones,
-        hasMinorRisk: editableFields.risks?.minors ?? aiResults.risks.minors,
-        hasPublicSpaceRisk: editableFields.risks?.publicSpaces ?? aiResults.risks.publicSpaces,
-        hasStuntRisk: editableFields.risks?.stunts ?? aiResults.risks.stunts,
-        hasHazardousLocationRisk: editableFields.risks?.hazardousLocations ?? aiResults.risks.hazardousLocations,
+        hasDroneRisk: editableFields.risks?.drones ?? aiResults.risks?.drones ?? false,
+        hasMinorRisk: editableFields.risks?.minors ?? aiResults.risks?.minors ?? false,
+        hasPublicSpaceRisk: editableFields.risks?.publicSpaces ?? aiResults.risks?.publicSpaces ?? false,
+        hasStuntRisk: editableFields.risks?.stunts ?? aiResults.risks?.stunts ?? false,
+        hasHazardousLocationRisk: editableFields.risks?.hazardousLocations ?? aiResults.risks?.hazardousLocations ?? false,
         requiredPermits: editableFields.requiredPermits || aiResults.requiredPermits,
         scenes: editableFields.scenes || aiResults.scenes,
         complexity: editableFields.complexity || aiResults.complexity,
@@ -157,14 +157,15 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
     return 5000; // Default
   }
 
-  function calculateRiskLevel(risks: SmartBriefOutput['risks']): 'LOW' | 'MEDIUM' | 'HIGH' {
+  function calculateRiskLevel(risks: SmartBriefOutput['risks'] | undefined): 'LOW' | 'MEDIUM' | 'HIGH' {
+    if (!risks) return 'LOW';
     const riskCount = Object.values(risks).filter(Boolean).length;
     if (riskCount >= 3) return 'HIGH';
     if (riskCount >= 1) return 'MEDIUM';
     return 'LOW';
   }
 
-  const hasHighRisk = aiResults && calculateRiskLevel(editableFields.risks || aiResults.risks) === 'HIGH';
+  const hasHighRisk = aiResults && aiResults.risks && calculateRiskLevel(editableFields.risks || aiResults.risks) === 'HIGH';
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
