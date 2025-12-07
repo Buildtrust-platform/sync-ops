@@ -19,6 +19,7 @@ import Breadcrumb from "@/app/components/Breadcrumb";
 import GovernedIngest from "@/app/components/GovernedIngest";
 import LifecycleStepper from "@/app/components/LifecycleStepper";
 import GreenlightGate from "@/app/components/GreenlightGate";
+import FieldIntelligence from "@/app/components/FieldIntelligence";
 
 export default function ProjectDetail() {
   const [client] = useState(() => generateClient<Schema>());
@@ -271,6 +272,12 @@ export default function ProjectDetail() {
                 onAdvance={handleLifecycleStateChange}
               />
             )}
+
+            {/* Field Intelligence - Situational awareness for shoots */}
+            <FieldIntelligence
+              project={project}
+              onUpdate={refreshProjectData}
+            />
 
             <NextActions
               project={project}

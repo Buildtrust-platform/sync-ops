@@ -114,6 +114,16 @@ const schema = a.schema({
 
     greenlightCompletedAt: a.datetime(), // When all approvals were completed
 
+    // FIELD INTELLIGENCE: Situational Awareness for Shoots
+    shootLocationCity: a.string(), // Primary shoot location city
+    shootLocationCountry: a.string(), // Primary shoot location country
+    shootLocationCoordinates: a.string(), // "lat,lng" format for weather API
+    fieldIntelligenceLastUpdated: a.datetime(), // When field intelligence was last refreshed
+    fieldIntelligenceFeasibilityScore: a.integer(), // 0-100 score based on weather, risks, readiness
+    fieldIntelligenceWeatherData: a.json(), // Cached weather forecast data
+    fieldIntelligenceRiskAlerts: a.string().array(), // ["High winds expected", "Major event nearby"]
+    fieldIntelligenceHealthAlerts: a.string().array(), // ["Air quality poor", "Heat advisory"]
+
     // Relationships
     assets: a.hasMany('Asset', 'projectId'),
     brief: a.hasOne('Brief', 'projectId'),
