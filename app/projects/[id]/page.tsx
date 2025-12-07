@@ -11,6 +11,9 @@ import AssetReview from "@/app/components/AssetReview";
 import ProductionPipeline from "@/app/components/ProductionPipeline";
 import AssetVersioning from "@/app/components/AssetVersioning";
 import GreenlightStatus from "@/app/components/GreenlightStatus";
+import ProjectOverview from "@/app/components/ProjectOverview";
+import BudgetTracker from "@/app/components/BudgetTracker";
+import ProjectTimeline from "@/app/components/ProjectTimeline";
 
 export default function ProjectDetail() {
   // Lazy initialize client - runs AFTER Amplify is configured in layout
@@ -19,6 +22,7 @@ export default function ProjectDetail() {
   const projectId = params.id as string;
 
   const [project, setProject] = useState<Schema["Project"]["type"] | null>(null);
+  const [brief, setBrief] = useState<Schema["Brief"]["type"] | null>(null);
   const [assets, setAssets] = useState<Array<Schema["Asset"]["type"]>>([]);
   const [activityLogs, setActivityLogs] = useState<Array<Schema["ActivityLog"]["type"]>>([]);
   const [uploadStatus, setUploadStatus] = useState("");
@@ -53,14 +57,23 @@ export default function ProjectDetail() {
         setProject(data.data);
       });
 
-      // B. Load Assets with real-time updates
+      // B. Load Brief (for ProjectOverview)
+      client.models.Brief.list({
+        filter: { projectId: { eq: projectId } }
+      }).then((data) => {
+        if (data.data && data.data.length > 0) {
+          setBrief(data.data[0]);
+        }
+      });
+
+      // C. Load Assets with real-time updates
       const assetSubscription = client.models.Asset.observeQuery({
         filter: { projectId: { eq: projectId } }
       }).subscribe({
         next: (data) => setAssets([...data.items]),
       });
 
-      // C. Load Activity Logs with real-time updates
+      // D. Load Activity Logs with real-time updates
       const activitySubscription = client.models.ActivityLog.observeQuery({
         filter: { projectId: { eq: projectId } }
       }).subscribe({
@@ -262,6 +275,20 @@ export default function ProjectDetail() {
           )}
         </div>
       )}
+
+      {/* PROJECT OVERVIEW */}
+      <div className="mb-10">
+        <ProjectOverview project={project} brief={brief} />
+      </div>
+
+      {/* BUDGET & TIMELINE - Side by Side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+        {/* Budget Tracker */}
+        <BudgetTracker project={project} />
+
+        {/* Project Timeline */}
+        <ProjectTimeline project={project} />
+      </div>
 
       {/* ANALYTICS DASHBOARD */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
