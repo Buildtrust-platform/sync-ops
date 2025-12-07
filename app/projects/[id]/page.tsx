@@ -2,11 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
-import { uploadData } from "aws-amplify/storage";
 import type { Schema } from "@/amplify/data/resource";
 import "@aws-amplify/ui-react/styles.css";
 import { useParams } from "next/navigation";
-import Link from "next/link";
 import AssetReview from "@/app/components/AssetReview";
 import ProductionPipeline from "@/app/components/ProductionPipeline";
 import AssetVersioning from "@/app/components/AssetVersioning";
@@ -18,6 +16,7 @@ import TabNavigation from "@/app/components/TabNavigation";
 import NextActions from "@/app/components/NextActions";
 import GlobalNav from "@/app/components/GlobalNav";
 import Breadcrumb from "@/app/components/Breadcrumb";
+import GovernedIngest from "@/app/components/GovernedIngest";
 
 export default function ProjectDetail() {
   const [client] = useState(() => generateClient<Schema>());
@@ -32,7 +31,7 @@ export default function ProjectDetail() {
 
   // UI STATE
   const [activeTab, setActiveTab] = useState("overview");
-  const [uploadStatus, setUploadStatus] = useState("");
+  const [showGovernedIngest, setShowGovernedIngest] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<string>("ALL");
   const [filterConfidence, setFilterConfidence] = useState<string>("ALL");
@@ -140,45 +139,6 @@ export default function ProjectDetail() {
                    (assets.filter(a => a.aiConfidence).length || 1),
   };
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.[0]) return;
-    const file = e.target.files[0];
-    setUploadStatus("Uploading...");
-
-    try {
-      const newAsset = await client.models.Asset.create({
-        projectId: projectId,
-        s3Key: `media/${projectId}/${file.name}`,
-        type: 'RAW',
-        storageClass: 'STANDARD',
-        usageHeatmap: 0
-      });
-
-      await uploadData({
-        path: `media/${projectId}/${file.name}`,
-        data: file,
-      }).result;
-
-      if (newAsset.data) {
-        await client.models.ActivityLog.create({
-          projectId: projectId,
-          userId: 'USER',
-          userEmail: 'user@syncops.app',
-          userRole: 'Editor',
-          action: 'ASSET_UPLOADED',
-          targetType: 'Asset',
-          targetId: newAsset.data.id,
-          targetName: file.name,
-          metadata: { fileSize: file.size, fileType: file.type },
-        });
-      }
-
-      setUploadStatus("Done! AI processing...");
-    } catch (error) {
-      console.error(error);
-      setUploadStatus("Error!");
-    }
-  };
 
   const handleActionClick = (actionId: string) => {
     switch (actionId) {
@@ -305,20 +265,14 @@ export default function ProjectDetail() {
         {activeTab === 'assets' && (
           <div className="space-y-6">
             {/* Upload Zone */}
-            <div className="bg-slate-800 p-8 rounded-xl border-2 border-dashed border-slate-600 hover:border-teal-500 transition-all text-center">
-              <input
-                type="file"
-                id="file-upload"
-                className="hidden"
-                onChange={handleUpload}
-              />
-              <label htmlFor="file-upload" className="cursor-pointer">
-                <div className="text-4xl mb-2">📂</div>
-                <p className="text-xl font-bold text-teal-400">Click to Upload Assets</p>
-                <p className="text-slate-500 text-sm">Drag & drop or click to upload media files</p>
-                {uploadStatus && <p className="mt-4 text-yellow-400">{uploadStatus}</p>}
-              </label>
-            </div>
+            <button
+              onClick={() => setShowGovernedIngest(true)}
+              className="w-full bg-slate-800 p-8 rounded-xl border-2 border-dashed border-slate-600 hover:border-teal-500 transition-all text-center cursor-pointer group"
+            >
+              <div className="text-4xl mb-2">📂</div>
+              <p className="text-xl font-bold text-teal-400 group-hover:text-teal-300">Upload Assets (Governed Ingest)</p>
+              <p className="text-slate-500 text-sm">Mandatory metadata validation • File type checking • Progress tracking</p>
+            </button>
 
             {/* Search & Filters */}
             <div className="bg-slate-800 p-6 rounded-xl border border-slate-700">
@@ -434,6 +388,18 @@ export default function ProjectDetail() {
             projectId={projectId}
             assetName={selectedAssetForVersioning.name}
             onClose={() => setSelectedAssetForVersioning(null)}
+          />
+        )}
+
+        {/* Governed Ingest Modal */}
+        {showGovernedIngest && (
+          <GovernedIngest
+            projectId={projectId}
+            onUploadComplete={() => {
+              setShowGovernedIngest(false);
+              // Assets will auto-refresh via observeQuery
+            }}
+            onCancel={() => setShowGovernedIngest(false)}
           />
         )}
       </main>
