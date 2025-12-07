@@ -12,13 +12,14 @@ const schema = a.schema({
     name: a.string().required(),
     description: a.string(),
     status: a.enum([
-      'INITIATION',
-      'PRE_PROD',
-      'PRODUCTION',
-      'POST',
-      'LEGAL_REVIEW',
-      'APPROVED',
-      'ARCHIVED'
+      'DEVELOPMENT',        // Phase 1: Smart Brief, Intake, Planning
+      'PRE_PRODUCTION',     // Phase 2: Logistics, Permits, Call Sheets
+      'PRODUCTION',         // Phase 3: Filming, On-set, Ingest
+      'POST_PRODUCTION',    // Phase 4: Editing, VFX, Color, Sound
+      'REVIEW_APPROVAL',    // Phase 5: Stakeholder Review & Feedback
+      'LEGAL_COMPLIANCE',   // Phase 6: Legal Lock, Rights Clearance
+      'DISTRIBUTION',       // Phase 7: Marketing, Delivery, Publishing
+      'ARCHIVE'             // Phase 8: Long-term Storage, Glacier
     ]),
     budgetCap: a.float(), // For the "Burn Rate" bar
     deadline: a.date(),   // Drives the Timeline

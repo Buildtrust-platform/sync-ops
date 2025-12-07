@@ -87,7 +87,7 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
       const newProject = await client.models.Project.create({
         name: editableFields.projectName || aiResults.projectName,
         department: 'Production', // Could be made editable
-        status: 'INITIATION',
+        status: 'DEVELOPMENT',
         budgetCap: parseBudgetRange(editableFields.budgetRange || aiResults.budgetRange),
         deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
       });

@@ -6,8 +6,9 @@ import type { Schema } from "@/amplify/data/resource";
 /**
  * PRODUCTION PIPELINE COMPONENT
  *
- * Visualizes the 7-stage production workflow per PRD:
- * INITIATION → PRE_PROD → PRODUCTION → POST → LEGAL_REVIEW → APPROVED → ARCHIVED
+ * Industry-standard 8-phase production workflow per PRD:
+ * DEVELOPMENT → PRE-PRODUCTION → PRODUCTION → POST-PRODUCTION →
+ * REVIEW/APPROVAL → LEGAL/COMPLIANCE → DISTRIBUTION → ARCHIVE
  *
  * Features:
  * - Visual pipeline with current stage highlighted
@@ -31,74 +32,84 @@ interface PipelineStage {
 
 const PIPELINE_STAGES: PipelineStage[] = [
   {
-    id: "INITIATION",
-    label: "Initiation",
-    shortLabel: "Brief",
-    description: "Project intake and Smart Brief generation",
-    modules: ["Smart Brief", "Risk Assessment", "Budget Estimation"],
+    id: "DEVELOPMENT",
+    label: "Development",
+    shortLabel: "Dev",
+    description: "Project intake, Smart Brief, and initial planning",
+    modules: ["Smart Brief", "Risk Assessment", "Budget Estimation", "Greenlight Gate"],
     color: "bg-blue-600",
-    icon: "📝",
-    requirements: ["Project description", "AI brief analysis", "Risk assessment"]
+    icon: "💡",
+    requirements: ["Project description", "AI brief analysis", "Risk assessment", "Budget approval"]
   },
   {
-    id: "PRE_PROD",
+    id: "PRE_PRODUCTION",
     label: "Pre-Production",
-    shortLabel: "Planning",
-    description: "Logistics, permits, and planning",
+    shortLabel: "Pre-Prod",
+    description: "Logistics, permits, crew, and planning",
     modules: ["Call Sheets", "Field Intelligence", "Policy Engine", "Equipment OS", "Rights Locker"],
     color: "bg-purple-600",
     icon: "📋",
-    requirements: ["Location scouting", "Permits secured", "Crew assigned", "Equipment reserved"]
+    requirements: ["Location permits", "Crew assigned", "Equipment reserved", "Insurance secured"]
   },
   {
     id: "PRODUCTION",
     label: "Production",
-    shortLabel: "Filming",
+    shortLabel: "Shoot",
     description: "On-location or studio filming",
     modules: ["Live Call Sheets", "Governed Ingest", "On-set Safety", "Real-time Communication"],
     color: "bg-green-600",
     icon: "🎬",
-    requirements: ["Daily reports", "Asset uploads", "Safety compliance"]
+    requirements: ["Daily reports", "Asset uploads", "Safety compliance", "Continuity tracking"]
   },
   {
-    id: "POST",
+    id: "POST_PRODUCTION",
     label: "Post-Production",
-    shortLabel: "Editing",
-    description: "Editorial, VFX, color, sound",
-    modules: ["Version Stacking", "AI Editorial", "Technical QC", "Review & Approval"],
+    shortLabel: "Post",
+    description: "Editing, VFX, color grading, sound design",
+    modules: ["Version Stacking", "AI Editorial", "Technical QC", "Color & Sound"],
     color: "bg-yellow-600",
     icon: "✂️",
-    requirements: ["Rough cut", "Color grading", "Sound mix", "VFX completion"]
+    requirements: ["Rough cut", "Color grading", "Sound mix", "VFX completion", "Final master"]
   },
   {
-    id: "LEGAL_REVIEW",
-    label: "Legal Review",
-    shortLabel: "Compliance",
-    description: "Legal and compliance approval",
-    modules: ["Legal Approval Lock", "Rights Verification", "Compliance Check"],
+    id: "REVIEW_APPROVAL",
+    label: "Review & Approval",
+    shortLabel: "Review",
+    description: "Stakeholder review and feedback",
+    modules: ["Time-coded Comments", "Multi-stakeholder Review", "AI Feedback Summary", "Conflict Detection"],
+    color: "bg-indigo-600",
+    icon: "👁️",
+    requirements: ["Internal review", "Client approval", "Creative sign-off", "Revision tracking"]
+  },
+  {
+    id: "LEGAL_COMPLIANCE",
+    label: "Legal & Compliance",
+    shortLabel: "Legal",
+    description: "Legal clearance and compliance approval",
+    modules: ["Legal Approval Lock", "Rights Verification", "Compliance Check", "PII Detection"],
     color: "bg-orange-600",
     icon: "⚖️",
-    requirements: ["Legal approval", "Rights clearance", "Compliance sign-off"]
+    requirements: ["Legal approval", "Rights clearance", "Compliance sign-off", "Master locked"]
   },
   {
-    id: "APPROVED",
-    label: "Approved",
-    shortLabel: "Ready",
-    description: "Ready for distribution",
-    modules: ["Distribution Engine", "Watermarking", "Social Output", "Analytics"],
+    id: "DISTRIBUTION",
+    label: "Distribution",
+    shortLabel: "Deliver",
+    description: "Marketing delivery and content publishing",
+    modules: ["Distribution Engine", "Watermarking", "Social Crops", "Geo-rights", "CMS Integration"],
     color: "bg-teal-600",
-    icon: "✅",
-    requirements: ["Final deliverables", "Distribution plan", "Marketing assets"]
+    icon: "🚀",
+    requirements: ["Social versions", "Captions & subtitles", "Marketing copy", "CMS upload", "Publishing scheduled"]
   },
   {
-    id: "ARCHIVED",
-    label: "Archived",
+    id: "ARCHIVE",
+    label: "Archive",
     shortLabel: "Archive",
     description: "Long-term storage and asset intelligence",
-    modules: ["Glacier Migration", "Asset Intelligence", "ROI Tracking"],
+    modules: ["Glacier Migration", "Asset Intelligence", "ROI Tracking", "Usage Analytics"],
     color: "bg-gray-600",
     icon: "📦",
-    requirements: ["Archive migration", "Metadata complete"]
+    requirements: ["Glacier migration", "Metadata complete", "Proxy retained", "Search indexed"]
   }
 ];
 
