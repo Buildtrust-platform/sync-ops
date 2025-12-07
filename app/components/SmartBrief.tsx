@@ -354,7 +354,7 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
               <div>
                 <label className="block text-xs font-bold text-slate-400 mb-2">DELIVERABLES</label>
                 <div className="flex flex-wrap gap-2">
-                  {(editableFields.deliverables || aiResults.deliverables).map((item, idx) => (
+                  {(editableFields.deliverables || aiResults.deliverables || []).map((item, idx) => (
                     <span key={idx} className="bg-teal-500/20 text-teal-300 text-sm px-3 py-1 rounded-full">
                       {item}
                     </span>
@@ -366,7 +366,7 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
               <div>
                 <label className="block text-xs font-bold text-slate-400 mb-2">REQUIRED CREW</label>
                 <div className="flex flex-wrap gap-2">
-                  {(editableFields.crewRoles || aiResults.crewRoles).map((role, idx) => (
+                  {(editableFields.crewRoles || aiResults.crewRoles || []).map((role, idx) => (
                     <span key={idx} className="bg-slate-700 text-slate-300 text-sm px-3 py-1 rounded-full">
                       {role}
                     </span>
@@ -375,11 +375,11 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
               </div>
 
               {/* Required Permits */}
-              {(editableFields.requiredPermits || aiResults.requiredPermits).length > 0 && (
+              {(editableFields.requiredPermits || aiResults.requiredPermits || []).length > 0 && (
                 <div>
                   <label className="block text-xs font-bold text-slate-400 mb-2">REQUIRED PERMITS</label>
                   <div className="flex flex-wrap gap-2">
-                    {(editableFields.requiredPermits || aiResults.requiredPermits).map((permit, idx) => (
+                    {(editableFields.requiredPermits || aiResults.requiredPermits || []).map((permit, idx) => (
                       <span key={idx} className="bg-yellow-500/20 text-yellow-300 text-sm px-3 py-1 rounded-full">
                         {permit}
                       </span>
@@ -389,11 +389,11 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
               )}
 
               {/* Scenes */}
-              {(editableFields.scenes || aiResults.scenes).length > 0 && (
+              {(editableFields.scenes || aiResults.scenes || []).length > 0 && (
                 <div>
                   <label className="block text-xs font-bold text-slate-400 mb-2">SCENE BREAKDOWN</label>
                   <div className="space-y-3">
-                    {(editableFields.scenes || aiResults.scenes).map((scene, idx) => (
+                    {(editableFields.scenes || aiResults.scenes || []).map((scene, idx) => (
                       <div key={idx} className="bg-slate-900 border border-slate-700 rounded-lg p-4">
                         <div className="flex items-start gap-3">
                           <span className="bg-teal-500 text-black font-bold text-xs w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">

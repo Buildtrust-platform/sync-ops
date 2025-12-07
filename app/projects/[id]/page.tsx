@@ -293,7 +293,7 @@ export default function ProjectDetail() {
       {/* ASSET GRID */}
       <h2 className="text-xl font-bold mb-4 border-b border-slate-700 pb-2">Project Assets</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredAssets.map((asset) => (
+        {(filteredAssets || []).map((asset) => (
           <div key={asset.id} className="bg-slate-800 p-5 rounded-xl border border-slate-700 hover:border-teal-500/50 transition-all">
             {/* File Preview */}
             <div className="bg-black/50 h-32 flex items-center justify-center mb-3 rounded text-slate-600 text-xs relative">
@@ -345,7 +345,7 @@ export default function ProjectDetail() {
               <div className="mt-3 pt-3 border-t border-slate-700">
                 <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">AI Tags</p>
                 <div className="flex flex-wrap gap-1">
-                  {asset.aiTags.slice(0, 5).map((tag, i) => (
+                  {(asset.aiTags || []).slice(0, 5).map((tag, i) => (
                     <span key={i} className="text-[9px] bg-slate-900 text-teal-300 px-2 py-0.5 rounded-full border border-teal-900">
                       {tag}
                     </span>
@@ -377,7 +377,7 @@ export default function ProjectDetail() {
             </div>
           ) : (
             <div className="divide-y divide-slate-700">
-              {activityLogs.slice(0, 10).map((log) => (
+              {(activityLogs || []).slice(0, 10).map((log) => (
                 <div key={log.id} className="p-4 hover:bg-slate-700/30 transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
