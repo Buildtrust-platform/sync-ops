@@ -42,7 +42,13 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
   const [client] = useState(() => generateClient<Schema>());
 
   // Editable fields after AI analysis
-  const [editableFields, setEditableFields] = useState<Partial<SmartBriefOutput>>({});
+  const [editableFields, setEditableFields] = useState<Partial<SmartBriefOutput>>({
+    projectName: '',
+    estimatedDuration: '',
+    budgetRange: '',
+    targetAudience: '',
+    tone: '',
+  });
 
   async function analyzeWithAI() {
     if (!projectDescription.trim()) {

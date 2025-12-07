@@ -33,6 +33,7 @@ const schema = a.schema({
     reviews: a.hasMany('Review', 'projectId'),
   })
   .authorization(allow => [
+    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.owner(), // Creator can do anything
     allow.authenticated().to(['read']), // Logged in users can view projects
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
@@ -66,6 +67,7 @@ const schema = a.schema({
     versions: a.hasMany('AssetVersion', 'assetId'),
   })
   .authorization(allow => [
+    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.owner(),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
     allow.groups(['Editor']).to(['create', 'read', 'update']), // Editors can upload, view, and edit
@@ -109,7 +111,10 @@ const schema = a.schema({
     approvedByLegal: a.boolean(),
     approvedByFinance: a.boolean(),
   })
-  .authorization(allow => [allow.authenticated()]),
+  .authorization(allow => [
+    allow.publicApiKey(), // TEMPORARY: Allow public access for development
+    allow.authenticated(),
+  ]),
 
   CallSheet: a.model({
     projectId: a.id().required(),
@@ -118,7 +123,10 @@ const schema = a.schema({
     location: a.string(),
     crewList: a.string().array(), // Simple list of names for now
   })
-  .authorization(allow => [allow.authenticated()]),
+  .authorization(allow => [
+    allow.publicApiKey(), // TEMPORARY: Allow public access for development
+    allow.authenticated(),
+  ]),
 
   // 4. REVIEW & APPROVAL SYSTEM (PRD FR-24 to FR-27)
   Review: a.model({
@@ -144,6 +152,7 @@ const schema = a.schema({
     comments: a.hasMany('ReviewComment', 'reviewId'),
   })
   .authorization(allow => [
+    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.owner(), // Reviewer owns their review
     allow.authenticated().to(['read']), // All authenticated users can view reviews
     allow.groups(['Admin', 'Legal']).to(['create', 'read', 'update', 'delete']),
@@ -182,6 +191,7 @@ const schema = a.schema({
     replies: a.hasMany('ReviewCommentReply', 'parentCommentId'),
   })
   .authorization(allow => [
+    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.owner(),
     allow.authenticated().to(['read', 'create']),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
@@ -199,6 +209,7 @@ const schema = a.schema({
     replyText: a.string().required(),
   })
   .authorization(allow => [
+    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.owner(),
     allow.authenticated().to(['read', 'create']),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
@@ -230,6 +241,7 @@ const schema = a.schema({
     createdByEmail: a.string(),
   })
   .authorization(allow => [
+    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.authenticated().to(['read']),
     allow.groups(['Admin', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -272,6 +284,7 @@ const schema = a.schema({
     ipAddress: a.string(), // Security tracking
   })
   .authorization(allow => [
+    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.authenticated().to(['read']),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -285,7 +298,10 @@ const schema = a.schema({
     })
     .returns(a.json())
     .handler(a.handler.function(smartBriefAI))
-    .authorization(allow => [allow.authenticated()]),
+    .authorization(allow => [
+      allow.publicApiKey(), // TEMPORARY: Allow public access for development
+      allow.authenticated(),
+    ]),
 })
 .authorization(allow => [allow.resource(mediaProcessor)]);
 
@@ -294,6 +310,9 @@ export type Schema = ClientSchema<typeof schema>;
 export const data = defineData({
   schema,
   authorizationModes: {
-    defaultAuthorizationMode: 'userPool',
+    defaultAuthorizationMode: 'apiKey', // TEMPORARY: Use API key for development
+    apiKeyAuthorizationMode: {
+      expiresInDays: 30,
+    },
   },
 });
