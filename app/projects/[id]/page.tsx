@@ -17,6 +17,8 @@ import NextActions from "@/app/components/NextActions";
 import GlobalNav from "@/app/components/GlobalNav";
 import Breadcrumb from "@/app/components/Breadcrumb";
 import GovernedIngest from "@/app/components/GovernedIngest";
+import LifecycleStepper from "@/app/components/LifecycleStepper";
+import GreenlightGate from "@/app/components/GreenlightGate";
 
 export default function ProjectDetail() {
   const [client] = useState(() => generateClient<Schema>());
@@ -106,6 +108,36 @@ export default function ProjectDetail() {
   const refreshProjectData = async () => {
     const updated = await client.models.Project.get({ id: projectId });
     setProject(updated.data);
+  };
+
+  const handleLifecycleStateChange = async (newState: string) => {
+    try {
+      await client.models.Project.update({
+        id: projectId,
+        lifecycleState: newState as any,
+      });
+
+      // Log the state change
+      await client.models.ActivityLog.create({
+        projectId: projectId,
+        userId: userId,
+        userEmail: userEmail,
+        userRole: 'User',
+        action: 'LIFECYCLE_STATE_CHANGED',
+        targetType: 'Project',
+        targetId: projectId,
+        targetName: project?.name || 'Project',
+        metadata: {
+          previousState: project?.lifecycleState,
+          newState: newState,
+        },
+      });
+
+      await refreshProjectData();
+    } catch (error) {
+      console.error('Error updating lifecycle state:', error);
+      alert('Failed to update project state. Please try again.');
+    }
   };
 
   const filteredAssets = assets.filter((asset) => {
@@ -229,6 +261,17 @@ export default function ProjectDetail() {
         <div className="mt-8">
         {activeTab === 'overview' && (
           <div className="space-y-8">
+            {/* Lifecycle Stepper - Visual workflow progress */}
+            <LifecycleStepper lifecycleState={project.lifecycleState} />
+
+            {/* Greenlight Gate - Only show when in review/approval states */}
+            {(project.lifecycleState === 'LEGAL_REVIEW' || project.lifecycleState === 'BUDGET_APPROVAL' || project.lifecycleState === 'INTAKE') && (
+              <GreenlightGate
+                project={project}
+                onAdvance={handleLifecycleStateChange}
+              />
+            )}
+
             <NextActions
               project={project}
               currentUserEmail={userEmail}

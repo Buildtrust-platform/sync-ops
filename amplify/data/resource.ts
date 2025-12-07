@@ -21,6 +21,28 @@ const schema = a.schema({
       'DISTRIBUTION',       // Phase 7: Marketing, Delivery, Publishing
       'ARCHIVE'             // Phase 8: Long-term Storage, Glacier
     ]),
+
+    // GOVERNANCE: Lifecycle State Machine (SyncOps Vision)
+    // Default value 'INTAKE' will be set at creation time in application logic
+    lifecycleState: a.enum([
+      'INTAKE',              // Smart Brief being created
+      'LEGAL_REVIEW',        // Legal reviewing brief and requirements
+      'BUDGET_APPROVAL',     // Finance reviewing and approving budget
+      'GREENLIT',            // All approvals granted - ready for pre-production
+      'PRE_PRODUCTION',      // Logistics, permits, equipment, call sheets
+      'PRODUCTION',          // Active filming/shooting
+      'POST_PRODUCTION',     // Editing, VFX, color, sound
+      'INTERNAL_REVIEW',     // Internal stakeholder review
+      'LEGAL_APPROVED',      // Legal has locked the master
+      'DISTRIBUTION_READY',  // Approved for distribution
+      'DISTRIBUTED',         // Actively distributed
+      'ARCHIVED'             // In long-term storage
+    ]),
+
+    // GOVERNANCE: Greenlight Gate Requirements Tracking
+    greenlightRequirements: a.json(), // { briefCompleted, legalReviewed, budgetApproved, insuranceUploaded, permitsIdentified }
+    greenlightBlockers: a.string().array(), // Array of human-readable blocker messages
+
     budgetCap: a.float(), // For the "Burn Rate" bar
     deadline: a.date(),   // Drives the Timeline
     department: a.string(), // "Marketing", "HR"
@@ -373,6 +395,11 @@ const schema = a.schema({
       'VERSION_CREATED',
       'LEGAL_APPROVED',
       'LEGAL_REJECTED',
+      // Lifecycle state transitions
+      'LIFECYCLE_STATE_CHANGED',
+      'GREENLIGHT_APPROVED',
+      'GREENLIGHT_REJECTED',
+      'REQUIREMENTS_UPDATED',
     ]),
 
     targetType: a.string(), // 'Asset', 'Project', 'User', 'Review', 'Comment'
