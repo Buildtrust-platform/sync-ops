@@ -4,8 +4,6 @@ import { useState } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
 
-const client = generateClient<Schema>();
-
 interface SmartBriefOutput {
   projectName: string;
   deliverables: string[];
@@ -41,6 +39,7 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiResults, setAiResults] = useState<SmartBriefOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [client] = useState(() => generateClient<Schema>());
 
   // Editable fields after AI analysis
   const [editableFields, setEditableFields] = useState<Partial<SmartBriefOutput>>({});
