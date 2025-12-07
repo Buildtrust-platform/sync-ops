@@ -3,25 +3,10 @@
 import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
-import { Amplify } from "aws-amplify";
-import outputs from "@/amplify_outputs.json";
 import "@aws-amplify/ui-react/styles.css";
 import { Authenticator } from "@aws-amplify/ui-react";
 import Link from "next/link";
 import SmartBrief from "./components/SmartBrief";
-
-// Configure Amplify BEFORE Authenticator component loads
-// This must happen at module level to prevent installHook.js warnings
-if (typeof window !== 'undefined') {
-  try {
-    const currentConfig = Amplify.getConfig();
-    if (!currentConfig.Auth?.Cognito) {
-      Amplify.configure(outputs, { ssr: true });
-    }
-  } catch {
-    Amplify.configure(outputs, { ssr: true });
-  }
-}
 
 export default function App() {
   const [projects, setProjects] = useState<Array<Schema["Project"]["type"]>>([]);
