@@ -9,6 +9,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import AssetReview from "@/app/components/AssetReview";
 import ProductionPipeline from "@/app/components/ProductionPipeline";
+import AssetVersioning from "@/app/components/AssetVersioning";
 
 export default function ProjectDetail() {
   // Lazy initialize client - runs AFTER Amplify is configured in layout
@@ -30,6 +31,12 @@ export default function ProjectDetail() {
   const [selectedAssetForReview, setSelectedAssetForReview] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState("user@syncops.app"); // TODO: Get from Cognito
   const [userId, setUserId] = useState("USER"); // TODO: Get from Cognito
+
+  // VERSIONING STATE
+  const [selectedAssetForVersioning, setSelectedAssetForVersioning] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   // 1. INITIAL LOAD (Runs once when projectId changes)
   useEffect(() => {
@@ -407,17 +414,34 @@ export default function ProjectDetail() {
               </div>
             )}
 
-            {/* Review Button - PRD FR-24 to FR-27 */}
+            {/* Action Buttons */}
             {asset.type !== 'PROCESSING' && (
-              <button
-                onClick={() => setSelectedAssetForReview(asset.id)}
-                className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all text-xs flex items-center justify-center gap-2"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                </svg>
-                Review & Approve
-              </button>
+              <div className="flex gap-2 mt-3">
+                {/* Review Button - PRD FR-24 to FR-27 */}
+                <button
+                  onClick={() => setSelectedAssetForReview(asset.id)}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all text-xs flex items-center justify-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                  </svg>
+                  Review
+                </button>
+
+                {/* Versions Button - PRD FR-20, FR-21 */}
+                <button
+                  onClick={() => setSelectedAssetForVersioning({
+                    id: asset.id,
+                    name: asset.s3Key.split('/').pop() || 'Asset'
+                  })}
+                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-all text-xs flex items-center justify-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                  </svg>
+                  Versions
+                </button>
+              </div>
             )}
           </div>
         ))}
@@ -498,6 +522,16 @@ export default function ProjectDetail() {
           userEmail={userEmail}
           userId={userId}
           onClose={() => setSelectedAssetForReview(null)}
+        />
+      )}
+
+      {/* Versioning Modal - PRD FR-20, FR-21: Version Stacking & Comparison */}
+      {selectedAssetForVersioning && (
+        <AssetVersioning
+          assetId={selectedAssetForVersioning.id}
+          projectId={projectId}
+          assetName={selectedAssetForVersioning.name}
+          onClose={() => setSelectedAssetForVersioning(null)}
         />
       )}
     </main>
