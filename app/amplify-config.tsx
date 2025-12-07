@@ -1,30 +1,24 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode } from 'react';
 import { Amplify } from 'aws-amplify';
 import outputs from '@/amplify_outputs.json';
 
-export default function ConfigureAmplify({ children }: { children: ReactNode }) {
-  const [isConfigured, setIsConfigured] = useState(false);
-
-  useEffect(() => {
-    // Configure Amplify only on client side after mount
-    try {
-      const currentConfig = Amplify.getConfig();
-      if (!currentConfig.Auth?.Cognito) {
-        Amplify.configure(outputs, { ssr: true });
-      }
-      setIsConfigured(true);
-    } catch {
+// Configure Amplify immediately when this module loads on the client
+// This happens BEFORE any component renders
+if (typeof window !== 'undefined') {
+  try {
+    const currentConfig = Amplify.getConfig();
+    if (!currentConfig.Auth?.Cognito) {
       Amplify.configure(outputs, { ssr: true });
-      setIsConfigured(true);
     }
-  }, []);
-
-  // Don't render children until Amplify is configured
-  if (!isConfigured) {
-    return <div>Loading...</div>;
+  } catch {
+    Amplify.configure(outputs, { ssr: true });
   }
+}
 
+export default function ConfigureAmplify({ children }: { children: ReactNode }) {
+  // Amplify is already configured at module load time
+  // Just render children
   return <>{children}</>;
 }
