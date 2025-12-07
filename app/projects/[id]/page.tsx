@@ -4,16 +4,13 @@ import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import { uploadData } from "aws-amplify/storage";
 import type { Schema } from "@/amplify/data/resource";
-import { Amplify } from "aws-amplify";
-import outputs from "@/amplify_outputs.json";
 import "@aws-amplify/ui-react/styles.css";
 import { useParams } from "next/navigation";
-import Link from "next/link"; 
-
-Amplify.configure(outputs);
-const client = generateClient<Schema>();
+import Link from "next/link";
 
 export default function ProjectDetail() {
+  // Lazy initialize client - runs AFTER Amplify is configured in layout
+  const [client] = useState(() => generateClient<Schema>());
   const params = useParams();
   const projectId = params.id as string;
   
