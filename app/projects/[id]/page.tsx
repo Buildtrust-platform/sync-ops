@@ -160,7 +160,36 @@ export default function ProjectDetail() {
     }
   }
 
+  // Calculate greenlight status for banner
+  function getGreenlightStatus() {
+    if (project?.status !== 'DEVELOPMENT') return null;
+
+    const approvalRoles = [
+      { field: 'producerEmail' as const, approved: 'greenlightProducerApproved' as const, label: 'Producer' },
+      { field: 'legalContactEmail' as const, approved: 'greenlightLegalApproved' as const, label: 'Legal' },
+      { field: 'financeContactEmail' as const, approved: 'greenlightFinanceApproved' as const, label: 'Finance' },
+      { field: 'executiveSponsorEmail' as const, approved: 'greenlightExecutiveApproved' as const, label: 'Executive' },
+      { field: 'clientContactEmail' as const, approved: 'greenlightClientApproved' as const, label: 'Client' },
+    ];
+
+    const requiredApprovals = approvalRoles.filter(role => project[role.field]);
+    const completedApprovals = requiredApprovals.filter(role => project[role.approved]);
+    const userPendingRoles = approvalRoles.filter(role =>
+      project[role.field] === userEmail && !project[role.approved]
+    );
+
+    return {
+      total: requiredApprovals.length,
+      completed: completedApprovals.length,
+      isComplete: requiredApprovals.length > 0 && requiredApprovals.length === completedApprovals.length,
+      userHasPending: userPendingRoles.length > 0,
+      userRoles: userPendingRoles.map(r => r.label),
+    };
+  }
+
   if (!project) return <div className="p-10 text-white">Loading Project DNA...</div>;
+
+  const greenlightStatus = getGreenlightStatus();
 
   return (
     <main className="min-h-screen bg-slate-900 text-white p-10 font-sans">
@@ -172,6 +201,67 @@ export default function ProjectDetail() {
           {project.status}
         </span>
       </div>
+
+      {/* APPROVAL STATUS BANNER */}
+      {greenlightStatus && (
+        <div className="mb-8">
+          {greenlightStatus.isComplete ? (
+            // GREENLIT - Success Banner
+            <div className="bg-gradient-to-r from-green-900/50 to-emerald-900/50 border-2 border-green-500 rounded-2xl p-6 shadow-2xl shadow-green-500/20">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="text-6xl animate-bounce">🎉</div>
+                  <div>
+                    <h2 className="text-3xl font-black text-green-400 mb-1">PROJECT GREENLIT!</h2>
+                    <p className="text-green-200 text-lg">
+                      All {greenlightStatus.total} stakeholder approvals received. Ready for Pre-Production.
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-green-500 text-black font-black px-8 py-4 rounded-xl text-2xl shadow-lg">
+                  ✓ APPROVED
+                </div>
+              </div>
+            </div>
+          ) : greenlightStatus.userHasPending ? (
+            // USER ACTION REQUIRED - Urgent Banner
+            <div className="bg-gradient-to-r from-yellow-900/50 to-orange-900/50 border-2 border-yellow-500 rounded-2xl p-6 shadow-2xl shadow-yellow-500/20 animate-pulse">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="text-6xl">⚠️</div>
+                  <div>
+                    <h2 className="text-3xl font-black text-yellow-400 mb-1">YOUR APPROVAL REQUIRED</h2>
+                    <p className="text-yellow-200 text-lg">
+                      You must approve as <span className="font-bold text-white">{greenlightStatus.userRoles.join(', ')}</span> before this project can proceed.
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-yellow-500 text-black font-black px-8 py-4 rounded-xl text-lg shadow-lg">
+                  ACTION NEEDED
+                </div>
+              </div>
+            </div>
+          ) : (
+            // WAITING FOR OTHERS - Info Banner
+            <div className="bg-gradient-to-r from-blue-900/50 to-indigo-900/50 border-2 border-blue-500 rounded-2xl p-6 shadow-2xl shadow-blue-500/20">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="text-6xl">🔒</div>
+                  <div>
+                    <h2 className="text-3xl font-black text-blue-400 mb-1">PENDING APPROVALS</h2>
+                    <p className="text-blue-200 text-lg">
+                      {greenlightStatus.completed} of {greenlightStatus.total} stakeholder approvals received. Waiting for remaining approvals.
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-blue-500 text-white font-black px-6 py-3 rounded-xl text-base">
+                  {greenlightStatus.completed}/{greenlightStatus.total}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ANALYTICS DASHBOARD */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

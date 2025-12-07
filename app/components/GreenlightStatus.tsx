@@ -172,33 +172,37 @@ export default function GreenlightStatus({ project, currentUserEmail, onApproval
   }
 
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
+    <div className="bg-slate-800 border-2 border-slate-700 rounded-xl p-8 shadow-xl">
       {/* Header */}
-      <div className="flex justify-between items-start mb-6">
+      <div className="flex justify-between items-start mb-8">
         <div>
-          <h3 className="text-xl font-bold text-white flex items-center gap-2">
-            {allApproved ? "🎉" : "🔓"} Greenlight Status
+          <h3 className="text-3xl font-black text-white flex items-center gap-3 mb-2">
+            {allApproved ? "🎉" : "📋"} Stakeholder Approvals
           </h3>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-base text-slate-300">
             {allApproved
-              ? "All approvals complete! Project is greenlit."
-              : `${completedApprovals.length} of ${requiredApprovals.length} approvals received`
+              ? "All stakeholder approvals received. Project is greenlit for Pre-Production."
+              : `${completedApprovals.length} of ${requiredApprovals.length} required approvals received`
             }
           </p>
         </div>
         {allApproved && (
-          <div className="bg-green-500/20 border border-green-500 rounded-lg px-4 py-2">
-            <p className="text-green-400 font-bold text-sm">GREENLIT</p>
+          <div className="bg-green-500 text-black font-black px-6 py-3 rounded-xl text-lg shadow-lg animate-pulse">
+            ✓ GREENLIT
           </div>
         )}
       </div>
 
       {/* Progress Bar */}
-      <div className="mb-6">
-        <div className="w-full bg-slate-700 rounded-full h-3">
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-sm font-bold text-slate-400">Approval Progress</span>
+          <span className="text-sm font-bold text-white">{Math.round(approvalProgress)}%</span>
+        </div>
+        <div className="w-full bg-slate-700 rounded-full h-4 shadow-inner">
           <div
-            className={`h-3 rounded-full transition-all duration-500 ${
-              allApproved ? 'bg-green-500' : 'bg-teal-500'
+            className={`h-4 rounded-full transition-all duration-500 shadow-lg ${
+              allApproved ? 'bg-green-500' : 'bg-gradient-to-r from-teal-500 to-blue-500'
             }`}
             style={{ width: `${approvalProgress}%` }}
           />
@@ -221,45 +225,49 @@ export default function GreenlightStatus({ project, currentUserEmail, onApproval
           return (
             <div
               key={role.key}
-              className={`border rounded-lg p-4 transition-all ${
+              className={`border-2 rounded-xl p-6 transition-all shadow-lg ${
                 isApproved
-                  ? `bg-${role.color}-500/10 border-${role.color}-500/50`
+                  ? 'bg-green-900/20 border-green-500'
+                  : canApprove
+                  ? 'bg-yellow-900/20 border-yellow-500 ring-2 ring-yellow-500/50'
                   : 'bg-slate-900 border-slate-700'
               }`}
             >
               {/* Role Header */}
               <div className="flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{role.icon}</span>
+                <div className="flex items-center gap-4">
+                  <div className="text-4xl">{role.icon}</div>
                   <div>
-                    <p className="font-bold text-white">{role.label}</p>
-                    <p className="text-xs text-slate-400">{stakeholderEmail}</p>
+                    <p className="text-xl font-black text-white mb-1">{role.label}</p>
+                    <p className="text-sm text-slate-300">{stakeholderEmail}</p>
                   </div>
                 </div>
 
                 {isApproved ? (
                   <div className="text-right">
-                    <p className={`text-${role.color}-400 font-bold text-sm flex items-center gap-1`}>
+                    <div className="bg-green-500 text-black font-black px-4 py-2 rounded-lg text-sm flex items-center gap-2 shadow-lg">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
-                      Approved
-                    </p>
+                      APPROVED
+                    </div>
                     {approvedAt && (
-                      <p className="text-xs text-slate-500 mt-1">
-                        {new Date(approvedAt).toLocaleDateString()}
+                      <p className="text-xs text-slate-400 mt-2">
+                        {new Date(approvedAt).toLocaleDateString()} at {new Date(approvedAt).toLocaleTimeString()}
                       </p>
                     )}
                   </div>
                 ) : canApprove ? (
                   <button
                     onClick={() => setExpandedRole(isExpanded ? null : role.key)}
-                    className="bg-teal-500 hover:bg-teal-600 text-black font-bold py-2 px-4 rounded-lg transition-all text-sm"
+                    className="bg-yellow-500 hover:bg-yellow-600 text-black font-black py-3 px-6 rounded-xl transition-all text-base shadow-lg animate-pulse"
                   >
-                    {isExpanded ? 'Cancel' : 'Review'}
+                    {isExpanded ? '✕ Cancel' : '👆 REVIEW NOW'}
                   </button>
                 ) : (
-                  <p className="text-yellow-400 text-sm font-semibold">Pending</p>
+                  <div className="bg-slate-700 text-slate-300 font-bold px-4 py-2 rounded-lg text-sm">
+                    ⏳ Pending
+                  </div>
                 )}
               </div>
 
@@ -276,41 +284,50 @@ export default function GreenlightStatus({ project, currentUserEmail, onApproval
 
               {/* Approval Actions (if user can approve) */}
               {canApprove && isExpanded && (
-                <div className="mt-4 pt-4 border-t border-slate-700 space-y-3">
+                <div className="mt-6 pt-6 border-t-2 border-yellow-500/30 space-y-4 bg-slate-950/50 -mx-6 -mb-6 px-6 pb-6 rounded-b-xl">
+                  <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mb-4">
+                    <p className="text-yellow-400 font-bold text-sm flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Your approval decision will be logged and cannot be undone
+                    </p>
+                  </div>
+
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-2">
+                    <label className="block text-sm font-bold text-white mb-3">
                       Comment (Optional)
                     </label>
                     <textarea
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
-                      placeholder="Add any notes or conditions..."
-                      className="w-full h-20 bg-slate-800 border border-slate-600 rounded p-3 text-white text-sm placeholder-slate-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                      placeholder="Add any notes, conditions, or feedback..."
+                      className="w-full h-24 bg-slate-800 border-2 border-slate-600 rounded-lg p-4 text-white placeholder-slate-500 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all"
                       disabled={isProcessing}
                     />
                   </div>
 
-                  <div className="flex gap-3">
+                  <div className="flex gap-4">
                     <button
                       onClick={() => handleApproval(role, true)}
                       disabled={isProcessing}
-                      className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-slate-700 disabled:text-slate-500 text-white font-bold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2"
+                      className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-slate-700 disabled:text-slate-500 text-white font-black py-4 px-6 rounded-xl transition-all flex items-center justify-center gap-3 text-lg shadow-xl hover:shadow-green-500/50"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
-                      Approve
+                      {isProcessing ? 'Processing...' : 'APPROVE'}
                     </button>
 
                     <button
                       onClick={() => handleApproval(role, false)}
                       disabled={isProcessing}
-                      className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-slate-700 disabled:text-slate-500 text-white font-bold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2"
+                      className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-slate-700 disabled:text-slate-500 text-white font-black py-4 px-6 rounded-xl transition-all flex items-center justify-center gap-3 text-lg shadow-xl hover:shadow-red-500/50"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
                       </svg>
-                      Reject
+                      {isProcessing ? 'Processing...' : 'REJECT'}
                     </button>
                   </div>
                 </div>
@@ -320,27 +337,17 @@ export default function GreenlightStatus({ project, currentUserEmail, onApproval
         })}
       </div>
 
-      {/* User Pending Actions Summary */}
-      {userRoles.length > 0 && (
-        <div className="mt-6 bg-yellow-500/10 border border-yellow-500/50 rounded-lg p-4">
-          <p className="text-yellow-400 font-bold text-sm flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            Your Approval Required
-          </p>
-          <p className="text-yellow-200 text-sm mt-2">
-            You have {userRoles.length} pending approval{userRoles.length > 1 ? 's' : ''} for this project ({userRoles.map(r => r.label).join(', ')}).
-          </p>
-        </div>
-      )}
-
       {/* Help Text */}
       {!allApproved && requiredApprovals.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-slate-700">
-          <p className="text-xs text-slate-500">
-            All stakeholders must approve before this project can move to Pre-Production phase.
-          </p>
+        <div className="mt-8 pt-6 border-t-2 border-slate-700">
+          <div className="flex items-start gap-3">
+            <svg className="w-5 h-5 text-slate-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-sm text-slate-400">
+              <span className="font-bold text-slate-300">Greenlight Gate:</span> All assigned stakeholders must approve before this project can transition to the Pre-Production phase. Approvals are logged for compliance and cannot be reversed.
+            </p>
+          </div>
         </div>
       )}
     </div>

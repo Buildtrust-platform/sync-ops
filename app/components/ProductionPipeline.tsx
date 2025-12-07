@@ -274,7 +274,7 @@ export default function ProductionPipeline({
               const isBlocked = !transitionCheck.allowed;
 
               return (
-                <div className="flex flex-col items-end gap-2">
+                <div className="flex flex-col items-end gap-3">
                   <button
                     onClick={() => {
                       if (transitionCheck.allowed) {
@@ -282,19 +282,27 @@ export default function ProductionPipeline({
                       }
                     }}
                     disabled={isBlocked}
-                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                    className={`px-6 py-3 rounded-xl text-base font-black transition-all shadow-lg ${
                       isBlocked
-                        ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
-                        : 'bg-blue-600 hover:bg-blue-700 text-white'
+                        ? 'bg-slate-700 text-slate-500 cursor-not-allowed border-2 border-red-500/50'
+                        : 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-blue-500/50'
                     }`}
                     title={isBlocked ? transitionCheck.reason : undefined}
                   >
-                    Move to {viewingStage.label}
+                    {isBlocked ? '🔒 BLOCKED' : `→ Move to ${viewingStage.label}`}
                   </button>
                   {isBlocked && transitionCheck.reason && (
-                    <p className="text-xs text-red-400 text-right max-w-xs">
-                      🔒 {transitionCheck.reason}
-                    </p>
+                    <div className="bg-red-900/30 border-2 border-red-500 rounded-lg p-4 max-w-md">
+                      <p className="text-red-400 font-bold text-sm flex items-center gap-2">
+                        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        {transitionCheck.reason}
+                      </p>
+                      <p className="text-red-300 text-xs mt-2">
+                        Complete all required approvals in the Stakeholder Approvals section below to unlock this phase.
+                      </p>
+                    </div>
                   )}
                 </div>
               );
