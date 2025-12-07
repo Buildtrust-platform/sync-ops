@@ -25,6 +25,53 @@ const schema = a.schema({
     deadline: a.date(),   // Drives the Timeline
     department: a.string(), // "Marketing", "HR"
 
+    // EXPANDED: Project Classification
+    projectType: a.enum(['COMMERCIAL', 'CORPORATE', 'SOCIAL_MEDIA', 'EVENT', 'TRAINING', 'DOCUMENTARY', 'OTHER']),
+    priority: a.enum(['URGENT', 'HIGH', 'NORMAL', 'LOW']),
+    confidentiality: a.enum(['PUBLIC', 'INTERNAL', 'CONFIDENTIAL', 'HIGHLY_CONFIDENTIAL']),
+
+    // EXPANDED: Stakeholders (email addresses for now - can link to User model later)
+    projectOwnerEmail: a.string(),
+    executiveSponsorEmail: a.string(),
+    creativeDirectorEmail: a.string(),
+    producerEmail: a.string(),
+    legalContactEmail: a.string(),
+    financeContactEmail: a.string(),
+    clientContactEmail: a.string(),
+
+    // EXPANDED: Timeline Milestones
+    kickoffDate: a.date(),
+    preProductionStartDate: a.date(),
+    preProductionEndDate: a.date(),
+    productionStartDate: a.date(),
+    productionEndDate: a.date(),
+    postProductionStartDate: a.date(),
+    postProductionEndDate: a.date(),
+    reviewDeadline: a.date(),
+    legalLockDeadline: a.date(),
+    distributionDate: a.date(),
+
+    // EXPANDED: Budget Breakdown
+    budgetPreProduction: a.float(),
+    budgetProduction: a.float(),
+    budgetPostProduction: a.float(),
+    budgetDistribution: a.float(),
+    budgetContingency: a.float(),
+    fundingSource: a.string(), // "Marketing Budget Q4", "HR Training Fund"
+    purchaseOrderNumber: a.string(),
+
+    // EXPANDED: Success Metrics
+    primaryKPI: a.string(), // "Views", "Engagement", "Conversions"
+    targetMetric: a.string(), // "100K views in 30 days"
+
+    // EXPANDED: Greenlight Approvals
+    greenlightProducerApproved: a.boolean().default(false),
+    greenlightLegalApproved: a.boolean().default(false),
+    greenlightFinanceApproved: a.boolean().default(false),
+    greenlightExecutiveApproved: a.boolean().default(false),
+    greenlightClientApproved: a.boolean().default(false),
+    greenlightApprovedAt: a.datetime(),
+
     // Relationships
     assets: a.hasMany('Asset', 'projectId'),
     brief: a.hasOne('Brief', 'projectId'),
@@ -92,6 +139,26 @@ const schema = a.schema({
     crewRoles: a.string().array(),
     distributionChannels: a.string().array(),
 
+    // EXPANDED: Creative Brief Details
+    keyMessages: a.string().array(), // Main points to communicate
+    brandGuidelines: a.string(), // Link to brand guidelines or description
+    inspirationReferences: a.string().array(), // URLs or descriptions of inspiration
+
+    // EXPANDED: Distribution & Format Requirements
+    masterFormat: a.string(), // "4K ProRes", "HD H.264", etc.
+    socialCropsRequired: a.string().array(), // ["16:9", "9:16", "1:1", "4:5"]
+    subtitlesRequired: a.boolean().default(false),
+    languageVersions: a.string().array(), // ["EN", "ES", "FR"]
+    accessibilityRequired: a.boolean().default(false), // Audio description, etc.
+    geoRights: a.string().array(), // ["US", "EU", "Global"]
+    embargoDate: a.datetime(), // When can it be published?
+
+    // EXPANDED: Production Details
+    talentOnScreen: a.string().array(), // ["John Doe - CEO", "Jane Smith - Presenter"]
+    talentVoiceOver: a.string().array(),
+    equipmentNeeds: a.json(), // {cameras: 2, lighting: true, audio: "boom+lavs", drones: true}
+    locationDetails: a.json(), // Array of {name, address, permitRequired, insurance}
+
     // Risk assessment
     riskLevel: a.enum(['LOW', 'MEDIUM', 'HIGH']),
     hasDroneRisk: a.boolean(),
@@ -100,6 +167,18 @@ const schema = a.schema({
     hasStuntRisk: a.boolean(),
     hasHazardousLocationRisk: a.boolean(),
     requiredPermits: a.string().array(),
+
+    // EXPANDED: Compliance & Legal
+    insuranceRequired: a.boolean().default(false),
+    safetyOfficerNeeded: a.boolean().default(false),
+    covidProtocolsRequired: a.boolean().default(false),
+    unionRules: a.string().array(), // ["SAG-AFTRA", "DGA"]
+    copyrightOwnership: a.enum(['COMPANY', 'CLIENT', 'SHARED']),
+    usageRightsDuration: a.string(), // "Perpetual", "1 Year", etc.
+    musicLicensing: a.enum(['LICENSED', 'ROYALTY_FREE', 'ORIGINAL_SCORE', 'NONE']),
+    stockFootageNeeded: a.boolean().default(false),
+    talentReleasesRequired: a.boolean().default(false),
+    locationReleasesRequired: a.boolean().default(false),
 
     // Scene breakdown
     scenes: a.json(), // Array of {description, location, props}

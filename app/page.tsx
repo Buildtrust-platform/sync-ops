@@ -6,11 +6,11 @@ import type { Schema } from "@/amplify/data/resource";
 import "@aws-amplify/ui-react/styles.css";
 import { Authenticator } from "@aws-amplify/ui-react";
 import Link from "next/link";
-import SmartBrief from "./components/SmartBrief";
+import ComprehensiveIntake from "./components/ComprehensiveIntake";
 
 export default function App() {
   const [projects, setProjects] = useState<Array<Schema["Project"]["type"]>>([]);
-  const [showSmartBrief, setShowSmartBrief] = useState(false);
+  const [showIntakeWizard, setShowIntakeWizard] = useState(false);
   const [client] = useState(() => generateClient<Schema>());
 
   function listProjects() {
@@ -37,16 +37,16 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function openSmartBrief() {
-    setShowSmartBrief(true);
+  function openIntakeWizard() {
+    setShowIntakeWizard(true);
   }
 
-  function closeSmartBrief() {
-    setShowSmartBrief(false);
+  function closeIntakeWizard() {
+    setShowIntakeWizard(false);
   }
 
-  function handleBriefComplete() {
-    setShowSmartBrief(false);
+  function handleIntakeComplete() {
+    setShowIntakeWizard(false);
     listProjects(); // Refresh the project list
   }
 
@@ -64,13 +64,13 @@ export default function App() {
             </div>
             <div className="flex gap-4">
               <button
-                onClick={openSmartBrief}
+                onClick={openIntakeWizard}
                 className="bg-teal-500 hover:bg-teal-600 text-black font-bold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-teal-500/20 flex items-center gap-2"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
-                Smart Brief
+                New Project
               </button>
               <button
                 onClick={signOut}
@@ -112,11 +112,11 @@ export default function App() {
             </div>
           )}
 
-          {/* Smart Brief Modal */}
-          {showSmartBrief && (
-            <SmartBrief
-              onComplete={handleBriefComplete}
-              onCancel={closeSmartBrief}
+          {/* Comprehensive Intake Wizard */}
+          {showIntakeWizard && (
+            <ComprehensiveIntake
+              onComplete={handleIntakeComplete}
+              onCancel={closeIntakeWizard}
             />
           )}
         </main>
