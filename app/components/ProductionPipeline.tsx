@@ -358,6 +358,248 @@ export default function ProductionPipeline({
           />
         </div>
       </div>
+
+      {/* TIMELINE VISUALIZATION */}
+      {project && (
+        <div className="mt-6 bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-6 border border-slate-700">
+          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            📅 Project Timeline
+          </h3>
+
+          {/* Timeline Grid */}
+          <div className="space-y-4">
+            {/* Kickoff Date */}
+            {project.kickoffDate && (
+              <TimelineMilestone
+                label="Kickoff"
+                date={project.kickoffDate}
+                icon="🎬"
+                isPast={new Date(project.kickoffDate) < new Date()}
+              />
+            )}
+
+            {/* Pre-Production Dates */}
+            {project.preProductionStartDate && (
+              <TimelineMilestone
+                label="Pre-Production Start"
+                date={project.preProductionStartDate}
+                icon="📋"
+                isPast={new Date(project.preProductionStartDate) < new Date()}
+              />
+            )}
+            {project.preProductionEndDate && (
+              <TimelineMilestone
+                label="Pre-Production End"
+                date={project.preProductionEndDate}
+                icon="✅"
+                isPast={new Date(project.preProductionEndDate) < new Date()}
+              />
+            )}
+
+            {/* Production Dates */}
+            {project.productionStartDate && (
+              <TimelineMilestone
+                label="Production Start"
+                date={project.productionStartDate}
+                icon="🎥"
+                isPast={new Date(project.productionStartDate) < new Date()}
+                isCritical={true}
+              />
+            )}
+            {project.productionEndDate && (
+              <TimelineMilestone
+                label="Production End"
+                date={project.productionEndDate}
+                icon="🏁"
+                isPast={new Date(project.productionEndDate) < new Date()}
+              />
+            )}
+
+            {/* Post-Production Dates */}
+            {project.postProductionStartDate && (
+              <TimelineMilestone
+                label="Post-Production Start"
+                date={project.postProductionStartDate}
+                icon="✂️"
+                isPast={new Date(project.postProductionStartDate) < new Date()}
+              />
+            )}
+            {project.postProductionEndDate && (
+              <TimelineMilestone
+                label="Post-Production End"
+                date={project.postProductionEndDate}
+                icon="✅"
+                isPast={new Date(project.postProductionEndDate) < new Date()}
+              />
+            )}
+
+            {/* Review & Legal Deadlines */}
+            {project.reviewDeadline && (
+              <TimelineMilestone
+                label="Review Deadline"
+                date={project.reviewDeadline}
+                icon="👁️"
+                isPast={new Date(project.reviewDeadline) < new Date()}
+                isCritical={true}
+              />
+            )}
+            {project.legalLockDeadline && (
+              <TimelineMilestone
+                label="Legal Lock Deadline"
+                date={project.legalLockDeadline}
+                icon="⚖️"
+                isPast={new Date(project.legalLockDeadline) < new Date()}
+                isCritical={true}
+              />
+            )}
+
+            {/* Distribution Date */}
+            {project.distributionDate && (
+              <TimelineMilestone
+                label="Distribution Date"
+                date={project.distributionDate}
+                icon="🚀"
+                isPast={new Date(project.distributionDate) < new Date()}
+                isCritical={true}
+              />
+            )}
+
+            {/* Final Deadline */}
+            {project.deadline && (
+              <TimelineMilestone
+                label="Final Deadline"
+                date={project.deadline}
+                icon="🎯"
+                isPast={new Date(project.deadline) < new Date()}
+                isCritical={true}
+              />
+            )}
+          </div>
+
+          {/* Timeline Summary Stats */}
+          <div className="mt-6 grid grid-cols-3 gap-4">
+            <div className="bg-slate-800 rounded-lg p-3 text-center">
+              <p className="text-xs text-slate-400 mb-1">Days Since Kickoff</p>
+              <p className="text-2xl font-bold text-white">
+                {project.kickoffDate
+                  ? Math.floor((Date.now() - new Date(project.kickoffDate).getTime()) / (1000 * 60 * 60 * 24))
+                  : '--'}
+              </p>
+            </div>
+            <div className="bg-slate-800 rounded-lg p-3 text-center">
+              <p className="text-xs text-slate-400 mb-1">Days to Deadline</p>
+              <p className={`text-2xl font-bold ${
+                project.deadline && new Date(project.deadline) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                  ? 'text-red-400'
+                  : 'text-teal-400'
+              }`}>
+                {project.deadline
+                  ? Math.floor((new Date(project.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+                  : '--'}
+              </p>
+            </div>
+            <div className="bg-slate-800 rounded-lg p-3 text-center">
+              <p className="text-xs text-slate-400 mb-1">Total Duration</p>
+              <p className="text-2xl font-bold text-white">
+                {project.kickoffDate && project.deadline
+                  ? Math.floor((new Date(project.deadline).getTime() - new Date(project.kickoffDate).getTime()) / (1000 * 60 * 60 * 24))
+                  : '--'}
+              </p>
+              <p className="text-xs text-slate-400">days</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Timeline Milestone Component
+interface TimelineMilestoneProps {
+  label: string;
+  date: string;
+  icon: string;
+  isPast: boolean;
+  isCritical?: boolean;
+}
+
+function TimelineMilestone({ label, date, icon, isPast, isCritical }: TimelineMilestoneProps) {
+  const dateObj = new Date(date);
+  const isToday = dateObj.toDateString() === new Date().toDateString();
+  const isUpcoming = !isPast && dateObj.getTime() < Date.now() + 7 * 24 * 60 * 60 * 1000; // Within 7 days
+
+  return (
+    <div className={`flex items-center gap-4 p-3 rounded-lg border transition-all ${
+      isToday
+        ? 'bg-teal-900/30 border-teal-500 ring-2 ring-teal-500/50'
+        : isPast
+          ? 'bg-slate-800/50 border-slate-700'
+          : isUpcoming && isCritical
+            ? 'bg-orange-900/30 border-orange-600'
+            : 'bg-slate-800 border-slate-700'
+    }`}>
+      <div className="flex-shrink-0">
+        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-xl ${
+          isToday
+            ? 'bg-teal-500 ring-4 ring-teal-500/30'
+            : isPast
+              ? 'bg-slate-600'
+              : isUpcoming && isCritical
+                ? 'bg-orange-600 ring-4 ring-orange-600/30'
+                : 'bg-slate-700'
+        }`}>
+          {isPast && !isToday ? (
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+            </svg>
+          ) : (
+            icon
+          )}
+        </div>
+      </div>
+
+      <div className="flex-1">
+        <div className="flex items-center gap-2 mb-1">
+          <h4 className={`font-bold ${
+            isToday
+              ? 'text-teal-300'
+              : isPast
+                ? 'text-slate-400'
+                : isUpcoming && isCritical
+                  ? 'text-orange-300'
+                  : 'text-white'
+          }`}>
+            {label}
+          </h4>
+          {isToday && (
+            <span className="bg-teal-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+              TODAY
+            </span>
+          )}
+          {isUpcoming && isCritical && !isToday && (
+            <span className="bg-orange-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+              UPCOMING
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-3 text-sm">
+          <span className={isPast ? 'text-slate-500' : isToday ? 'text-teal-400 font-bold' : 'text-slate-300'}>
+            {dateObj.toLocaleDateString('en-US', {
+              weekday: 'short',
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric'
+            })}
+          </span>
+          <span className="text-slate-600">•</span>
+          <span className={`text-xs ${isPast ? 'text-slate-600' : 'text-slate-400'}`}>
+            {isPast
+              ? `${Math.floor((Date.now() - dateObj.getTime()) / (1000 * 60 * 60 * 24))} days ago`
+              : `in ${Math.floor((dateObj.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days`
+            }
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
