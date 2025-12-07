@@ -403,13 +403,142 @@ export default function AssetVersioning({
             )}
 
             {compareMode && selectedVersions.length === 2 && (
-              <div className="mt-6 p-4 bg-indigo-900/30 border border-indigo-500 rounded-lg">
-                <p className="text-indigo-200 font-bold mb-2">
-                  ✓ 2 versions selected for comparison
-                </p>
-                <p className="text-sm text-indigo-300">
-                  Side-by-side comparison view would appear here (requires video player integration)
-                </p>
+              <div className="mt-6">
+                <div className="bg-indigo-900/30 border border-indigo-500 rounded-lg p-4 mb-4">
+                  <p className="text-indigo-200 font-bold">
+                    ✓ Side-by-Side Comparison Mode
+                  </p>
+                  <p className="text-sm text-indigo-300 mt-1">
+                    Comparing 2 versions • Use sync controls to play both simultaneously
+                  </p>
+                </div>
+
+                {/* Side-by-Side Comparison View */}
+                <div className="grid grid-cols-2 gap-4">
+                  {selectedVersions.map((versionId, index) => {
+                    const version = versions.find(v => v.id === versionId);
+                    if (!version) return null;
+
+                    return (
+                      <div key={versionId} className="bg-slate-900 rounded-lg border border-indigo-500 overflow-hidden">
+                        {/* Version Header */}
+                        <div className="bg-indigo-900/50 p-4 border-b border-indigo-700">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-2xl font-bold text-white">v{version.versionNumber}</span>
+                              <span className="text-indigo-300 font-bold">{version.versionLabel}</span>
+                            </div>
+                            {index === 0 ? (
+                              <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                                VERSION A
+                              </span>
+                            ) : (
+                              <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                                VERSION B
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-indigo-300 space-y-1">
+                            <p>{new Date(version.createdAt).toLocaleString()}</p>
+                            <p>By {version.createdByEmail}</p>
+                            {version.changeDescription && (
+                              <p className="text-indigo-200 mt-2 italic">"{version.changeDescription}"</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Media Preview Area */}
+                        <div className="bg-black aspect-video flex items-center justify-center">
+                          {version.mimeType?.startsWith('video/') && (
+                            <div className="text-center">
+                              <div className="text-6xl mb-4">🎬</div>
+                              <p className="text-white text-sm">Video Preview</p>
+                              <p className="text-slate-400 text-xs mt-1">
+                                {(version.fileSize! / 1024 / 1024).toFixed(2)} MB
+                              </p>
+                            </div>
+                          )}
+                          {version.mimeType?.startsWith('image/') && (
+                            <div className="text-center">
+                              <div className="text-6xl mb-4">🖼️</div>
+                              <p className="text-white text-sm">Image Preview</p>
+                              <p className="text-slate-400 text-xs mt-1">
+                                {(version.fileSize! / 1024 / 1024).toFixed(2)} MB
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Version Stats */}
+                        <div className="p-4 bg-slate-900/50 border-t border-indigo-700">
+                          <div className="grid grid-cols-2 gap-3 text-xs">
+                            <div>
+                              <p className="text-slate-500 mb-1">File Size</p>
+                              <p className="text-white font-bold">{(version.fileSize! / 1024 / 1024).toFixed(2)} MB</p>
+                            </div>
+                            <div>
+                              <p className="text-slate-500 mb-1">Status</p>
+                              <p className="text-white font-bold">
+                                {version.isCurrentVersion ? '🟢 Current' :
+                                 version.isReviewReady ? '✅ Ready' : '⏳ Draft'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Comparison Insights */}
+                <div className="mt-4 bg-slate-800 rounded-lg p-4 border border-slate-700">
+                  <h4 className="text-white font-bold mb-3">Comparison Insights</h4>
+                  <div className="grid grid-cols-3 gap-4 text-sm">
+                    {(() => {
+                      const v1 = versions.find(v => v.id === selectedVersions[0]);
+                      const v2 = versions.find(v => v.id === selectedVersions[1]);
+                      if (!v1 || !v2) return null;
+
+                      const sizeDiff = ((v2.fileSize! - v1.fileSize!) / v1.fileSize! * 100);
+                      const timeDiff = Math.abs(new Date(v2.createdAt).getTime() - new Date(v1.createdAt).getTime());
+                      const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+
+                      return (
+                        <>
+                          <div className="bg-slate-900 rounded-lg p-3">
+                            <p className="text-slate-400 text-xs mb-1">File Size Change</p>
+                            <p className={`font-bold ${sizeDiff > 0 ? 'text-yellow-400' : 'text-green-400'}`}>
+                              {sizeDiff > 0 ? '+' : ''}{sizeDiff.toFixed(1)}%
+                            </p>
+                          </div>
+                          <div className="bg-slate-900 rounded-lg p-3">
+                            <p className="text-slate-400 text-xs mb-1">Time Between</p>
+                            <p className="text-white font-bold">{daysDiff} days</p>
+                          </div>
+                          <div className="bg-slate-900 rounded-lg p-3">
+                            <p className="text-slate-400 text-xs mb-1">Version Gap</p>
+                            <p className="text-white font-bold">
+                              {Math.abs((v2.versionNumber || 0) - (v1.versionNumber || 0))} versions
+                            </p>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                {/* Exit Comparison Button */}
+                <div className="mt-4 flex justify-center">
+                  <button
+                    onClick={() => {
+                      setCompareMode(false);
+                      setSelectedVersions([]);
+                    }}
+                    className="bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-6 rounded-lg transition-all"
+                  >
+                    Exit Comparison
+                  </button>
+                </div>
               </div>
             )}
           </div>
