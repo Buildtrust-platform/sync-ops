@@ -66,11 +66,31 @@ const schema = a.schema({
 
     // EXPANDED: Greenlight Approvals
     greenlightProducerApproved: a.boolean().default(false),
+    greenlightProducerApprovedAt: a.datetime(),
+    greenlightProducerApprovedBy: a.string(),
+    greenlightProducerComment: a.string(),
+
     greenlightLegalApproved: a.boolean().default(false),
+    greenlightLegalApprovedAt: a.datetime(),
+    greenlightLegalApprovedBy: a.string(),
+    greenlightLegalComment: a.string(),
+
     greenlightFinanceApproved: a.boolean().default(false),
+    greenlightFinanceApprovedAt: a.datetime(),
+    greenlightFinanceApprovedBy: a.string(),
+    greenlightFinanceComment: a.string(),
+
     greenlightExecutiveApproved: a.boolean().default(false),
+    greenlightExecutiveApprovedAt: a.datetime(),
+    greenlightExecutiveApprovedBy: a.string(),
+    greenlightExecutiveComment: a.string(),
+
     greenlightClientApproved: a.boolean().default(false),
-    greenlightApprovedAt: a.datetime(),
+    greenlightClientApprovedAt: a.datetime(),
+    greenlightClientApprovedBy: a.string(),
+    greenlightClientComment: a.string(),
+
+    greenlightCompletedAt: a.datetime(), // When all approvals were completed
 
     // Relationships
     assets: a.hasMany('Asset', 'projectId'),

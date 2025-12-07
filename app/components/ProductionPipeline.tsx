@@ -116,6 +116,7 @@ const PIPELINE_STAGES: PipelineStage[] = [
 interface ProductionPipelineProps {
   currentStatus: ProjectStatus;
   projectId: string;
+  project?: Schema["Project"]["type"]; // For greenlight gate enforcement
   onStatusChange?: (newStatus: ProjectStatus) => void;
   showDetails?: boolean;
 }
@@ -123,6 +124,7 @@ interface ProductionPipelineProps {
 export default function ProductionPipeline({
   currentStatus,
   projectId,
+  project,
   onStatusChange,
   showDetails = true
 }: ProductionPipelineProps) {
@@ -133,6 +135,46 @@ export default function ProductionPipeline({
   const viewingStage = selectedStage
     ? PIPELINE_STAGES.find(s => s.id === selectedStage)
     : currentStage;
+
+  // GREENLIGHT GATE ENFORCEMENT
+  // Check if all required approvals are complete
+  function checkGreenlightApprovals(): { isComplete: boolean; missingApprovals: string[] } {
+    if (!project) return { isComplete: true, missingApprovals: [] };
+
+    const approvalRoles = [
+      { field: 'producerEmail' as const, approved: 'greenlightProducerApproved' as const, label: 'Producer' },
+      { field: 'legalContactEmail' as const, approved: 'greenlightLegalApproved' as const, label: 'Legal' },
+      { field: 'financeContactEmail' as const, approved: 'greenlightFinanceApproved' as const, label: 'Finance' },
+      { field: 'executiveSponsorEmail' as const, approved: 'greenlightExecutiveApproved' as const, label: 'Executive' },
+      { field: 'clientContactEmail' as const, approved: 'greenlightClientApproved' as const, label: 'Client' },
+    ];
+
+    const requiredApprovals = approvalRoles.filter(role => project[role.field]);
+    const missingApprovals = requiredApprovals
+      .filter(role => !project[role.approved])
+      .map(role => role.label);
+
+    return {
+      isComplete: requiredApprovals.length === 0 || missingApprovals.length === 0,
+      missingApprovals
+    };
+  }
+
+  // Check if transition to target stage is allowed
+  function canTransitionTo(targetStage: ProjectStatus): { allowed: boolean; reason?: string } {
+    // GREENLIGHT GATE: Block transition from DEVELOPMENT to PRE_PRODUCTION without approvals
+    if (currentStatus === 'DEVELOPMENT' && targetStage === 'PRE_PRODUCTION') {
+      const { isComplete, missingApprovals } = checkGreenlightApprovals();
+      if (!isComplete) {
+        return {
+          allowed: false,
+          reason: `Greenlight Gate: Missing approvals from ${missingApprovals.join(', ')}`
+        };
+      }
+    }
+
+    return { allowed: true };
+  }
 
   return (
     <div className="w-full">
@@ -227,14 +269,36 @@ export default function ProductionPipeline({
               <p className="text-slate-400 text-sm">{viewingStage.description}</p>
             </div>
 
-            {onStatusChange && viewingStage.id !== currentStatus && (
-              <button
-                onClick={() => onStatusChange(viewingStage.id)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all"
-              >
-                Move to {viewingStage.label}
-              </button>
-            )}
+            {onStatusChange && viewingStage.id !== currentStatus && (() => {
+              const transitionCheck = canTransitionTo(viewingStage.id);
+              const isBlocked = !transitionCheck.allowed;
+
+              return (
+                <div className="flex flex-col items-end gap-2">
+                  <button
+                    onClick={() => {
+                      if (transitionCheck.allowed) {
+                        onStatusChange(viewingStage.id);
+                      }
+                    }}
+                    disabled={isBlocked}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                      isBlocked
+                        ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
+                        : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    }`}
+                    title={isBlocked ? transitionCheck.reason : undefined}
+                  >
+                    Move to {viewingStage.label}
+                  </button>
+                  {isBlocked && transitionCheck.reason && (
+                    <p className="text-xs text-red-400 text-right max-w-xs">
+                      🔒 {transitionCheck.reason}
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
           </div>
 
           {/* MODULES */}

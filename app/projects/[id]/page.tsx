@@ -10,6 +10,7 @@ import Link from "next/link";
 import AssetReview from "@/app/components/AssetReview";
 import ProductionPipeline from "@/app/components/ProductionPipeline";
 import AssetVersioning from "@/app/components/AssetVersioning";
+import GreenlightStatus from "@/app/components/GreenlightStatus";
 
 export default function ProjectDetail() {
   // Lazy initialize client - runs AFTER Amplify is configured in layout
@@ -37,6 +38,12 @@ export default function ProjectDetail() {
     id: string;
     name: string;
   } | null>(null);
+
+  // Refresh project data (for use by child components)
+  async function refreshProjectData() {
+    const updatedProject = await client.models.Project.get({ id: projectId });
+    setProject(updatedProject.data);
+  }
 
   // 1. INITIAL LOAD (Runs once when projectId changes)
   useEffect(() => {
@@ -238,6 +245,7 @@ export default function ProjectDetail() {
           <ProductionPipeline
             currentStatus={project.status}
             projectId={projectId}
+            project={project}
             onStatusChange={async (newStatus) => {
               await client.models.Project.update({
                 id: projectId,
@@ -264,6 +272,17 @@ export default function ProjectDetail() {
               const updatedProject = await client.models.Project.get({ id: projectId });
               setProject(updatedProject.data);
             }}
+          />
+        </div>
+      )}
+
+      {/* GREENLIGHT APPROVALS */}
+      {project?.status === 'DEVELOPMENT' && (
+        <div className="mb-10">
+          <GreenlightStatus
+            project={project}
+            currentUserEmail={userEmail}
+            onApprovalChange={refreshProjectData}
           />
         </div>
       )}
