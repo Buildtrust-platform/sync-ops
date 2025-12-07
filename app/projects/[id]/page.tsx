@@ -8,6 +8,7 @@ import "@aws-amplify/ui-react/styles.css";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import AssetReview from "@/app/components/AssetReview";
+import ProductionPipeline from "@/app/components/ProductionPipeline";
 
 export default function ProjectDetail() {
   // Lazy initialize client - runs AFTER Amplify is configured in layout
@@ -223,6 +224,42 @@ export default function ProjectDetail() {
           </div>
         </div>
       </div>
+
+      {/* PRODUCTION PIPELINE */}
+      {project?.status && (
+        <div className="mb-10">
+          <ProductionPipeline
+            currentStatus={project.status}
+            projectId={projectId}
+            onStatusChange={async (newStatus) => {
+              await client.models.Project.update({
+                id: projectId,
+                status: newStatus,
+              });
+
+              // Log the status change
+              await client.models.ActivityLog.create({
+                projectId,
+                userId: userId,
+                userEmail: userEmail,
+                action: 'PROJECT_UPDATED',
+                targetType: 'Project',
+                targetId: projectId,
+                targetName: project.name || 'Unnamed Project',
+                metadata: JSON.stringify({
+                  field: 'status',
+                  oldValue: project.status,
+                  newValue: newStatus,
+                }),
+              });
+
+              // Refresh project data
+              const updatedProject = await client.models.Project.get({ id: projectId });
+              setProject(updatedProject.data);
+            }}
+          />
+        </div>
+      )}
 
       {/* UPLOAD ZONE */}
       <div className="bg-slate-800 p-8 rounded-xl border-2 border-dashed border-slate-600 hover:border-teal-500 transition-all text-center mb-10">
