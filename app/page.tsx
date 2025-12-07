@@ -11,6 +11,7 @@ import ComprehensiveIntake from "./components/ComprehensiveIntake";
 export default function App() {
   const [projects, setProjects] = useState<Array<Schema["Project"]["type"]>>([]);
   const [showIntakeWizard, setShowIntakeWizard] = useState(false);
+  const [showCompleted, setShowCompleted] = useState(false);
   const [client] = useState(() => generateClient<Schema>());
 
   function listProjects() {
@@ -210,7 +211,6 @@ export default function App() {
     <Authenticator>
       {({ signOut, user }) => {
         const { actionRequired, inProgress, completed } = categorizeProjects(user?.signInDetails?.loginId);
-        const [showCompleted, setShowCompleted] = useState(false);
 
         return (
           <main className="min-h-screen bg-slate-900 text-white p-10 font-sans">
