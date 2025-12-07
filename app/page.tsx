@@ -7,6 +7,7 @@ import "@aws-amplify/ui-react/styles.css";
 import { Authenticator } from "@aws-amplify/ui-react";
 import Link from "next/link";
 import ComprehensiveIntake from "./components/ComprehensiveIntake";
+import GlobalNav from "./components/GlobalNav";
 
 export default function App() {
   const [projects, setProjects] = useState<Array<Schema["Project"]["type"]>>([]);
@@ -213,15 +214,20 @@ export default function App() {
         const { actionRequired, inProgress, completed } = categorizeProjects(user?.signInDetails?.loginId);
 
         return (
-          <main className="min-h-screen bg-slate-900 text-white p-10 font-sans">
-            {/* HEADER */}
-            <div className="flex justify-between items-center mb-10 border-b border-slate-700 pb-4">
-              <div>
-                <h1 className="text-4xl font-bold tracking-tight text-teal-400">SyncOps</h1>
-                <p className="text-slate-400 mt-1">Enterprise Media Operating System</p>
-                <p className="text-xs text-slate-500 mt-1">User: {user?.signInDetails?.loginId}</p>
-              </div>
-              <div className="flex gap-4">
+          <div className="min-h-screen bg-slate-900 text-white">
+            {/* GLOBAL NAVIGATION */}
+            <GlobalNav
+              userEmail={user?.signInDetails?.loginId}
+              onSignOut={signOut}
+            />
+
+            <main className="p-10 font-sans">
+              {/* PAGE HEADER */}
+              <div className="flex justify-between items-center mb-10">
+                <div>
+                  <h1 className="text-4xl font-bold tracking-tight text-white">Projects</h1>
+                  <p className="text-slate-400 mt-1">Manage your media production pipeline</p>
+                </div>
                 <button
                   onClick={openIntakeWizard}
                   className="bg-teal-500 hover:bg-teal-600 text-black font-bold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-teal-500/20 flex items-center gap-2"
@@ -231,14 +237,7 @@ export default function App() {
                   </svg>
                   New Project
                 </button>
-                <button
-                  onClick={signOut}
-                  className="bg-slate-700 hover:bg-red-500 hover:text-white text-slate-300 font-bold py-3 px-6 rounded-lg transition-all"
-                >
-                  Sign Out
-                </button>
               </div>
-            </div>
 
             {/* GROUPED PROJECT SECTIONS */}
             {!projects || projects.length === 0 ? (
@@ -321,14 +320,15 @@ export default function App() {
               </div>
             )}
 
-            {/* Comprehensive Intake Wizard */}
-            {showIntakeWizard && (
-              <ComprehensiveIntake
-                onComplete={handleIntakeComplete}
-                onCancel={closeIntakeWizard}
-              />
-            )}
-          </main>
+              {/* Comprehensive Intake Wizard */}
+              {showIntakeWizard && (
+                <ComprehensiveIntake
+                  onComplete={handleIntakeComplete}
+                  onCancel={closeIntakeWizard}
+                />
+              )}
+            </main>
+          </div>
         );
       }}
     </Authenticator>

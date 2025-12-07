@@ -16,6 +16,7 @@ import BudgetTracker from "@/app/components/BudgetTracker";
 import ProjectTimeline from "@/app/components/ProjectTimeline";
 import TabNavigation from "@/app/components/TabNavigation";
 import NextActions from "@/app/components/NextActions";
+import GlobalNav from "@/app/components/GlobalNav";
 
 export default function ProjectDetail() {
   const [client] = useState(() => generateClient<Schema>());
@@ -219,43 +220,54 @@ export default function ProjectDetail() {
   ];
 
   return (
-    <main className="min-h-screen bg-slate-900 text-white p-10 font-sans">
-      {/* HEADER */}
-      <div className="mb-8">
-        <Link href="/" className="text-slate-500 hover:text-teal-400 mb-4 inline-block flex items-center gap-2">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Back to Projects
-        </Link>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-white">{project.name}</h1>
-            <p className="text-slate-400 mt-2">
-              {project.department} • {project.projectType}
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className={`px-4 py-2 rounded-lg font-bold text-sm ${
-              project.status === 'DEVELOPMENT' ? 'bg-blue-600 text-white' :
-              project.status === 'PRODUCTION' ? 'bg-green-600 text-white' :
-              'bg-slate-700 text-slate-300'
-            }`}>
-              {project.status}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* TAB NAVIGATION */}
-      <TabNavigation
-        tabs={tabs}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
+    <div className="min-h-screen bg-slate-900 text-white">
+      {/* GLOBAL NAVIGATION */}
+      <GlobalNav
+        userEmail={userEmail}
+        onSignOut={() => window.location.href = '/'}
       />
 
-      {/* TAB CONTENT */}
-      <div className="mt-8">
+      <main className="p-10 font-sans">
+        {/* BREADCRUMB */}
+        <div className="mb-6">
+          <Link href="/" className="text-slate-500 hover:text-teal-400 inline-flex items-center gap-2 text-sm">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Projects
+          </Link>
+        </div>
+
+        {/* PAGE HEADER */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-white">{project.name}</h1>
+              <p className="text-slate-400 mt-2">
+                {project.department} • {project.projectType}
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className={`px-4 py-2 rounded-lg font-bold text-sm ${
+                project.status === 'DEVELOPMENT' ? 'bg-blue-600 text-white' :
+                project.status === 'PRODUCTION' ? 'bg-green-600 text-white' :
+                'bg-slate-700 text-slate-300'
+              }`}>
+                {project.status}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* TAB NAVIGATION */}
+        <TabNavigation
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
+
+        {/* TAB CONTENT */}
+        <div className="mt-8">
         {activeTab === 'overview' && (
           <div className="space-y-8">
             <NextActions
@@ -404,10 +416,10 @@ export default function ProjectDetail() {
             </div>
           </div>
         )}
-      </div>
+        </div>
 
-      {/* MODALS */}
-      {selectedAssetForReview && (
+        {/* MODALS */}
+        {selectedAssetForReview && (
         <AssetReview
           assetId={selectedAssetForReview}
           projectId={projectId}
@@ -417,14 +429,15 @@ export default function ProjectDetail() {
         />
       )}
 
-      {selectedAssetForVersioning && (
-        <AssetVersioning
-          assetId={selectedAssetForVersioning.id}
-          projectId={projectId}
-          assetName={selectedAssetForVersioning.name}
-          onClose={() => setSelectedAssetForVersioning(null)}
-        />
-      )}
-    </main>
+        {selectedAssetForVersioning && (
+          <AssetVersioning
+            assetId={selectedAssetForVersioning.id}
+            projectId={projectId}
+            assetName={selectedAssetForVersioning.name}
+            onClose={() => setSelectedAssetForVersioning(null)}
+          />
+        )}
+      </main>
+    </div>
   );
 }
