@@ -8,11 +8,10 @@ import { Authenticator } from "@aws-amplify/ui-react";
 import Link from "next/link";
 import SmartBrief from "./components/SmartBrief";
 
-const client = generateClient<Schema>();
-
 export default function App() {
   const [projects, setProjects] = useState<Array<Schema["Project"]["type"]>>([]);
   const [showSmartBrief, setShowSmartBrief] = useState(false);
+  const [client] = useState(() => generateClient<Schema>());
 
   function listProjects() {
     try {
@@ -35,6 +34,7 @@ export default function App() {
 
   useEffect(() => {
     listProjects();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function openSmartBrief() {
