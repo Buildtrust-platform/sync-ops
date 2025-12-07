@@ -29,6 +29,7 @@ const schema = a.schema({
     brief: a.hasOne('Brief', 'projectId'),
     callSheets: a.hasMany('CallSheet', 'projectId'),
     activityLogs: a.hasMany('ActivityLog', 'projectId'),
+    reviews: a.hasMany('Review', 'projectId'),
   })
   .authorization(allow => [
     allow.owner(), // Creator can do anything
@@ -58,6 +59,10 @@ const schema = a.schema({
     dimensions: a.string(), // Image/video dimensions (e.g., "1920x1080")
     duration: a.float(), // Video duration in seconds
     thumbnailKey: a.string(), // S3 key for thumbnail image
+
+    // Relationships
+    reviews: a.hasMany('Review', 'assetId'),
+    versions: a.hasMany('AssetVersion', 'assetId'),
   })
   .authorization(allow => [
     allow.owner(),
@@ -114,7 +119,121 @@ const schema = a.schema({
   })
   .authorization(allow => [allow.authenticated()]),
 
-  // 4. ACTIVITY LOG (Audit Trail)
+  // 4. REVIEW & APPROVAL SYSTEM (PRD FR-24 to FR-27)
+  Review: a.model({
+    assetId: a.id().required(),
+    asset: a.belongsTo('Asset', 'assetId'),
+    projectId: a.id().required(),
+    project: a.belongsTo('Project', 'projectId'),
+
+    // Reviewer information
+    reviewerId: a.string().required(), // Cognito user ID
+    reviewerEmail: a.string().required(),
+    reviewerRole: a.enum(['INTERNAL', 'CLIENT', 'LEGAL', 'COMPLIANCE']),
+
+    // Review status
+    status: a.enum(['IN_PROGRESS', 'COMPLETED', 'APPROVED', 'REJECTED']),
+
+    // Legal lock (PRD FR-27: Legal Approval Lock - immutable)
+    isLegalApproved: a.boolean().default(false),
+    legalApprovedAt: a.datetime(),
+    legalApprovedBy: a.string(),
+
+    // Relationships
+    comments: a.hasMany('ReviewComment', 'reviewId'),
+  })
+  .authorization(allow => [
+    allow.owner(), // Reviewer owns their review
+    allow.authenticated().to(['read']), // All authenticated users can view reviews
+    allow.groups(['Admin', 'Legal']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // PRD FR-24: Time-coded comments
+  ReviewComment: a.model({
+    reviewId: a.id().required(),
+    review: a.belongsTo('Review', 'reviewId'),
+    assetId: a.id().required(),
+    projectId: a.id().required(),
+
+    // Comment metadata
+    commenterId: a.string().required(), // Cognito user ID
+    commenterEmail: a.string().required(),
+    commenterRole: a.string(),
+
+    // Time-coded position (for video/audio)
+    timecode: a.float(), // Position in seconds (e.g., 45.5 = 00:45.5)
+    timecodeFormatted: a.string(), // Human-readable format (e.g., "00:00:45.5")
+
+    // Comment content
+    commentText: a.string().required(),
+    commentType: a.enum(['NOTE', 'ISSUE', 'APPROVAL', 'REJECTION']),
+    priority: a.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
+
+    // Thread management (PRD FR-24: resolve/reopen threads)
+    isResolved: a.boolean().default(false),
+    resolvedAt: a.datetime(),
+    resolvedBy: a.string(),
+
+    // Attachments
+    attachmentKeys: a.string().array(), // S3 keys for attached files/screenshots
+
+    // Relationships
+    replies: a.hasMany('ReviewCommentReply', 'parentCommentId'),
+  })
+  .authorization(allow => [
+    allow.owner(),
+    allow.authenticated().to(['read', 'create']),
+    allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // Threaded replies to comments
+  ReviewCommentReply: a.model({
+    parentCommentId: a.id().required(),
+    parentComment: a.belongsTo('ReviewComment', 'parentCommentId'),
+
+    replierId: a.string().required(),
+    replierEmail: a.string().required(),
+    replierRole: a.string(),
+
+    replyText: a.string().required(),
+  })
+  .authorization(allow => [
+    allow.owner(),
+    allow.authenticated().to(['read', 'create']),
+    allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // 5. VERSION MANAGEMENT (PRD FR-20, FR-21)
+  AssetVersion: a.model({
+    assetId: a.id().required(), // Parent asset
+    asset: a.belongsTo('Asset', 'assetId'),
+    projectId: a.id().required(),
+
+    versionNumber: a.integer().required(), // v1, v2, v3, etc.
+    versionLabel: a.string(), // "Final Cut", "Client Review v2", etc.
+
+    s3Key: a.string().required(), // S3 path for this version
+    fileSize: a.integer(),
+    mimeType: a.string(),
+
+    // Change tracking (PRD FR-21: side-by-side comparison)
+    changeDescription: a.string(), // What changed from previous version
+    previousVersionId: a.id(), // Link to previous version for comparison
+
+    // Status
+    isCurrentVersion: a.boolean().default(false),
+    isReviewReady: a.boolean().default(false), // PRD: No version shareable until marked "Review Ready"
+
+    // Creator
+    createdBy: a.string().required(),
+    createdByEmail: a.string(),
+  })
+  .authorization(allow => [
+    allow.authenticated().to(['read']),
+    allow.groups(['Admin', 'Editor']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // 6. ACTIVITY LOG (Audit Trail)
   ActivityLog: a.model({
     projectId: a.id().required(),
     project: a.belongsTo('Project', 'projectId'),
@@ -135,9 +254,16 @@ const schema = a.schema({
       'PERMISSION_CHANGED',
       'AI_PROCESSING_STARTED',
       'AI_PROCESSING_COMPLETED',
+      'REVIEW_CREATED',
+      'REVIEW_COMPLETED',
+      'COMMENT_ADDED',
+      'COMMENT_RESOLVED',
+      'VERSION_CREATED',
+      'LEGAL_APPROVED',
+      'LEGAL_REJECTED',
     ]),
 
-    targetType: a.string(), // 'Asset', 'Project', 'User'
+    targetType: a.string(), // 'Asset', 'Project', 'User', 'Review', 'Comment'
     targetId: a.string(), // ID of affected resource
     targetName: a.string(), // Friendly name for display
 
