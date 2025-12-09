@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
 
@@ -73,6 +74,7 @@ interface ComprehensiveIntakeProps {
 }
 
 export default function ComprehensiveIntake({ onComplete, onCancel }: ComprehensiveIntakeProps) {
+  const router = useRouter();
   const [client] = useState(() => generateClient<Schema>());
   const [currentStep, setCurrentStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -263,7 +265,14 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
         },
       });
 
+      // Close the wizard
       onComplete();
+
+      // Small delay to allow database propagation before navigating
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Navigate to the new project detail page
+      router.push(`/projects/${newProject.data.id}`);
     } catch (err) {
       console.error('Project creation error:', err);
       setError('Failed to create project. Please try again.');

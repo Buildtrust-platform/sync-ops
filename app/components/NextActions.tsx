@@ -111,6 +111,44 @@ export default function NextActions({ project, currentUserEmail, onActionClick }
     });
   }
 
+  // Check if Greenlight Gate is blocking progression
+  const needsGreenlight = !project.greenlightCompletedAt &&
+    ['INTAKE', 'LEGAL_REVIEW', 'BUDGET_APPROVAL'].includes(project.lifecycleState || '');
+
+  if (needsGreenlight) {
+    const briefMissing = !project.brief;
+    const pendingApprovalsCount = approvalRoles.filter(
+      role => project[role.field] && !project[role.approved]
+    ).length;
+
+    if (briefMissing || pendingApprovalsCount > 0) {
+      const blockers: string[] = [];
+      if (briefMissing) blockers.push('Smart Brief');
+      if (pendingApprovalsCount > 0) blockers.push(`${pendingApprovalsCount} approvals`);
+
+      actions.push({
+        id: 'complete-greenlight',
+        title: '🚦 Greenlight Gate BLOCKING',
+        description: `Missing: ${blockers.join(', ')}. Project cannot advance until requirements are met.`,
+        icon: '🚨',
+        color: 'red',
+        priority: 'critical'
+      });
+    }
+  }
+
+  // Check if in Pre-Production or Production phase
+  if (project.lifecycleState === 'PRE_PRODUCTION' || project.lifecycleState === 'PRODUCTION') {
+    actions.push({
+      id: 'manage-call-sheets',
+      title: 'Manage Call Sheets',
+      description: 'Create and manage production call sheets with scenes, cast, and crew scheduling.',
+      icon: '��',
+      color: 'blue',
+      priority: 'medium'
+    });
+  }
+
   // Empty state
   if (actions.length === 0) {
     return (

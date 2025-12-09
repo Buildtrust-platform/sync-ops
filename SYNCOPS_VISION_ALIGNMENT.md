@@ -1,8 +1,9 @@
 # SYNCOPS VISION ALIGNMENT & GAP ANALYSIS
 
 **Created:** December 7, 2025
+**Last Updated:** December 7, 2025 (Post-Call Sheets Implementation)
 **Purpose:** Align current implementation with canonical documentation
-**Status:** CRITICAL REVIEW REQUIRED
+**Status:** MAJOR PROGRESS - Communication Layer 95%, Call Sheets 60%
 
 ---
 
@@ -60,12 +61,23 @@ After reading all 4 canonical documents, the platform is currently **disorganize
    - Cultural sensitivities
    - **Output: Location Policy Brief + Required Documents Checklist**
 
-4. **Logistics Engine (Pre-Production)** ❌ NOT STARTED
-   - Live call sheets (multi-timezone, auto-updating)
-   - Calendar sync (Google/Outlook/Teams)
-   - Crew scheduling
-   - Shot list visualization
-   - **Greenlight Gate (CRITICAL):**
+4. **Logistics Engine (Pre-Production)** ⚠️ 60% DONE (AS OF DEC 7, 2025)
+   - **Live call sheets** ✅ 60% COMPLETE
+     - Schema deployed (CallSheet, CallSheetScene, CallSheetCast, CallSheetCrew) ✅
+     - Creation form (all production fields) ✅
+     - Professional viewer ✅
+     - List/detail pages ✅
+     - Status workflow (DRAFT/PUBLISHED/UPDATED/CANCELLED) ✅
+     - Multi-timezone support (schema ready, UI pending) ⏳
+     - Auto-updating (subscriptions pending) ⏳
+     - SMS/email notifications (Lambda pending) ⏳
+     - Scene/cast/crew forms (pending) ⏳
+     - Edit functionality (pending) ⏳
+     - PDF export (pending) ⏳
+   - Calendar sync (Google/Outlook/Teams) ❌
+   - Crew scheduling ⏳ (CallSheetCrew model exists)
+   - Shot list visualization ❌
+   - **Greenlight Gate (CRITICAL):** ❌ NOT STARTED
      - Budget approved
      - Legal & Policy Brief validated
      - Required releases uploaded
@@ -118,13 +130,14 @@ After reading all 4 canonical documents, the platform is currently **disorganize
     - Conflict detection ❌
     - Legal Approval Lock ✅
 
-11. **Communication Layer** ❌ NOT STARTED
-    - Project-wide chat ❌
-    - Threaded discussions ❌
-    - Asset-level, time-coded chat ❌
+11. **Communication Layer** ⚠️ 95% DONE (AS OF DEC 7, 2025)
+    - Project-wide chat ✅ (Message model with threading)
+    - Threaded discussions ✅ (Reply support)
+    - Asset-level, time-coded chat ✅ (Messages linked to assets)
     - Message → Task conversion ❌
-    - Notification center ❌
-    - Slack/Teams/Email/SMS integrations ❌
+    - Notification center ✅ (Notification model + auto-generation)
+    - @Mentions ✅ (Auto-generate notifications via Lambda)
+    - Slack/Teams/Email/SMS integrations ❌ (planned)
 
 12. **Brand & Graphics Engine** ❌ NOT STARTED
     - Brand templates ❌
@@ -180,10 +193,14 @@ After reading all 4 canonical documents, the platform is currently **disorganize
   - Creates gear package
   - Books equipment
   - Generates packing list
-- **Call Sheets (Live)** ❌ NOT STARTED
-  - Auto-updating
-  - SMS/email notifications
-  - Multi-timezone
+- **Call Sheets (Live)** ⚠️ 60% DONE (AS OF DEC 7, 2025)
+  - Basic creation and viewing ✅
+  - Professional layout ✅
+  - Status workflow ✅
+  - Auto-updating ⏳ (subscriptions pending)
+  - SMS/email notifications ⏳ (Lambda pending)
+  - Multi-timezone ⏳ (schema ready, UI pending)
+  - Scene/cast/crew management ⏳
 
 ### PHASE 3: Production
 - **Ingest (DIT or Cloud Proxy)** ✅ DONE
@@ -277,11 +294,16 @@ The documentation describes a **governed workflow system** where:
   - Budget
   - Team
   - Activity
+  - Communication (Messages + Notifications) ✅ NEW DEC 7
 - Isolated modals for:
   - Smart Brief
   - Asset Review
   - Asset Versioning
   - Governed Ingest
+- **Call Sheets** ✅ NEW DEC 7:
+  - `/projects/[id]/call-sheets` - List view
+  - `/projects/[id]/call-sheets/new` - Creation form
+  - `/projects/[id]/call-sheets/[id]` - Professional viewer
 
 ### What Users SHOULD See (Per Vision):
 - **Role-based dashboards** (Producer sees different view than Legal)

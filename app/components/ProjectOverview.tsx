@@ -23,9 +23,9 @@ export default function ProjectOverview({ project, brief }: ProjectOverviewProps
   // Calculate total budget
   const totalBudget = (project.budgetPreProduction || 0) +
     (project.budgetProduction || 0) +
-    (project.budgetPostProduction || 0) +
-    (project.budgetDistribution || 0) +
-    (project.budgetContingency || 0);
+    ((project.budgetPostProduction ?? 0) || 0) +
+    ((project.budgetDistribution ?? 0) || 0) +
+    ((project.budgetContingency ?? 0) || 0);
 
   return (
     <div className="space-y-6">
@@ -216,7 +216,7 @@ export default function ProjectOverview({ project, brief }: ProjectOverviewProps
 
           {/* Budget Breakdown */}
           <div className="space-y-3">
-            {project.budgetPreProduction > 0 && (
+            {(project.budgetPreProduction ?? 0) > 0 && (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 bg-purple-500 rounded"></div>
@@ -224,16 +224,16 @@ export default function ProjectOverview({ project, brief }: ProjectOverviewProps
                 </div>
                 <div className="text-right">
                   <p className="text-white font-bold">
-                    ${project.budgetPreProduction.toLocaleString()}
+                    ${project.budgetPreProduction?.toLocaleString()}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {Math.round((project.budgetPreProduction / totalBudget) * 100)}%
+                    {Math.round(((project.budgetPreProduction ?? 0) / totalBudget) * 100)}%
                   </p>
                 </div>
               </div>
             )}
 
-            {project.budgetProduction > 0 && (
+            {(project.budgetProduction ?? 0) > 0 && (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 bg-green-500 rounded"></div>
@@ -241,16 +241,16 @@ export default function ProjectOverview({ project, brief }: ProjectOverviewProps
                 </div>
                 <div className="text-right">
                   <p className="text-white font-bold">
-                    ${project.budgetProduction.toLocaleString()}
+                    ${project.budgetProduction?.toLocaleString()}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {Math.round((project.budgetProduction / totalBudget) * 100)}%
+                    {Math.round(((project.budgetProduction ?? 0) / totalBudget) * 100)}%
                   </p>
                 </div>
               </div>
             )}
 
-            {project.budgetPostProduction > 0 && (
+            {((project.budgetPostProduction ?? 0) ?? 0) > 0 && (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 bg-yellow-500 rounded"></div>
@@ -258,16 +258,16 @@ export default function ProjectOverview({ project, brief }: ProjectOverviewProps
                 </div>
                 <div className="text-right">
                   <p className="text-white font-bold">
-                    ${project.budgetPostProduction.toLocaleString()}
+                    ${project.budgetPostProduction?.toLocaleString()}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {Math.round((project.budgetPostProduction / totalBudget) * 100)}%
+                    {Math.round(((project.budgetPostProduction ?? 0) / totalBudget) * 100)}%
                   </p>
                 </div>
               </div>
             )}
 
-            {project.budgetDistribution > 0 && (
+            {(project.budgetDistribution ?? 0) > 0 && (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 bg-teal-500 rounded"></div>
@@ -275,16 +275,16 @@ export default function ProjectOverview({ project, brief }: ProjectOverviewProps
                 </div>
                 <div className="text-right">
                   <p className="text-white font-bold">
-                    ${project.budgetDistribution.toLocaleString()}
+                    ${project.budgetDistribution?.toLocaleString()}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {Math.round((project.budgetDistribution / totalBudget) * 100)}%
+                    {Math.round(((project.budgetDistribution ?? 0) / totalBudget) * 100)}%
                   </p>
                 </div>
               </div>
             )}
 
-            {project.budgetContingency > 0 && (
+            {(project.budgetContingency ?? 0) > 0 && (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 bg-orange-500 rounded"></div>
@@ -292,10 +292,10 @@ export default function ProjectOverview({ project, brief }: ProjectOverviewProps
                 </div>
                 <div className="text-right">
                   <p className="text-white font-bold">
-                    ${project.budgetContingency.toLocaleString()}
+                    ${project.budgetContingency?.toLocaleString()}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {Math.round((project.budgetContingency / totalBudget) * 100)}%
+                    {Math.round(((project.budgetContingency ?? 0) / totalBudget) * 100)}%
                   </p>
                 </div>
               </div>
@@ -304,38 +304,38 @@ export default function ProjectOverview({ project, brief }: ProjectOverviewProps
 
           {/* Visual Budget Bar */}
           <div className="mt-4 h-4 bg-slate-700 rounded-full overflow-hidden flex">
-            {project.budgetPreProduction > 0 && (
+            {(project.budgetPreProduction ?? 0) > 0 && (
               <div
                 className="bg-purple-500 h-full"
-                style={{ width: `${(project.budgetPreProduction / totalBudget) * 100}%` }}
+                style={{ width: `${((project.budgetPreProduction ?? 0) / totalBudget) * 100}%` }}
                 title="Pre-Production"
               />
             )}
-            {project.budgetProduction > 0 && (
+            {(project.budgetProduction ?? 0) > 0 && (
               <div
                 className="bg-green-500 h-full"
-                style={{ width: `${(project.budgetProduction / totalBudget) * 100}%` }}
+                style={{ width: `${((project.budgetProduction ?? 0) / totalBudget) * 100}%` }}
                 title="Production"
               />
             )}
-            {project.budgetPostProduction > 0 && (
+            {(project.budgetPostProduction ?? 0) > 0 && (
               <div
                 className="bg-yellow-500 h-full"
-                style={{ width: `${(project.budgetPostProduction / totalBudget) * 100}%` }}
+                style={{ width: `${((project.budgetPostProduction ?? 0) / totalBudget) * 100}%` }}
                 title="Post-Production"
               />
             )}
-            {project.budgetDistribution > 0 && (
+            {(project.budgetDistribution ?? 0) > 0 && (
               <div
                 className="bg-teal-500 h-full"
-                style={{ width: `${(project.budgetDistribution / totalBudget) * 100}%` }}
+                style={{ width: `${((project.budgetDistribution ?? 0) / totalBudget) * 100}%` }}
                 title="Distribution"
               />
             )}
-            {project.budgetContingency > 0 && (
+            {(project.budgetContingency ?? 0) > 0 && (
               <div
                 className="bg-orange-500 h-full"
-                style={{ width: `${(project.budgetContingency / totalBudget) * 100}%` }}
+                style={{ width: `${((project.budgetContingency ?? 0) / totalBudget) * 100}%` }}
                 title="Contingency"
               />
             )}

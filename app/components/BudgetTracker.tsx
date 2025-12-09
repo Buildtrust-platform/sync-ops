@@ -49,7 +49,7 @@ export default function BudgetTracker({ project }: BudgetTrackerProps) {
       budgeted: project.budgetPreProduction || 0,
       spent: 0, // Placeholder
       percentage: totalBudget > 0 ? ((project.budgetPreProduction || 0) / totalBudget) * 100 : 0,
-      status: "on-track",
+      status: "on-track" as "on-track",
       icon: "📋",
       color: "purple",
     },
@@ -58,7 +58,7 @@ export default function BudgetTracker({ project }: BudgetTrackerProps) {
       budgeted: project.budgetProduction || 0,
       spent: 0, // Placeholder
       percentage: totalBudget > 0 ? ((project.budgetProduction || 0) / totalBudget) * 100 : 0,
-      status: "on-track",
+      status: "on-track" as "on-track",
       icon: "🎬",
       color: "green",
     },
@@ -67,7 +67,7 @@ export default function BudgetTracker({ project }: BudgetTrackerProps) {
       budgeted: project.budgetPostProduction || 0,
       spent: 0, // Placeholder
       percentage: totalBudget > 0 ? ((project.budgetPostProduction || 0) / totalBudget) * 100 : 0,
-      status: "on-track",
+      status: "on-track" as "on-track",
       icon: "✂️",
       color: "yellow",
     },
@@ -76,7 +76,7 @@ export default function BudgetTracker({ project }: BudgetTrackerProps) {
       budgeted: project.budgetDistribution || 0,
       spent: 0, // Placeholder
       percentage: totalBudget > 0 ? ((project.budgetDistribution || 0) / totalBudget) * 100 : 0,
-      status: "on-track",
+      status: "on-track" as "on-track",
       icon: "🚀",
       color: "teal",
     },
@@ -85,7 +85,7 @@ export default function BudgetTracker({ project }: BudgetTrackerProps) {
       budgeted: project.budgetContingency || 0,
       spent: 0, // Placeholder
       percentage: totalBudget > 0 ? ((project.budgetContingency || 0) / totalBudget) * 100 : 0,
-      status: "on-track",
+      status: "on-track" as "on-track",
       icon: "🛡️",
       color: "slate",
     },

@@ -163,8 +163,13 @@ export default function FieldIntelligence({ project, onUpdate }: FieldIntelligen
 
       // Using OpenWeatherMap One Call API 3.0 (free tier)
       // Note: In production, this should be a serverless function to protect API key
-      const apiKey = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY || 'demo'; // User needs to add their key
+      const apiKey = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
 
+      if (!apiKey) {
+        throw new Error('OpenWeatherMap API key not configured. Please add NEXT_PUBLIC_OPENWEATHER_API_KEY to your .env.local file.');
+      }
+
+      // Real API call to OpenWeatherMap
       const response = await fetch(
         `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lng}&units=metric&appid=${apiKey}`
       );
