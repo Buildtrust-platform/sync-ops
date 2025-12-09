@@ -2,6 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
+import { generateClient } from "aws-amplify/data";
+import type { Schema } from "@/amplify/data/resource";
+import NotificationCenter from "./NotificationCenter";
+import UniversalSearch from "./UniversalSearch";
 
 /**
  * GLOBAL NAVIGATION BAR
@@ -17,12 +22,42 @@ interface GlobalNavProps {
 
 export default function GlobalNav({ userEmail, onSignOut }: GlobalNavProps) {
   const pathname = usePathname();
+  const [client] = useState(() => generateClient<Schema>());
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const navItems = [
     { href: "/", label: "Projects", icon: "📁" },
     { href: "/library", label: "Library", icon: "📚" },
     { href: "/reports", label: "Reports", icon: "📊" },
   ];
+
+  // Track unread notifications
+  useEffect(() => {
+    if (!userEmail) return;
+
+    // Check if Notification model is available (schema deployed)
+    if (!client.models.Notification) {
+      console.log('Notification model not yet available - waiting for schema deployment');
+      return;
+    }
+
+    const subscription = client.models.Notification.observeQuery({
+      filter: {
+        userId: { eq: userEmail },
+        isRead: { ne: true },
+      },
+    }).subscribe({
+      next: (data) => {
+        if (data?.items) {
+          setUnreadCount(data.items.length);
+        }
+      },
+      error: (error) => console.error('Error loading unread count:', error),
+    });
+
+    return () => subscription.unsubscribe();
+  }, [userEmail, client]);
 
   return (
     <nav className="bg-slate-800 border-b border-slate-700 sticky top-0 z-50">
@@ -59,8 +94,27 @@ export default function GlobalNav({ userEmail, onSignOut }: GlobalNavProps) {
             </div>
           </div>
 
+          {/* Universal Search */}
+          <div className="flex-1 max-w-2xl mx-8">
+            <UniversalSearch />
+          </div>
+
           {/* User Section */}
           <div className="flex items-center gap-4">
+            {/* Notification Bell */}
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="relative p-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-all"
+              title="Notifications"
+            >
+              <span className="text-xl">🔔</span>
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full min-w-[20px] text-center">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </button>
+
             {userEmail && (
               <div className="hidden md:block text-sm text-slate-400">
                 {userEmail}
@@ -78,6 +132,13 @@ export default function GlobalNav({ userEmail, onSignOut }: GlobalNavProps) {
           </div>
         </div>
       </div>
+
+      {/* Notification Center Panel */}
+      <NotificationCenter
+        currentUserEmail={userEmail}
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
+      />
     </nav>
   );
 }

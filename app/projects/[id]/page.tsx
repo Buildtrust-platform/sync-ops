@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
 import "@aws-amplify/ui-react/styles.css";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import AssetReview from "@/app/components/AssetReview";
 import ProductionPipeline from "@/app/components/ProductionPipeline";
 import AssetVersioning from "@/app/components/AssetVersioning";
@@ -20,10 +20,14 @@ import GovernedIngest from "@/app/components/GovernedIngest";
 import LifecycleStepper from "@/app/components/LifecycleStepper";
 import GreenlightGate from "@/app/components/GreenlightGate";
 import FieldIntelligence from "@/app/components/FieldIntelligence";
+import ProjectSettings from "@/app/components/ProjectSettings";
+import ProjectChat from "@/app/components/ProjectChat";
+import TaskManager from "@/app/components/TaskManager";
 
 export default function ProjectDetail() {
   const [client] = useState(() => generateClient<Schema>());
   const params = useParams();
+  const router = useRouter();
   const projectId = params.id as string;
 
   // DATA STATE
@@ -51,7 +55,17 @@ export default function ProjectDetail() {
   // INITIAL LOAD
   useEffect(() => {
     if (projectId) {
-      client.models.Project.get({ id: projectId }).then((data) => setProject(data.data));
+      client.models.Project.get({ id: projectId })
+        .then((data) => {
+          if (data.data) {
+            setProject(data.data);
+          } else {
+            console.error('Project not found:', projectId);
+          }
+        })
+        .catch((error) => {
+          console.error('Error loading project:', error);
+        });
 
       client.models.Brief.list({
         filter: { projectId: { eq: projectId } }
@@ -59,6 +73,8 @@ export default function ProjectDetail() {
         if (data.data && data.data.length > 0) {
           setBrief(data.data[0]);
         }
+      }).catch((error) => {
+        console.error('Error loading brief:', error);
       });
 
       const assetSub = client.models.Asset.observeQuery({
@@ -188,6 +204,12 @@ export default function ProjectDetail() {
       case 'assign-stakeholders':
         setActiveTab('team');
         break;
+      case 'complete-greenlight':
+        setActiveTab('greenlight');
+        break;
+      case 'manage-call-sheets':
+        router.push(`/projects/${projectId}/call-sheets`);
+        break;
     }
   };
 
@@ -203,14 +225,23 @@ export default function ProjectDetail() {
   ];
   const pendingApprovals = approvalRoles.filter(role => project[role.field] && !project[role.approved]).length;
 
+  // Check if project needs greenlight
+  const needsGreenlight = !project.greenlightCompletedAt &&
+    ['INTAKE', 'LEGAL_REVIEW', 'BUDGET_APPROVAL'].includes(project.lifecycleState || '');
+
   const tabs = [
     { id: 'overview', label: 'Overview', icon: '📊' },
     { id: 'timeline', label: 'Timeline', icon: '📅' },
+    { id: 'tasks', label: 'Tasks', icon: '✓' },
+    { id: 'greenlight', label: 'Greenlight Gate', icon: '🚦', badge: needsGreenlight && pendingApprovals > 0 ? '!' : undefined },
     { id: 'approvals', label: 'Approvals', icon: '✅', badge: pendingApprovals > 0 ? pendingApprovals : undefined },
     { id: 'assets', label: 'Assets', icon: '📦', badge: assets.length },
+    { id: 'call-sheets', label: 'Call Sheets', icon: '📋' },
+    { id: 'communication', label: 'Communication', icon: '💬' },
     { id: 'budget', label: 'Budget', icon: '💰' },
     { id: 'team', label: 'Team', icon: '👥' },
     { id: 'activity', label: 'Activity', icon: '📋', badge: activityLogs.length },
+    { id: 'settings', label: 'Settings', icon: '⚙️' },
   ];
 
   return (
@@ -302,6 +333,22 @@ export default function ProjectDetail() {
 
         {activeTab === 'timeline' && (
           <ProjectTimeline project={project} />
+        )}
+
+        {activeTab === 'tasks' && (
+          <TaskManager
+            projectId={projectId}
+            currentUserEmail={userEmail}
+          />
+        )}
+
+        {activeTab === 'greenlight' && (
+          <div className="space-y-6">
+            <GreenlightGate
+              project={project}
+              onAdvance={handleLifecycleStateChange}
+            />
+          </div>
         )}
 
         {activeTab === 'approvals' && project.status === 'DEVELOPMENT' && (
@@ -418,6 +465,51 @@ export default function ProjectDetail() {
               ))}
             </div>
           </div>
+        )}
+
+        {activeTab === 'call-sheets' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-3xl font-bold text-white mb-2">Call Sheets</h2>
+                <p className="text-slate-400">
+                  Manage production call sheets with scenes, cast, and crew scheduling
+                </p>
+              </div>
+              <button
+                onClick={() => router.push(`/projects/${projectId}/call-sheets/new`)}
+                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
+              >
+                + Create Call Sheet
+              </button>
+            </div>
+
+            <iframe
+              src={`/projects/${projectId}/call-sheets`}
+              className="w-full bg-white rounded-xl border-0"
+              style={{ height: 'calc(100vh - 400px)', minHeight: '600px' }}
+              title="Call Sheets"
+            />
+          </div>
+        )}
+
+        {activeTab === 'communication' && (
+          <div className="bg-slate-800 rounded-xl border border-slate-700" style={{ height: 'calc(100vh - 400px)' }}>
+            <ProjectChat
+              projectId={projectId}
+              project={project}
+              currentUserEmail={userEmail}
+              currentUserName={userEmail.split('@')[0]}
+              currentUserRole="Producer"
+            />
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <ProjectSettings
+            project={project}
+            onUpdate={refreshProjectData}
+          />
         )}
         </div>
 

@@ -1,6 +1,7 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
 import { mediaProcessor } from '../function/mediaProcessor/resource';
 import { smartBriefAI } from '../function/smartBriefAI/resource';
+import { universalSearch } from '../functions/universal-search/resource';
 
 /* * SYNC OPS - DATA SCHEMA
  * This defines the Database (DynamoDB) and Permissions (Cognito)
@@ -130,6 +131,7 @@ const schema = a.schema({
     callSheets: a.hasMany('CallSheet', 'projectId'),
     activityLogs: a.hasMany('ActivityLog', 'projectId'),
     reviews: a.hasMany('Review', 'projectId'),
+    messages: a.hasMany('Message', 'projectId'),
   })
   .authorization(allow => [
     allow.publicApiKey(), // TEMPORARY: Allow public access for development
@@ -247,12 +249,131 @@ const schema = a.schema({
     allow.authenticated(),
   ]),
 
+  // CALL SHEETS - Live Production Coordination (PRD FR-12)
   CallSheet: a.model({
     projectId: a.id().required(),
     project: a.belongsTo('Project', 'projectId'),
-    shootDate: a.date(),
+
+    // Production Information
+    productionTitle: a.string(),
+    productionCompany: a.string(),
+    shootDayNumber: a.integer(),
+    totalShootDays: a.integer(),
+    shootDate: a.date().required(),
+    episodeNumber: a.string(),
+
+    // General Call Information
+    generalCrewCall: a.string(), // Time stored as string (HH:mm format)
+    estimatedWrap: a.string(),
+    timezone: a.string(), // IANA timezone (e.g., "America/Los_Angeles")
+
+    // Location Information
+    primaryLocation: a.string(),
+    primaryLocationAddress: a.string(),
+    parkingInstructions: a.string(),
+    nearestHospital: a.string(),
+    hospitalAddress: a.string(),
+
+    // Weather
+    weatherForecast: a.string(),
+    temperature: a.string(),
+    sunset: a.string(),
+
+    // Production Contacts
+    directorName: a.string(),
+    directorPhone: a.string(),
+    producerName: a.string(),
+    producerPhone: a.string(),
+    firstADName: a.string(),
+    firstADPhone: a.string(),
+    productionManagerName: a.string(),
+    productionManagerPhone: a.string(),
+    productionOfficePhone: a.string(),
+
+    // Additional Information
+    mealTimes: a.string(),
+    cateringLocation: a.string(),
+    transportationNotes: a.string(),
+    safetyNotes: a.string(),
+    specialInstructions: a.string(),
+    nextDaySchedule: a.string(),
+
+    // Metadata
+    status: a.enum(['DRAFT', 'PUBLISHED', 'UPDATED', 'CANCELLED']),
+    version: a.integer().default(1),
+    publishedAt: a.datetime(),
+    lastUpdatedBy: a.string(),
+
+    // Relationships
+    scenes: a.hasMany('CallSheetScene', 'callSheetId'),
+    castMembers: a.hasMany('CallSheetCast', 'callSheetId'),
+    crewMembers: a.hasMany('CallSheetCrew', 'callSheetId'),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(), // TEMPORARY: Allow public access for development
+    allow.authenticated(),
+  ]),
+
+  CallSheetScene: a.model({
+    callSheetId: a.id().required(),
+    callSheet: a.belongsTo('CallSheet', 'callSheetId'),
+
+    sceneNumber: a.string().required(),
+    sceneHeading: a.string(),
+    description: a.string(),
     location: a.string(),
-    crewList: a.string().array(), // Simple list of names for now
+    pageCount: a.float(),
+    estimatedDuration: a.integer(), // minutes
+    scheduledTime: a.string(), // Time stored as string (HH:mm format)
+    status: a.enum(['SCHEDULED', 'COMPLETED', 'CANCELLED', 'MOVED']),
+    notes: a.string(),
+    sortOrder: a.integer(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(), // TEMPORARY: Allow public access for development
+    allow.authenticated(),
+  ]),
+
+  CallSheetCast: a.model({
+    callSheetId: a.id().required(),
+    callSheet: a.belongsTo('CallSheet', 'callSheetId'),
+
+    actorName: a.string().required(),
+    characterName: a.string(),
+    phone: a.string(),
+    email: a.string(),
+
+    // Call Times
+    makeupCall: a.string(), // Time stored as string (HH:mm format)
+    wardrobeCall: a.string(),
+    callToSet: a.string(),
+
+    // Logistics
+    pickupLocation: a.string(),
+    pickupTime: a.string(),
+
+    notes: a.string(),
+    sortOrder: a.integer(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(), // TEMPORARY: Allow public access for development
+    allow.authenticated(),
+  ]),
+
+  CallSheetCrew: a.model({
+    callSheetId: a.id().required(),
+    callSheet: a.belongsTo('CallSheet', 'callSheetId'),
+
+    name: a.string().required(),
+    role: a.string().required(),
+    department: a.enum(['CAMERA', 'SOUND', 'LIGHTING', 'GRIP', 'ELECTRIC', 'PRODUCTION', 'ART', 'MAKEUP', 'WARDROBE', 'VFX', 'OTHER']),
+    phone: a.string(),
+    email: a.string(),
+    callTime: a.string(), // Time stored as string (HH:mm format)
+    walkieChannel: a.string(),
+
+    notes: a.string(),
+    sortOrder: a.integer(),
   })
   .authorization(allow => [
     allow.publicApiKey(), // TEMPORARY: Allow public access for development
@@ -425,7 +546,213 @@ const schema = a.schema({
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
   ]),
 
-  // 5. CUSTOM QUERIES
+  // 7. COMMUNICATION LAYER (PRD FR-28 to FR-30)
+  Message: a.model({
+    projectId: a.id().required(),
+    project: a.belongsTo('Project', 'projectId'),
+
+    // Asset-level messages (optional - for time-coded asset discussions)
+    assetId: a.id(), // Optional: If message is about a specific asset
+    timecode: a.float(), // Optional: If message references a specific time in video
+    timecodeFormatted: a.string(), // Human-readable format (e.g., "00:01:23")
+
+    // Message content
+    senderId: a.string().required(), // Cognito user ID
+    senderEmail: a.string().required(),
+    senderName: a.string(),
+    senderRole: a.string(), // User's role (Producer, Legal, etc.)
+
+    messageText: a.string().required(),
+    messageType: a.enum(['GENERAL', 'TASK', 'ALERT', 'APPROVAL_REQUEST', 'FILE_SHARE']),
+    priority: a.enum(['LOW', 'NORMAL', 'HIGH', 'URGENT']),
+
+    // Threading
+    parentMessageId: a.id(), // For threaded discussions
+    threadDepth: a.integer().default(0), // 0 = top-level, 1+ = reply depth
+
+    // Attachments
+    attachmentKeys: a.string().array(), // S3 keys for files
+    attachmentNames: a.string().array(), // Original file names
+
+    // Task conversion (PRD FR-30: Message → Task)
+    convertedToTask: a.boolean().default(false),
+    taskId: a.string(), // Future: Link to Task model
+    taskAssignedTo: a.string(),
+    taskDeadline: a.datetime(),
+
+    // Status
+    isEdited: a.boolean().default(false),
+    editedAt: a.datetime(),
+    isDeleted: a.boolean().default(false),
+    deletedAt: a.datetime(),
+
+    // Read receipts
+    readBy: a.string().array(), // Array of user IDs who read this
+
+    // Mentions
+    mentionedUsers: a.string().array(), // Array of user IDs mentioned with @
+  })
+  .authorization(allow => [
+    allow.publicApiKey(), // TEMPORARY: Allow public access for development
+    allow.owner(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // 8. NOTIFICATION CENTER (PRD FR-29, FR-30)
+  Notification: a.model({
+    userId: a.string().required(), // Cognito user ID of recipient
+
+    // Notification content
+    type: a.enum([
+      'MESSAGE',              // New message in project chat
+      'MENTION',              // You were @mentioned
+      'TASK_ASSIGNED',        // Task assigned to you
+      'TASK_DUE_SOON',        // Task deadline approaching
+      'APPROVAL_REQUESTED',   // Your approval needed
+      'APPROVAL_GRANTED',     // Your approval request was granted
+      'APPROVAL_DENIED',      // Your approval request was denied
+      'COMMENT_ADDED',        // New comment on asset you're watching
+      'COMMENT_REPLY',        // Reply to your comment
+      'ASSET_UPLOADED',       // New asset uploaded to project
+      'LIFECYCLE_CHANGED',    // Project state changed
+      'GREENLIGHT_APPROVED',  // Project greenlit
+      'LEGAL_LOCK',           // Asset legally locked
+      'REVIEW_ASSIGNED',      // Review assigned to you
+      'DEADLINE_APPROACHING', // Project/shoot deadline near
+      'FIELD_ALERT',          // Weather/risk alert for shoot
+    ]),
+
+    title: a.string().required(),
+    message: a.string().required(),
+
+    // Links and actions
+    actionUrl: a.string(), // Where to go when clicked (e.g., /projects/123/assets/456)
+    actionLabel: a.string(), // Button text (e.g., "View Asset", "Approve Now")
+
+    // Source tracking
+    projectId: a.id(),
+    projectName: a.string(),
+    assetId: a.id(),
+    assetName: a.string(),
+    messageId: a.id(),
+    reviewId: a.id(),
+    senderId: a.string(), // Who triggered this notification
+    senderEmail: a.string(),
+    senderName: a.string(),
+
+    // Status
+    isRead: a.boolean().default(false),
+    readAt: a.datetime(),
+
+    // Multi-channel delivery (PRD FR-30: Slack/Teams/Email/SMS integrations)
+    deliveryChannels: a.string().array(), // ['IN_APP', 'EMAIL', 'SLACK', 'SMS']
+    emailSent: a.boolean().default(false),
+    emailSentAt: a.datetime(),
+    slackSent: a.boolean().default(false),
+    slackSentAt: a.datetime(),
+    smsSent: a.boolean().default(false),
+    smsSentAt: a.datetime(),
+
+    // Priority for sorting
+    priority: a.enum(['LOW', 'NORMAL', 'HIGH', 'URGENT']),
+
+    // Expiration (auto-delete old notifications)
+    expiresAt: a.datetime(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(), // TEMPORARY: Allow public access for development
+    allow.owner(), // User can only see their own notifications
+    allow.authenticated().to(['read', 'update']), // Can mark as read
+    allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // 9. TASK SYSTEM (Section 5, Final Locked Brief)
+  // Tasks linked to assets, timestamps, comments, or messages
+  Task: a.model({
+    projectId: a.id().required(),
+
+    // Task content
+    title: a.string().required(),
+    description: a.string(),
+
+    // Task type and source
+    taskType: a.enum([
+      'GENERAL',           // Manually created task
+      'FROM_COMMENT',      // Auto-created from review comment
+      'FROM_MESSAGE',      // Auto-created from message
+      'APPROVAL',          // Approval task
+      'REVIEW',            // Review task
+      'UPLOAD',            // Upload task
+      'TECHNICAL',         // Technical/QC task
+      'CREATIVE',          // Creative feedback task
+      'LEGAL',             // Legal review task
+      'COMPLIANCE'         // Compliance check task
+    ]),
+
+    // Source tracking (where did this task come from?)
+    sourceCommentId: a.id(), // If created from a comment
+    sourceMessageId: a.id(), // If created from a message
+    sourceAssetId: a.id(),   // Related asset
+
+    // Asset/timestamp linking (PRD: Tasks linked to specific assets or timestamps)
+    linkedAssetId: a.id(),
+    linkedAssetName: a.string(),
+    linkedTimecode: a.float(), // Position in seconds for video/audio tasks
+    linkedTimecodeFormatted: a.string(), // Human-readable (e.g., "00:02:15")
+
+    // Assignment
+    assignedToEmail: a.string(), // Who should do this task
+    assignedToName: a.string(),
+    assignedBy: a.string(),      // Who assigned it
+    assignedByEmail: a.string(),
+    assignedAt: a.datetime(),
+
+    // Priority and status
+    priority: a.enum(['LOW', 'NORMAL', 'HIGH', 'URGENT']),
+    status: a.enum([
+      'TODO',
+      'IN_PROGRESS',
+      'BLOCKED',
+      'IN_REVIEW',
+      'COMPLETED',
+      'CANCELLED'
+    ]),
+
+    // Dates
+    dueDate: a.datetime(),
+    startDate: a.datetime(),
+    completedAt: a.datetime(),
+    completedBy: a.string(),
+    completedByEmail: a.string(),
+
+    // Blockers and dependencies (PRD: Blockers and dependencies)
+    blockedBy: a.string().array(), // Array of task IDs that block this task
+    blockedReason: a.string(),     // Why is this blocked?
+    dependsOn: a.string().array(), // Array of task IDs this depends on
+
+    // Progress tracking
+    progressPercentage: a.integer(), // 0-100
+    estimatedHours: a.float(),
+    actualHours: a.float(),
+
+    // Creator info
+    createdBy: a.string().required(),
+    createdByEmail: a.string(),
+
+    // Tags for filtering
+    tags: a.string().array(), // ['color-correction', 'urgent', 'client-feedback']
+
+    // Attachments
+    attachmentKeys: a.string().array(), // S3 keys for files
+  })
+  .authorization(allow => [
+    allow.publicApiKey(), // TEMPORARY: Allow public access for development
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'ProjectManager']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // 10. CUSTOM QUERIES
   analyzeProjectBrief: a
     .query()
     .arguments({
@@ -436,6 +763,21 @@ const schema = a.schema({
     .handler(a.handler.function(smartBriefAI))
     .authorization(allow => [
       allow.publicApiKey(), // TEMPORARY: Allow public access for development
+      allow.authenticated(),
+    ]),
+
+  // UNIVERSAL SEARCH (Section 5, Final Locked Brief)
+  // UNIVERSAL SEARCH - Search across all entities
+  universalSearch: a
+    .query()
+    .arguments({
+      query: a.string().required(),
+      limit: a.integer(),
+    })
+    .returns(a.json())
+    .handler(a.handler.function(universalSearch))
+    .authorization(allow => [
+      allow.publicApiKey(),
       allow.authenticated(),
     ]),
 })
