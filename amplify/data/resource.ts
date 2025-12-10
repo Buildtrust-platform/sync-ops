@@ -1,16 +1,367 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
 import { mediaProcessor } from '../function/mediaProcessor/resource';
 import { smartBriefAI } from '../function/smartBriefAI/resource';
-import { feedbackSummarizer } from '../function/feedbackSummarizer/resource';
-import { universalSearch } from '../functions/universal-search/resource';
 
 /* * SYNC OPS - DATA SCHEMA
  * This defines the Database (DynamoDB) and Permissions (Cognito)
  */
 
 const schema = a.schema({
+  // ============================================
+  // SAAS MULTI-TENANCY MODELS
+  // ============================================
+
+  // ORGANIZATION - The top-level tenant (Studio, Agency, Brand)
+  Organization: a.model({
+    // Basic Info
+    name: a.string().required(),
+    slug: a.string().required(), // URL-friendly name (e.g., "acme-studios")
+    description: a.string(),
+    logo: a.string(), // S3 key for organization logo
+    website: a.string(),
+    industry: a.enum([
+      'PRODUCTION_STUDIO',
+      'ADVERTISING_AGENCY',
+      'CORPORATE_MEDIA',
+      'BROADCAST',
+      'STREAMING',
+      'INDEPENDENT',
+      'EDUCATION',
+      'NONPROFIT',
+      'GOVERNMENT',
+      'OTHER',
+    ]),
+
+    // Contact Info
+    email: a.string().required(),
+    phone: a.string(),
+    address: a.string(),
+    city: a.string(),
+    state: a.string(),
+    country: a.string(),
+    postalCode: a.string(),
+
+    // Subscription & Billing
+    subscriptionTier: a.enum([
+      'FREE',           // Free trial / limited
+      'STARTER',        // $99/month
+      'PROFESSIONAL',   // $299/month
+      'ENTERPRISE',     // $799/month
+      'STUDIO',         // Custom pricing
+    ]),
+    subscriptionStatus: a.enum([
+      'TRIALING',
+      'ACTIVE',
+      'PAST_DUE',
+      'CANCELLED',
+      'PAUSED',
+      'EXPIRED',
+    ]),
+    trialEndsAt: a.datetime(),
+    subscriptionStartedAt: a.datetime(),
+    subscriptionEndsAt: a.datetime(),
+    billingCycleDay: a.integer(), // Day of month for billing (1-28)
+
+    // Stripe Integration
+    stripeCustomerId: a.string(),
+    stripeSubscriptionId: a.string(),
+    stripePriceId: a.string(),
+    stripePaymentMethodId: a.string(),
+
+    // Usage Limits (based on tier)
+    maxProjects: a.integer(), // null = unlimited
+    maxUsers: a.integer(),
+    maxStorageGB: a.integer(),
+    maxAICredits: a.integer(), // Monthly AI processing credits
+
+    // Current Usage
+    currentProjectCount: a.integer().default(0),
+    currentUserCount: a.integer().default(0),
+    currentStorageUsedGB: a.float().default(0),
+    currentAICreditsUsed: a.integer().default(0),
+    usageResetDate: a.datetime(), // When monthly usage resets
+
+    // Features (based on tier)
+    featuresEnabled: a.string().array(), // ['smart_brief', 'field_intel', 'equipment_os', ...]
+    customFeatures: a.json(), // For enterprise custom configurations
+
+    // Branding (for white-label)
+    brandPrimaryColor: a.string(), // Hex color
+    brandSecondaryColor: a.string(),
+    brandAccentColor: a.string(),
+    customDomain: a.string(), // For enterprise: studio.acme.com
+    emailFromName: a.string(),
+    emailFromAddress: a.string(),
+
+    // Security Settings
+    ssoEnabled: a.boolean().default(false),
+    ssoProvider: a.enum(['OKTA', 'AZURE_AD', 'GOOGLE', 'SAML', 'OIDC']),
+    ssoConfig: a.json(), // SSO configuration details
+    mfaRequired: a.boolean().default(false),
+    ipWhitelist: a.string().array(), // Allowed IPs
+    sessionTimeoutMinutes: a.integer().default(480), // 8 hours
+
+    // Data Retention
+    dataRetentionDays: a.integer().default(365),
+    autoArchiveDays: a.integer().default(90),
+
+    // Audit & Compliance
+    isSOC2Compliant: a.boolean().default(false),
+    isHIPAACompliant: a.boolean().default(false),
+    isGDPRCompliant: a.boolean().default(true),
+    dataProcessingAgreementSigned: a.boolean().default(false),
+    dpaSignedAt: a.datetime(),
+
+    // Onboarding
+    onboardingCompleted: a.boolean().default(false),
+    onboardingCompletedAt: a.datetime(),
+    onboardingStep: a.integer().default(0), // Current step in onboarding wizard
+
+    // Status
+    status: a.enum(['ACTIVE', 'SUSPENDED', 'DELETED']),
+    suspendedAt: a.datetime(),
+    suspendedReason: a.string(),
+    deletedAt: a.datetime(),
+
+    // Metadata
+    createdBy: a.string().required(), // User who created the org
+    timezone: a.string().default('America/Los_Angeles'),
+    locale: a.string().default('en-US'),
+    currency: a.string().default('USD'),
+
+    // Relationships
+    members: a.hasMany('OrganizationMember', 'organizationId'),
+    invitations: a.hasMany('OrganizationInvitation', 'organizationId'),
+    usageRecords: a.hasMany('UsageRecord', 'organizationId'),
+    invoices: a.hasMany('Invoice', 'organizationId'),
+    projects: a.hasMany('Project', 'organizationId'),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.owner(),
+    allow.authenticated().to(['read']),
+    allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // ORGANIZATION MEMBER - Users belonging to an organization
+  OrganizationMember: a.model({
+    organizationId: a.id().required(),
+    organization: a.belongsTo('Organization', 'organizationId'),
+
+    // User Identity
+    userId: a.string().required(), // Cognito user ID
+    email: a.string().required(),
+    name: a.string(),
+    avatar: a.string(), // S3 key for profile picture
+    title: a.string(), // Job title
+    department: a.string(),
+    phone: a.string(),
+
+    // Role & Permissions
+    role: a.enum([
+      'OWNER',          // Full access, can delete org
+      'ADMIN',          // Full access, cannot delete org
+      'MANAGER',        // Manage projects, users (limited)
+      'MEMBER',         // Standard access
+      'BILLING',        // Billing & invoices only
+      'VIEWER',         // Read-only access
+    ]),
+    customPermissions: a.json(), // Override default role permissions
+
+    // Status
+    status: a.enum(['ACTIVE', 'SUSPENDED', 'DEACTIVATED']),
+    invitedBy: a.string(),
+    invitedAt: a.datetime(),
+    joinedAt: a.datetime(),
+    lastActiveAt: a.datetime(),
+    suspendedAt: a.datetime(),
+    suspendedBy: a.string(),
+    suspendedReason: a.string(),
+
+    // Notification Preferences
+    emailNotifications: a.boolean().default(true),
+    slackNotifications: a.boolean().default(false),
+    slackUserId: a.string(),
+    weeklyDigest: a.boolean().default(true),
+
+    // API Access
+    apiKeyId: a.string(), // For API access
+    apiKeyLastUsed: a.datetime(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.owner(),
+    allow.authenticated().to(['read']),
+    allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // ORGANIZATION INVITATION - Pending invitations
+  OrganizationInvitation: a.model({
+    organizationId: a.id().required(),
+    organization: a.belongsTo('Organization', 'organizationId'),
+
+    email: a.string().required(),
+    role: a.enum(['ADMIN', 'MANAGER', 'MEMBER', 'BILLING', 'VIEWER']),
+    message: a.string(), // Custom invite message
+
+    // Token for accepting invite
+    inviteToken: a.string().required(),
+    expiresAt: a.datetime().required(),
+
+    // Status
+    status: a.enum(['PENDING', 'ACCEPTED', 'DECLINED', 'EXPIRED', 'REVOKED']),
+    acceptedAt: a.datetime(),
+    declinedAt: a.datetime(),
+
+    // Tracking
+    invitedBy: a.string().required(),
+    invitedByEmail: a.string(),
+    remindersSent: a.integer().default(0),
+    lastReminderAt: a.datetime(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // USAGE RECORD - Track resource consumption
+  UsageRecord: a.model({
+    organizationId: a.id().required(),
+    organization: a.belongsTo('Organization', 'organizationId'),
+
+    // Period
+    periodStart: a.datetime().required(),
+    periodEnd: a.datetime().required(),
+    billingPeriod: a.string(), // "2024-01" format
+
+    // Usage Metrics
+    usageType: a.enum([
+      'STORAGE',        // GB stored
+      'BANDWIDTH',      // GB transferred
+      'AI_PROCESSING',  // AI credits used
+      'TRANSCODING',    // Minutes transcoded
+      'USERS',          // Active users
+      'PROJECTS',       // Active projects
+      'API_CALLS',      // API requests
+    ]),
+    quantity: a.float().required(),
+    unit: a.string(), // 'GB', 'minutes', 'credits', 'count'
+
+    // Cost Calculation
+    unitPrice: a.float(), // Price per unit
+    totalCost: a.float(),
+    currency: a.string().default('USD'),
+
+    // Overage
+    includedQuantity: a.float(), // Included in plan
+    overageQuantity: a.float(), // Over limit
+    overageCost: a.float(),
+
+    // Metadata
+    projectId: a.id(), // If usage is per-project
+    userId: a.string(), // If usage is per-user
+    description: a.string(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read']),
+    allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // INVOICE - Billing history
+  Invoice: a.model({
+    organizationId: a.id().required(),
+    organization: a.belongsTo('Organization', 'organizationId'),
+
+    // Invoice Details
+    invoiceNumber: a.string().required(),
+    stripeInvoiceId: a.string(),
+
+    // Period
+    periodStart: a.datetime().required(),
+    periodEnd: a.datetime().required(),
+    billingPeriod: a.string(), // "2024-01" format
+
+    // Amounts
+    subtotal: a.float().required(),
+    tax: a.float().default(0),
+    discount: a.float().default(0),
+    total: a.float().required(),
+    currency: a.string().default('USD'),
+
+    // Line Items
+    lineItems: a.json(), // Array of { description, quantity, unitPrice, total }
+
+    // Status
+    status: a.enum(['DRAFT', 'OPEN', 'PAID', 'VOID', 'UNCOLLECTIBLE']),
+    dueDate: a.datetime(),
+    paidAt: a.datetime(),
+    paymentMethod: a.string(),
+
+    // URLs
+    invoicePdfUrl: a.string(),
+    hostedInvoiceUrl: a.string(),
+
+    // Metadata
+    notes: a.string(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read']),
+    allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // SUBSCRIPTION PLAN - Available plans
+  SubscriptionPlan: a.model({
+    // Plan Identity
+    name: a.string().required(), // "Professional"
+    slug: a.string().required(), // "professional"
+    description: a.string(),
+    tier: a.enum(['FREE', 'STARTER', 'PROFESSIONAL', 'ENTERPRISE', 'STUDIO']),
+
+    // Pricing
+    monthlyPrice: a.float().required(),
+    annualPrice: a.float(), // Annual price (usually 10-20% discount)
+    currency: a.string().default('USD'),
+    stripePriceIdMonthly: a.string(),
+    stripePriceIdAnnual: a.string(),
+
+    // Limits
+    maxProjects: a.integer(), // null = unlimited
+    maxUsers: a.integer(),
+    maxStorageGB: a.integer(),
+    maxAICreditsPerMonth: a.integer(),
+    maxBandwidthGB: a.integer(),
+
+    // Features
+    features: a.string().array(), // ['smart_brief', 'field_intel', ...]
+    featuresDescription: a.json(), // { feature: description }
+
+    // Visibility
+    isPublic: a.boolean().default(true), // Show on pricing page
+    isPopular: a.boolean().default(false), // Highlight as popular
+    sortOrder: a.integer().default(0),
+
+    // Status
+    isActive: a.boolean().default(true),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read']),
+    allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // ============================================
+  // PRODUCTION MODELS (with organizationId)
+  // ============================================
+
   // 1. THE PROJECT HUB
   Project: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+    organization: a.belongsTo('Organization', 'organizationId'),
+
     name: a.string().required(),
     description: a.string(),
     status: a.enum([
@@ -143,6 +494,9 @@ const schema = a.schema({
 
   // 2. THE ASSET (Video Files)
   Asset: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     projectId: a.id().required(),
     project: a.belongsTo('Project', 'projectId'),
 
@@ -178,6 +532,9 @@ const schema = a.schema({
 
   // 3. LOGISTICS (Pre-Prod)
   Brief: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     projectId: a.id().required(),
     project: a.belongsTo('Project', 'projectId'),
 
@@ -252,6 +609,9 @@ const schema = a.schema({
 
   // CALL SHEETS - Live Production Coordination (PRD FR-12)
   CallSheet: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     projectId: a.id().required(),
     project: a.belongsTo('Project', 'projectId'),
 
@@ -383,6 +743,9 @@ const schema = a.schema({
 
   // 4. REVIEW & APPROVAL SYSTEM (PRD FR-24 to FR-27)
   Review: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     assetId: a.id().required(),
     asset: a.belongsTo('Asset', 'assetId'),
     projectId: a.id().required(),
@@ -413,6 +776,9 @@ const schema = a.schema({
 
   // PRD FR-24: Time-coded comments
   ReviewComment: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     reviewId: a.id().required(),
     review: a.belongsTo('Review', 'reviewId'),
     assetId: a.id().required(),
@@ -470,6 +836,9 @@ const schema = a.schema({
 
   // 5. VERSION MANAGEMENT (PRD FR-20, FR-21)
   AssetVersion: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     assetId: a.id().required(), // Parent asset
     asset: a.belongsTo('Asset', 'assetId'),
     projectId: a.id().required(),
@@ -501,6 +870,9 @@ const schema = a.schema({
 
   // 6. ACTIVITY LOG (Audit Trail)
   ActivityLog: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     projectId: a.id().required(),
     project: a.belongsTo('Project', 'projectId'),
 
@@ -549,6 +921,9 @@ const schema = a.schema({
 
   // 7. COMMUNICATION LAYER (PRD FR-28 to FR-30)
   Message: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     projectId: a.id().required(),
     project: a.belongsTo('Project', 'projectId'),
 
@@ -602,6 +977,9 @@ const schema = a.schema({
 
   // 8. NOTIFICATION CENTER (PRD FR-29, FR-30)
   Notification: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     userId: a.string().required(), // Cognito user ID of recipient
 
     // Notification content
@@ -671,6 +1049,9 @@ const schema = a.schema({
   // 9. TASK SYSTEM (Section 5, Final Locked Brief)
   // Tasks linked to assets, timestamps, comments, or messages
   Task: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     projectId: a.id().required(),
 
     // Task content
@@ -756,6 +1137,9 @@ const schema = a.schema({
   // 10. EQUIPMENT OS (Module 4 - Pre-Production Logistics)
   // Equipment inventory management with check-in/check-out tracking
   Equipment: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     // Basic Information
     name: a.string().required(),
     description: a.string(),
@@ -831,6 +1215,9 @@ const schema = a.schema({
 
   // Equipment checkout/check-in tracking
   EquipmentCheckout: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     equipmentId: a.id().required(),
     equipment: a.belongsTo('Equipment', 'equipmentId'),
     projectId: a.id(), // Optional - may be checked out for non-project use
@@ -872,6 +1259,9 @@ const schema = a.schema({
 
   // Equipment Kits - Pre-configured packages
   EquipmentKit: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     name: a.string().required(), // "A-Camera Package", "Audio Kit"
     description: a.string(),
     category: a.enum([
@@ -926,6 +1316,9 @@ const schema = a.schema({
   // 11. DIGITAL RIGHTS LOCKER (Module 6 - Legal Document Management)
   // Centralized storage for all production legal documents
   RightsDocument: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     // Basic Information
     name: a.string().required(),
     description: a.string(),
@@ -1030,6 +1423,9 @@ const schema = a.schema({
   // 12. DISTRIBUTION ENGINE (Module 9 - Secure Streaming & Distribution)
   // Manages secure link sharing, watermarked playback, and distribution tracking
   DistributionLink: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     // Basic Information
     name: a.string().required(),
     description: a.string(),
@@ -1171,6 +1567,9 @@ const schema = a.schema({
 
   // Social Output Configuration (FR-33)
   SocialOutput: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     // Basic Information
     name: a.string().required(),
     description: a.string(),
@@ -1296,6 +1695,9 @@ const schema = a.schema({
 
   // Archive Policy - Defines rules for automatic archival
   ArchivePolicy: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     name: a.string().required(),
     description: a.string(),
     projectId: a.id(), // Optional - if null, applies globally
@@ -1342,6 +1744,9 @@ const schema = a.schema({
 
   // Asset Analytics - Tracks usage and performance of each asset
   AssetAnalytics: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     assetId: a.id().required(),
     projectId: a.id().required(),
 
@@ -1403,6 +1808,9 @@ const schema = a.schema({
 
   // Quality Score - AI-powered quality assessment
   QualityScore: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     assetId: a.id().required(),
     assetVersionId: a.id(), // Optional - can score specific version
     projectId: a.id().required(),
@@ -1467,6 +1875,9 @@ const schema = a.schema({
 
   // Storage Tier Record - Tracks current storage location of assets
   StorageTier: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     assetId: a.id().required(),
     projectId: a.id().required(),
 
@@ -1528,6 +1939,9 @@ const schema = a.schema({
 
   // Restore Request - Tracks restoration requests from Glacier
   RestoreRequest: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     assetId: a.id().required(),
     projectId: a.id().required(),
     storageTierId: a.id(),
@@ -1574,6 +1988,9 @@ const schema = a.schema({
 
   // 14. TEAM MANAGEMENT (Stakeholder & Crew Assignment)
   TeamMember: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
     projectId: a.id().required(),
 
     // Member Identity
@@ -1633,7 +2050,503 @@ const schema = a.schema({
     allow.groups(['Admin', 'Producer']).to(['create', 'read', 'update', 'delete']),
   ]),
 
-  // 15. CUSTOM QUERIES
+  // 15. BUDGET & EXPENSE TRACKING (Granular Cost Management)
+  // Track every cent across crew, equipment, locations, and all production stages
+
+  // Budget Line Items - Planned budget allocations
+  BudgetLineItem: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
+    projectId: a.id().required(),
+
+    // Category and Classification
+    category: a.enum([
+      'CREW',
+      'EQUIPMENT_OWNED',
+      'EQUIPMENT_RENTAL',
+      'LOCATION',
+      'TALENT',
+      'CATERING',
+      'TRANSPORT',
+      'ACCOMMODATION',
+      'PERMITS',
+      'INSURANCE',
+      'POST_PRODUCTION',
+      'VFX',
+      'MUSIC_LICENSING',
+      'MARKETING',
+      'CONTINGENCY',
+      'OTHER',
+    ]),
+    subcategory: a.string(), // e.g., "Camera Department", "Lighting Rental"
+
+    // Production Phase
+    phase: a.enum([
+      'PRE_PRODUCTION',
+      'PRODUCTION',
+      'POST_PRODUCTION',
+      'DISTRIBUTION',
+    ]),
+
+    // Line Item Details
+    description: a.string().required(),
+    notes: a.string(),
+
+    // Budget Amounts
+    estimatedAmount: a.float().required(), // Planned budget
+    actualAmount: a.float().default(0), // Actual spent (calculated from expenses)
+    variance: a.float(), // estimatedAmount - actualAmount
+
+    // Rate Information (for per-unit items)
+    unitType: a.enum(['FIXED', 'HOURLY', 'DAILY', 'WEEKLY', 'PER_ITEM']),
+    unitRate: a.float(), // Rate per unit
+    estimatedUnits: a.float(), // Number of units (days, hours, items)
+    actualUnits: a.float(), // Actual units used
+
+    // Date Range (when this cost applies)
+    startDate: a.date(),
+    endDate: a.date(),
+
+    // Status
+    status: a.enum(['DRAFT', 'APPROVED', 'ACTIVE', 'COMPLETED', 'CANCELLED']),
+    approvedBy: a.string(),
+    approvedAt: a.datetime(),
+
+    // Vendor/Supplier
+    vendorName: a.string(),
+    vendorContact: a.string(),
+    purchaseOrderNumber: a.string(),
+
+    // Creator
+    createdBy: a.string().required(),
+    createdByEmail: a.string(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'Finance']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // Expense - Individual expense entries (actual costs)
+  Expense: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
+    projectId: a.id().required(),
+    budgetLineItemId: a.id(), // Optional link to budget line item
+
+    // Category
+    category: a.enum([
+      'CREW',
+      'EQUIPMENT_OWNED',
+      'EQUIPMENT_RENTAL',
+      'LOCATION',
+      'TALENT',
+      'CATERING',
+      'TRANSPORT',
+      'ACCOMMODATION',
+      'PERMITS',
+      'INSURANCE',
+      'POST_PRODUCTION',
+      'VFX',
+      'MUSIC_LICENSING',
+      'MARKETING',
+      'CONTINGENCY',
+      'OTHER',
+    ]),
+    subcategory: a.string(),
+
+    // Phase
+    phase: a.enum([
+      'PRE_PRODUCTION',
+      'PRODUCTION',
+      'POST_PRODUCTION',
+      'DISTRIBUTION',
+    ]),
+
+    // Expense Details
+    description: a.string().required(),
+    notes: a.string(),
+
+    // Amount
+    amount: a.float().required(),
+    currency: a.string().default('USD'),
+    exchangeRate: a.float(), // If foreign currency
+
+    // Date
+    expenseDate: a.date().required(),
+    shootDay: a.integer(), // Which shoot day (if applicable)
+
+    // Payment Info
+    paymentMethod: a.enum(['CASH', 'CHECK', 'CREDIT_CARD', 'WIRE', 'PETTY_CASH', 'INVOICE', 'OTHER']),
+    paymentStatus: a.enum(['PENDING', 'PAID', 'PARTIALLY_PAID', 'OVERDUE', 'CANCELLED']),
+    paymentDate: a.date(),
+    paymentReference: a.string(), // Check number, transaction ID, etc.
+
+    // Vendor/Recipient
+    vendorName: a.string(),
+    vendorId: a.string(), // Internal vendor ID if tracked
+    invoiceNumber: a.string(),
+    invoiceDate: a.date(),
+
+    // Receipt/Documentation
+    receiptKey: a.string(), // S3 key for receipt image/PDF
+    receiptFileName: a.string(),
+    hasReceipt: a.boolean().default(false),
+
+    // Approval
+    status: a.enum(['DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED', 'PAID']),
+    submittedBy: a.string(),
+    submittedAt: a.datetime(),
+    approvedBy: a.string(),
+    approvedAt: a.datetime(),
+    rejectionReason: a.string(),
+
+    // Reimbursement (if paid by crew member)
+    isReimbursement: a.boolean().default(false),
+    reimburseTo: a.string(), // Email of person to reimburse
+    reimburseToName: a.string(),
+    reimbursementStatus: a.enum(['PENDING', 'APPROVED', 'PAID']),
+
+    // Creator
+    createdBy: a.string().required(),
+    createdByEmail: a.string(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'Finance']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // Crew Cost - Daily/hourly crew rates and actual costs
+  CrewCost: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
+    projectId: a.id().required(),
+    callSheetId: a.id(), // Link to specific call sheet/shoot day
+
+    // Crew Member Info
+    crewMemberEmail: a.string().required(),
+    crewMemberName: a.string().required(),
+    role: a.string().required(), // "Director of Photography", "Gaffer", etc.
+    department: a.enum(['CAMERA', 'SOUND', 'LIGHTING', 'GRIP', 'ELECTRIC', 'PRODUCTION', 'ART', 'MAKEUP', 'WARDROBE', 'VFX', 'POST', 'OTHER']),
+
+    // Date
+    workDate: a.date().required(),
+    shootDay: a.integer(), // Which shoot day number
+
+    // Rate Structure
+    rateType: a.enum(['HOURLY', 'DAILY', 'WEEKLY', 'FLAT', 'DAY_RATE']),
+    baseRate: a.float().required(), // Base rate
+    overtimeRate: a.float(), // Overtime rate (usually 1.5x or 2x)
+    kitFee: a.float(), // Equipment/kit rental fee
+    mileageRate: a.float(), // Per mile reimbursement
+    perDiem: a.float(), // Daily allowance
+
+    // Hours Worked
+    callTime: a.string(), // When they were called (HH:mm)
+    wrapTime: a.string(), // When they wrapped (HH:mm)
+    regularHours: a.float(), // Regular hours worked
+    overtimeHours: a.float(), // Overtime hours
+    doubleTimeHours: a.float(), // Double time hours
+    mealPenaltyHours: a.float(), // Meal penalty hours
+    travelHours: a.float(), // Travel time
+
+    // Calculated Costs
+    baseCost: a.float(), // regularHours * baseRate
+    overtimeCost: a.float(), // overtimeHours * overtimeRate
+    doubleTimeCost: a.float(),
+    mealPenaltyCost: a.float(),
+    kitFeeCost: a.float(),
+    mileageCost: a.float(),
+    perDiemCost: a.float(),
+    totalCost: a.float().required(), // Sum of all costs
+
+    // Tax/Deductions
+    taxWithheld: a.float(),
+    deductions: a.float(),
+    netPay: a.float(),
+
+    // Payment Status
+    paymentStatus: a.enum(['PENDING', 'APPROVED', 'PROCESSED', 'PAID']),
+    paymentDate: a.date(),
+    paymentReference: a.string(),
+
+    // Timesheet
+    timesheetKey: a.string(), // S3 key for signed timesheet
+    timesheetApproved: a.boolean().default(false),
+    timesheetApprovedBy: a.string(),
+    timesheetApprovedAt: a.datetime(),
+
+    // Notes
+    notes: a.string(),
+
+    // Creator
+    createdBy: a.string().required(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'Finance']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // Equipment Rental - Track rented/hired equipment costs
+  EquipmentRental: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
+    projectId: a.id().required(),
+    equipmentId: a.id(), // Link to owned equipment if applicable
+
+    // Equipment Info
+    equipmentName: a.string().required(),
+    equipmentCategory: a.enum([
+      'CAMERA',
+      'LENS',
+      'LIGHTING',
+      'AUDIO',
+      'GRIP',
+      'ELECTRIC',
+      'MONITORS',
+      'STORAGE',
+      'DRONES',
+      'STABILIZERS',
+      'ACCESSORIES',
+      'VEHICLES',
+      'OTHER',
+    ]),
+    description: a.string(),
+    serialNumber: a.string(),
+    quantity: a.integer().default(1),
+
+    // Vendor Info
+    vendorName: a.string().required(),
+    vendorContact: a.string(),
+    vendorPhone: a.string(),
+    vendorEmail: a.string(),
+    vendorAddress: a.string(),
+
+    // Rental Period
+    rentalStartDate: a.date().required(),
+    rentalEndDate: a.date().required(),
+    rentalDays: a.integer(), // Calculated or manual
+
+    // Rates
+    dailyRate: a.float().required(),
+    weeklyRate: a.float(), // If applicable (usually 3-day week)
+    monthlyRate: a.float(),
+    insuranceRate: a.float(), // Daily insurance cost
+    depositAmount: a.float(),
+
+    // Calculated Costs
+    subtotal: a.float(), // dailyRate * rentalDays (or weekly/monthly)
+    insuranceCost: a.float(),
+    deliveryFee: a.float(),
+    pickupFee: a.float(),
+    damageCost: a.float(), // If any damage
+    lateFee: a.float(),
+    discountAmount: a.float(),
+    taxAmount: a.float(),
+    totalCost: a.float().required(),
+
+    // Dates by Shoot Day (for daily breakdown)
+    usageByDay: a.json(), // { "2024-01-15": { hours: 10, cost: 500 }, ... }
+
+    // Status
+    status: a.enum(['QUOTE', 'CONFIRMED', 'PICKED_UP', 'IN_USE', 'RETURNED', 'INVOICED', 'PAID', 'CANCELLED']),
+    pickupDate: a.datetime(),
+    returnDate: a.datetime(),
+    returnCondition: a.enum(['EXCELLENT', 'GOOD', 'FAIR', 'DAMAGED']),
+    damageNotes: a.string(),
+
+    // Documentation
+    quoteNumber: a.string(),
+    invoiceNumber: a.string(),
+    purchaseOrderNumber: a.string(),
+    contractKey: a.string(), // S3 key for rental contract
+    invoiceKey: a.string(), // S3 key for invoice
+
+    // Payment
+    paymentStatus: a.enum(['PENDING', 'DEPOSIT_PAID', 'PARTIALLY_PAID', 'PAID']),
+    depositPaid: a.boolean().default(false),
+    depositPaidDate: a.date(),
+    paymentDate: a.date(),
+    paymentMethod: a.string(),
+    paymentReference: a.string(),
+
+    // Notes
+    notes: a.string(),
+
+    // Creator
+    createdBy: a.string().required(),
+    createdByEmail: a.string(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'EquipmentManager']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // Location Cost - Track location fees and associated costs
+  LocationCost: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
+    projectId: a.id().required(),
+    callSheetId: a.id(), // Link to specific call sheet
+
+    // Location Info
+    locationName: a.string().required(),
+    locationAddress: a.string(),
+    locationType: a.enum(['STUDIO', 'PRACTICAL', 'EXTERIOR', 'PUBLIC', 'PRIVATE', 'GOVERNMENT', 'OTHER']),
+
+    // Date Range
+    useStartDate: a.date().required(),
+    useEndDate: a.date().required(),
+    useDays: a.integer(),
+    shootDays: a.string().array(), // Array of shoot day numbers
+
+    // Contact
+    contactName: a.string(),
+    contactPhone: a.string(),
+    contactEmail: a.string(),
+    ownerName: a.string(),
+
+    // Fees
+    locationFee: a.float().required(), // Base location fee
+    feeType: a.enum(['FLAT', 'DAILY', 'HOURLY', 'HALF_DAY', 'FULL_DAY']),
+    dailyRate: a.float(),
+    halfDayRate: a.float(),
+    hourlyRate: a.float(),
+    overtimeRate: a.float(), // Per hour overtime
+
+    // Additional Costs
+    permitFee: a.float(),
+    parkingFee: a.float(),
+    securityFee: a.float(),
+    cleaningFee: a.float(),
+    powerFee: a.float(), // Generator or power hookup
+    insuranceFee: a.float(),
+    damageDeposit: a.float(),
+    cateringFee: a.float(),
+    holdingFee: a.float(), // Fee for holding dates
+    cancellationFee: a.float(),
+    otherFees: a.float(),
+    otherFeesDescription: a.string(),
+
+    // Calculated
+    subtotal: a.float(),
+    taxAmount: a.float(),
+    totalCost: a.float().required(),
+
+    // Daily Breakdown
+    costByDay: a.json(), // { "2024-01-15": { locationFee: 1000, permits: 200, total: 1200 }, ... }
+
+    // Status
+    status: a.enum(['SCOUTING', 'NEGOTIATING', 'CONFIRMED', 'CONTRACTED', 'COMPLETED', 'CANCELLED']),
+    contractSigned: a.boolean().default(false),
+    contractSignedDate: a.date(),
+    depositPaid: a.boolean().default(false),
+    depositPaidDate: a.date(),
+
+    // Documentation
+    contractKey: a.string(), // S3 key
+    permitKey: a.string(), // S3 key for permit
+    insuranceCertKey: a.string(), // S3 key for insurance certificate
+    invoiceKey: a.string(),
+
+    // Payment
+    paymentStatus: a.enum(['PENDING', 'DEPOSIT_PAID', 'PARTIALLY_PAID', 'PAID']),
+    paymentDate: a.date(),
+    paymentMethod: a.string(),
+    paymentReference: a.string(),
+
+    // Notes
+    notes: a.string(),
+    specialRequirements: a.string(),
+    restrictions: a.string(),
+
+    // Creator
+    createdBy: a.string().required(),
+    createdByEmail: a.string(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'LocationManager']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // Daily Cost Summary - Aggregated costs per shoot day
+  DailyCostSummary: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
+    projectId: a.id().required(),
+    callSheetId: a.id(),
+
+    // Date
+    date: a.date().required(),
+    shootDay: a.integer(), // Which shoot day (1, 2, 3, etc.)
+
+    // Crew Costs
+    crewCount: a.integer(),
+    crewTotalHours: a.float(),
+    crewOvertimeHours: a.float(),
+    crewBaseCost: a.float(),
+    crewOvertimeCost: a.float(),
+    crewKitFees: a.float(),
+    crewPerDiem: a.float(),
+    crewTotalCost: a.float(),
+
+    // Equipment Costs
+    equipmentOwnedCost: a.float(), // Depreciation or internal charge
+    equipmentRentalCost: a.float(),
+    equipmentTotalCost: a.float(),
+
+    // Location Costs
+    locationFees: a.float(),
+    permitFees: a.float(),
+    locationTotalCost: a.float(),
+
+    // Talent Costs
+    talentFees: a.float(),
+    talentPerDiem: a.float(),
+    talentTotalCost: a.float(),
+
+    // Other Costs
+    cateringCost: a.float(),
+    transportCost: a.float(),
+    parkingCost: a.float(),
+    miscCost: a.float(),
+    otherTotalCost: a.float(),
+
+    // Totals
+    totalPlannedCost: a.float(), // From budget
+    totalActualCost: a.float(), // Sum of all actual costs
+    variance: a.float(), // planned - actual
+    variancePercentage: a.float(),
+
+    // Status
+    isFinalized: a.boolean().default(false),
+    finalizedBy: a.string(),
+    finalizedAt: a.datetime(),
+
+    // Notes
+    notes: a.string(),
+    issues: a.string(), // Any cost overrun issues
+
+    // Creator
+    createdBy: a.string().required(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'Finance']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // 16. CUSTOM QUERIES
   analyzeProjectBrief: a
     .query()
     .arguments({
@@ -1647,33 +2560,6 @@ const schema = a.schema({
       allow.authenticated(),
     ]),
 
-  // UNIVERSAL SEARCH (Section 5, Final Locked Brief)
-  // UNIVERSAL SEARCH - Search across all entities
-  universalSearch: a
-    .query()
-    .arguments({
-      query: a.string().required(),
-      limit: a.integer(),
-    })
-    .returns(a.json())
-    .handler(a.handler.function(universalSearch))
-    .authorization(allow => [
-      allow.publicApiKey(),
-      allow.authenticated(),
-    ]),
-
-  // AI FEEDBACK SUMMARIZATION - Analyze review comments and generate insights
-  summarizeFeedback: a
-    .query()
-    .arguments({
-      comments: a.json().required(),
-    })
-    .returns(a.json())
-    .handler(a.handler.function(feedbackSummarizer))
-    .authorization(allow => [
-      allow.publicApiKey(),
-      allow.authenticated(),
-    ]),
 })
 .authorization(allow => [allow.resource(mediaProcessor)]);
 
