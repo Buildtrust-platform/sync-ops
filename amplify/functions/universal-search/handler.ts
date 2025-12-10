@@ -1,6 +1,5 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
-import type { Schema } from '../../data/resource';
 import { env } from '$amplify/env/universal-search';
 
 const client = new DynamoDBClient({});
@@ -17,7 +16,14 @@ interface SearchResult {
   highlights?: string[];
 }
 
-export const handler: Schema['universalSearch']['functionHandler'] = async (event) => {
+interface SearchEvent {
+  arguments: {
+    query: string;
+    limit?: number;
+  };
+}
+
+export const handler = async (event: SearchEvent): Promise<SearchResult[]> => {
   const { query, limit = 10 } = event.arguments;
 
   console.log('🔍 Universal Search Lambda invoked:', { query, limit });

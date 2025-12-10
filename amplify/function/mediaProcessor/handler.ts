@@ -64,6 +64,7 @@ export const handler = async (event: any) => {
 
       // 3a. LOG ACTIVITY: AI Processing Started
       await client.models.ActivityLog.create({
+        organizationId: assetToUpdate.organizationId,
         projectId: assetToUpdate.projectId,
         userId: 'SYSTEM',
         userEmail: 'ai-processor@syncops.system',
@@ -125,6 +126,7 @@ export const handler = async (event: any) => {
 
       // 5a. LOG ACTIVITY: AI Processing Completed
       await client.models.ActivityLog.create({
+        organizationId: assetToUpdate.organizationId,
         projectId: assetToUpdate.projectId,
         userId: 'SYSTEM',
         userEmail: 'ai-processor@syncops.system',
