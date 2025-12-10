@@ -53,6 +53,15 @@ export default function ProjectSettings({ project, onUpdate }: ProjectSettingsPr
 
     // Lifecycle state (admin override)
     lifecycleState: project.lifecycleState || 'INTAKE',
+
+    // Budget breakdown
+    budgetPreProduction: project.budgetPreProduction?.toString() || '',
+    budgetProduction: project.budgetProduction?.toString() || '',
+    budgetPostProduction: project.budgetPostProduction?.toString() || '',
+    budgetDistribution: project.budgetDistribution?.toString() || '',
+    budgetContingency: project.budgetContingency?.toString() || '',
+    fundingSource: project.fundingSource || '',
+    purchaseOrderNumber: project.purchaseOrderNumber || '',
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -66,14 +75,26 @@ export default function ProjectSettings({ project, onUpdate }: ProjectSettingsPr
     setSaveMessage(null);
 
     try {
+      // Convert budget strings to numbers
+      const budgetFields = ['budgetPreProduction', 'budgetProduction', 'budgetPostProduction', 'budgetDistribution', 'budgetContingency'];
+
       const updateData: any = {
         id: project.id,
         ...formData,
       };
 
-      // Remove empty strings (convert to null)
+      // Convert budget fields to numbers
+      budgetFields.forEach(field => {
+        if (updateData[field] && updateData[field] !== '') {
+          updateData[field] = parseFloat(updateData[field]);
+        } else {
+          updateData[field] = null;
+        }
+      });
+
+      // Remove empty strings (convert to null) for other fields
       Object.keys(updateData).forEach(key => {
-        if (updateData[key] === '') {
+        if (!budgetFields.includes(key) && updateData[key] === '') {
           updateData[key] = null;
         }
       });
@@ -237,6 +258,159 @@ export default function ProjectSettings({ project, onUpdate }: ProjectSettingsPr
             <p className="text-xs text-slate-500 mt-1">
               Find coordinates at <a href="https://www.latlong.net/" target="_blank" rel="noopener noreferrer" className="text-teal-400 hover:underline">latlong.net</a>
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* BUDGET BREAKDOWN */}
+      <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
+        <div className="mb-4">
+          <h3 className="text-xl font-bold text-white flex items-center gap-2">
+            💰 Budget Breakdown
+          </h3>
+          <p className="text-sm text-slate-400 mt-1">
+            Allocate budget across production phases to enable Budget Tracker
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-bold text-slate-300 mb-2">
+              📋 Pre-Production Budget
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+              <input
+                type="number"
+                value={formData.budgetPreProduction}
+                onChange={(e) => handleInputChange('budgetPreProduction', e.target.value)}
+                placeholder="0"
+                min="0"
+                step="100"
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg pl-8 pr-4 py-2 text-white placeholder-slate-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-slate-300 mb-2">
+              🎬 Production Budget
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+              <input
+                type="number"
+                value={formData.budgetProduction}
+                onChange={(e) => handleInputChange('budgetProduction', e.target.value)}
+                placeholder="0"
+                min="0"
+                step="100"
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg pl-8 pr-4 py-2 text-white placeholder-slate-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-slate-300 mb-2">
+              ✂️ Post-Production Budget
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+              <input
+                type="number"
+                value={formData.budgetPostProduction}
+                onChange={(e) => handleInputChange('budgetPostProduction', e.target.value)}
+                placeholder="0"
+                min="0"
+                step="100"
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg pl-8 pr-4 py-2 text-white placeholder-slate-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-slate-300 mb-2">
+              🚀 Distribution Budget
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+              <input
+                type="number"
+                value={formData.budgetDistribution}
+                onChange={(e) => handleInputChange('budgetDistribution', e.target.value)}
+                placeholder="0"
+                min="0"
+                step="100"
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg pl-8 pr-4 py-2 text-white placeholder-slate-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-slate-300 mb-2">
+              🛡️ Contingency Budget
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+              <input
+                type="number"
+                value={formData.budgetContingency}
+                onChange={(e) => handleInputChange('budgetContingency', e.target.value)}
+                placeholder="0"
+                min="0"
+                step="100"
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg pl-8 pr-4 py-2 text-white placeholder-slate-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-slate-300 mb-2">
+              📊 Total Budget
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+              <input
+                type="text"
+                value={(
+                  (parseFloat(formData.budgetPreProduction) || 0) +
+                  (parseFloat(formData.budgetProduction) || 0) +
+                  (parseFloat(formData.budgetPostProduction) || 0) +
+                  (parseFloat(formData.budgetDistribution) || 0) +
+                  (parseFloat(formData.budgetContingency) || 0)
+                ).toLocaleString()}
+                readOnly
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg pl-8 pr-4 py-2 text-teal-400 font-bold cursor-not-allowed"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-700">
+          <div>
+            <label className="block text-sm font-bold text-slate-300 mb-2">
+              💳 Funding Source
+            </label>
+            <input
+              type="text"
+              value={formData.fundingSource}
+              onChange={(e) => handleInputChange('fundingSource', e.target.value)}
+              placeholder="e.g., Marketing Budget Q4"
+              className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-slate-300 mb-2">
+              📄 Purchase Order Number
+            </label>
+            <input
+              type="text"
+              value={formData.purchaseOrderNumber}
+              onChange={(e) => handleInputChange('purchaseOrderNumber', e.target.value)}
+              placeholder="e.g., PO-2024-001"
+              className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all"
+            />
           </div>
         </div>
       </div>

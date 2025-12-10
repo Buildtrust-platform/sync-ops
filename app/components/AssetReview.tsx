@@ -1,8 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { generateClient } from "aws-amplify/data";
+import { getUrl } from "aws-amplify/storage";
 import type { Schema } from "@/amplify/data/resource";
+import FeedbackSummary from "./FeedbackSummary";
+import ReviewHeatmap from "./ReviewHeatmap";
+import VideoPlayer from "./VideoPlayer";
+import AudioWaveform from "./AudioWaveform";
 
 interface AssetReviewProps {
   assetId: string;
@@ -38,6 +43,17 @@ export default function AssetReview({
   // Legal approval state
   const [showLegalApproval, setShowLegalApproval] = useState(false);
 
+  // Video player state
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [videoDuration, setVideoDuration] = useState<number>(0);
+  const [currentVideoTime, setCurrentVideoTime] = useState<number>(0);
+  const [seekToTime, setSeekToTime] = useState<number | undefined>(undefined);
+
+  // Audio player state
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [audioDuration, setAudioDuration] = useState<number>(0);
+  const [currentAudioTime, setCurrentAudioTime] = useState<number>(0);
+
   // Load asset and reviews
   useEffect(() => {
     if (assetId) {
@@ -70,6 +86,54 @@ export default function AssetReview({
       };
     }
   }, [assetId, client]);
+
+  // Load video/audio URL when asset is available
+  useEffect(() => {
+    if (asset?.s3Key) {
+      if (isVideoFile(asset.s3Key)) {
+        getUrl({
+          path: asset.s3Key,
+          options: { expiresIn: 3600 } // 1 hour expiration
+        }).then(({ url }) => {
+          setVideoUrl(url.toString());
+        }).catch(err => {
+          console.error('Error loading video URL:', err);
+        });
+      } else if (isAudioFile(asset.s3Key)) {
+        getUrl({
+          path: asset.s3Key,
+          options: { expiresIn: 3600 } // 1 hour expiration
+        }).then(({ url }) => {
+          setAudioUrl(url.toString());
+        }).catch(err => {
+          console.error('Error loading audio URL:', err);
+        });
+      }
+    }
+  }, [asset]);
+
+  // Check if asset is a video file
+  function isVideoFile(filename: string): boolean {
+    const videoExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.m4v', '.wmv'];
+    const lowerFilename = filename.toLowerCase();
+    return videoExtensions.some(ext => lowerFilename.endsWith(ext));
+  }
+
+  // Check if asset is an audio file
+  function isAudioFile(filename: string): boolean {
+    const audioExtensions = ['.mp3', '.wav', '.aac', '.ogg', '.flac', '.m4a', '.wma', '.aiff'];
+    const lowerFilename = filename.toLowerCase();
+    return audioExtensions.some(ext => lowerFilename.endsWith(ext));
+  }
+
+  // Handle seek from comment or heatmap click
+  function handleSeekToTimecode(timecode: number) {
+    setSeekToTime(timecode);
+    // Also update the timecode input for comment form
+    setTimecode(timecode);
+    // Clear seekToTime after a short delay to allow re-seeking to same position
+    setTimeout(() => setSeekToTime(undefined), 100);
+  }
 
   // Create a new review
   async function startReview() {
@@ -299,7 +363,60 @@ export default function AssetReview({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6" id="review-content">
+          {/* Video Player - Show for video assets */}
+          {videoUrl && (
+            <div className="bg-slate-900 rounded-xl border border-slate-700 overflow-hidden">
+              <VideoPlayer
+                src={videoUrl}
+                onTimeUpdate={(time) => setCurrentVideoTime(time)}
+                onDurationChange={(dur) => setVideoDuration(dur)}
+                seekTo={seekToTime}
+              />
+            </div>
+          )}
+
+          {/* Audio Waveform - Show for audio assets */}
+          {audioUrl && (
+            <AudioWaveform
+              src={audioUrl}
+              onTimeUpdate={(time) => setCurrentAudioTime(time)}
+              onDurationChange={(dur) => setAudioDuration(dur)}
+              seekTo={seekToTime}
+            />
+          )}
+
+          {/* AI Feedback Summary - Show when there are comments */}
+          {comments.length > 0 && (
+            <FeedbackSummary comments={comments} assetId={assetId} />
+          )}
+
+          {/* Review Heatmap - Visual timeline of comment density */}
+          {comments.length > 0 && (
+            <ReviewHeatmap
+              comments={comments}
+              duration={videoDuration > 0 ? videoDuration : audioDuration > 0 ? audioDuration : undefined}
+              currentTime={videoUrl ? currentVideoTime : audioUrl ? currentAudioTime : undefined}
+              onTimecodeClick={(timecode) => {
+                // Seek video/audio to this timecode
+                handleSeekToTimecode(timecode);
+                // Find the comment at or near this timecode
+                const targetComment = comments.find(c => Math.abs((c.timecode || 0) - timecode) < 5);
+                if (targetComment) {
+                  const commentElement = document.getElementById(`comment-${targetComment.id}`);
+                  if (commentElement) {
+                    commentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Highlight the comment briefly
+                    commentElement.classList.add('ring-4', 'ring-teal-500');
+                    setTimeout(() => {
+                      commentElement.classList.remove('ring-4', 'ring-teal-500');
+                    }, 2000);
+                  }
+                }
+              }}
+            />
+          )}
+
           {/* Start Review Section */}
           {!currentReviewId && !hasLegalApproval && (
             <div className="bg-slate-900 rounded-xl border border-slate-700 p-6">
@@ -376,14 +493,26 @@ export default function AssetReview({
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-slate-400 mb-2">TIMECODE (seconds)</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={timecode}
-                        onChange={(e) => setTimecode(parseFloat(e.target.value))}
-                        placeholder="0.0"
-                        className="w-full bg-slate-900 border border-slate-600 rounded p-2 text-white text-sm"
-                      />
+                      <div className="flex gap-2">
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={timecode}
+                          onChange={(e) => setTimecode(parseFloat(e.target.value))}
+                          placeholder="0.0"
+                          className="flex-1 bg-slate-900 border border-slate-600 rounded p-2 text-white text-sm"
+                        />
+                        {(videoUrl || audioUrl) && (
+                          <button
+                            type="button"
+                            onClick={() => setTimecode(Math.round((videoUrl ? currentVideoTime : currentAudioTime) * 10) / 10)}
+                            className="bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold px-2 py-1 rounded transition-all whitespace-nowrap"
+                            title="Use current playback time"
+                          >
+                            Use Now
+                          </button>
+                        )}
+                      </div>
                       <p className="text-xs text-slate-500 mt-1">{formatTimecode(timecode)}</p>
                     </div>
                     <div>
@@ -458,7 +587,8 @@ export default function AssetReview({
                 {comments.map((comment) => (
                   <div
                     key={comment.id}
-                    className={`bg-slate-800 rounded-lg border p-4 ${
+                    id={`comment-${comment.id}`}
+                    className={`bg-slate-800 rounded-lg border p-4 transition-all ${
                       comment.isResolved
                         ? 'border-slate-700 opacity-50'
                         : comment.priority === 'CRITICAL'
@@ -470,9 +600,15 @@ export default function AssetReview({
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-center gap-3">
-                        <span className="bg-teal-500 text-black font-mono text-xs px-2 py-1 rounded">
+                        <button
+                          onClick={() => videoUrl && comment.timecode && handleSeekToTimecode(comment.timecode)}
+                          className={`bg-teal-500 text-black font-mono text-xs px-2 py-1 rounded ${
+                            videoUrl ? 'hover:bg-teal-400 cursor-pointer' : ''
+                          }`}
+                          title={videoUrl ? 'Click to jump to this timecode' : comment.timecodeFormatted || ''}
+                        >
                           {comment.timecodeFormatted}
-                        </span>
+                        </button>
                         <span className={`text-xs font-bold px-2 py-1 rounded ${
                           comment.commentType === 'ISSUE' ? 'bg-red-900 text-red-200' :
                           comment.commentType === 'APPROVAL' ? 'bg-green-900 text-green-200' :

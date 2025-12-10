@@ -121,7 +121,7 @@ export default function TaskManager({
         description: newTask.description.trim() || undefined,
         priority: newTask.priority,
         assignedToEmail: newTask.assignedToEmail || undefined,
-        dueDate: newTask.dueDate || undefined,
+        dueDate: newTask.dueDate ? new Date(newTask.dueDate).toISOString() : undefined,
         linkedAssetId: linkedAssetId || undefined,
         linkedTimecode: linkedTimecode || undefined,
         status: 'TODO',
@@ -133,6 +133,8 @@ export default function TaskManager({
 
       if (errors) {
         console.error('Error creating task:', errors);
+        console.error('Error details:', JSON.stringify(errors, null, 2));
+        alert(`Failed to create task: ${errors.map((e: any) => e.message).join(', ')}`);
       } else if (data) {
         setShowCreateModal(false);
         setNewTask({ title: '', description: '', priority: 'NORMAL', assignedToEmail: '', dueDate: '' });

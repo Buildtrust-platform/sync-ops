@@ -16,6 +16,10 @@ export const storage = defineStorage({
       allow.authenticated.to(['read', 'write', 'delete']),
       allow.guest.to(['read', 'write']), // TEMPORARY: For development without Cognito
     ],
+    'rights-documents/*': [
+      allow.authenticated.to(['read', 'write', 'delete']),
+      allow.guest.to(['read', 'write']), // TEMPORARY: For development without Cognito
+    ],
   }),
   triggers: {
     onUpload: mediaProcessor,
