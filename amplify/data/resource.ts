@@ -1,6 +1,7 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
 import { mediaProcessor } from '../function/mediaProcessor/resource';
 import { smartBriefAI } from '../function/smartBriefAI/resource';
+import { universalSearch } from '../function/universalSearch/resource';
 
 /* * SYNC OPS - DATA SCHEMA
  * This defines the Database (DynamoDB) and Permissions (Cognito)
@@ -2555,6 +2556,20 @@ const schema = a.schema({
     })
     .returns(a.json())
     .handler(a.handler.function(smartBriefAI))
+    .authorization(allow => [
+      allow.publicApiKey(), // TEMPORARY: Allow public access for development
+      allow.authenticated(),
+    ]),
+
+  // Universal Search - searches across projects, assets, comments, messages, tasks
+  universalSearch: a
+    .query()
+    .arguments({
+      query: a.string().required(),
+      limit: a.integer(),
+    })
+    .returns(a.json().array())
+    .handler(a.handler.function(universalSearch))
     .authorization(allow => [
       allow.publicApiKey(), // TEMPORARY: Allow public access for development
       allow.authenticated(),
