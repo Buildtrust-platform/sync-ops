@@ -6,6 +6,7 @@ import { mediaProcessor } from './function/mediaProcessor/resource';
 import { smartBriefAI } from './function/smartBriefAI/resource';
 import { notificationGenerator } from './function/notificationGenerator/resource';
 import { universalSearch } from './functions/universal-search/resource';
+import { feedbackSummarizer } from './function/feedbackSummarizer/resource';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { StartingPosition } from 'aws-cdk-lib/aws-lambda';
 import { DynamoEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
@@ -18,6 +19,7 @@ const backend = defineBackend({
   smartBriefAI,
   notificationGenerator,
   universalSearch,
+  feedbackSummarizer,
 });
 
 // Grant Rekognition permissions to Lambda
@@ -141,3 +143,31 @@ backend.universalSearch.addEnvironment('ASSET_TABLE_NAME', assetTable.tableName)
 backend.universalSearch.addEnvironment('REVIEWCOMMENT_TABLE_NAME', reviewCommentTable.tableName);
 backend.universalSearch.addEnvironment('MESSAGE_TABLE_NAME', messageTable2.tableName);
 backend.universalSearch.addEnvironment('TASK_TABLE_NAME', taskTable.tableName);
+
+// Configure Feedback Summarizer Lambda with Bedrock permissions
+backend.feedbackSummarizer.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: [
+      'bedrock:InvokeModel',
+      'bedrock:InvokeModelWithResponseStream',
+    ],
+    resources: [
+      'arn:aws:bedrock:*::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0',
+      'arn:aws:bedrock:*::foundation-model/anthropic.claude-*',
+    ],
+  })
+);
+
+// Grant DynamoDB access for reading review comments
+backend.feedbackSummarizer.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: [
+      'dynamodb:Query',
+      'dynamodb:Scan',
+    ],
+    resources: [reviewCommentTable.tableArn],
+  })
+);
+
+// Pass table name as environment variable
+backend.feedbackSummarizer.addEnvironment('REVIEWCOMMENT_TABLE_NAME', reviewCommentTable.tableName);
