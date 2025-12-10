@@ -1,0 +1,256 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { getUrl } from "aws-amplify/storage";
+
+interface VideoThumbnailProps {
+  s3Key: string;
+  alt?: string;
+  className?: string;
+  thumbnailTime?: number; // Time in seconds to capture thumbnail (default: 1)
+}
+
+export default function VideoThumbnail({
+  s3Key,
+  alt = "Video thumbnail",
+  className = "",
+  thumbnailTime = 1,
+}: VideoThumbnailProps) {
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  // Check if file is a video
+  const isVideoFile = (filename: string): boolean => {
+    const videoExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.m4v', '.wmv'];
+    const lowerFilename = filename.toLowerCase();
+    return videoExtensions.some(ext => lowerFilename.endsWith(ext));
+  };
+
+  // Check if file is an image
+  const isImageFile = (filename: string): boolean => {
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
+    const lowerFilename = filename.toLowerCase();
+    return imageExtensions.some(ext => lowerFilename.endsWith(ext));
+  };
+
+  // Check if file is audio
+  const isAudioFile = (filename: string): boolean => {
+    const audioExtensions = ['.mp3', '.wav', '.aac', '.ogg', '.flac', '.m4a', '.wma', '.aiff'];
+    const lowerFilename = filename.toLowerCase();
+    return audioExtensions.some(ext => lowerFilename.endsWith(ext));
+  };
+
+  // Generate a static waveform pattern for audio thumbnails
+  const generateWaveformBars = (): number[] => {
+    const bars: number[] = [];
+    for (let i = 0; i < 40; i++) {
+      const base = 0.3 + Math.sin(i * 0.3) * 0.2;
+      const random = Math.random() * 0.3;
+      bars.push(Math.min(1, Math.max(0.15, base + random)));
+    }
+    return bars;
+  };
+
+  // Store waveform bars for audio files (generated once)
+  const [waveformBars] = useState(() => generateWaveformBars());
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadThumbnail() {
+      try {
+        setIsLoading(true);
+        setError(false);
+
+        // If it's an audio file, we don't need to fetch - just show waveform
+        if (isAudioFile(s3Key)) {
+          if (isMounted) {
+            setIsLoading(false);
+            // No thumbnailUrl needed - we'll render waveform directly
+          }
+          return;
+        }
+
+        // Get signed URL for the asset
+        const { url } = await getUrl({
+          path: s3Key,
+          options: { expiresIn: 3600 }
+        });
+
+        const urlString = url.toString();
+
+        // If it's an image, use it directly
+        if (isImageFile(s3Key)) {
+          if (isMounted) {
+            setThumbnailUrl(urlString);
+            setIsLoading(false);
+          }
+          return;
+        }
+
+        // If it's a video, extract a frame
+        if (isVideoFile(s3Key)) {
+          // Create a hidden video element to extract frame
+          const video = document.createElement('video');
+          video.crossOrigin = 'anonymous';
+          video.muted = true;
+          video.preload = 'metadata';
+
+          // Set a timeout in case video loading hangs
+          const timeout = setTimeout(() => {
+            if (isMounted) {
+              setError(true);
+              setIsLoading(false);
+            }
+            video.remove();
+          }, 10000); // 10 second timeout
+
+          video.onloadedmetadata = () => {
+            // Seek to the specified time (or 10% into video if time exceeds duration)
+            const seekTime = Math.min(thumbnailTime, video.duration * 0.1);
+            video.currentTime = seekTime;
+          };
+
+          video.onseeked = () => {
+            clearTimeout(timeout);
+            // Create canvas and draw the video frame
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 320;
+            canvas.height = video.videoHeight || 180;
+
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+              // Convert to data URL
+              const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+              if (isMounted) {
+                setThumbnailUrl(dataUrl);
+                setIsLoading(false);
+              }
+            }
+
+            // Clean up
+            video.remove();
+          };
+
+          video.onerror = () => {
+            clearTimeout(timeout);
+            if (isMounted) {
+              setError(true);
+              setIsLoading(false);
+            }
+            video.remove();
+          };
+
+          video.src = urlString;
+          video.load();
+        } else {
+          // Not a video, image, or audio - show placeholder
+          if (isMounted) {
+            setError(true);
+            setIsLoading(false);
+          }
+        }
+      } catch (err) {
+        console.error('Error loading thumbnail:', err);
+        if (isMounted) {
+          setError(true);
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadThumbnail();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [s3Key, thumbnailTime]);
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className={`bg-slate-800 flex items-center justify-center ${className}`}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-600 border-t-teal-500 mx-auto"></div>
+          <p className="text-xs text-slate-500 mt-2">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error/fallback state (but not for audio - audio has its own display)
+  if ((error || !thumbnailUrl) && !isAudioFile(s3Key)) {
+    const extension = s3Key.split('.').pop()?.toUpperCase() || 'FILE';
+    return (
+      <div className={`bg-slate-800 flex items-center justify-center ${className}`}>
+        <div className="text-center">
+          <svg className="w-12 h-12 text-slate-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            {isVideoFile(s3Key) ? (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            )}
+          </svg>
+          <p className="text-xs text-slate-500 mt-1">{extension}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Audio file - show waveform thumbnail
+  if (isAudioFile(s3Key)) {
+    return (
+      <div className={`relative overflow-hidden bg-slate-900 ${className}`}>
+        {/* Waveform visualization */}
+        <div className="absolute inset-0 flex items-center justify-center px-2">
+          <div className="flex items-center justify-center gap-0.5 w-full h-full">
+            {waveformBars.map((height, index) => (
+              <div
+                key={index}
+                className="bg-teal-500 rounded-sm flex-1 min-w-[2px] max-w-[6px]"
+                style={{ height: `${height * 70}%` }}
+              />
+            ))}
+          </div>
+        </div>
+        {/* Audio icon overlay */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-black/40 flex items-center justify-center">
+            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+            </svg>
+          </div>
+        </div>
+        {/* File type badge */}
+        <div className="absolute bottom-1 right-1 bg-teal-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+          {s3Key.split('.').pop()?.toUpperCase()}
+        </div>
+      </div>
+    );
+  }
+
+  // Success - show thumbnail
+  return (
+    <div className={`relative overflow-hidden ${className}`}>
+      <img
+        src={thumbnailUrl || undefined}
+        alt={alt}
+        className="w-full h-full object-cover"
+      />
+      {/* Video indicator overlay */}
+      {isVideoFile(s3Key) && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity">
+          <div className="w-12 h-12 rounded-full bg-black/60 flex items-center justify-center">
+            <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
