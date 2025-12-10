@@ -4,26 +4,75 @@ import { useState, useEffect } from 'react';
 
 /**
  * LIFECYCLE NAVIGATION COMPONENT
+ * Design System: Dark mode, CSS variables
+ * Icons: Lucide-style SVGs (stroke-width: 1.5)
  *
- * Professional production lifecycle navigation organized by phases:
- * 1. Development (Brief → Greenlight)
+ * Production lifecycle navigation organized by phases:
+ * 1. Development (Brief > Greenlight)
  * 2. Pre-Production (Planning & Logistics)
  * 3. Production (Shooting & Ingest)
  * 4. Post-Production (Edit & Review)
  * 5. Delivery (Distribution & Archive)
  */
 
-// Production lifecycle phases matching industry workflow
+// Lucide-style phase icons
+const LightbulbIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 18h6"/>
+    <path d="M10 22h4"/>
+    <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0018 8 6 6 0 006 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 018.91 14"/>
+  </svg>
+);
+
+const ClipboardIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+    <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/>
+  </svg>
+);
+
+const ClapperboardIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 11v8a2 2 0 002 2h12a2 2 0 002-2v-8H4z"/>
+    <path d="M4 11V6a2 2 0 012-2h12a2 2 0 012 2v5"/>
+    <path d="M8 4l2 7"/>
+    <path d="M14 4l2 7"/>
+    <path d="M4 11h16"/>
+  </svg>
+);
+
+const ScissorsIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="6" cy="6" r="3"/>
+    <circle cx="6" cy="18" r="3"/>
+    <line x1="20" y1="4" x2="8.12" y2="15.88"/>
+    <line x1="14.47" y1="14.48" x2="20" y2="20"/>
+    <line x1="8.12" y1="8.12" x2="12" y2="12"/>
+  </svg>
+);
+
+const SendIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="22" y1="2" x2="11" y2="13"/>
+    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+  </svg>
+);
+
+const ChevronDownIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6 9 12 15 18 9"/>
+  </svg>
+);
+
+// Production lifecycle phases
 const LIFECYCLE_PHASES = [
   {
     id: 'development',
     name: 'Development',
     shortName: 'DEV',
-    icon: '💡',
-    color: 'from-blue-600 to-blue-700',
-    borderColor: 'border-blue-500',
-    bgColor: 'bg-blue-500/10',
-    textColor: 'text-blue-400',
+    icon: LightbulbIcon,
+    color: 'var(--primary)',
+    mutedColor: 'var(--primary-muted)',
     description: 'Brief, budget, and approvals',
     status: ['INTAKE', 'LEGAL_REVIEW', 'BUDGET_APPROVAL'],
   },
@@ -31,11 +80,9 @@ const LIFECYCLE_PHASES = [
     id: 'pre-production',
     name: 'Pre-Production',
     shortName: 'PRE',
-    icon: '📋',
-    color: 'from-amber-600 to-amber-700',
-    borderColor: 'border-amber-500',
-    bgColor: 'bg-amber-500/10',
-    textColor: 'text-amber-400',
+    icon: ClipboardIcon,
+    color: 'var(--warning)',
+    mutedColor: 'var(--warning-muted)',
     description: 'Team, locations, and logistics',
     status: ['GREENLIT', 'PRE_PRODUCTION'],
   },
@@ -43,11 +90,9 @@ const LIFECYCLE_PHASES = [
     id: 'production',
     name: 'Production',
     shortName: 'PROD',
-    icon: '🎬',
-    color: 'from-red-600 to-red-700',
-    borderColor: 'border-red-500',
-    bgColor: 'bg-red-500/10',
-    textColor: 'text-red-400',
+    icon: ClapperboardIcon,
+    color: 'var(--danger)',
+    mutedColor: 'var(--danger-muted)',
     description: 'Shooting and media capture',
     status: ['PRODUCTION'],
   },
@@ -55,11 +100,9 @@ const LIFECYCLE_PHASES = [
     id: 'post-production',
     name: 'Post-Production',
     shortName: 'POST',
-    icon: '✂️',
-    color: 'from-purple-600 to-purple-700',
-    borderColor: 'border-purple-500',
-    bgColor: 'bg-purple-500/10',
-    textColor: 'text-purple-400',
+    icon: ScissorsIcon,
+    color: 'var(--accent)',
+    mutedColor: 'var(--accent-muted)',
     description: 'Edit, review, and approval',
     status: ['POST_PRODUCTION', 'REVIEW'],
   },
@@ -67,11 +110,9 @@ const LIFECYCLE_PHASES = [
     id: 'delivery',
     name: 'Delivery',
     shortName: 'DEL',
-    icon: '🚀',
-    color: 'from-emerald-600 to-emerald-700',
-    borderColor: 'border-emerald-500',
-    bgColor: 'bg-emerald-500/10',
-    textColor: 'text-emerald-400',
+    icon: SendIcon,
+    color: 'var(--secondary)',
+    mutedColor: 'var(--secondary-muted)',
     description: 'Distribution and archive',
     status: ['DISTRIBUTION', 'COMPLETED', 'ARCHIVED'],
   },
@@ -137,7 +178,6 @@ export default function LifecycleNavigation({
   taskCount = 0,
 }: LifecycleNavigationProps) {
   const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
 
   // Determine current phase based on lifecycle state
   const currentPhase = LIFECYCLE_PHASES.find(phase =>
@@ -148,14 +188,6 @@ export default function LifecycleNavigation({
   useEffect(() => {
     setExpandedPhase(currentPhase.id);
   }, [currentPhase.id]);
-
-  // Check for mobile
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   // Find which phase contains the active module
   const activePhase = Object.entries(PHASE_MODULES).find(([_, modules]) =>
@@ -171,14 +203,14 @@ export default function LifecycleNavigation({
     return undefined;
   };
 
-  // Check if a phase is completed (all before current)
+  // Check if a phase is completed
   const isPhaseCompleted = (phaseId: string): boolean => {
     const currentIndex = LIFECYCLE_PHASES.findIndex(p => p.id === currentPhase.id);
     const phaseIndex = LIFECYCLE_PHASES.findIndex(p => p.id === phaseId);
     return phaseIndex < currentIndex;
   };
 
-  // Check if phase is accessible (current or completed)
+  // Check if phase is accessible
   const isPhaseAccessible = (phaseId: string): boolean => {
     const currentIndex = LIFECYCLE_PHASES.findIndex(p => p.id === currentPhase.id);
     const phaseIndex = LIFECYCLE_PHASES.findIndex(p => p.id === phaseId);
@@ -186,10 +218,16 @@ export default function LifecycleNavigation({
   };
 
   return (
-    <div className="bg-slate-900 border-r border-slate-800 h-full flex flex-col">
+    <div
+      className="h-full flex flex-col"
+      style={{ background: 'var(--bg-1)', borderRight: '1px solid var(--border)' }}
+    >
       {/* Phase Progress Header */}
-      <div className="p-4 border-b border-slate-800">
-        <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+      <div className="p-4" style={{ borderBottom: '1px solid var(--border)' }}>
+        <div
+          className="text-[11px] font-semibold uppercase tracking-wider mb-3"
+          style={{ color: 'var(--text-tertiary)' }}
+        >
           Production Lifecycle
         </div>
 
@@ -205,29 +243,33 @@ export default function LifecycleNavigation({
                 <button
                   onClick={() => isAccessible && setExpandedPhase(phase.id)}
                   disabled={!isAccessible}
-                  className={`
-                    w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
-                    transition-all duration-200
-                    ${isCurrent
-                      ? `bg-gradient-to-r ${phase.color} text-white ring-2 ring-offset-2 ring-offset-slate-900 ring-${phase.borderColor.replace('border-', '')}`
-                      : isCompleted
-                        ? 'bg-emerald-500 text-white'
-                        : isAccessible
-                          ? 'bg-slate-700 text-slate-400 hover:bg-slate-600'
-                          : 'bg-slate-800 text-slate-600 cursor-not-allowed'
-                    }
-                  `}
+                  className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-[80ms]"
+                  style={{
+                    background: isCurrent ? phase.color : isCompleted ? 'var(--secondary)' : 'var(--bg-2)',
+                    color: isCurrent || isCompleted ? 'white' : 'var(--text-tertiary)',
+                    cursor: isAccessible ? 'pointer' : 'not-allowed',
+                    opacity: !isAccessible ? 0.5 : 1,
+                    boxShadow: isCurrent ? `0 0 0 3px ${phase.mutedColor}` : 'none',
+                  }}
                   title={phase.name}
                 >
-                  {isCompleted ? '✓' : phase.shortName.charAt(0)}
+                  {isCompleted ? (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  ) : (
+                    <span className="text-[10px] font-bold">{phase.shortName.charAt(0)}</span>
+                  )}
                 </button>
                 {index < LIFECYCLE_PHASES.length - 1 && (
-                  <div className={`w-4 h-0.5 mx-1 ${
-                    isPhaseCompleted(LIFECYCLE_PHASES[index + 1].id) ||
-                    (isCompleted && !isPhaseCompleted(LIFECYCLE_PHASES[index + 1].id))
-                      ? 'bg-emerald-500'
-                      : 'bg-slate-700'
-                  }`} />
+                  <div
+                    className="w-4 h-0.5 mx-1"
+                    style={{
+                      background: isPhaseCompleted(LIFECYCLE_PHASES[index + 1].id) || isCompleted
+                        ? 'var(--secondary)'
+                        : 'var(--bg-2)',
+                    }}
+                  />
                 )}
               </div>
             );
@@ -235,14 +277,19 @@ export default function LifecycleNavigation({
         </div>
 
         {/* Current Phase Info */}
-        <div className={`p-3 rounded-lg ${currentPhase.bgColor} border ${currentPhase.borderColor}`}>
+        <div
+          className="p-3 rounded-[10px]"
+          style={{ background: currentPhase.mutedColor, border: `1px solid ${currentPhase.color}` }}
+        >
           <div className="flex items-center gap-2">
-            <span className="text-lg">{currentPhase.icon}</span>
+            <span style={{ color: currentPhase.color }}>
+              {(() => { const Icon = currentPhase.icon; return <Icon />; })()}
+            </span>
             <div>
-              <div className={`font-semibold ${currentPhase.textColor}`}>
+              <div className="font-semibold text-[14px]" style={{ color: currentPhase.color }}>
                 {currentPhase.name}
               </div>
-              <div className="text-xs text-slate-400">
+              <div className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
                 {currentPhase.description}
               </div>
             </div>
@@ -258,6 +305,7 @@ export default function LifecycleNavigation({
           const isActive = activePhase === phase.id;
           const isAccessible = isPhaseAccessible(phase.id);
           const isCompleted = isPhaseCompleted(phase.id);
+          const IconComponent = phase.icon;
 
           return (
             <div key={phase.id} className="mb-1">
@@ -265,42 +313,39 @@ export default function LifecycleNavigation({
               <button
                 onClick={() => setExpandedPhase(isExpanded ? null : phase.id)}
                 disabled={!isAccessible}
-                className={`
-                  w-full px-4 py-3 flex items-center justify-between
-                  transition-all duration-200 group
-                  ${isActive
-                    ? `${phase.bgColor} border-l-2 ${phase.borderColor}`
-                    : isAccessible
-                      ? 'hover:bg-slate-800/50 border-l-2 border-transparent'
-                      : 'opacity-50 cursor-not-allowed border-l-2 border-transparent'
-                  }
-                `}
+                className="w-full px-4 py-3 flex items-center justify-between transition-all duration-[80ms]"
+                style={{
+                  background: isActive ? phase.mutedColor : 'transparent',
+                  borderLeft: isActive ? `2px solid ${phase.color}` : '2px solid transparent',
+                  opacity: !isAccessible ? 0.5 : 1,
+                  cursor: !isAccessible ? 'not-allowed' : 'pointer',
+                }}
               >
                 <div className="flex items-center gap-3">
-                  <span className={`text-lg ${isActive ? '' : 'grayscale-[50%]'}`}>
-                    {phase.icon}
+                  <span style={{ color: isActive ? phase.color : 'var(--text-tertiary)' }}>
+                    <IconComponent />
                   </span>
                   <div className="text-left">
-                    <div className={`font-medium text-sm ${
-                      isActive ? phase.textColor : 'text-slate-400'
-                    }`}>
+                    <div
+                      className="font-medium text-[14px]"
+                      style={{ color: isActive ? phase.color : 'var(--text-secondary)' }}
+                    >
                       {phase.name}
                     </div>
                     {isCompleted && (
-                      <span className="text-xs text-emerald-400">Completed</span>
+                      <span className="text-[11px]" style={{ color: 'var(--secondary)' }}>Completed</span>
                     )}
                   </div>
                 </div>
-                <svg
-                  className={`w-4 h-4 text-slate-500 transition-transform ${
-                    isExpanded ? 'rotate-180' : ''
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                <span
+                  className="transition-transform duration-[80ms]"
+                  style={{
+                    color: 'var(--text-tertiary)',
+                    transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                  }}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                  <ChevronDownIcon />
+                </span>
               </button>
 
               {/* Phase Modules */}
@@ -314,14 +359,23 @@ export default function LifecycleNavigation({
                       <button
                         key={module.id}
                         onClick={() => onModuleChange(module.id)}
-                        className={`
-                          w-full px-3 py-2 rounded-lg flex items-center gap-3
-                          transition-all duration-150 text-left mb-1
-                          ${isModuleActive
-                            ? `bg-gradient-to-r ${phase.color} text-white shadow-lg`
-                            : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                        className="w-full px-3 py-2 rounded-[6px] flex items-center gap-3 transition-all duration-[80ms] text-left mb-1"
+                        style={{
+                          background: isModuleActive ? phase.color : 'transparent',
+                          color: isModuleActive ? 'white' : 'var(--text-secondary)',
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isModuleActive) {
+                            e.currentTarget.style.background = 'var(--bg-2)';
+                            e.currentTarget.style.color = 'var(--text-primary)';
                           }
-                        `}
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isModuleActive) {
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.color = 'var(--text-secondary)';
+                          }
+                        }}
                       >
                         <svg
                           className="w-5 h-5 flex-shrink-0"
@@ -329,24 +383,17 @@ export default function LifecycleNavigation({
                           stroke="currentColor"
                           viewBox="0 0 24 24"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1.5}
-                            d={module.icon}
-                          />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={module.icon} />
                         </svg>
-                        <span className="flex-1 text-sm font-medium">
-                          {module.label}
-                        </span>
+                        <span className="flex-1 text-[13px] font-medium">{module.label}</span>
                         {badge !== undefined && (
-                          <span className={`
-                            px-2 py-0.5 rounded-full text-xs font-bold
-                            ${isModuleActive
-                              ? 'bg-white/20 text-white'
-                              : 'bg-slate-700 text-slate-300'
-                            }
-                          `}>
+                          <span
+                            className="px-2 py-0.5 rounded-full text-[11px] font-bold"
+                            style={{
+                              background: isModuleActive ? 'rgba(255,255,255,0.2)' : 'var(--bg-2)',
+                              color: isModuleActive ? 'white' : 'var(--text-secondary)',
+                            }}
+                          >
                             {badge}
                           </span>
                         )}
@@ -360,7 +407,7 @@ export default function LifecycleNavigation({
         })}
 
         {/* Divider */}
-        <div className="mx-4 my-3 border-t border-slate-800" />
+        <div className="mx-4 my-3" style={{ borderTop: '1px solid var(--border)' }} />
 
         {/* Settings & Activity */}
         <div className="px-2 pb-4">
@@ -368,54 +415,69 @@ export default function LifecycleNavigation({
             <button
               key={module.id}
               onClick={() => onModuleChange(module.id)}
-              className={`
-                w-full px-3 py-2 rounded-lg flex items-center gap-3
-                transition-all duration-150 text-left mb-1
-                ${activeModule === module.id
-                  ? 'bg-slate-700 text-white'
-                  : 'text-slate-500 hover:bg-slate-800 hover:text-slate-300'
+              className="w-full px-3 py-2 rounded-[6px] flex items-center gap-3 transition-all duration-[80ms] text-left mb-1"
+              style={{
+                background: activeModule === module.id ? 'var(--bg-2)' : 'transparent',
+                color: activeModule === module.id ? 'var(--text-primary)' : 'var(--text-tertiary)',
+              }}
+              onMouseEnter={(e) => {
+                if (activeModule !== module.id) {
+                  e.currentTarget.style.background = 'var(--bg-2)';
+                  e.currentTarget.style.color = 'var(--text-secondary)';
                 }
-              `}
+              }}
+              onMouseLeave={(e) => {
+                if (activeModule !== module.id) {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-tertiary)';
+                }
+              }}
             >
-              <svg
-                className="w-5 h-5 flex-shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d={module.icon}
-                />
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={module.icon} />
               </svg>
-              <span className="flex-1 text-sm font-medium">
-                {module.label}
-              </span>
+              <span className="flex-1 text-[13px] font-medium">{module.label}</span>
             </button>
           ))}
         </div>
       </nav>
 
       {/* Quick Actions Footer */}
-      <div className="p-4 border-t border-slate-800 bg-slate-900/50">
+      <div className="p-4" style={{ borderTop: '1px solid var(--border)', background: 'var(--bg-1)' }}>
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => onModuleChange('communication')}
-            className="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-medium text-slate-300 flex items-center justify-center gap-2 transition-colors"
+            className="px-3 py-2 rounded-[6px] text-[12px] font-medium flex items-center justify-center gap-2 transition-all duration-[80ms]"
+            style={{ background: 'var(--bg-2)', color: 'var(--text-secondary)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--primary-muted)';
+              e.currentTarget.style.color = 'var(--primary)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'var(--bg-2)';
+              e.currentTarget.style.color = 'var(--text-secondary)';
+            }}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
             Chat
           </button>
           <button
             onClick={() => onModuleChange('tasks')}
-            className="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-medium text-slate-300 flex items-center justify-center gap-2 transition-colors"
+            className="px-3 py-2 rounded-[6px] text-[12px] font-medium flex items-center justify-center gap-2 transition-all duration-[80ms]"
+            style={{ background: 'var(--bg-2)', color: 'var(--text-secondary)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--primary-muted)';
+              e.currentTarget.style.color = 'var(--primary)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'var(--bg-2)';
+              e.currentTarget.style.color = 'var(--text-secondary)';
+            }}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
             Tasks
           </button>

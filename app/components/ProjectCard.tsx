@@ -1,8 +1,14 @@
 'use client';
 
-import React from 'react';
 import Link from 'next/link';
 import { Schema } from '@/amplify/data/resource';
+
+/**
+ * PROJECT CARD
+ * Design System: Dark mode, CSS variables
+ * Border radius: 12px for cards
+ * Icons: Lucide-style SVGs (stroke-width: 1.5)
+ */
 
 type Project = Schema['Project']['type'];
 
@@ -10,8 +16,30 @@ interface ProjectCardProps {
   project: Project;
 }
 
+// Lucide-style icons
+const CalendarIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+    <line x1="16" y1="2" x2="16" y2="6"/>
+    <line x1="8" y1="2" x2="8" y2="6"/>
+    <line x1="3" y1="10" x2="21" y2="10"/>
+  </svg>
+);
+
+const UserIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+    <circle cx="12" cy="7" r="4"/>
+  </svg>
+);
+
+const FolderIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+  </svg>
+);
+
 export default function ProjectCard({ project }: ProjectCardProps) {
-  // Calculate days progress
   const getDaysProgress = () => {
     if (!project.kickoffDate || !project.deadline) return null;
 
@@ -31,37 +59,34 @@ export default function ProjectCard({ project }: ProjectCardProps) {
     };
   };
 
-  // Get lifecycle state badge color
-  const getLifecycleStateColor = (state: string | null | undefined): string => {
+  const getLifecycleStateStyle = (state: string | null | undefined): { bg: string; text: string } => {
     switch (state) {
-      case 'INTAKE': return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'LEGAL_REVIEW': return 'bg-purple-100 text-purple-800 border-purple-300';
-      case 'BUDGET_APPROVAL': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'GREENLIT': return 'bg-green-100 text-green-800 border-green-300';
-      case 'PRE_PRODUCTION': return 'bg-cyan-100 text-cyan-800 border-cyan-300';
-      case 'PRODUCTION': return 'bg-orange-100 text-orange-800 border-orange-300';
-      case 'POST_PRODUCTION': return 'bg-indigo-100 text-indigo-800 border-indigo-300';
-      case 'INTERNAL_REVIEW': return 'bg-pink-100 text-pink-800 border-pink-300';
-      case 'LEGAL_APPROVED': return 'bg-teal-100 text-teal-800 border-teal-300';
-      case 'DISTRIBUTION_READY': return 'bg-lime-100 text-lime-800 border-lime-300';
-      case 'DISTRIBUTED': return 'bg-emerald-100 text-emerald-800 border-emerald-300';
-      case 'ARCHIVED': return 'bg-gray-100 text-gray-800 border-gray-300';
-      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+      case 'INTAKE': return { bg: 'var(--primary-muted)', text: 'var(--primary)' };
+      case 'LEGAL_REVIEW': return { bg: 'var(--accent-muted)', text: 'var(--accent)' };
+      case 'BUDGET_APPROVAL': return { bg: 'var(--warning-muted)', text: 'var(--warning)' };
+      case 'GREENLIT': return { bg: 'var(--secondary-muted)', text: 'var(--secondary)' };
+      case 'PRE_PRODUCTION': return { bg: 'var(--info-muted)', text: 'var(--info)' };
+      case 'PRODUCTION': return { bg: 'var(--warning-muted)', text: 'var(--warning)' };
+      case 'POST_PRODUCTION': return { bg: 'var(--accent-muted)', text: 'var(--accent)' };
+      case 'INTERNAL_REVIEW': return { bg: 'var(--info-muted)', text: 'var(--info)' };
+      case 'LEGAL_APPROVED': return { bg: 'var(--secondary-muted)', text: 'var(--secondary)' };
+      case 'DISTRIBUTION_READY': return { bg: 'var(--secondary-muted)', text: 'var(--secondary)' };
+      case 'DISTRIBUTED': return { bg: 'var(--secondary-muted)', text: 'var(--secondary)' };
+      case 'ARCHIVED': return { bg: 'var(--bg-2)', text: 'var(--text-tertiary)' };
+      default: return { bg: 'var(--bg-2)', text: 'var(--text-secondary)' };
     }
   };
 
-  // Get priority badge color
-  const getPriorityColor = (priority: string | null | undefined): string => {
+  const getPriorityStyle = (priority: string | null | undefined): { bg: string; text: string } => {
     switch (priority) {
-      case 'URGENT': return 'bg-red-100 text-red-800 border-red-300';
-      case 'HIGH': return 'bg-orange-100 text-orange-800 border-orange-300';
-      case 'NORMAL': return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'LOW': return 'bg-gray-100 text-gray-800 border-gray-300';
-      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+      case 'URGENT': return { bg: 'var(--danger-muted)', text: 'var(--danger)' };
+      case 'HIGH': return { bg: 'var(--warning-muted)', text: 'var(--warning)' };
+      case 'NORMAL': return { bg: 'var(--primary-muted)', text: 'var(--primary)' };
+      case 'LOW': return { bg: 'var(--bg-2)', text: 'var(--text-secondary)' };
+      default: return { bg: 'var(--bg-2)', text: 'var(--text-secondary)' };
     }
   };
 
-  // Format lifecycle state for display
   const formatLifecycleState = (state: string | null | undefined): string => {
     if (!state) return 'Unknown';
     return state.split('_').map(word =>
@@ -70,49 +95,75 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   };
 
   const timelineProgress = getDaysProgress();
+  const lifecycleStyle = getLifecycleStateStyle(project.lifecycleState);
+  const priorityStyle = getPriorityStyle(project.priority);
+
+  const getProgressColor = (percent: number) => {
+    if (percent > 90) return 'var(--danger)';
+    if (percent > 75) return 'var(--warning)';
+    return 'var(--secondary)';
+  };
 
   return (
     <Link href={`/projects/${project.id}`}>
-      <div className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-lg transition-shadow cursor-pointer">
+      <div
+        className="p-5 rounded-[12px] transition-all duration-[80ms] hover:translate-y-[-2px] cursor-pointer"
+        style={{
+          background: 'var(--bg-1)',
+          border: '1px solid var(--border)',
+          boxShadow: 'var(--shadow-sm)',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+          e.currentTarget.style.borderColor = 'var(--border-hover)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+          e.currentTarget.style.borderColor = 'var(--border)';
+        }}
+      >
         {/* Header */}
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 mb-1 line-clamp-1">
-              {project.name}
-            </h3>
-            {project.description && (
-              <p className="text-sm text-gray-600 line-clamp-2 mb-2">
-                {project.description}
-              </p>
-            )}
-          </div>
+        <div className="mb-3">
+          <h3
+            className="text-[16px] font-semibold mb-1 line-clamp-1"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            {project.name}
+          </h3>
+          {project.description && (
+            <p
+              className="text-[13px] line-clamp-2"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              {project.description}
+            </p>
+          )}
         </div>
 
         {/* Badges */}
         <div className="flex flex-wrap gap-2 mb-4">
-          {/* Lifecycle State Badge */}
-          <span className={`px-2 py-1 text-xs font-medium rounded-md border ${getLifecycleStateColor(project.lifecycleState)}`}>
+          <span
+            className="px-2.5 py-1 text-[11px] font-medium rounded-full"
+            style={{ background: lifecycleStyle.bg, color: lifecycleStyle.text }}
+          >
             {formatLifecycleState(project.lifecycleState)}
           </span>
 
-          {/* Priority Badge */}
           {project.priority && (
-            <span className={`px-2 py-1 text-xs font-medium rounded-md border ${getPriorityColor(project.priority)}`}>
+            <span
+              className="px-2.5 py-1 text-[11px] font-medium rounded-full"
+              style={{ background: priorityStyle.bg, color: priorityStyle.text }}
+            >
               {project.priority}
             </span>
           )}
 
-          {/* Department Badge */}
           {project.department && (
-            <span className="px-2 py-1 text-xs font-medium rounded-md border bg-gray-50 text-gray-700 border-gray-200">
+            <span
+              className="px-2.5 py-1 text-[11px] font-medium rounded-full"
+              style={{ background: 'var(--bg-2)', color: 'var(--text-secondary)' }}
+            >
               {project.department}
-            </span>
-          )}
-
-          {/* Project Type Badge */}
-          {project.projectType && (
-            <span className="px-2 py-1 text-xs font-medium rounded-md border bg-gray-50 text-gray-700 border-gray-200">
-              {project.projectType.split('_').map(w => w.charAt(0) + w.slice(1).toLowerCase()).join(' ')}
             </span>
           )}
         </div>
@@ -120,26 +171,35 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         {/* Timeline Progress */}
         {timelineProgress && (
           <div className="mb-4">
-            <div className="flex justify-between text-xs text-gray-600 mb-1">
-              <span>Day {timelineProgress.daysPassed} of {timelineProgress.totalDays}</span>
-              <span className={timelineProgress.daysRemaining < 0 ? 'text-red-600 font-medium' : ''}>
+            <div className="flex justify-between text-[12px] mb-1.5">
+              <span style={{ color: 'var(--text-secondary)' }}>
+                Day {timelineProgress.daysPassed} of {timelineProgress.totalDays}
+              </span>
+              <span
+                className="font-medium"
+                style={{
+                  color: timelineProgress.daysRemaining < 0
+                    ? 'var(--danger)'
+                    : 'var(--text-secondary)',
+                }}
+              >
                 {timelineProgress.daysRemaining >= 0
                   ? `${timelineProgress.daysRemaining} days left`
                   : `${Math.abs(timelineProgress.daysRemaining)} days overdue`
                 }
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className="w-full h-1.5 rounded-full"
+              style={{ background: 'var(--bg-2)' }}
+            >
               <div
-                className={`h-2 rounded-full transition-all ${
-                  timelineProgress.progressPercent > 90
-                    ? 'bg-red-500'
-                    : timelineProgress.progressPercent > 75
-                    ? 'bg-yellow-500'
-                    : 'bg-green-500'
-                }`}
-                style={{ width: `${Math.min(100, timelineProgress.progressPercent)}%` }}
-              ></div>
+                className="h-1.5 rounded-full transition-all"
+                style={{
+                  width: `${Math.min(100, timelineProgress.progressPercent)}%`,
+                  background: getProgressColor(timelineProgress.progressPercent),
+                }}
+              />
             </div>
           </div>
         )}
@@ -147,50 +207,88 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         {/* Budget Information */}
         {project.budgetCap && (
           <div className="mb-4">
-            <div className="flex justify-between text-xs text-gray-600 mb-1">
-              <span>Budget</span>
-              <span className="font-medium">${project.budgetCap.toLocaleString()}</span>
+            <div className="flex justify-between text-[12px]">
+              <span style={{ color: 'var(--text-secondary)' }}>Budget</span>
+              <span
+                className="font-medium"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                ${project.budgetCap.toLocaleString()}
+              </span>
             </div>
           </div>
         )}
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-3 gap-3 pt-3 border-t border-gray-100">
-          {/* Deadline */}
+        <div
+          className="grid grid-cols-3 gap-3 pt-3"
+          style={{ borderTop: '1px solid var(--border)' }}
+        >
           {project.deadline && (
             <div>
-              <p className="text-xs text-gray-500 mb-0.5">Deadline</p>
-              <p className="text-sm font-medium text-gray-900">
+              <p
+                className="text-[11px] mb-0.5 flex items-center gap-1"
+                style={{ color: 'var(--text-tertiary)' }}
+              >
+                <CalendarIcon />
+                Deadline
+              </p>
+              <p
+                className="text-[13px] font-medium"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 {new Date(project.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               </p>
             </div>
           )}
 
-          {/* Owner */}
           {project.projectOwnerEmail && (
             <div>
-              <p className="text-xs text-gray-500 mb-0.5">Owner</p>
-              <p className="text-sm font-medium text-gray-900 truncate" title={project.projectOwnerEmail}>
+              <p
+                className="text-[11px] mb-0.5 flex items-center gap-1"
+                style={{ color: 'var(--text-tertiary)' }}
+              >
+                <UserIcon />
+                Owner
+              </p>
+              <p
+                className="text-[13px] font-medium truncate"
+                style={{ color: 'var(--text-primary)' }}
+                title={project.projectOwnerEmail}
+              >
                 {project.projectOwnerEmail.split('@')[0]}
               </p>
             </div>
           )}
 
-          {/* Status */}
           {project.status && (
             <div>
-              <p className="text-xs text-gray-500 mb-0.5">Status</p>
-              <p className="text-sm font-medium text-gray-900">
+              <p
+                className="text-[11px] mb-0.5 flex items-center gap-1"
+                style={{ color: 'var(--text-tertiary)' }}
+              >
+                <FolderIcon />
+                Status
+              </p>
+              <p
+                className="text-[13px] font-medium"
+                style={{ color: 'var(--text-primary)' }}
+              >
                 {project.status.split('_').map(w => w.charAt(0) + w.slice(1).toLowerCase()).join(' ')}
               </p>
             </div>
           )}
         </div>
 
-        {/* Greenlight Approval Status (if in BUDGET_APPROVAL or LEGAL_REVIEW) */}
+        {/* Greenlight Approval Status */}
         {(project.lifecycleState === 'BUDGET_APPROVAL' || project.lifecycleState === 'LEGAL_REVIEW') && (
-          <div className="mt-3 pt-3 border-t border-gray-100">
-            <p className="text-xs text-gray-500 mb-2">Greenlight Approvals</p>
+          <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--border)' }}>
+            <p
+              className="text-[11px] mb-2"
+              style={{ color: 'var(--text-tertiary)' }}
+            >
+              Greenlight Approvals
+            </p>
             <div className="flex gap-1">
               {[
                 { label: 'Brief', approved: !!project.brief },
@@ -201,11 +299,12 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               ].map((item, idx) => (
                 <div
                   key={idx}
-                  className={`flex-1 h-1.5 rounded-full ${
-                    item.approved ? 'bg-green-500' : 'bg-gray-200'
-                  }`}
+                  className="flex-1 h-1.5 rounded-full"
+                  style={{
+                    background: item.approved ? 'var(--secondary)' : 'var(--bg-2)',
+                  }}
                   title={`${item.label}: ${item.approved ? 'Approved' : 'Pending'}`}
-                ></div>
+                />
               ))}
             </div>
           </div>

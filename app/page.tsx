@@ -13,14 +13,19 @@ import GlobalDashboard from "./components/GlobalDashboard";
 export default function App() {
   const [projects, setProjects] = useState<Array<Schema["Project"]["type"]>>([]);
   const [showIntakeWizard, setShowIntakeWizard] = useState(false);
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
+
+  // Initialize Amplify client after mount to avoid SSR issues
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
 
   // Fetch user's organization when authenticated
   useEffect(() => {
     async function fetchOrganization() {
-      if (!isAuthenticated) return;
+      if (!isAuthenticated || !client) return;
 
       try {
         const attributes = await fetchUserAttributes();
@@ -71,7 +76,7 @@ export default function App() {
 
   // Fetch projects for the organization with real-time updates
   const listProjects = useCallback(() => {
-    if (!isAuthenticated || !organizationId) return;
+    if (!isAuthenticated || !organizationId || !client) return;
 
     try {
       const subscription = client.models.Project.observeQuery({

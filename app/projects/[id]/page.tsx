@@ -48,7 +48,7 @@ import DashboardKPIs from "@/app/components/DashboardKPIs";
 import ProjectSettings from "@/app/components/ProjectSettings";
 
 export default function ProjectDetail() {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const params = useParams();
   const router = useRouter();
   const projectId = params.id as string;
@@ -76,9 +76,14 @@ export default function ProjectDetail() {
   const [userEmail] = useState("user@syncops.app");
   const [userId] = useState("USER");
 
+  // Initialize Amplify client after mount to avoid SSR issues
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
+
   // INITIAL LOAD
   useEffect(() => {
-    if (projectId) {
+    if (projectId && client) {
       client.models.Project.get({ id: projectId })
         .then((data) => {
           if (data.data) {
@@ -125,11 +130,13 @@ export default function ProjectDetail() {
 
   // HELPERS
   const refreshProjectData = async () => {
+    if (!client) return;
     const updated = await client.models.Project.get({ id: projectId });
     setProject(updated.data);
   };
 
   const handleLifecycleStateChange = async (newState: string) => {
+    if (!client) return;
     try {
       await client.models.Project.update({
         id: projectId,
@@ -356,6 +363,7 @@ export default function ProjectDetail() {
                   </div>
                 ) : (
                   <SmartBrief projectId={projectId} onBriefCreated={() => {
+                    if (!client) return;
                     client.models.Brief.list({
                       filter: { projectId: { eq: projectId } }
                     }).then((data) => {

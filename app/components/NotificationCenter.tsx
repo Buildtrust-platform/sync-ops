@@ -34,24 +34,39 @@ export default function NotificationCenter({
       return;
     }
 
-    const subscription = client.models.Notification.observeQuery({
-      filter: {
-        userId: { eq: currentUserEmail },
-      },
-    }).subscribe({
-      next: (data) => {
-        if (data?.items) {
-          // Sort by created date (newest first)
-          const sorted = [...data.items].sort((a, b) =>
+    // Use list instead of observeQuery to handle potential data integrity issues
+    // with legacy records that may have null organizationId
+    const fetchNotifications = async () => {
+      try {
+        const { data, errors } = await client.models.Notification.list({
+          filter: {
+            userId: { eq: currentUserEmail },
+          },
+        });
+
+        if (errors) {
+          console.log('Notification query had errors (likely legacy data):', errors);
+          // Continue with whatever data we got
+        }
+
+        if (data) {
+          // Filter out invalid items and sort by created date (newest first)
+          const validItems = data.filter(item =>
+            item !== null && item.createdAt !== null && item.organizationId !== null
+          ) as Notification[];
+          const sorted = validItems.sort((a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           );
           setNotifications(sorted);
         }
-      },
-      error: (error) => console.error('Error loading notifications:', error),
-    });
+      } catch (error) {
+        console.log('Error loading notifications (may be due to legacy data):', error);
+        // Set empty array to prevent UI errors
+        setNotifications([]);
+      }
+    };
 
-    return () => subscription.unsubscribe();
+    fetchNotifications();
   }, [currentUserEmail, client]);
 
   // Filter notifications

@@ -5,12 +5,46 @@ import { Schema } from '@/amplify/data/resource';
 import DashboardStats from './DashboardStats';
 import ProjectCard from './ProjectCard';
 
+/**
+ * GLOBAL DASHBOARD
+ * Design System: Dark mode, 32px section spacing
+ * Uses CSS variables for consistent theming
+ */
+
 type Project = Schema['Project']['type'];
 
 interface GlobalDashboardProps {
   projects: Project[];
   onCreateProject?: () => void;
 }
+
+// Lucide-style icons
+const PlusIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19"/>
+    <line x1="5" y1="12" x2="19" y2="12"/>
+  </svg>
+);
+
+const SearchIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8"/>
+    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+  </svg>
+);
+
+const XIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18"/>
+    <line x1="6" y1="6" x2="18" y2="18"/>
+  </svg>
+);
+
+const FolderIcon = () => (
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+  </svg>
+);
 
 export default function GlobalDashboard({ projects, onCreateProject }: GlobalDashboardProps) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,20 +54,15 @@ export default function GlobalDashboard({ projects, onCreateProject }: GlobalDas
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [sortBy, setSortBy] = useState<'deadline' | 'priority' | 'name' | 'createdAt'>('createdAt');
 
-  // Get unique departments from projects
   const departments = useMemo(() => {
     const depts = new Set<string>();
-    projects.forEach(p => {
-      if (p.department) depts.add(p.department);
-    });
+    projects.forEach(p => { if (p.department) depts.add(p.department); });
     return Array.from(depts).sort();
   }, [projects]);
 
-  // Filter and sort projects
   const filteredProjects = useMemo(() => {
     let filtered = projects;
 
-    // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(p =>
@@ -44,146 +73,116 @@ export default function GlobalDashboard({ projects, onCreateProject }: GlobalDas
       );
     }
 
-    // Lifecycle state filter
-    if (filterLifecycleState !== 'ALL') {
-      filtered = filtered.filter(p => p.lifecycleState === filterLifecycleState);
-    }
+    if (filterLifecycleState !== 'ALL') filtered = filtered.filter(p => p.lifecycleState === filterLifecycleState);
+    if (filterPriority !== 'ALL') filtered = filtered.filter(p => p.priority === filterPriority);
+    if (filterDepartment !== 'ALL') filtered = filtered.filter(p => p.department === filterDepartment);
+    if (filterStatus !== 'ALL') filtered = filtered.filter(p => p.status === filterStatus);
 
-    // Priority filter
-    if (filterPriority !== 'ALL') {
-      filtered = filtered.filter(p => p.priority === filterPriority);
-    }
-
-    // Department filter
-    if (filterDepartment !== 'ALL') {
-      filtered = filtered.filter(p => p.department === filterDepartment);
-    }
-
-    // Status filter
-    if (filterStatus !== 'ALL') {
-      filtered = filtered.filter(p => p.status === filterStatus);
-    }
-
-    // Sort
-    const sorted = [...filtered].sort((a, b) => {
+    return [...filtered].sort((a, b) => {
       switch (sortBy) {
         case 'deadline':
           if (!a.deadline && !b.deadline) return 0;
           if (!a.deadline) return 1;
           if (!b.deadline) return -1;
           return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
-
         case 'priority': {
-          const priorityOrder = { URGENT: 0, HIGH: 1, NORMAL: 2, LOW: 3 };
-          const aPriority = a.priority ? priorityOrder[a.priority as keyof typeof priorityOrder] ?? 4 : 4;
-          const bPriority = b.priority ? priorityOrder[b.priority as keyof typeof priorityOrder] ?? 4 : 4;
-          return aPriority - bPriority;
+          const order = { URGENT: 0, HIGH: 1, NORMAL: 2, LOW: 3 };
+          return (order[a.priority as keyof typeof order] ?? 4) - (order[b.priority as keyof typeof order] ?? 4);
         }
-
-        case 'name':
-          return a.name.localeCompare(b.name);
-
-        case 'createdAt':
-        default:
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'name': return a.name.localeCompare(b.name);
+        default: return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       }
     });
-
-    return sorted;
   }, [projects, searchQuery, filterLifecycleState, filterPriority, filterDepartment, filterStatus, sortBy]);
 
-  // Quick filter presets
-  const quickFilters = [
-    { label: 'All Projects', count: projects.length, onClick: () => {
-      setFilterLifecycleState('ALL');
-      setFilterPriority('ALL');
-      setFilterDepartment('ALL');
-      setFilterStatus('ALL');
-    }},
-    { label: 'Active Production', count: projects.filter(p => p.lifecycleState === 'PRODUCTION').length, onClick: () => {
-      setFilterLifecycleState('PRODUCTION');
-    }},
-    { label: 'Needs Approval', count: projects.filter(p =>
-      p.lifecycleState === 'LEGAL_REVIEW' || p.lifecycleState === 'BUDGET_APPROVAL' || p.lifecycleState === 'INTERNAL_REVIEW'
-    ).length, onClick: () => {
-      setFilterLifecycleState('ALL');
-      setSearchQuery('');
-    }},
-    { label: 'Urgent Only', count: projects.filter(p => p.priority === 'URGENT').length, onClick: () => {
-      setFilterPriority('URGENT');
-    }},
-  ];
+  const hasFilters = filterLifecycleState !== 'ALL' || filterPriority !== 'ALL' || filterDepartment !== 'ALL' || filterStatus !== 'ALL' || searchQuery;
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setFilterLifecycleState('ALL');
+    setFilterPriority('ALL');
+    setFilterDepartment('ALL');
+    setFilterStatus('ALL');
+  };
+
+  // Select styles
+  const selectStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '10px 12px',
+    paddingRight: '36px',
+    fontSize: '14px',
+    background: 'var(--bg-2)',
+    border: '1px solid var(--border)',
+    borderRadius: '10px',
+    color: 'var(--text-primary)',
+    cursor: 'pointer',
+    appearance: 'none' as const,
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A1A6AE' stroke-width='1.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'right 12px center',
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ background: 'var(--bg-0)' }}>
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="px-6 py-6" style={{ background: 'var(--bg-1)', borderBottom: '1px solid var(--border)' }}>
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">SyncOps Dashboard</h1>
-              <p className="text-gray-600 mt-1">Global operations overview and project management</p>
+              <h1 className="text-[28px] font-bold" style={{ color: 'var(--text-primary)' }}>Dashboard</h1>
+              <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
+                Global operations overview and project management
+              </p>
             </div>
             <button
-              onClick={() => {
-                console.log('Create Project button clicked, onCreateProject:', onCreateProject);
-                if (onCreateProject) {
-                  onCreateProject();
-                } else {
-                  console.error('onCreateProject is undefined!');
-                }
-              }}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              onClick={() => onCreateProject?.()}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-[6px] text-sm font-medium transition-all duration-[80ms] active:scale-[0.98]"
+              style={{ background: 'var(--primary)', color: 'white' }}
             >
-              + New Project
+              <PlusIcon />
+              New Project
             </button>
           </div>
 
-          {/* Search and Quick Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            {/* Search */}
-            <div className="flex-1 max-w-md">
-              <input
-                type="text"
-                placeholder="Search projects..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+          {/* Search */}
+          <div className="relative max-w-md">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-tertiary)' }}>
+              <SearchIcon />
             </div>
-
-            {/* Quick Filters */}
-            <div className="flex gap-2 flex-wrap">
-              {quickFilters.map((filter, idx) => (
-                <button
-                  key={idx}
-                  onClick={filter.onClick}
-                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  {filter.label} <span className="text-gray-500">({filter.count})</span>
-                </button>
-              ))}
-            </div>
+            <input
+              type="text"
+              placeholder="Search projects..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 text-sm rounded-[10px] transition-all duration-[80ms]"
+              style={{
+                background: 'var(--bg-2)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-primary)',
+              }}
+            />
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
+      <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Stats */}
-        <DashboardStats projects={projects} />
+        <div className="mb-8">
+          <DashboardStats projects={projects} />
+        </div>
 
-        {/* Filters Row */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
+        {/* Filters */}
+        <div
+          className="p-4 mb-8 rounded-[12px]"
+          style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}
+        >
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            {/* Lifecycle State Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Lifecycle State</label>
-              <select
-                value={filterLifecycleState}
-                onChange={(e) => setFilterLifecycleState(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              >
+              <label className="block text-[13px] font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                Lifecycle State
+              </label>
+              <select value={filterLifecycleState} onChange={(e) => setFilterLifecycleState(e.target.value)} style={selectStyle}>
                 <option value="ALL">All States</option>
                 <option value="INTAKE">Intake</option>
                 <option value="LEGAL_REVIEW">Legal Review</option>
@@ -200,14 +199,11 @@ export default function GlobalDashboard({ projects, onCreateProject }: GlobalDas
               </select>
             </div>
 
-            {/* Priority Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-              <select
-                value={filterPriority}
-                onChange={(e) => setFilterPriority(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              >
+              <label className="block text-[13px] font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                Priority
+              </label>
+              <select value={filterPriority} onChange={(e) => setFilterPriority(e.target.value)} style={selectStyle}>
                 <option value="ALL">All Priorities</option>
                 <option value="URGENT">Urgent</option>
                 <option value="HIGH">High</option>
@@ -216,29 +212,21 @@ export default function GlobalDashboard({ projects, onCreateProject }: GlobalDas
               </select>
             </div>
 
-            {/* Department Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-              <select
-                value={filterDepartment}
-                onChange={(e) => setFilterDepartment(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              >
+              <label className="block text-[13px] font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                Department
+              </label>
+              <select value={filterDepartment} onChange={(e) => setFilterDepartment(e.target.value)} style={selectStyle}>
                 <option value="ALL">All Departments</option>
-                {departments.map(dept => (
-                  <option key={dept} value={dept}>{dept}</option>
-                ))}
+                {departments.map(dept => <option key={dept} value={dept}>{dept}</option>)}
               </select>
             </div>
 
-            {/* Status Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              >
+              <label className="block text-[13px] font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                Status
+              </label>
+              <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={selectStyle}>
                 <option value="ALL">All Statuses</option>
                 <option value="DEVELOPMENT">Development</option>
                 <option value="PRE_PRODUCTION">Pre-Production</option>
@@ -251,14 +239,11 @@ export default function GlobalDashboard({ projects, onCreateProject }: GlobalDas
               </select>
             </div>
 
-            {/* Sort By */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              >
+              <label className="block text-[13px] font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                Sort By
+              </label>
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} style={selectStyle}>
                 <option value="createdAt">Recently Created</option>
                 <option value="deadline">Deadline (Soonest)</option>
                 <option value="priority">Priority (Highest)</option>
@@ -267,76 +252,75 @@ export default function GlobalDashboard({ projects, onCreateProject }: GlobalDas
             </div>
           </div>
 
-          {/* Active Filters Summary */}
-          {(filterLifecycleState !== 'ALL' || filterPriority !== 'ALL' || filterDepartment !== 'ALL' || filterStatus !== 'ALL' || searchQuery) && (
-            <div className="mt-3 pt-3 border-t border-gray-200">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm text-gray-600">Active filters:</span>
-                {searchQuery && (
-                  <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-md">
-                    Search: "{searchQuery}"
-                  </span>
-                )}
-                {filterLifecycleState !== 'ALL' && (
-                  <span className="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-md">
-                    State: {filterLifecycleState.split('_').map(w => w.charAt(0) + w.slice(1).toLowerCase()).join(' ')}
-                  </span>
-                )}
-                {filterPriority !== 'ALL' && (
-                  <span className="px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded-md">
-                    Priority: {filterPriority}
-                  </span>
-                )}
-                {filterDepartment !== 'ALL' && (
-                  <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-md">
-                    Department: {filterDepartment}
-                  </span>
-                )}
-                {filterStatus !== 'ALL' && (
-                  <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-md">
-                    Status: {filterStatus.split('_').map(w => w.charAt(0) + w.slice(1).toLowerCase()).join(' ')}
-                  </span>
-                )}
-                <button
-                  onClick={() => {
-                    setSearchQuery('');
-                    setFilterLifecycleState('ALL');
-                    setFilterPriority('ALL');
-                    setFilterDepartment('ALL');
-                    setFilterStatus('ALL');
-                  }}
-                  className="px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded-md"
-                >
-                  Clear all
-                </button>
-              </div>
+          {/* Active Filters */}
+          {hasFilters && (
+            <div className="mt-4 pt-4 flex items-center gap-2 flex-wrap" style={{ borderTop: '1px solid var(--border)' }}>
+              <span className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>Active filters:</span>
+              {searchQuery && (
+                <span className="px-2.5 py-1 text-xs font-medium rounded-full" style={{ background: 'var(--primary-muted)', color: 'var(--primary)' }}>
+                  Search: &quot;{searchQuery}&quot;
+                </span>
+              )}
+              {filterLifecycleState !== 'ALL' && (
+                <span className="px-2.5 py-1 text-xs font-medium rounded-full" style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}>
+                  {filterLifecycleState.replace(/_/g, ' ')}
+                </span>
+              )}
+              {filterPriority !== 'ALL' && (
+                <span className="px-2.5 py-1 text-xs font-medium rounded-full" style={{ background: 'var(--warning-muted)', color: 'var(--warning)' }}>
+                  {filterPriority}
+                </span>
+              )}
+              {filterDepartment !== 'ALL' && (
+                <span className="px-2.5 py-1 text-xs font-medium rounded-full" style={{ background: 'var(--secondary-muted)', color: 'var(--secondary)' }}>
+                  {filterDepartment}
+                </span>
+              )}
+              {filterStatus !== 'ALL' && (
+                <span className="px-2.5 py-1 text-xs font-medium rounded-full" style={{ background: 'var(--info-muted)', color: 'var(--info)' }}>
+                  {filterStatus.replace(/_/g, ' ')}
+                </span>
+              )}
+              <button
+                onClick={clearFilters}
+                className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full transition-all duration-[80ms]"
+                style={{ background: 'var(--danger-muted)', color: 'var(--danger)' }}
+              >
+                <XIcon /> Clear all
+              </button>
             </div>
           )}
         </div>
 
-        {/* Projects Grid */}
+        {/* Results Count */}
         <div className="mb-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
             Showing {filteredProjects.length} of {projects.length} projects
           </p>
         </div>
 
+        {/* Projects Grid */}
         {filteredProjects.length === 0 ? (
-          <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
-            <div className="text-6xl mb-4">📋</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No projects found</h3>
-            <p className="text-gray-600 mb-4">
-              {searchQuery || filterLifecycleState !== 'ALL' || filterPriority !== 'ALL' || filterDepartment !== 'ALL' || filterStatus !== 'ALL'
-                ? 'Try adjusting your filters or search query'
-                : 'Get started by creating your first project'
-              }
+          <div
+            className="p-16 rounded-[12px] text-center"
+            style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}
+          >
+            <div className="mb-4 inline-block" style={{ color: 'var(--text-tertiary)' }}>
+              <FolderIcon />
+            </div>
+            <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+              No projects found
+            </h3>
+            <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
+              {hasFilters ? 'Try adjusting your filters or search query' : 'Get started by creating your first project'}
             </p>
-            {!(searchQuery || filterLifecycleState !== 'ALL' || filterPriority !== 'ALL' || filterDepartment !== 'ALL' || filterStatus !== 'ALL') && (
+            {!hasFilters && (
               <button
                 onClick={onCreateProject}
-                className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[6px] text-sm font-medium transition-all duration-[80ms] active:scale-[0.98]"
+                style={{ background: 'var(--primary)', color: 'white' }}
               >
-                Create Project
+                <PlusIcon /> Create Project
               </button>
             )}
           </div>
