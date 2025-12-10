@@ -1,6 +1,7 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
 import { mediaProcessor } from '../function/mediaProcessor/resource';
 import { smartBriefAI } from '../function/smartBriefAI/resource';
+import { feedbackSummarizer } from '../function/feedbackSummarizer/resource';
 import { universalSearch } from '../functions/universal-search/resource';
 
 /* * SYNC OPS - DATA SCHEMA
@@ -752,7 +753,887 @@ const schema = a.schema({
     allow.groups(['Admin', 'Producer', 'ProjectManager']).to(['create', 'read', 'update', 'delete']),
   ]),
 
-  // 10. CUSTOM QUERIES
+  // 10. EQUIPMENT OS (Module 4 - Pre-Production Logistics)
+  // Equipment inventory management with check-in/check-out tracking
+  Equipment: a.model({
+    // Basic Information
+    name: a.string().required(),
+    description: a.string(),
+    category: a.enum([
+      'CAMERA',
+      'LENS',
+      'LIGHTING',
+      'AUDIO',
+      'GRIP',
+      'ELECTRIC',
+      'MONITORS',
+      'STORAGE',
+      'DRONES',
+      'STABILIZERS',
+      'ACCESSORIES',
+      'VEHICLES',
+      'OTHER'
+    ]),
+    subcategory: a.string(), // e.g., "Prime Lens", "LED Panel", "Wireless Mic"
+
+    // Identification
+    serialNumber: a.string(),
+    assetTag: a.string(), // Internal tracking number
+    barcode: a.string(), // For scanning
+
+    // Ownership & Status
+    ownershipType: a.enum(['OWNED', 'RENTED', 'LEASED', 'BORROWED']),
+    status: a.enum([
+      'AVAILABLE',
+      'CHECKED_OUT',
+      'IN_MAINTENANCE',
+      'DAMAGED',
+      'LOST',
+      'RETIRED'
+    ]),
+    condition: a.enum(['EXCELLENT', 'GOOD', 'FAIR', 'POOR', 'NEEDS_REPAIR']),
+
+    // Financial
+    purchasePrice: a.float(),
+    purchaseDate: a.date(),
+    replacementValue: a.float(),
+    rentalRate: a.float(), // Daily rental rate if applicable
+    insuranceValue: a.float(),
+    insurancePolicyNumber: a.string(),
+
+    // Technical Specs
+    manufacturer: a.string(),
+    model: a.string(),
+    specifications: a.json(), // Flexible JSON for category-specific specs
+
+    // Location & Storage
+    storageLocation: a.string(), // "Warehouse A, Shelf 3"
+    homeBase: a.string(), // Default location when not in use
+
+    // Maintenance
+    lastMaintenanceDate: a.date(),
+    nextMaintenanceDate: a.date(),
+    maintenanceNotes: a.string(),
+    calibrationDate: a.date(), // For cameras, monitors, etc.
+
+    // Images
+    imageKey: a.string(), // S3 key for equipment photo
+
+    // Relationships
+    checkouts: a.hasMany('EquipmentCheckout', 'equipmentId'),
+    kitItems: a.hasMany('EquipmentKitItem', 'equipmentId'),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read']),
+    allow.groups(['Admin', 'Producer', 'EquipmentManager']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // Equipment checkout/check-in tracking
+  EquipmentCheckout: a.model({
+    equipmentId: a.id().required(),
+    equipment: a.belongsTo('Equipment', 'equipmentId'),
+    projectId: a.id(), // Optional - may be checked out for non-project use
+
+    // Who
+    checkedOutBy: a.string().required(), // User email
+    checkedOutByName: a.string(),
+    approvedBy: a.string(), // Manager who approved
+    returnedBy: a.string(),
+
+    // When
+    checkoutDate: a.datetime().required(),
+    expectedReturnDate: a.datetime(),
+    actualReturnDate: a.datetime(),
+
+    // Status
+    status: a.enum(['CHECKED_OUT', 'RETURNED', 'OVERDUE', 'LOST']),
+
+    // Condition tracking
+    conditionAtCheckout: a.enum(['EXCELLENT', 'GOOD', 'FAIR', 'POOR']),
+    conditionAtReturn: a.enum(['EXCELLENT', 'GOOD', 'FAIR', 'POOR', 'DAMAGED']),
+    conditionNotes: a.string(),
+    damageReported: a.boolean().default(false),
+    damageDescription: a.string(),
+
+    // Purpose
+    purpose: a.string(), // "Principal Photography", "B-Roll Shoot", etc.
+    shootLocation: a.string(),
+
+    // Signature/Confirmation
+    checkoutSignature: a.string(), // Could be S3 key for signature image
+    returnSignature: a.string(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'EquipmentManager']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // Equipment Kits - Pre-configured packages
+  EquipmentKit: a.model({
+    name: a.string().required(), // "A-Camera Package", "Audio Kit"
+    description: a.string(),
+    category: a.enum([
+      'CAMERA_PACKAGE',
+      'LIGHTING_PACKAGE',
+      'AUDIO_PACKAGE',
+      'GRIP_PACKAGE',
+      'DRONE_PACKAGE',
+      'INTERVIEW_KIT',
+      'RUN_AND_GUN',
+      'STUDIO_KIT',
+      'CUSTOM'
+    ]),
+
+    // Kit items linked separately
+    kitContents: a.hasMany('EquipmentKitItem', 'kitId'),
+
+    // Status
+    isActive: a.boolean().default(true),
+
+    // Templates
+    isTemplate: a.boolean().default(false), // Can be used as starting point for new kits
+
+    // Totals (calculated/cached)
+    totalValue: a.float(),
+    itemCount: a.integer(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read']),
+    allow.groups(['Admin', 'Producer', 'EquipmentManager']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // Items within a kit
+  EquipmentKitItem: a.model({
+    kitId: a.id().required(),
+    kit: a.belongsTo('EquipmentKit', 'kitId'),
+    equipmentId: a.id().required(),
+    equipment: a.belongsTo('Equipment', 'equipmentId'),
+
+    quantity: a.integer().default(1),
+    isRequired: a.boolean().default(true), // Required vs optional item
+    notes: a.string(),
+    sortOrder: a.integer(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read']),
+    allow.groups(['Admin', 'Producer', 'EquipmentManager']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // 11. DIGITAL RIGHTS LOCKER (Module 6 - Legal Document Management)
+  // Centralized storage for all production legal documents
+  RightsDocument: a.model({
+    // Basic Information
+    name: a.string().required(),
+    description: a.string(),
+    documentType: a.enum([
+      'LOCATION_PERMIT',
+      'TALENT_RELEASE',
+      'MODEL_RELEASE',
+      'MINOR_RELEASE',
+      'PROPERTY_RELEASE',
+      'DRONE_PERMIT',
+      'FILMING_PERMIT',
+      'INSURANCE_CERTIFICATE',
+      'LIABILITY_WAIVER',
+      'NDA',
+      'CONTRACT',
+      'WORK_PERMIT',
+      'VISA',
+      'RISK_ASSESSMENT',
+      'SAFETY_PLAN',
+      'MUSIC_LICENSE',
+      'STOCK_LICENSE',
+      'ARCHIVE_LICENSE',
+      'DISTRIBUTION_AGREEMENT',
+      'OTHER'
+    ]),
+
+    // Status Workflow
+    status: a.enum([
+      'DRAFT',
+      'PENDING_REVIEW',
+      'PENDING_SIGNATURE',
+      'APPROVED',
+      'REJECTED',
+      'EXPIRED',
+      'REVOKED'
+    ]),
+
+    // Dates
+    issueDate: a.date(),
+    effectiveDate: a.date(),
+    expirationDate: a.date(),
+    renewalDate: a.date(), // For recurring documents
+
+    // Linkage (Project → Shoot Day → Location → Person)
+    projectId: a.id().required(),
+    shootDay: a.string(), // Optional - specific shoot day
+    locationName: a.string(), // Location this document covers
+    locationAddress: a.string(),
+    personName: a.string(), // Person this document covers (talent, crew)
+    personEmail: a.string(),
+    personRole: a.string(), // Actor, Extra, Crew, Location Owner, etc.
+
+    // Document Details
+    documentNumber: a.string(), // Permit number, contract ID, etc.
+    issuingAuthority: a.string(), // FilmLA, Borough Council, etc.
+    jurisdiction: a.string(), // Country/State/City
+
+    // Coverage Details
+    coverageType: a.string(), // "All locations", "Interior only", etc.
+    coverageAmount: a.string(), // For insurance: "$1M liability"
+    restrictions: a.string(), // Any limitations noted in document
+
+    // File Storage
+    fileKey: a.string(), // S3 key for uploaded document
+    fileName: a.string(),
+    fileSize: a.integer(),
+    mimeType: a.string(),
+    thumbnailKey: a.string(), // Preview thumbnail
+
+    // Approval Workflow
+    uploadedBy: a.string().required(),
+    uploadedByName: a.string(),
+    reviewedBy: a.string(),
+    reviewedByName: a.string(),
+    reviewDate: a.datetime(),
+    approvedBy: a.string(),
+    approvedByName: a.string(),
+    approvalDate: a.datetime(),
+    rejectionReason: a.string(),
+
+    // Notes & Tags
+    notes: a.string(),
+    tags: a.string().array(), // For filtering: ["outdoor", "drone", "night"]
+    isRequired: a.boolean().default(false), // Required for Greenlight Gate
+    isCritical: a.boolean().default(false), // Production cannot proceed without
+
+    // Version Control
+    version: a.integer().default(1),
+    previousVersionId: a.id(),
+    isLatestVersion: a.boolean().default(true),
+
+    // Reminders
+    reminderDays: a.integer(), // Days before expiration to remind
+    lastReminderSent: a.datetime(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'Legal', 'ProjectManager']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // 12. DISTRIBUTION ENGINE (Module 9 - Secure Streaming & Distribution)
+  // Manages secure link sharing, watermarked playback, and distribution tracking
+  DistributionLink: a.model({
+    // Basic Information
+    name: a.string().required(),
+    description: a.string(),
+
+    // Link Configuration
+    linkType: a.enum([
+      'REVIEW',           // For stakeholder review
+      'CLIENT_PREVIEW',   // For client previews
+      'PRESS',            // For press/media
+      'PARTNER',          // For distribution partners
+      'INTERNAL',         // Internal sharing
+      'PUBLIC',           // Public release
+      'SCREENER',         // Festival/awards screener
+      'INVESTOR',         // Investor preview
+    ]),
+
+    // Security Settings
+    accessCode: a.string(), // Optional password protection
+    isPasswordProtected: a.boolean().default(false),
+    maxViews: a.integer(), // Maximum number of views allowed (null = unlimited)
+    currentViews: a.integer().default(0),
+
+    // Expiration
+    expiresAt: a.datetime(),
+    isExpired: a.boolean().default(false),
+
+    // Geo-Rights Enforcement (FR-32)
+    geoRestriction: a.enum(['NONE', 'ALLOW_LIST', 'BLOCK_LIST']),
+    allowedCountries: a.string().array(), // ISO country codes
+    blockedCountries: a.string().array(), // ISO country codes
+
+    // Watermark Settings (FR-31)
+    isWatermarked: a.boolean().default(true),
+    watermarkType: a.enum(['VISIBLE', 'FORENSIC', 'BOTH']),
+    watermarkText: a.string(), // Custom watermark text (e.g., recipient email)
+    watermarkPosition: a.enum(['TOP_LEFT', 'TOP_RIGHT', 'BOTTOM_LEFT', 'BOTTOM_RIGHT', 'CENTER', 'DIAGONAL']),
+    watermarkOpacity: a.float(), // 0.0 to 1.0
+
+    // Content
+    projectId: a.id().required(),
+    assetId: a.id(), // Specific asset to share (optional)
+    assetVersionId: a.id(), // Specific version to share (optional)
+    playlistAssetIds: a.string().array(), // For sharing multiple assets
+
+    // Recipient Information
+    recipientEmail: a.string(),
+    recipientName: a.string(),
+    recipientCompany: a.string(),
+    recipientRole: a.string(), // Reviewer, Client, Press, etc.
+
+    // Notification Settings
+    notifyOnView: a.boolean().default(true),
+    notifyOnDownload: a.boolean().default(true),
+
+    // Permissions
+    allowDownload: a.boolean().default(false),
+    allowShare: a.boolean().default(false),
+    downloadResolution: a.enum(['PROXY', 'HD', 'FULL_RES']),
+
+    // Stream Quality
+    streamQuality: a.enum(['AUTO', 'SD', 'HD', 'UHD_4K']),
+
+    // Tracking
+    createdBy: a.string().required(),
+    createdByEmail: a.string(),
+    lastAccessedAt: a.datetime(),
+    lastAccessedBy: a.string(),
+    lastAccessedFrom: a.string(), // IP or location
+
+    // Status
+    status: a.enum(['ACTIVE', 'PAUSED', 'EXPIRED', 'REVOKED']),
+    revokedAt: a.datetime(),
+    revokedBy: a.string(),
+    revokedReason: a.string(),
+
+    // Analytics
+    totalViewDuration: a.integer(), // Total seconds watched
+    averageViewDuration: a.integer(), // Average seconds per view
+    completionRate: a.float(), // Percentage of content viewed
+
+    // Unique token for URL
+    accessToken: a.string().required(), // UUID for secure URL
+
+    // Relationships
+    viewLogs: a.hasMany('DistributionViewLog', 'distributionLinkId'),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'Marketing']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // View logs for distribution links (analytics and audit trail)
+  DistributionViewLog: a.model({
+    distributionLinkId: a.id().required(),
+    distributionLink: a.belongsTo('DistributionLink', 'distributionLinkId'),
+
+    // Viewer Information
+    viewerEmail: a.string(), // If known
+    viewerName: a.string(),
+    viewerIP: a.string(),
+    viewerCountry: a.string(), // Detected from IP
+    viewerCity: a.string(),
+    viewerDevice: a.string(), // Device type
+    viewerBrowser: a.string(),
+    viewerOS: a.string(),
+
+    // Session Information
+    sessionId: a.string().required(),
+    startTime: a.datetime().required(),
+    endTime: a.datetime(),
+    duration: a.integer(), // Seconds watched
+
+    // Playback Details
+    percentageWatched: a.float(), // 0-100
+    seekEvents: a.integer(), // Number of seek operations
+    pauseEvents: a.integer(), // Number of pauses
+    playbackSpeed: a.float(), // Last playback speed used
+
+    // Quality
+    qualityChanges: a.integer(), // Number of quality changes
+    averageBitrate: a.integer(), // Average bitrate in kbps
+    bufferingEvents: a.integer(),
+    bufferingDuration: a.integer(), // Total buffering time in ms
+
+    // Security Events
+    downloadAttempted: a.boolean().default(false),
+    screenshotAttempted: a.boolean().default(false), // If detected
+
+    // Geo-Restriction Events
+    geoBlocked: a.boolean().default(false),
+    geoBlockReason: a.string(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create']),
+    allow.groups(['Admin', 'Producer', 'Marketing']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // Social Output Configuration (FR-33)
+  SocialOutput: a.model({
+    // Basic Information
+    name: a.string().required(),
+    description: a.string(),
+
+    // Source
+    projectId: a.id().required(),
+    sourceAssetId: a.id().required(),
+    sourceVersionId: a.id(),
+
+    // Output Configuration
+    platform: a.enum([
+      'YOUTUBE',
+      'VIMEO',
+      'FACEBOOK',
+      'INSTAGRAM_FEED',
+      'INSTAGRAM_STORY',
+      'INSTAGRAM_REELS',
+      'TIKTOK',
+      'TWITTER',
+      'LINKEDIN',
+      'WEBSITE',
+      'CMS',
+      'OTHER',
+    ]),
+
+    // Crop/Aspect Ratio (FR-33: Auto-crops)
+    aspectRatio: a.enum(['LANDSCAPE_16_9', 'PORTRAIT_9_16', 'SQUARE_1_1', 'PORTRAIT_4_5', 'STANDARD_4_3', 'CINEMATIC_21_9', 'CUSTOM']),
+    customWidth: a.integer(),
+    customHeight: a.integer(),
+    cropPosition: a.enum(['CENTER', 'TOP', 'BOTTOM', 'LEFT', 'RIGHT', 'CUSTOM']),
+    cropX: a.integer(), // For custom positioning
+    cropY: a.integer(),
+
+    // Duration
+    maxDuration: a.integer(), // Max seconds for platform (e.g., 60 for Instagram)
+    trimStart: a.float(), // Start trim point in seconds
+    trimEnd: a.float(), // End trim point in seconds
+
+    // Captions/Subtitles (FR-33)
+    includeCaptions: a.boolean().default(false),
+    captionLanguage: a.string(), // ISO language code
+    captionStyle: a.enum(['BURNED_IN', 'EMBEDDED', 'SIDECAR']),
+    captionFileKey: a.string(), // S3 key for caption file (.srt, .vtt)
+
+    // Subtitles
+    includeSubtitles: a.boolean().default(false),
+    subtitleLanguages: a.string().array(), // Multiple language support
+
+    // Audio
+    audioTrack: a.enum(['ORIGINAL', 'MUSIC_ONLY', 'VO_ONLY', 'MIX', 'MUTED']),
+    normalizeAudio: a.boolean().default(true),
+    targetLoudness: a.float(), // LUFS value
+
+    // Visual
+    addWatermark: a.boolean().default(false),
+    watermarkKey: a.string(), // S3 key for watermark image
+    addEndCard: a.boolean().default(false),
+    endCardKey: a.string(), // S3 key for end card
+    endCardDuration: a.integer(), // Seconds
+
+    // Output
+    outputFormat: a.enum(['MP4', 'MOV', 'WEBM', 'GIF']),
+    outputCodec: a.enum(['H264', 'H265', 'VP9', 'AV1']),
+    outputBitrate: a.string(), // e.g., "8M", "15M"
+    outputResolution: a.enum(['SD', 'HD', 'FHD', 'UHD_4K', 'CUSTOM']),
+
+    // Processing Status
+    status: a.enum(['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'CANCELLED']),
+    processingStartedAt: a.datetime(),
+    processingCompletedAt: a.datetime(),
+    processingError: a.string(),
+    processingProgress: a.integer(), // 0-100
+
+    // Output File
+    outputFileKey: a.string(), // S3 key for output file
+    outputFileSize: a.integer(),
+    outputDuration: a.float(),
+
+    // CMS Integration (FR-33: CMS exports)
+    cmsIntegration: a.string(), // CMS name/type
+    cmsEndpoint: a.string(),
+    cmsPublishStatus: a.enum(['NOT_PUBLISHED', 'PUBLISHING', 'PUBLISHED', 'FAILED']),
+    cmsPublishedAt: a.datetime(),
+    cmsPublishedUrl: a.string(),
+
+    // Social Media Post Content
+    postCaption: a.string(), // The caption/text for the social post
+    postHashtags: a.string().array(), // Array of hashtags
+    postMentions: a.string().array(), // Array of @mentions
+    postLocation: a.string(), // Location tag for the post
+    postTitle: a.string(), // Title (for YouTube, LinkedIn)
+    postDescription: a.string(), // Description (for YouTube, Vimeo)
+    postTags: a.string().array(), // Platform tags (for YouTube)
+    postCategory: a.string(), // Category (for YouTube)
+    postPrivacy: a.enum(['PUBLIC', 'UNLISTED', 'PRIVATE', 'FRIENDS_ONLY']),
+    postThumbnailKey: a.string(), // Custom thumbnail S3 key
+    postCallToAction: a.string(), // CTA button text
+    postCallToActionUrl: a.string(), // CTA link URL
+
+    // Social Publishing Status
+    socialPublishStatus: a.enum(['DRAFT', 'READY', 'PUBLISHING', 'PUBLISHED', 'SCHEDULED', 'FAILED']),
+    socialPublishedAt: a.datetime(),
+    socialPublishedUrl: a.string(), // URL of the published post
+    socialPostId: a.string(), // Platform's post ID
+    socialPublishError: a.string(),
+
+    // Scheduling
+    scheduledPublishAt: a.datetime(),
+    isScheduled: a.boolean().default(false),
+
+    // Creator
+    createdBy: a.string().required(),
+    createdByEmail: a.string(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'Marketing', 'Editor']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // 13. ARCHIVE & ASSET INTELLIGENCE (Module 10 - FR-34 to FR-36)
+  // Manages intelligent storage tiering, asset analytics, and quality scoring
+
+  // Archive Policy - Defines rules for automatic archival
+  ArchivePolicy: a.model({
+    name: a.string().required(),
+    description: a.string(),
+    projectId: a.id(), // Optional - if null, applies globally
+
+    // Trigger Conditions
+    triggerType: a.enum(['LAST_ACCESS', 'CREATION_DATE', 'MANUAL', 'SIZE_THRESHOLD', 'USAGE_SCORE']),
+    daysUntilArchive: a.integer(), // Days since last access before archiving
+    minFileSizeMB: a.integer(), // Minimum file size to consider for archival
+    usageScoreThreshold: a.float(), // Archive if usage score below this
+
+    // Target Storage
+    targetStorageClass: a.enum([
+      'STANDARD',           // S3 Standard
+      'STANDARD_IA',        // Infrequent Access
+      'ONEZONE_IA',         // One Zone IA
+      'INTELLIGENT_TIERING', // Auto-tiering
+      'GLACIER_IR',         // Glacier Instant Retrieval
+      'GLACIER_FR',         // Glacier Flexible Retrieval
+      'GLACIER_DA',         // Glacier Deep Archive
+    ]),
+
+    // Asset Filters
+    includeAssetTypes: a.string().array(), // VIDEO, AUDIO, IMAGE, DOCUMENT
+    excludeAssetTypes: a.string().array(),
+    excludeTaggedWith: a.string().array(), // Don't archive assets with these tags
+    onlyProjectStatus: a.string().array(), // Only archive from projects with these statuses
+
+    // Policy Status
+    isEnabled: a.boolean().default(true),
+    lastExecutedAt: a.datetime(),
+    nextScheduledRun: a.datetime(),
+    assetsProcessed: a.integer().default(0),
+    storageFreedGB: a.float().default(0),
+
+    // Creator
+    createdBy: a.string().required(),
+    createdByEmail: a.string(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // Asset Analytics - Tracks usage and performance of each asset
+  AssetAnalytics: a.model({
+    assetId: a.id().required(),
+    projectId: a.id().required(),
+
+    // View/Usage Metrics
+    totalViews: a.integer().default(0),
+    uniqueViewers: a.integer().default(0),
+    totalPlayDuration: a.integer().default(0), // Total seconds played
+    averageWatchPercentage: a.float().default(0), // 0-100
+    downloadCount: a.integer().default(0),
+    shareCount: a.integer().default(0),
+
+    // Usage Heatmap Data (JSON for flexibility)
+    viewsByHour: a.json(), // { "0": 5, "1": 3, ... "23": 10 }
+    viewsByDay: a.json(), // { "Mon": 50, "Tue": 45, ... }
+    viewsByWeek: a.json(), // Last 12 weeks data
+    viewsByMonth: a.json(), // Last 12 months data
+    viewerLocations: a.json(), // { "US": 100, "UK": 50, ... }
+    viewerDevices: a.json(), // { "Desktop": 60, "Mobile": 35, "Tablet": 5 }
+
+    // Engagement Metrics
+    commentCount: a.integer().default(0),
+    approvalCount: a.integer().default(0),
+    revisionRequestCount: a.integer().default(0),
+    feedbackSentiment: a.float(), // -1 to 1 sentiment score
+    averageRating: a.float(), // 0-5 star rating
+
+    // Usage Score (computed metric for archival decisions)
+    usageScore: a.float().default(50), // 0-100, higher = more used
+    usageScoreUpdatedAt: a.datetime(),
+    usageTrend: a.enum(['RISING', 'STABLE', 'DECLINING', 'INACTIVE']),
+
+    // Time-based tracking
+    firstViewedAt: a.datetime(),
+    lastViewedAt: a.datetime(),
+    peakUsageDate: a.datetime(),
+    peakUsageCount: a.integer(),
+
+    // Distribution tracking
+    distributionLinksCreated: a.integer().default(0),
+    socialOutputsCreated: a.integer().default(0),
+    externalEmbeds: a.integer().default(0),
+
+    // ROI Tracking
+    estimatedValue: a.float(), // Estimated value in dollars
+    productionCost: a.float(), // Cost to produce
+    revenueGenerated: a.float(), // Revenue attributed to this asset
+    roiPercentage: a.float(), // (Revenue - Cost) / Cost * 100
+    roiLastCalculated: a.datetime(),
+
+    // Update tracking
+    lastUpdated: a.datetime(),
+    dataIntegrity: a.enum(['COMPLETE', 'PARTIAL', 'STALE']),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'Marketing']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // Quality Score - AI-powered quality assessment
+  QualityScore: a.model({
+    assetId: a.id().required(),
+    assetVersionId: a.id(), // Optional - can score specific version
+    projectId: a.id().required(),
+
+    // Overall Score
+    overallScore: a.float().required(), // 0-100
+    grade: a.enum(['A', 'B', 'C', 'D', 'F']), // Letter grade
+
+    // Video Quality Metrics
+    videoResolution: a.string(), // e.g., "3840x2160"
+    videoBitrate: a.integer(), // kbps
+    videoCodec: a.string(), // e.g., "H.264", "H.265"
+    videoFrameRate: a.float(), // e.g., 23.976, 29.97, 60
+    videoColorSpace: a.string(), // e.g., "Rec.709", "Rec.2020"
+    videoBitDepth: a.integer(), // 8, 10, 12 bit
+    videoHDR: a.boolean(),
+    videoResolutionScore: a.float(), // 0-100
+    videoBitrateScore: a.float(), // 0-100
+    videoStabilityScore: a.float(), // 0-100 (shakiness detection)
+    videoExposureScore: a.float(), // 0-100
+
+    // Audio Quality Metrics
+    audioCodec: a.string(), // e.g., "AAC", "PCM"
+    audioBitrate: a.integer(), // kbps
+    audioSampleRate: a.integer(), // e.g., 48000
+    audioChannels: a.integer(), // e.g., 2 (stereo), 6 (5.1)
+    audioLoudnessLUFS: a.float(), // Integrated loudness
+    audioPeakdB: a.float(), // Peak level
+    audioNoiseFloor: a.float(), // dB
+    audioQualityScore: a.float(), // 0-100
+    audioClippingDetected: a.boolean(),
+    audioSilencePercentage: a.float(),
+
+    // Technical Compliance
+    formatCompliance: a.boolean(), // Meets broadcast/streaming standards
+    complianceIssues: a.string().array(), // List of issues found
+    recommendedFixes: a.string().array(), // Suggestions for improvement
+
+    // AI Content Analysis
+    contentClarity: a.float(), // 0-100 based on AI analysis
+    compositionScore: a.float(), // 0-100 framing/composition
+    colorGradeConsistency: a.float(), // 0-100
+    motionSmoothnessScore: a.float(), // 0-100
+
+    // Metadata
+    analyzedAt: a.datetime().required(),
+    analysisDuration: a.integer(), // Seconds to analyze
+    analysisVersion: a.string(), // Version of analysis algorithm
+    analyzedBy: a.string(), // 'AI' or user email
+
+    // File Integrity
+    checksumMD5: a.string(),
+    checksumSHA256: a.string(),
+    fileIntegrity: a.enum(['VERIFIED', 'CORRUPTED', 'UNKNOWN']),
+    corruptionDetails: a.string(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'Editor']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // Storage Tier Record - Tracks current storage location of assets
+  StorageTier: a.model({
+    assetId: a.id().required(),
+    projectId: a.id().required(),
+
+    // Current Storage Info
+    currentStorageClass: a.enum([
+      'STANDARD',
+      'STANDARD_IA',
+      'ONEZONE_IA',
+      'INTELLIGENT_TIERING',
+      'GLACIER_IR',
+      'GLACIER_FR',
+      'GLACIER_DA',
+    ]),
+    s3Key: a.string().required(),
+    s3Bucket: a.string(),
+    fileSizeBytes: a.integer().required(),
+
+    // Archive Status
+    isArchived: a.boolean().default(false),
+    archivedAt: a.datetime(),
+    archivedBy: a.string(), // Policy name or user email
+    archiveReason: a.string(), // Why it was archived
+    originalStorageClass: a.string(), // Where it was before archival
+
+    // Restoration
+    isRestoring: a.boolean().default(false),
+    restoreRequestedAt: a.datetime(),
+    restoreRequestedBy: a.string(),
+    restoreType: a.enum(['STANDARD', 'BULK', 'EXPEDITED']),
+    restoreExpiresAt: a.datetime(), // Glacier restore temporary copy expiry
+    lastRestoredAt: a.datetime(),
+    restoreCount: a.integer().default(0),
+
+    // Smart Thaw (Partial Restore)
+    partialRestoreRanges: a.json(), // [{ start: 0, end: 60 }, ...] seconds
+    partialRestoreKey: a.string(), // S3 key for partial restore
+    partialRestoreExpiresAt: a.datetime(),
+
+    // Cost Tracking
+    monthlyStorageCost: a.float(), // Estimated monthly cost
+    lastCostCalculation: a.datetime(),
+    totalStorageCostToDate: a.float(),
+    projectedAnnualCost: a.float(),
+
+    // Lifecycle
+    lifecyclePolicyApplied: a.string(), // Name of policy
+    nextTransitionDate: a.datetime(),
+    nextTransitionClass: a.string(),
+
+    // Audit
+    transitionHistory: a.json(), // Array of { date, from, to, reason }
+    lastChecked: a.datetime(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // Restore Request - Tracks restoration requests from Glacier
+  RestoreRequest: a.model({
+    assetId: a.id().required(),
+    projectId: a.id().required(),
+    storageTierId: a.id(),
+
+    // Request Details
+    requestType: a.enum(['FULL', 'PARTIAL', 'SMART_THAW']),
+    restoreTier: a.enum(['EXPEDITED', 'STANDARD', 'BULK']),
+
+    // For partial restores
+    partialStartSeconds: a.float(),
+    partialEndSeconds: a.float(),
+    partialReason: a.string(), // Why partial restore needed
+
+    // Status
+    status: a.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'FAILED', 'CANCELLED']),
+    requestedAt: a.datetime().required(),
+    requestedBy: a.string().required(),
+    requestedByEmail: a.string(),
+    estimatedCompletion: a.datetime(),
+    completedAt: a.datetime(),
+    errorMessage: a.string(),
+
+    // Cost
+    estimatedCost: a.float(),
+    actualCost: a.float(),
+
+    // Expiry
+    restoreDurationDays: a.integer(), // How long restore will be available
+    expiresAt: a.datetime(),
+
+    // Result
+    restoredKey: a.string(), // S3 key where restored file is available
+    restoredSize: a.integer(),
+
+    // Notifications
+    notifyOnComplete: a.boolean().default(true),
+    notificationSent: a.boolean().default(false),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'Editor']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // 14. TEAM MANAGEMENT (Stakeholder & Crew Assignment)
+  TeamMember: a.model({
+    projectId: a.id().required(),
+
+    // Member Identity
+    email: a.string().required(),
+    name: a.string(),
+    avatar: a.string(), // S3 key for profile image
+
+    // Role & Access
+    role: a.enum([
+      'PROJECT_OWNER',
+      'EXECUTIVE_SPONSOR',
+      'CREATIVE_DIRECTOR',
+      'PRODUCER',
+      'LEGAL_CONTACT',
+      'FINANCE_CONTACT',
+      'CLIENT_CONTACT',
+      'DIRECTOR',
+      'EDITOR',
+      'CINEMATOGRAPHER',
+      'SOUND_DESIGNER',
+      'VFX_ARTIST',
+      'PRODUCTION_ASSISTANT',
+      'VIEWER',
+      'CUSTOM',
+    ]),
+    customRoleTitle: a.string(), // For CUSTOM role type
+    permissions: a.string(), // JSON stringified array of permissions
+    department: a.string(),
+
+    // Invitation Status
+    status: a.enum(['PENDING', 'ACTIVE', 'DECLINED', 'REMOVED']),
+    invitedBy: a.string(),
+    invitedAt: a.datetime(),
+    acceptedAt: a.datetime(),
+    removedAt: a.datetime(),
+    removedBy: a.string(),
+    removalReason: a.string(),
+
+    // Activity Tracking
+    lastActiveAt: a.datetime(),
+    contributionCount: a.integer().default(0), // Tasks completed, comments, uploads
+
+    // Notification Preferences
+    notifyOnMessages: a.boolean().default(true),
+    notifyOnTasks: a.boolean().default(true),
+    notifyOnApprovals: a.boolean().default(true),
+    notifyOnAssets: a.boolean().default(true),
+
+    // External Contact Info
+    phone: a.string(),
+    company: a.string(),
+    title: a.string(), // Job title
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // 15. CUSTOM QUERIES
   analyzeProjectBrief: a
     .query()
     .arguments({
@@ -776,6 +1657,19 @@ const schema = a.schema({
     })
     .returns(a.json())
     .handler(a.handler.function(universalSearch))
+    .authorization(allow => [
+      allow.publicApiKey(),
+      allow.authenticated(),
+    ]),
+
+  // AI FEEDBACK SUMMARIZATION - Analyze review comments and generate insights
+  summarizeFeedback: a
+    .query()
+    .arguments({
+      comments: a.json().required(),
+    })
+    .returns(a.json())
+    .handler(a.handler.function(feedbackSummarizer))
     .authorization(allow => [
       allow.publicApiKey(),
       allow.authenticated(),

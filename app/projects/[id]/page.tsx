@@ -23,6 +23,13 @@ import FieldIntelligence from "@/app/components/FieldIntelligence";
 import ProjectSettings from "@/app/components/ProjectSettings";
 import ProjectChat from "@/app/components/ProjectChat";
 import TaskManager from "@/app/components/TaskManager";
+import VideoThumbnail from "@/app/components/VideoThumbnail";
+import PolicyEngine from "@/app/components/PolicyEngine";
+import EquipmentOS from "@/app/components/EquipmentOS";
+import DigitalRightsLocker from "@/app/components/DigitalRightsLocker";
+import DistributionEngine from "@/app/components/DistributionEngine";
+import ArchiveIntelligence from "@/app/components/ArchiveIntelligence";
+import TeamManagement from "@/app/components/TeamManagement";
 
 export default function ProjectDetail() {
   const [client] = useState(() => generateClient<Schema>());
@@ -237,10 +244,15 @@ export default function ProjectDetail() {
     { id: 'approvals', label: 'Approvals', icon: '✅', badge: pendingApprovals > 0 ? pendingApprovals : undefined },
     { id: 'assets', label: 'Assets', icon: '📦', badge: assets.length },
     { id: 'call-sheets', label: 'Call Sheets', icon: '📋' },
+    { id: 'equipment', label: 'Equipment', icon: '🎬' },
+    { id: 'rights', label: 'Rights Locker', icon: '🔐' },
+    { id: 'distribution', label: 'Distribution', icon: '📡' },
+    { id: 'archive', label: 'Archive Intel', icon: '🧠' },
     { id: 'communication', label: 'Communication', icon: '💬' },
     { id: 'budget', label: 'Budget', icon: '💰' },
     { id: 'team', label: 'Team', icon: '👥' },
     { id: 'activity', label: 'Activity', icon: '📋', badge: activityLogs.length },
+    { id: 'compliance', label: 'Compliance', icon: '⚖️' },
     { id: 'settings', label: 'Settings', icon: '⚙️' },
   ];
 
@@ -409,11 +421,11 @@ export default function ProjectDetail() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredAssets.map((asset) => (
                 <div key={asset.id} className="bg-slate-800 p-5 rounded-xl border border-slate-700 hover:border-teal-500/50 transition-all">
-                  <div className="bg-black/50 h-32 flex items-center justify-center mb-3 rounded text-6xl">
-                    {asset.mimeType?.startsWith('video/') && '🎬'}
-                    {asset.mimeType?.startsWith('image/') && '🖼️'}
-                    {asset.mimeType?.startsWith('application/') && '📄'}
-                  </div>
+                  <VideoThumbnail
+                    s3Key={asset.s3Key}
+                    alt={asset.s3Key.split('/').pop() || 'Asset'}
+                    className="h-32 rounded mb-3"
+                  />
                   <p className="text-sm text-white font-medium truncate mb-2">{asset.s3Key.split('/').pop()}</p>
                   <div className="flex gap-2">
                     <button
@@ -423,7 +435,7 @@ export default function ProjectDetail() {
                       Review
                     </button>
                     <button
-                      onClick={() => setSelectedAssetForVersioning({ id: asset.id, name: asset.s3Key.split('/').pop() || 'Asset' })}
+                      onClick={() => router.push(`/projects/${projectId}/assets/${asset.id}/versions`)}
                       className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg text-xs"
                     >
                       Versions
@@ -440,11 +452,12 @@ export default function ProjectDetail() {
         )}
 
         {activeTab === 'team' && (
-          <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
-            <h3 className="text-2xl font-bold text-white mb-4">Stakeholder Directory</h3>
-            {/* This would show the stakeholder section from ProjectOverview */}
-            <p className="text-slate-400">Team management coming soon...</p>
-          </div>
+          <TeamManagement
+            projectId={projectId}
+            project={project}
+            currentUserEmail={userEmail}
+            onUpdate={refreshProjectData}
+          />
         )}
 
         {activeTab === 'activity' && (
@@ -493,6 +506,38 @@ export default function ProjectDetail() {
           </div>
         )}
 
+        {activeTab === 'equipment' && (
+          <EquipmentOS
+            projectId={projectId}
+            currentUserEmail={userEmail}
+            currentUserName={userEmail.split('@')[0]}
+          />
+        )}
+
+        {activeTab === 'rights' && (
+          <DigitalRightsLocker
+            projectId={projectId}
+            currentUserEmail={userEmail}
+            currentUserName={userEmail.split('@')[0]}
+          />
+        )}
+
+        {activeTab === 'distribution' && (
+          <DistributionEngine
+            projectId={projectId}
+            currentUserEmail={userEmail}
+            currentUserName={userEmail.split('@')[0]}
+          />
+        )}
+
+        {activeTab === 'archive' && (
+          <ArchiveIntelligence
+            projectId={projectId}
+            currentUserEmail={userEmail}
+            currentUserName={userEmail.split('@')[0]}
+          />
+        )}
+
         {activeTab === 'communication' && (
           <div className="bg-slate-800 rounded-xl border border-slate-700" style={{ height: 'calc(100vh - 400px)' }}>
             <ProjectChat
@@ -503,6 +548,17 @@ export default function ProjectDetail() {
               currentUserRole="Producer"
             />
           </div>
+        )}
+
+        {activeTab === 'compliance' && (
+          <PolicyEngine
+            projectId={projectId}
+            country={project.shootLocationCountry || undefined}
+            city={project.shootLocationCity || undefined}
+            hasDrones={brief?.hasDroneRisk || false}
+            hasMinors={brief?.hasMinorRisk || false}
+            hasForeignCrew={false}
+          />
         )}
 
         {activeTab === 'settings' && (
