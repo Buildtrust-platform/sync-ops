@@ -1,9 +1,17 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
-import { env } from '$amplify/env/universal-search';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
+
+// Environment variables set in resource.ts
+const env = {
+  PROJECT_TABLE_NAME: process.env.PROJECT_TABLE_NAME || '',
+  ASSET_TABLE_NAME: process.env.ASSET_TABLE_NAME || '',
+  REVIEWCOMMENT_TABLE_NAME: process.env.REVIEWCOMMENT_TABLE_NAME || '',
+  MESSAGE_TABLE_NAME: process.env.MESSAGE_TABLE_NAME || '',
+  TASK_TABLE_NAME: process.env.TASK_TABLE_NAME || '',
+};
 
 interface SearchResult {
   type: 'project' | 'asset' | 'comment' | 'message' | 'task' | 'brief';
