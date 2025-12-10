@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { generateClient } from "aws-amplify/data";
+import { fetchUserAttributes } from "aws-amplify/auth";
 import type { Schema } from "@/amplify/data/resource";
 
 /**
@@ -79,6 +80,62 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
   const [currentStep, setCurrentStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string>('');
+
+  // Fetch user's organization on mount
+  useEffect(() => {
+    async function fetchUserOrganization() {
+      try {
+        // Get user attributes
+        const attributes = await fetchUserAttributes();
+        const email = attributes.email || '';
+        const userId = attributes.sub || '';
+        setUserEmail(email);
+
+        // Find user's organization membership
+        const { data: memberships } = await client.models.OrganizationMember.list({
+          filter: { email: { eq: email } }
+        });
+
+        if (memberships && memberships.length > 0) {
+          setOrganizationId(memberships[0].organizationId);
+        } else {
+          // If no membership found, try to get/create a default organization
+          const { data: orgs } = await client.models.Organization.list();
+          if (orgs && orgs.length > 0) {
+            setOrganizationId(orgs[0].id);
+          } else {
+            // Create a default organization for the user
+            const { data: newOrg } = await client.models.Organization.create({
+              name: 'My Organization',
+              slug: `org-${Date.now()}`,
+              email: email,
+              subscriptionTier: 'FREE',
+              subscriptionStatus: 'TRIALING',
+              createdBy: userId,
+            });
+            if (newOrg) {
+              setOrganizationId(newOrg.id);
+              // Also create membership
+              await client.models.OrganizationMember.create({
+                organizationId: newOrg.id,
+                userId: userId,
+                email: email,
+                role: 'OWNER',
+                status: 'ACTIVE',
+              });
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching organization:', err);
+        setError('Unable to load organization. Please try again.');
+      }
+    }
+
+    fetchUserOrganization();
+  }, [client]);
 
   const [intakeData, setIntakeData] = useState<Partial<IntakeData>>({
     projectType: 'CORPORATE',
@@ -136,6 +193,12 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
     setIsProcessing(true);
     setError(null);
 
+    if (!organizationId) {
+      setError('Organization not found. Please refresh and try again.');
+      setIsProcessing(false);
+      return;
+    }
+
     try {
       const aiResults = intakeData.aiResults as any;
 
@@ -148,6 +211,7 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
 
       // Create the project
       const newProject = await client.models.Project.create({
+        organizationId: organizationId,
         name: intakeData.projectName || aiResults?.projectName || 'Untitled Project',
         description: intakeData.projectDescription,
         status: 'DEVELOPMENT',
@@ -194,12 +258,20 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
         greenlightClientApproved: false,
       });
 
+      // Log detailed error info if project creation failed
+      if (newProject.errors && newProject.errors.length > 0) {
+        console.error('Project creation GraphQL errors:', newProject.errors);
+        throw new Error(`Failed to create project: ${newProject.errors.map(e => e.message).join(', ')}`);
+      }
+
       if (!newProject.data) {
-        throw new Error('Failed to create project');
+        console.error('Project creation returned null data without errors');
+        throw new Error('Failed to create project - no data returned');
       }
 
       // Create the Brief
       await client.models.Brief.create({
+        organizationId: organizationId,
         projectId: newProject.data.id,
         projectDescription: intakeData.projectDescription,
         scriptOrNotes: intakeData.scriptOrNotes,
@@ -249,9 +321,10 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
 
       // Log activity
       await client.models.ActivityLog.create({
+        organizationId: organizationId,
         projectId: newProject.data.id,
         userId: 'USER',
-        userEmail: intakeData.projectOwnerEmail || 'user@syncops.app',
+        userEmail: userEmail || intakeData.projectOwnerEmail || 'user@syncops.app',
         userRole: 'Producer',
         action: 'PROJECT_CREATED',
         targetType: 'Project',
