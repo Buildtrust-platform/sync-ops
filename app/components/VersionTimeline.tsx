@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
 
-const client = generateClient<Schema>();
-
 interface AssetVersion {
   id: string;
   versionNumber: number;
@@ -29,6 +27,7 @@ interface VersionTimelineProps {
 }
 
 export default function VersionTimeline({ assetId, onVersionSelect, onCompare, compact = false }: VersionTimelineProps) {
+  const [client] = useState(() => generateClient<Schema>());
   const [versions, setVersions] = useState<AssetVersion[]>([]);
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null);
   const [compareMode, setCompareMode] = useState(false);
@@ -39,19 +38,19 @@ export default function VersionTimeline({ assetId, onVersionSelect, onCompare, c
     const subscription = client.models.AssetVersion.observeQuery({
       filter: { assetId: { eq: assetId } }
     }).subscribe({
-      next: ({ items }) => {
+      next: ({ items }: { items: AssetVersion[] }) => {
         const sortedVersions = [...items].sort((a, b) => b.versionNumber - a.versionNumber);
         setVersions(sortedVersions as AssetVersion[]);
         setLoading(false);
       },
-      error: (error) => {
+      error: (error: Error) => {
         console.error('Error fetching versions:', error);
         setLoading(false);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [assetId]);
+  }, [assetId, client]);
 
   function formatDate(dateString: string): string {
     return new Date(dateString).toLocaleDateString('en-US', {

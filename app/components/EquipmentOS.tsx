@@ -102,6 +102,7 @@ interface EquipmentRental {
 
 interface EquipmentOSProps {
   projectId?: string;
+  organizationId?: string;
   currentUserEmail: string;
   currentUserName?: string;
 }
@@ -140,9 +141,11 @@ const CONDITION_CONFIG: Record<EquipmentCondition, { label: string; color: strin
 
 export default function EquipmentOS({
   projectId,
+  organizationId,
   currentUserEmail,
   currentUserName,
 }: EquipmentOSProps) {
+  const orgId = organizationId || 'default-org';
   const [client] = useState(() => generateClient<Schema>());
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [checkouts, setCheckouts] = useState<EquipmentCheckoutRecord[]>([]);
@@ -279,10 +282,10 @@ export default function EquipmentOS({
   // Stats
   const stats = useMemo(() => {
     const total = equipment.length;
-    const available = equipment.filter((e) => e.status === "AVAILABLE").length;
-    const checkedOut = equipment.filter((e) => e.status === "CHECKED_OUT").length;
-    const maintenance = equipment.filter((e) => e.status === "IN_MAINTENANCE").length;
-    const damaged = equipment.filter((e) => e.status === "DAMAGED" || e.status === "LOST").length;
+    const available = equipment.filter((e) => e?.status === "AVAILABLE").length;
+    const checkedOut = equipment.filter((e) => e?.status === "CHECKED_OUT").length;
+    const maintenance = equipment.filter((e) => e?.status === "IN_MAINTENANCE").length;
+    const damaged = equipment.filter((e) => e?.status === "DAMAGED" || e?.status === "LOST").length;
     const totalValue = equipment.reduce((sum, e) => sum + (e.replacementValue || 0), 0);
 
     // Overdue checkouts
@@ -322,6 +325,7 @@ export default function EquipmentOS({
 
     try {
       await client.models.Equipment.create({
+        organizationId: orgId,
         name: newEquipment.name,
         description: newEquipment.description || undefined,
         category: newEquipment.category,
@@ -364,6 +368,7 @@ export default function EquipmentOS({
     try {
       // Create checkout record
       await client.models.EquipmentCheckout.create({
+        organizationId: orgId,
         equipmentId: showCheckoutModal.id,
         projectId: projectId || undefined,
         checkedOutBy: currentUserEmail,
@@ -458,6 +463,7 @@ export default function EquipmentOS({
       const depositAmount = parseFloat(rentalForm.depositAmount) || 0;
 
       await client.models.EquipmentRental.create({
+        organizationId: orgId,
         projectId,
         equipmentName: rentalForm.equipmentName,
         equipmentCategory: rentalForm.equipmentCategory,

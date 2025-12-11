@@ -17,6 +17,75 @@ import type { Schema } from "@/amplify/data/resource";
  * - Expandable milestone details
  */
 
+// SVG Icon Components (Lucide-style, stroke-width: 1.5)
+const CalendarIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
+  </svg>
+);
+
+const RocketIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+    <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+    <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+    <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+  </svg>
+);
+
+const TargetIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <circle cx="12" cy="12" r="6" />
+    <circle cx="12" cy="12" r="2" />
+  </svg>
+);
+
+const FileTextIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+    <line x1="16" y1="13" x2="8" y2="13" />
+    <line x1="16" y1="17" x2="8" y2="17" />
+    <polyline points="10 9 9 9 8 9" />
+  </svg>
+);
+
+const PackageIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="16.5" y1="9.4" x2="7.5" y2="4.21" />
+    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+    <line x1="12" y1="22.08" x2="12" y2="12" />
+  </svg>
+);
+
+const ClapperboardIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 11v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8H4z" />
+    <path d="m4 11-.88-2.87a2 2 0 0 1 1.33-2.5l11.48-3.5a2 2 0 0 1 2.5 1.32l.87 2.87L4 11z" />
+    <path d="m6.6 4.99 3.38 4.2" />
+    <path d="m11.86 3.38 3.38 4.2" />
+  </svg>
+);
+
+const FlagIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+    <line x1="4" y1="22" x2="4" y2="15" />
+  </svg>
+);
+
+const ClockIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
+  </svg>
+);
+
 interface ProjectTimelineProps {
   project: Schema["Project"]["type"];
 }
@@ -26,8 +95,8 @@ interface Milestone {
   label: string;
   date: string | null | undefined;
   phase: string;
-  icon: string;
-  color: string;
+  IconComponent: () => JSX.Element;
+  colorVar: string;
   status: "upcoming" | "today" | "overdue" | "none";
 }
 
@@ -55,8 +124,8 @@ export default function ProjectTimeline({ project }: ProjectTimelineProps) {
       label: "Project Start Date",
       date: project.preProductionStartDate,
       phase: "Development",
-      icon: "🚀",
-      color: "blue",
+      IconComponent: RocketIcon,
+      colorVar: "var(--accent-secondary)",
       status: getDateStatus(project.preProductionStartDate),
     },
     {
@@ -64,8 +133,8 @@ export default function ProjectTimeline({ project }: ProjectTimelineProps) {
       label: "Final Deadline",
       date: project.postProductionEndDate,
       phase: "All Phases",
-      icon: "🎯",
-      color: "red",
+      IconComponent: TargetIcon,
+      colorVar: "var(--status-error)",
       status: getDateStatus(project.postProductionEndDate),
     },
     {
@@ -73,8 +142,8 @@ export default function ProjectTimeline({ project }: ProjectTimelineProps) {
       label: "First Draft Delivery",
       date: project.postProductionStartDate,
       phase: "Post-Production",
-      icon: "📝",
-      color: "yellow",
+      IconComponent: FileTextIcon,
+      colorVar: "var(--status-warning)",
       status: getDateStatus(project.postProductionStartDate),
     },
     {
@@ -82,8 +151,8 @@ export default function ProjectTimeline({ project }: ProjectTimelineProps) {
       label: "Final Deliverable Date",
       date: project.distributionDate,
       phase: "Distribution",
-      icon: "📦",
-      color: "green",
+      IconComponent: PackageIcon,
+      colorVar: "var(--status-success)",
       status: getDateStatus(project.distributionDate),
     },
     {
@@ -91,8 +160,8 @@ export default function ProjectTimeline({ project }: ProjectTimelineProps) {
       label: "Shoot Start Date",
       date: project.productionStartDate,
       phase: "Production",
-      icon: "🎬",
-      color: "purple",
+      IconComponent: ClapperboardIcon,
+      colorVar: "var(--accent-primary)",
       status: getDateStatus(project.productionStartDate),
     },
     {
@@ -100,11 +169,11 @@ export default function ProjectTimeline({ project }: ProjectTimelineProps) {
       label: "Shoot End Date",
       date: project.productionEndDate,
       phase: "Production",
-      icon: "🏁",
-      color: "purple",
+      IconComponent: FlagIcon,
+      colorVar: "var(--accent-primary)",
       status: getDateStatus(project.productionEndDate),
     },
-  ].filter(m => m.date); // Only show milestones with dates
+  ].filter(m => m.date);
 
   // Sort milestones by date
   const sortedMilestones = [...milestones].sort((a, b) => {
@@ -114,10 +183,18 @@ export default function ProjectTimeline({ project }: ProjectTimelineProps) {
 
   if (sortedMilestones.length === 0) {
     return (
-      <div className="bg-slate-800 border border-slate-700 rounded-xl p-8 text-center">
-        <div className="text-4xl mb-3">📅</div>
-        <h3 className="text-xl font-bold text-slate-400 mb-2">No Timeline Data</h3>
-        <p className="text-sm text-slate-500">
+      <div style={{
+        backgroundColor: 'var(--bg-2)',
+        border: '1px solid var(--border-default)',
+        borderRadius: '12px',
+        padding: '32px',
+        textAlign: 'center',
+      }}>
+        <div style={{ marginBottom: '12px', color: 'var(--text-muted)' }}>
+          <CalendarIcon />
+        </div>
+        <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-muted)', marginBottom: '8px' }}>No Timeline Data</h3>
+        <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
           Milestone dates will appear here once configured in the project intake.
         </p>
       </div>
@@ -135,14 +212,28 @@ export default function ProjectTimeline({ project }: ProjectTimelineProps) {
     : 0;
 
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl">
+    <div style={{
+      backgroundColor: 'var(--bg-2)',
+      border: '1px solid var(--border-default)',
+      borderRadius: '12px',
+      padding: '24px',
+      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+    }}>
       {/* Header */}
-      <div className="flex justify-between items-start mb-6">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
         <div>
-          <h3 className="text-2xl font-black text-white flex items-center gap-3 mb-2">
-            📅 Project Timeline
+          <h3 style={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            color: 'var(--text-primary)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            marginBottom: '8px',
+          }}>
+            <CalendarIcon /> Project Timeline
           </h3>
-          <p className="text-sm text-slate-400">
+          <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
             {sortedMilestones.length} milestone{sortedMilestones.length !== 1 ? 's' : ''} tracked
             {durationDays > 0 && ` • ${durationDays} day project duration`}
           </p>
@@ -150,55 +241,87 @@ export default function ProjectTimeline({ project }: ProjectTimelineProps) {
       </div>
 
       {/* Timeline Visualization */}
-      <div className="mb-6">
-        <div className="relative">
+      <div style={{ marginBottom: '24px' }}>
+        <div style={{ position: 'relative' }}>
           {/* Timeline Line */}
-          <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-slate-700"></div>
+          <div style={{
+            position: 'absolute',
+            left: '32px',
+            top: 0,
+            bottom: 0,
+            width: '2px',
+            backgroundColor: 'var(--bg-3)',
+          }} />
 
           {/* Milestones */}
-          <div className="space-y-6">
-            {sortedMilestones.map((milestone, index) => {
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {sortedMilestones.map((milestone) => {
               const isExpanded = expandedMilestone === milestone.id;
               const milestoneDate = milestone.date ? new Date(milestone.date) : null;
               const daysFromNow = milestoneDate
                 ? Math.ceil((milestoneDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
                 : null;
+              const MilestoneIcon = milestone.IconComponent;
 
               return (
-                <div key={milestone.id} className="relative pl-20">
+                <div key={milestone.id} style={{ position: 'relative', paddingLeft: '80px' }}>
                   {/* Timeline Dot */}
-                  <div className={`absolute left-6 top-2 w-5 h-5 rounded-full border-4 ${
-                    milestone.status === "today"
-                      ? "bg-yellow-500 border-yellow-500 animate-pulse shadow-lg shadow-yellow-500/50"
+                  <div style={{
+                    position: 'absolute',
+                    left: '24px',
+                    top: '8px',
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    border: '4px solid',
+                    borderColor: milestone.status === "today"
+                      ? 'var(--status-warning)'
                       : milestone.status === "overdue"
-                      ? "bg-red-500 border-red-500"
-                      : `bg-${milestone.color}-500 border-${milestone.color}-500`
-                  }`}></div>
+                        ? 'var(--status-error)'
+                        : milestone.colorVar,
+                    backgroundColor: milestone.status === "today"
+                      ? 'var(--status-warning)'
+                      : milestone.status === "overdue"
+                        ? 'var(--status-error)'
+                        : milestone.colorVar,
+                    boxShadow: milestone.status === "today"
+                      ? '0 0 12px rgba(234, 179, 8, 0.5)'
+                      : 'none',
+                  }} />
 
                   {/* Milestone Card */}
                   <button
                     onClick={() => setExpandedMilestone(isExpanded ? null : milestone.id)}
-                    className={`w-full text-left bg-slate-900 rounded-lg p-4 border-2 transition-all hover:shadow-lg ${
-                      milestone.status === "today"
-                        ? "border-yellow-500"
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      backgroundColor: 'var(--bg-1)',
+                      borderRadius: '10px',
+                      padding: '16px',
+                      border: milestone.status === "today"
+                        ? '2px solid var(--status-warning)'
                         : milestone.status === "overdue"
-                        ? "border-red-500"
-                        : "border-slate-700 hover:border-slate-600"
-                    }`}
+                          ? '2px solid var(--status-error)'
+                          : '1px solid var(--border-default)',
+                      transition: 'all 80ms ease',
+                      cursor: 'pointer',
+                    }}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="text-2xl">{milestone.icon}</span>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                          <span style={{ color: milestone.colorVar }}>
+                            <MilestoneIcon />
+                          </span>
                           <div>
-                            <p className="text-base font-bold text-white">{milestone.label}</p>
-                            <p className="text-xs text-slate-500">{milestone.phase}</p>
+                            <p style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{milestone.label}</p>
+                            <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{milestone.phase}</p>
                           </div>
                         </div>
 
                         {milestone.date && (
-                          <div className="ml-11">
-                            <p className="text-sm text-slate-300">
+                          <div style={{ marginLeft: '32px' }}>
+                            <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
                               {new Date(milestone.date).toLocaleDateString('en-US', {
                                 weekday: 'long',
                                 year: 'numeric',
@@ -207,13 +330,16 @@ export default function ProjectTimeline({ project }: ProjectTimelineProps) {
                               })}
                             </p>
                             {daysFromNow !== null && (
-                              <p className={`text-xs mt-1 ${
-                                milestone.status === "overdue"
-                                  ? "text-red-400 font-bold"
+                              <p style={{
+                                fontSize: '12px',
+                                marginTop: '4px',
+                                fontWeight: milestone.status === "overdue" || milestone.status === "today" ? 'bold' : 'normal',
+                                color: milestone.status === "overdue"
+                                  ? 'var(--status-error)'
                                   : milestone.status === "today"
-                                  ? "text-yellow-400 font-bold"
-                                  : "text-slate-500"
-                              }`}>
+                                    ? 'var(--status-warning)'
+                                    : 'var(--text-muted)',
+                              }}>
                                 {milestone.status === "overdue" && `${Math.abs(daysFromNow)} days overdue`}
                                 {milestone.status === "today" && "TODAY"}
                                 {milestone.status === "upcoming" && `${daysFromNow} days from now`}
@@ -224,13 +350,20 @@ export default function ProjectTimeline({ project }: ProjectTimelineProps) {
                       </div>
 
                       {/* Status Badge */}
-                      <div className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        milestone.status === "today"
-                          ? "bg-yellow-500 text-black"
+                      <div style={{
+                        padding: '4px 12px',
+                        borderRadius: '9999px',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        backgroundColor: milestone.status === "today"
+                          ? 'var(--status-warning)'
                           : milestone.status === "overdue"
-                          ? "bg-red-500 text-white"
-                          : `bg-${milestone.color}-500/20 text-${milestone.color}-300`
-                      }`}>
+                            ? 'var(--status-error)'
+                            : 'rgba(45, 212, 191, 0.2)',
+                        color: milestone.status === "today" || milestone.status === "overdue"
+                          ? 'var(--bg-1)'
+                          : 'var(--accent-primary)',
+                      }}>
                         {milestone.status === "today" && "TODAY"}
                         {milestone.status === "overdue" && "OVERDUE"}
                         {milestone.status === "upcoming" && "UPCOMING"}
@@ -239,17 +372,22 @@ export default function ProjectTimeline({ project }: ProjectTimelineProps) {
 
                     {/* Expanded Details */}
                     {isExpanded && (
-                      <div className="mt-4 pt-4 border-t border-slate-700 ml-11">
-                        <div className="grid grid-cols-2 gap-4 text-xs">
+                      <div style={{
+                        marginTop: '16px',
+                        paddingTop: '16px',
+                        borderTop: '1px solid var(--border-default)',
+                        marginLeft: '32px',
+                      }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', fontSize: '12px' }}>
                           <div>
-                            <p className="text-slate-500 mb-1">Date</p>
-                            <p className="text-white font-mono">
+                            <p style={{ color: 'var(--text-muted)', marginBottom: '4px' }}>Date</p>
+                            <p style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>
                               {milestone.date ? new Date(milestone.date).toISOString().split('T')[0] : 'N/A'}
                             </p>
                           </div>
                           <div>
-                            <p className="text-slate-500 mb-1">Phase</p>
-                            <p className="text-white">{milestone.phase}</p>
+                            <p style={{ color: 'var(--text-muted)', marginBottom: '4px' }}>Phase</p>
+                            <p style={{ color: 'var(--text-primary)' }}>{milestone.phase}</p>
                           </div>
                         </div>
                       </div>
@@ -262,12 +400,14 @@ export default function ProjectTimeline({ project }: ProjectTimelineProps) {
 
           {/* Today Marker (if within timeline range) */}
           {firstDate && lastDate && today >= firstDate && today <= lastDate && (
-            <div className="mt-8 pt-6 border-t-2 border-yellow-500/30">
-              <div className="flex items-center gap-3 text-yellow-400">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="text-sm font-bold">
+            <div style={{
+              marginTop: '32px',
+              paddingTop: '24px',
+              borderTop: '2px solid rgba(234, 179, 8, 0.3)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--status-warning)' }}>
+                <ClockIcon />
+                <span style={{ fontSize: '14px', fontWeight: 'bold' }}>
                   Today: {today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                 </span>
               </div>
@@ -277,20 +417,26 @@ export default function ProjectTimeline({ project }: ProjectTimelineProps) {
       </div>
 
       {/* Summary Statistics */}
-      <div className="grid grid-cols-3 gap-3 pt-4 border-t border-slate-700">
-        <div className="bg-slate-900 rounded-lg p-3 text-center">
-          <p className="text-xs text-slate-500 mb-1">Total Milestones</p>
-          <p className="text-xl font-bold text-white">{sortedMilestones.length}</p>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: '12px',
+        paddingTop: '16px',
+        borderTop: '1px solid var(--border-default)',
+      }}>
+        <div style={{ backgroundColor: 'var(--bg-1)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Total Milestones</p>
+          <p style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{sortedMilestones.length}</p>
         </div>
-        <div className="bg-slate-900 rounded-lg p-3 text-center">
-          <p className="text-xs text-slate-500 mb-1">Overdue</p>
-          <p className="text-xl font-bold text-red-400">
+        <div style={{ backgroundColor: 'var(--bg-1)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Overdue</p>
+          <p style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--status-error)' }}>
             {sortedMilestones.filter(m => m.status === "overdue").length}
           </p>
         </div>
-        <div className="bg-slate-900 rounded-lg p-3 text-center">
-          <p className="text-xs text-slate-500 mb-1">Upcoming</p>
-          <p className="text-xl font-bold text-blue-400">
+        <div style={{ backgroundColor: 'var(--bg-1)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Upcoming</p>
+          <p style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--accent-secondary)' }}>
             {sortedMilestones.filter(m => m.status === "upcoming").length}
           </p>
         </div>

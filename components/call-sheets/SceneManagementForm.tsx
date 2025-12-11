@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
 
-const client = generateClient<Schema>();
-
 type CallSheetScene = Schema['CallSheetScene']['type'];
 
 interface SceneManagementFormProps {
@@ -17,6 +15,7 @@ export default function SceneManagementForm({
   callSheetId,
   onScenesUpdated,
 }: SceneManagementFormProps) {
+  const [client] = useState(() => generateClient<Schema>());
   const [scenes, setScenes] = useState<CallSheetScene[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);

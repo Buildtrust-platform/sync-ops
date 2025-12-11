@@ -5,8 +5,6 @@ import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
 import { generateCallSheetPDF } from '@/lib/callSheetPDF';
 
-const client = generateClient<Schema>();
-
 type CallSheet = Schema['CallSheet']['type'];
 type CallSheetScene = Schema['CallSheetScene']['type'];
 type CallSheetCast = Schema['CallSheetCast']['type'];
@@ -18,6 +16,7 @@ interface CallSheetViewerProps {
 }
 
 export default function CallSheetViewer({ callSheetId, onEdit }: CallSheetViewerProps) {
+  const [client] = useState(() => generateClient<Schema>());
   const [callSheet, setCallSheet] = useState<CallSheet | null>(null);
   const [scenes, setScenes] = useState<CallSheetScene[]>([]);
   const [cast, setCast] = useState<CallSheetCast[]>([]);

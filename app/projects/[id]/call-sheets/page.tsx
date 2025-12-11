@@ -5,8 +5,6 @@ import { useRouter, useParams } from 'next/navigation';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
 
-const client = generateClient<Schema>();
-
 type CallSheet = Schema['CallSheet']['type'];
 
 export default function CallSheetsListPage() {
@@ -14,6 +12,7 @@ export default function CallSheetsListPage() {
   const params = useParams();
   const projectId = params.id as string;
 
+  const [client] = useState(() => generateClient<Schema>());
   const [callSheets, setCallSheets] = useState<CallSheet[]>([]);
   const [loading, setLoading] = useState(true);
 

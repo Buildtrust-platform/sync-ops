@@ -5,7 +5,16 @@ import { generateClient } from 'aws-amplify/data';
 import { getUrl } from 'aws-amplify/storage';
 import type { Schema } from '@/amplify/data/resource';
 
-const client = generateClient<Schema>();
+// SVG Icon Components (Lucide-style, stroke-width: 1.5)
+const FileIcon = () => (
+  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+    <line x1="16" y1="13" x2="8" y2="13" />
+    <line x1="16" y1="17" x2="8" y2="17" />
+    <polyline points="10 9 9 9 8 9" />
+  </svg>
+);
 
 interface AssetVersion {
   id: string;
@@ -32,6 +41,7 @@ interface VersionComparisonProps {
 }
 
 export default function VersionComparison({ assetId, projectId }: VersionComparisonProps) {
+  const [client] = useState(() => generateClient<Schema>());
   const [versions, setVersions] = useState<AssetVersion[]>([]);
   const [leftVersion, setLeftVersion] = useState<AssetVersion | null>(null);
   const [rightVersion, setRightVersion] = useState<AssetVersion | null>(null);
@@ -44,7 +54,7 @@ export default function VersionComparison({ assetId, projectId }: VersionCompari
     const subscription = client.models.AssetVersion.observeQuery({
       filter: { assetId: { eq: assetId } }
     }).subscribe({
-      next: ({ items }) => {
+      next: ({ items }: { items: AssetVersion[] }) => {
         const sortedVersions = [...items].sort((a, b) => b.versionNumber - a.versionNumber);
         setVersions(sortedVersions as AssetVersion[]);
 
@@ -58,14 +68,14 @@ export default function VersionComparison({ assetId, projectId }: VersionCompari
 
         setLoading(false);
       },
-      error: (error) => {
+      error: (error: Error) => {
         console.error('Error fetching versions:', error);
         setLoading(false);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [assetId]);
+  }, [assetId, client]);
 
   // Generate signed URL for left version
   useEffect(() => {
@@ -139,10 +149,26 @@ export default function VersionComparison({ assetId, projectId }: VersionCompari
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96 bg-slate-800 rounded-xl border border-slate-700">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="text-slate-400 mt-4">Loading versions...</p>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '384px',
+        backgroundColor: 'var(--bg-2)',
+        borderRadius: '12px',
+        border: '1px solid var(--border-default)',
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '48px',
+            height: '48px',
+            border: '2px solid transparent',
+            borderTopColor: 'var(--accent-secondary)',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto',
+          }} />
+          <p style={{ color: 'var(--text-muted)', marginTop: '16px' }}>Loading versions...</p>
         </div>
       </div>
     );
@@ -150,32 +176,54 @@ export default function VersionComparison({ assetId, projectId }: VersionCompari
 
   if (versions.length === 0) {
     return (
-      <div className="bg-slate-800 rounded-xl border border-slate-700 p-8">
-        <div className="text-center">
-          <svg className="w-16 h-16 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <p className="text-slate-400 font-medium">No versions available</p>
-          <p className="text-slate-500 text-sm mt-2">Upload a new version to start tracking changes</p>
+      <div style={{
+        backgroundColor: 'var(--bg-2)',
+        borderRadius: '12px',
+        border: '1px solid var(--border-default)',
+        padding: '32px',
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ color: 'var(--text-muted)', marginBottom: '16px' }}>
+            <FileIcon />
+          </div>
+          <p style={{ color: 'var(--text-muted)', fontWeight: 500 }}>No versions available</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '8px' }}>
+            Upload a new version to start tracking changes
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Version Selector Row */}
-      <div className="grid grid-cols-2 gap-4">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
         {/* Left Version Selector */}
-        <div className="bg-slate-800 rounded-lg border border-slate-700 p-4">
-          <label className="block text-sm font-medium text-slate-300 mb-2">Compare Version</label>
+        <div style={{
+          backgroundColor: 'var(--bg-2)',
+          borderRadius: '10px',
+          border: '1px solid var(--border-default)',
+          padding: '16px',
+        }}>
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '8px' }}>
+            Compare Version
+          </label>
           <select
             value={leftVersion?.id || ''}
             onChange={(e) => {
               const version = versions.find(v => v.id === e.target.value);
               setLeftVersion(version || null);
             }}
-            className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            style={{
+              width: '100%',
+              backgroundColor: 'var(--bg-1)',
+              border: '1px solid var(--border-default)',
+              borderRadius: '6px',
+              padding: '8px 12px',
+              color: 'var(--text-primary)',
+              fontSize: '14px',
+            }}
           >
             <option value="">Select a version...</option>
             {versions.map(version => (
@@ -188,15 +236,30 @@ export default function VersionComparison({ assetId, projectId }: VersionCompari
         </div>
 
         {/* Right Version Selector */}
-        <div className="bg-slate-800 rounded-lg border border-slate-700 p-4">
-          <label className="block text-sm font-medium text-slate-300 mb-2">With Version</label>
+        <div style={{
+          backgroundColor: 'var(--bg-2)',
+          borderRadius: '10px',
+          border: '1px solid var(--border-default)',
+          padding: '16px',
+        }}>
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '8px' }}>
+            With Version
+          </label>
           <select
             value={rightVersion?.id || ''}
             onChange={(e) => {
               const version = versions.find(v => v.id === e.target.value);
               setRightVersion(version || null);
             }}
-            className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            style={{
+              width: '100%',
+              backgroundColor: 'var(--bg-1)',
+              border: '1px solid var(--border-default)',
+              borderRadius: '6px',
+              padding: '8px 12px',
+              color: 'var(--text-primary)',
+              fontSize: '14px',
+            }}
           >
             <option value="">Select a version...</option>
             {versions.map(version => (
@@ -211,173 +274,271 @@ export default function VersionComparison({ assetId, projectId }: VersionCompari
 
       {/* Side-by-Side Comparison */}
       {(leftVersion || rightVersion) && (
-        <div className="grid grid-cols-2 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
           {/* Left Version */}
-          <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+          <div style={{
+            backgroundColor: 'var(--bg-2)',
+            borderRadius: '12px',
+            border: '1px solid var(--border-default)',
+            overflow: 'hidden',
+          }}>
             {leftVersion ? (
               <>
                 {/* Version Header */}
-                <div className="bg-slate-900 border-b border-slate-700 p-4">
-                  <div className="flex items-start justify-between">
+                <div style={{
+                  backgroundColor: 'var(--bg-1)',
+                  borderBottom: '1px solid var(--border-default)',
+                  padding: '16px',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-semibold text-white">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>
                           Version {leftVersion.versionNumber}
                         </h3>
                         {leftVersion.isCurrentVersion && (
-                          <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-medium rounded">
+                          <span style={{
+                            padding: '2px 8px',
+                            backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                            color: 'var(--status-success)',
+                            fontSize: '12px',
+                            fontWeight: 500,
+                            borderRadius: '4px',
+                          }}>
                             Current
                           </span>
                         )}
                         {leftVersion.isReviewReady && (
-                          <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs font-medium rounded">
+                          <span style={{
+                            padding: '2px 8px',
+                            backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                            color: 'var(--accent-secondary)',
+                            fontSize: '12px',
+                            fontWeight: 500,
+                            borderRadius: '4px',
+                          }}>
                             Review Ready
                           </span>
                         )}
                       </div>
                       {leftVersion.versionLabel && (
-                        <p className="text-sm text-slate-400 mt-1">{leftVersion.versionLabel}</p>
+                        <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginTop: '4px' }}>{leftVersion.versionLabel}</p>
                       )}
                     </div>
                   </div>
 
-                  <div className="mt-3 space-y-1 text-sm text-slate-400">
+                  <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '14px', color: 'var(--text-muted)' }}>
                     <p>Created by {leftVersion.createdByEmail || leftVersion.createdBy}</p>
                     <p>{formatDate(leftVersion.createdAt)}</p>
                     <p>{formatFileSize(leftVersion.fileSize)}</p>
                   </div>
 
                   {leftVersion.changeDescription && (
-                    <div className="mt-3 p-3 bg-slate-800 rounded-lg">
-                      <p className="text-xs font-medium text-slate-300 mb-1">Changes:</p>
-                      <p className="text-sm text-slate-400">{leftVersion.changeDescription}</p>
+                    <div style={{
+                      marginTop: '12px',
+                      padding: '12px',
+                      backgroundColor: 'var(--bg-2)',
+                      borderRadius: '8px',
+                    }}>
+                      <p style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '4px' }}>Changes:</p>
+                      <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>{leftVersion.changeDescription}</p>
                     </div>
                   )}
                 </div>
 
                 {/* Version Preview */}
-                <div className="bg-black aspect-video flex items-center justify-center">
+                <div style={{
+                  backgroundColor: 'var(--bg-1)',
+                  aspectRatio: '16/9',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
                   {leftUrl ? (
                     <>
                       {isVideo(leftVersion.mimeType) ? (
                         <video
                           src={leftUrl}
                           controls
-                          className="w-full h-full"
+                          style={{ width: '100%', height: '100%' }}
                           preload="metadata"
                         />
                       ) : isImage(leftVersion.mimeType) ? (
                         <img
                           src={leftUrl}
                           alt={`Version ${leftVersion.versionNumber}`}
-                          className="max-w-full max-h-full object-contain"
+                          style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                         />
                       ) : (
-                        <div className="text-center p-8">
-                          <svg className="w-16 h-16 text-slate-600 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                          <p className="text-slate-400">Preview not available for this file type</p>
-                          <p className="text-slate-500 text-sm mt-1">{leftVersion.mimeType}</p>
+                        <div style={{ textAlign: 'center', padding: '32px' }}>
+                          <div style={{ color: 'var(--text-muted)', marginBottom: '12px' }}>
+                            <FileIcon />
+                          </div>
+                          <p style={{ color: 'var(--text-muted)' }}>Preview not available for this file type</p>
+                          <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '4px' }}>{leftVersion.mimeType}</p>
                         </div>
                       )}
                     </>
                   ) : (
-                    <div className="text-center">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-                      <p className="text-slate-400 mt-4 text-sm">Loading preview...</p>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{
+                        width: '48px',
+                        height: '48px',
+                        border: '2px solid transparent',
+                        borderTopColor: 'var(--accent-secondary)',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite',
+                        margin: '0 auto',
+                      }} />
+                      <p style={{ color: 'var(--text-muted)', marginTop: '16px', fontSize: '14px' }}>Loading preview...</p>
                     </div>
                   )}
                 </div>
               </>
             ) : (
-              <div className="h-full flex items-center justify-center p-8 text-center">
-                <p className="text-slate-500">Select a version to compare</p>
+              <div style={{
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '32px',
+                textAlign: 'center',
+              }}>
+                <p style={{ color: 'var(--text-muted)' }}>Select a version to compare</p>
               </div>
             )}
           </div>
 
           {/* Right Version */}
-          <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+          <div style={{
+            backgroundColor: 'var(--bg-2)',
+            borderRadius: '12px',
+            border: '1px solid var(--border-default)',
+            overflow: 'hidden',
+          }}>
             {rightVersion ? (
               <>
                 {/* Version Header */}
-                <div className="bg-slate-900 border-b border-slate-700 p-4">
-                  <div className="flex items-start justify-between">
+                <div style={{
+                  backgroundColor: 'var(--bg-1)',
+                  borderBottom: '1px solid var(--border-default)',
+                  padding: '16px',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-semibold text-white">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>
                           Version {rightVersion.versionNumber}
                         </h3>
                         {rightVersion.isCurrentVersion && (
-                          <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-medium rounded">
+                          <span style={{
+                            padding: '2px 8px',
+                            backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                            color: 'var(--status-success)',
+                            fontSize: '12px',
+                            fontWeight: 500,
+                            borderRadius: '4px',
+                          }}>
                             Current
                           </span>
                         )}
                         {rightVersion.isReviewReady && (
-                          <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs font-medium rounded">
+                          <span style={{
+                            padding: '2px 8px',
+                            backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                            color: 'var(--accent-secondary)',
+                            fontSize: '12px',
+                            fontWeight: 500,
+                            borderRadius: '4px',
+                          }}>
                             Review Ready
                           </span>
                         )}
                       </div>
                       {rightVersion.versionLabel && (
-                        <p className="text-sm text-slate-400 mt-1">{rightVersion.versionLabel}</p>
+                        <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginTop: '4px' }}>{rightVersion.versionLabel}</p>
                       )}
                     </div>
                   </div>
 
-                  <div className="mt-3 space-y-1 text-sm text-slate-400">
+                  <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '14px', color: 'var(--text-muted)' }}>
                     <p>Created by {rightVersion.createdByEmail || rightVersion.createdBy}</p>
                     <p>{formatDate(rightVersion.createdAt)}</p>
                     <p>{formatFileSize(rightVersion.fileSize)}</p>
                   </div>
 
                   {rightVersion.changeDescription && (
-                    <div className="mt-3 p-3 bg-slate-800 rounded-lg">
-                      <p className="text-xs font-medium text-slate-300 mb-1">Changes:</p>
-                      <p className="text-sm text-slate-400">{rightVersion.changeDescription}</p>
+                    <div style={{
+                      marginTop: '12px',
+                      padding: '12px',
+                      backgroundColor: 'var(--bg-2)',
+                      borderRadius: '8px',
+                    }}>
+                      <p style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '4px' }}>Changes:</p>
+                      <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>{rightVersion.changeDescription}</p>
                     </div>
                   )}
                 </div>
 
                 {/* Version Preview */}
-                <div className="bg-black aspect-video flex items-center justify-center">
+                <div style={{
+                  backgroundColor: 'var(--bg-1)',
+                  aspectRatio: '16/9',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
                   {rightUrl ? (
                     <>
                       {isVideo(rightVersion.mimeType) ? (
                         <video
                           src={rightUrl}
                           controls
-                          className="w-full h-full"
+                          style={{ width: '100%', height: '100%' }}
                           preload="metadata"
                         />
                       ) : isImage(rightVersion.mimeType) ? (
                         <img
                           src={rightUrl}
                           alt={`Version ${rightVersion.versionNumber}`}
-                          className="max-w-full max-h-full object-contain"
+                          style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                         />
                       ) : (
-                        <div className="text-center p-8">
-                          <svg className="w-16 h-16 text-slate-600 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                          <p className="text-slate-400">Preview not available for this file type</p>
-                          <p className="text-slate-500 text-sm mt-1">{rightVersion.mimeType}</p>
+                        <div style={{ textAlign: 'center', padding: '32px' }}>
+                          <div style={{ color: 'var(--text-muted)', marginBottom: '12px' }}>
+                            <FileIcon />
+                          </div>
+                          <p style={{ color: 'var(--text-muted)' }}>Preview not available for this file type</p>
+                          <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '4px' }}>{rightVersion.mimeType}</p>
                         </div>
                       )}
                     </>
                   ) : (
-                    <div className="text-center">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-                      <p className="text-slate-400 mt-4 text-sm">Loading preview...</p>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{
+                        width: '48px',
+                        height: '48px',
+                        border: '2px solid transparent',
+                        borderTopColor: 'var(--accent-secondary)',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite',
+                        margin: '0 auto',
+                      }} />
+                      <p style={{ color: 'var(--text-muted)', marginTop: '16px', fontSize: '14px' }}>Loading preview...</p>
                     </div>
                   )}
                 </div>
               </>
             ) : (
-              <div className="h-full flex items-center justify-center p-8 text-center">
-                <p className="text-slate-500">Select a version to compare</p>
+              <div style={{
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '32px',
+                textAlign: 'center',
+              }}>
+                <p style={{ color: 'var(--text-muted)' }}>Select a version to compare</p>
               </div>
             )}
           </div>

@@ -3,9 +3,133 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
-import { getUrl } from 'aws-amplify/storage';
 
-const client = generateClient<Schema>();
+// Client is initialized inside component to avoid SSR issues
+
+// Lucide-style SVG Icons
+const BroadcastIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="2" />
+    <path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14" />
+  </svg>
+);
+
+const LinkIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+  </svg>
+);
+
+const ShareIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="18" cy="5" r="3" />
+    <circle cx="6" cy="12" r="3" />
+    <circle cx="18" cy="19" r="3" />
+    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+  </svg>
+);
+
+const EyeIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const LockIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+);
+
+const GlobeIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="2" y1="12" x2="22" y2="12" />
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+  </svg>
+);
+
+const DropletIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+  </svg>
+);
+
+const CopyIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </svg>
+);
+
+const BanIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+  </svg>
+);
+
+const PlusIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+);
+
+const SmartphoneIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+    <line x1="12" y1="18" x2="12.01" y2="18" />
+  </svg>
+);
+
+const BarChartIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="20" x2="12" y2="10" />
+    <line x1="18" y1="20" x2="18" y2="4" />
+    <line x1="6" y1="20" x2="6" y2="16" />
+  </svg>
+);
+
+const ClockIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
+  </svg>
+);
+
+const CalendarIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
+  </svg>
+);
+
+const XIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
+const PlayIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="5 3 19 12 5 21 5 3" />
+  </svg>
+);
+
+const MailIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+    <polyline points="22,6 12,13 2,6" />
+  </svg>
+);
 
 // Types
 interface DistributionLink {
@@ -84,34 +208,35 @@ interface Asset {
 
 interface Props {
   projectId: string;
+  organizationId?: string;
   currentUserEmail: string;
   currentUserName?: string;
 }
 
 // Link type icons and labels
 const LINK_TYPES = [
-  { value: 'REVIEW', label: 'Stakeholder Review', icon: '👁️' },
-  { value: 'CLIENT_PREVIEW', label: 'Client Preview', icon: '🎬' },
-  { value: 'PRESS', label: 'Press/Media', icon: '📰' },
-  { value: 'PARTNER', label: 'Distribution Partner', icon: '🤝' },
-  { value: 'INTERNAL', label: 'Internal Sharing', icon: '🏢' },
-  { value: 'PUBLIC', label: 'Public Release', icon: '🌍' },
-  { value: 'SCREENER', label: 'Festival/Awards', icon: '🏆' },
-  { value: 'INVESTOR', label: 'Investor Preview', icon: '💼' },
+  { value: 'REVIEW', label: 'Stakeholder Review', icon: EyeIcon },
+  { value: 'CLIENT_PREVIEW', label: 'Client Preview', icon: PlayIcon },
+  { value: 'PRESS', label: 'Press/Media', icon: BroadcastIcon },
+  { value: 'PARTNER', label: 'Distribution Partner', icon: ShareIcon },
+  { value: 'INTERNAL', label: 'Internal Sharing', icon: LinkIcon },
+  { value: 'PUBLIC', label: 'Public Release', icon: GlobeIcon },
+  { value: 'SCREENER', label: 'Festival/Awards', icon: PlayIcon },
+  { value: 'INVESTOR', label: 'Investor Preview', icon: BarChartIcon },
 ];
 
 // Social platform configurations with character limits
 const SOCIAL_PLATFORMS = [
-  { value: 'YOUTUBE', label: 'YouTube', icon: '▶️', aspectRatio: 'LANDSCAPE_16_9', aspectLabel: '16:9', maxDuration: null, captionLimit: 5000, titleLimit: 100, hasTitle: true, hasDescription: true, hasHashtags: true, hasTags: true },
-  { value: 'VIMEO', label: 'Vimeo', icon: '🎥', aspectRatio: 'LANDSCAPE_16_9', aspectLabel: '16:9', maxDuration: null, captionLimit: 5000, titleLimit: 128, hasTitle: true, hasDescription: true, hasHashtags: false, hasTags: true },
-  { value: 'FACEBOOK', label: 'Facebook', icon: '📘', aspectRatio: 'LANDSCAPE_16_9', aspectLabel: '16:9', maxDuration: 240, captionLimit: 63206, titleLimit: null, hasTitle: false, hasDescription: false, hasHashtags: true, hasTags: false },
-  { value: 'INSTAGRAM_FEED', label: 'Instagram Feed', icon: '📷', aspectRatio: 'SQUARE_1_1', aspectLabel: '1:1', maxDuration: 60, captionLimit: 2200, titleLimit: null, hasTitle: false, hasDescription: false, hasHashtags: true, hasTags: false },
-  { value: 'INSTAGRAM_STORY', label: 'Instagram Story', icon: '📱', aspectRatio: 'PORTRAIT_9_16', aspectLabel: '9:16', maxDuration: 15, captionLimit: 0, titleLimit: null, hasTitle: false, hasDescription: false, hasHashtags: false, hasTags: false },
-  { value: 'INSTAGRAM_REELS', label: 'Instagram Reels', icon: '🎞️', aspectRatio: 'PORTRAIT_9_16', aspectLabel: '9:16', maxDuration: 90, captionLimit: 2200, titleLimit: null, hasTitle: false, hasDescription: false, hasHashtags: true, hasTags: false },
-  { value: 'TIKTOK', label: 'TikTok', icon: '🎵', aspectRatio: 'PORTRAIT_9_16', aspectLabel: '9:16', maxDuration: 180, captionLimit: 2200, titleLimit: null, hasTitle: false, hasDescription: false, hasHashtags: true, hasTags: false },
-  { value: 'TWITTER', label: 'Twitter/X', icon: '🐦', aspectRatio: 'LANDSCAPE_16_9', aspectLabel: '16:9', maxDuration: 140, captionLimit: 280, titleLimit: null, hasTitle: false, hasDescription: false, hasHashtags: true, hasTags: false },
-  { value: 'LINKEDIN', label: 'LinkedIn', icon: '💼', aspectRatio: 'LANDSCAPE_16_9', aspectLabel: '16:9', maxDuration: 600, captionLimit: 3000, titleLimit: 200, hasTitle: true, hasDescription: false, hasHashtags: true, hasTags: false },
-  { value: 'WEBSITE', label: 'Website', icon: '🌐', aspectRatio: 'LANDSCAPE_16_9', aspectLabel: '16:9', maxDuration: null, captionLimit: null, titleLimit: null, hasTitle: true, hasDescription: true, hasHashtags: false, hasTags: false },
+  { value: 'YOUTUBE', label: 'YouTube', icon: PlayIcon, aspectRatio: 'LANDSCAPE_16_9', aspectLabel: '16:9', maxDuration: null, captionLimit: 5000, titleLimit: 100, hasTitle: true, hasDescription: true, hasHashtags: true, hasTags: true },
+  { value: 'VIMEO', label: 'Vimeo', icon: PlayIcon, aspectRatio: 'LANDSCAPE_16_9', aspectLabel: '16:9', maxDuration: null, captionLimit: 5000, titleLimit: 128, hasTitle: true, hasDescription: true, hasHashtags: false, hasTags: true },
+  { value: 'FACEBOOK', label: 'Facebook', icon: ShareIcon, aspectRatio: 'LANDSCAPE_16_9', aspectLabel: '16:9', maxDuration: 240, captionLimit: 63206, titleLimit: null, hasTitle: false, hasDescription: false, hasHashtags: true, hasTags: false },
+  { value: 'INSTAGRAM_FEED', label: 'Instagram Feed', icon: SmartphoneIcon, aspectRatio: 'SQUARE_1_1', aspectLabel: '1:1', maxDuration: 60, captionLimit: 2200, titleLimit: null, hasTitle: false, hasDescription: false, hasHashtags: true, hasTags: false },
+  { value: 'INSTAGRAM_STORY', label: 'Instagram Story', icon: SmartphoneIcon, aspectRatio: 'PORTRAIT_9_16', aspectLabel: '9:16', maxDuration: 15, captionLimit: 0, titleLimit: null, hasTitle: false, hasDescription: false, hasHashtags: false, hasTags: false },
+  { value: 'INSTAGRAM_REELS', label: 'Instagram Reels', icon: SmartphoneIcon, aspectRatio: 'PORTRAIT_9_16', aspectLabel: '9:16', maxDuration: 90, captionLimit: 2200, titleLimit: null, hasTitle: false, hasDescription: false, hasHashtags: true, hasTags: false },
+  { value: 'TIKTOK', label: 'TikTok', icon: SmartphoneIcon, aspectRatio: 'PORTRAIT_9_16', aspectLabel: '9:16', maxDuration: 180, captionLimit: 2200, titleLimit: null, hasTitle: false, hasDescription: false, hasHashtags: true, hasTags: false },
+  { value: 'TWITTER', label: 'Twitter/X', icon: ShareIcon, aspectRatio: 'LANDSCAPE_16_9', aspectLabel: '16:9', maxDuration: 140, captionLimit: 280, titleLimit: null, hasTitle: false, hasDescription: false, hasHashtags: true, hasTags: false },
+  { value: 'LINKEDIN', label: 'LinkedIn', icon: ShareIcon, aspectRatio: 'LANDSCAPE_16_9', aspectLabel: '16:9', maxDuration: 600, captionLimit: 3000, titleLimit: 200, hasTitle: true, hasDescription: false, hasHashtags: true, hasTags: false },
+  { value: 'WEBSITE', label: 'Website', icon: GlobeIcon, aspectRatio: 'LANDSCAPE_16_9', aspectLabel: '16:9', maxDuration: null, captionLimit: null, titleLimit: null, hasTitle: true, hasDescription: true, hasHashtags: false, hasTags: false },
 ];
 
 // YouTube categories
@@ -158,7 +283,10 @@ const COUNTRIES = [
   { code: 'CH', name: 'Switzerland' },
 ];
 
-export default function DistributionEngine({ projectId, currentUserEmail, currentUserName }: Props) {
+export default function DistributionEngine({ projectId, organizationId, currentUserEmail, currentUserName }: Props) {
+  const orgId = organizationId || 'default-org';
+  const [client] = useState(() => generateClient<Schema>());
+
   // State
   const [activeTab, setActiveTab] = useState<'links' | 'social' | 'analytics'>('links');
   const [distributionLinks, setDistributionLinks] = useState<DistributionLink[]>([]);
@@ -275,6 +403,7 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
       const expiresAt = linkForm.expiresAt ? new Date(linkForm.expiresAt).toISOString() : undefined;
 
       await client.models.DistributionLink.create({
+        organizationId: orgId,
         name: linkForm.name,
         description: linkForm.description || undefined,
         linkType: linkForm.linkType as 'REVIEW' | 'CLIENT_PREVIEW' | 'PRESS' | 'PARTNER' | 'INTERNAL' | 'PUBLIC' | 'SCREENER' | 'INVESTOR',
@@ -334,6 +463,7 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
         : undefined;
 
       await client.models.SocialOutput.create({
+        organizationId: orgId,
         name: socialForm.name,
         description: socialForm.description || undefined,
         projectId,
@@ -503,28 +633,63 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
   // Get status badge
   function getStatusBadge(status?: string | null, isExpired?: boolean | null) {
     if (isExpired || status === 'EXPIRED') {
-      return <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs rounded-full">Expired</span>;
+      return (
+        <span
+          className="px-2 py-1 text-xs rounded-full"
+          style={{ backgroundColor: 'rgba(239, 68, 68, 0.2)', color: 'var(--status-error)' }}
+        >
+          Expired
+        </span>
+      );
     }
     switch (status) {
       case 'ACTIVE':
-        return <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">Active</span>;
+        return (
+          <span
+            className="px-2 py-1 text-xs rounded-full"
+            style={{ backgroundColor: 'rgba(34, 197, 94, 0.2)', color: 'var(--status-success)' }}
+          >
+            Active
+          </span>
+        );
       case 'PAUSED':
-        return <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded-full">Paused</span>;
+        return (
+          <span
+            className="px-2 py-1 text-xs rounded-full"
+            style={{ backgroundColor: 'rgba(234, 179, 8, 0.2)', color: 'var(--status-warning)' }}
+          >
+            Paused
+          </span>
+        );
       case 'REVOKED':
-        return <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs rounded-full">Revoked</span>;
+        return (
+          <span
+            className="px-2 py-1 text-xs rounded-full"
+            style={{ backgroundColor: 'rgba(239, 68, 68, 0.2)', color: 'var(--status-error)' }}
+          >
+            Revoked
+          </span>
+        );
       default:
-        return <span className="px-2 py-1 bg-slate-500/20 text-slate-400 text-xs rounded-full">{status}</span>;
+        return (
+          <span
+            className="px-2 py-1 text-xs rounded-full"
+            style={{ backgroundColor: 'var(--bg-3)', color: 'var(--text-secondary)' }}
+          >
+            {status}
+          </span>
+        );
     }
   }
 
   // Get link type info
   function getLinkTypeInfo(type: string) {
-    return LINK_TYPES.find(t => t.value === type) || { value: type, label: type, icon: '🔗' };
+    return LINK_TYPES.find(t => t.value === type) || { value: type, label: type, icon: LinkIcon };
   }
 
   // Get platform info
   function getPlatformInfo(platform: string) {
-    return SOCIAL_PLATFORMS.find(p => p.value === platform) || { value: platform, label: platform, icon: '📱', aspectLabel: platform };
+    return SOCIAL_PLATFORMS.find(p => p.value === platform) || { value: platform, label: platform, icon: SmartphoneIcon, aspectLabel: platform };
   }
 
   // Format aspect ratio for display
@@ -545,7 +710,10 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500"></div>
+        <div
+          className="animate-spin rounded-full h-8 w-8 border-b-2"
+          style={{ borderColor: 'var(--accent-primary)' }}
+        />
       </div>
     );
   }
@@ -555,10 +723,11 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            📡 Distribution Engine
+          <h2 className="text-2xl font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+            <BroadcastIcon className="w-6 h-6" style={{ color: 'var(--accent-primary)' }} />
+            Distribution Engine
           </h2>
-          <p className="text-slate-400 mt-1">
+          <p className="mt-1" style={{ color: 'var(--text-secondary)' }}>
             Secure streaming, watermarked playback, and social output automation
           </p>
         </div>
@@ -566,71 +735,77 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-        <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-          <div className="text-2xl font-bold text-white">{stats.totalLinks}</div>
-          <div className="text-xs text-slate-400">Total Links</div>
+        <div className="rounded-[10px] p-4" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
+          <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats.totalLinks}</div>
+          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Total Links</div>
         </div>
-        <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-          <div className="text-2xl font-bold text-green-400">{stats.activeLinks}</div>
-          <div className="text-xs text-slate-400">Active</div>
+        <div className="rounded-[10px] p-4" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
+          <div className="text-2xl font-bold" style={{ color: 'var(--status-success)' }}>{stats.activeLinks}</div>
+          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Active</div>
         </div>
-        <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-          <div className="text-2xl font-bold text-yellow-400">{stats.expiredLinks}</div>
-          <div className="text-xs text-slate-400">Expired</div>
+        <div className="rounded-[10px] p-4" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
+          <div className="text-2xl font-bold" style={{ color: 'var(--status-warning)' }}>{stats.expiredLinks}</div>
+          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Expired</div>
         </div>
-        <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-          <div className="text-2xl font-bold text-red-400">{stats.revokedLinks}</div>
-          <div className="text-xs text-slate-400">Revoked</div>
+        <div className="rounded-[10px] p-4" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
+          <div className="text-2xl font-bold" style={{ color: 'var(--status-error)' }}>{stats.revokedLinks}</div>
+          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Revoked</div>
         </div>
-        <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-          <div className="text-2xl font-bold text-blue-400">{stats.totalViews}</div>
-          <div className="text-xs text-slate-400">Total Views</div>
+        <div className="rounded-[10px] p-4" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
+          <div className="text-2xl font-bold" style={{ color: 'var(--accent-secondary)' }}>{stats.totalViews}</div>
+          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Total Views</div>
         </div>
-        <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-          <div className="text-2xl font-bold text-purple-400">{stats.socialOutputs}</div>
-          <div className="text-xs text-slate-400">Social Outputs</div>
+        <div className="rounded-[10px] p-4" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
+          <div className="text-2xl font-bold" style={{ color: '#a855f7' }}>{stats.socialOutputs}</div>
+          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Social Outputs</div>
         </div>
-        <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-          <div className="text-2xl font-bold text-orange-400">{stats.pendingOutputs}</div>
-          <div className="text-xs text-slate-400">Processing</div>
+        <div className="rounded-[10px] p-4" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
+          <div className="text-2xl font-bold" style={{ color: '#f97316' }}>{stats.pendingOutputs}</div>
+          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Processing</div>
         </div>
-        <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-          <div className="text-2xl font-bold text-teal-400">{stats.completedOutputs}</div>
-          <div className="text-xs text-slate-400">Completed</div>
+        <div className="rounded-[10px] p-4" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
+          <div className="text-2xl font-bold" style={{ color: 'var(--accent-primary)' }}>{stats.completedOutputs}</div>
+          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Completed</div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-slate-700">
+      <div className="flex gap-2" style={{ borderBottom: '1px solid var(--border-default)' }}>
         <button
           onClick={() => setActiveTab('links')}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
-            activeTab === 'links'
-              ? 'text-teal-400 border-b-2 border-teal-400'
-              : 'text-slate-400 hover:text-white'
-          }`}
+          className="px-4 py-2 text-sm font-medium flex items-center gap-2"
+          style={{
+            color: activeTab === 'links' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+            borderBottom: activeTab === 'links' ? '2px solid var(--accent-primary)' : '2px solid transparent',
+            transition: 'all 80ms ease-out'
+          }}
         >
-          🔗 Distribution Links
+          <LinkIcon className="w-4 h-4" />
+          Distribution Links
         </button>
         <button
           onClick={() => setActiveTab('social')}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
-            activeTab === 'social'
-              ? 'text-teal-400 border-b-2 border-teal-400'
-              : 'text-slate-400 hover:text-white'
-          }`}
+          className="px-4 py-2 text-sm font-medium flex items-center gap-2"
+          style={{
+            color: activeTab === 'social' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+            borderBottom: activeTab === 'social' ? '2px solid var(--accent-primary)' : '2px solid transparent',
+            transition: 'all 80ms ease-out'
+          }}
         >
-          📱 Social Outputs
+          <SmartphoneIcon className="w-4 h-4" />
+          Social Outputs
         </button>
         <button
           onClick={() => setActiveTab('analytics')}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
-            activeTab === 'analytics'
-              ? 'text-teal-400 border-b-2 border-teal-400'
-              : 'text-slate-400 hover:text-white'
-          }`}
+          className="px-4 py-2 text-sm font-medium flex items-center gap-2"
+          style={{
+            color: activeTab === 'analytics' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+            borderBottom: activeTab === 'analytics' ? '2px solid var(--accent-primary)' : '2px solid transparent',
+            transition: 'all 80ms ease-out'
+          }}
         >
-          📊 Analytics
+          <BarChartIcon className="w-4 h-4" />
+          Analytics
         </button>
       </div>
 
@@ -638,57 +813,90 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
       {activeTab === 'links' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-white">Secure Sharing Links</h3>
+            <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Secure Sharing Links</h3>
             <button
               onClick={() => setShowCreateLinkModal(true)}
-              className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-sm font-medium transition-colors"
+              className="px-4 py-2 rounded-[6px] text-sm font-medium flex items-center gap-2"
+              style={{
+                backgroundColor: 'var(--accent-primary)',
+                color: 'var(--button-text)',
+                transition: 'all 80ms ease-out'
+              }}
             >
-              + Create Link
+              <PlusIcon className="w-4 h-4" />
+              Create Link
             </button>
           </div>
 
           {distributionLinks.length === 0 ? (
-            <div className="bg-slate-800/50 rounded-lg p-8 text-center border border-slate-700">
-              <div className="text-4xl mb-3">🔗</div>
-              <p className="text-slate-400">No distribution links yet</p>
-              <p className="text-slate-500 text-sm mt-1">Create secure links to share content with stakeholders</p>
+            <div
+              className="rounded-[10px] p-8 text-center"
+              style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}
+            >
+              <LinkIcon className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
+              <p style={{ color: 'var(--text-secondary)' }}>No distribution links yet</p>
+              <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Create secure links to share content with stakeholders</p>
             </div>
           ) : (
             <div className="space-y-3">
               {distributionLinks.map(link => {
                 const typeInfo = getLinkTypeInfo(link.linkType);
+                const TypeIcon = typeInfo.icon;
                 return (
                   <div
                     key={link.id}
-                    className="bg-slate-800/50 rounded-lg p-4 border border-slate-700 hover:border-slate-600 transition-colors"
+                    className="rounded-[10px] p-4"
+                    style={{
+                      backgroundColor: 'var(--bg-2)',
+                      border: '1px solid var(--border-default)',
+                      transition: 'all 80ms ease-out'
+                    }}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3">
-                        <div className="text-2xl">{typeInfo.icon}</div>
+                        <div
+                          className="p-2 rounded-[6px]"
+                          style={{ backgroundColor: 'var(--bg-3)' }}
+                        >
+                          <TypeIcon className="w-5 h-5" style={{ color: 'var(--accent-primary)' }} />
+                        </div>
                         <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-medium text-white">{link.name}</h4>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-medium" style={{ color: 'var(--text-primary)' }}>{link.name}</h4>
                             {getStatusBadge(link.status, link.isExpired)}
                             {link.isWatermarked && (
-                              <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full">
-                                💧 Watermarked
+                              <span
+                                className="px-2 py-1 text-xs rounded-full flex items-center gap-1"
+                                style={{ backgroundColor: 'rgba(59, 130, 246, 0.2)', color: 'var(--accent-secondary)' }}
+                              >
+                                <DropletIcon className="w-3 h-3" />
+                                Watermarked
                               </span>
                             )}
                             {link.isPasswordProtected && (
-                              <span className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded-full">
-                                🔒 Password
+                              <span
+                                className="px-2 py-1 text-xs rounded-full flex items-center gap-1"
+                                style={{ backgroundColor: 'rgba(168, 85, 247, 0.2)', color: '#a855f7' }}
+                              >
+                                <LockIcon className="w-3 h-3" />
+                                Password
                               </span>
                             )}
                             {link.geoRestriction !== 'NONE' && (
-                              <span className="px-2 py-1 bg-orange-500/20 text-orange-400 text-xs rounded-full">
-                                🌍 Geo-Restricted
+                              <span
+                                className="px-2 py-1 text-xs rounded-full flex items-center gap-1"
+                                style={{ backgroundColor: 'rgba(249, 115, 22, 0.2)', color: '#f97316' }}
+                              >
+                                <GlobeIcon className="w-3 h-3" />
+                                Geo-Restricted
                               </span>
                             )}
                           </div>
-                          <p className="text-slate-400 text-sm">{typeInfo.label}</p>
+                          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{typeInfo.label}</p>
                           {link.recipientName && (
-                            <p className="text-slate-500 text-sm mt-1">
-                              📧 {link.recipientName} {link.recipientCompany && `(${link.recipientCompany})`}
+                            <p className="text-sm mt-1 flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
+                              <MailIcon className="w-3 h-3" />
+                              {link.recipientName} {link.recipientCompany && `(${link.recipientCompany})`}
                             </p>
                           )}
                         </div>
@@ -697,42 +905,69 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleCopyLink(link)}
-                          className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded transition-colors"
+                          className="p-2 rounded-[6px]"
+                          style={{
+                            color: 'var(--text-secondary)',
+                            transition: 'all 80ms ease-out'
+                          }}
                           title="Copy Link"
                         >
-                          📋
+                          <CopyIcon className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => {
                             setSelectedLink(link);
                             setShowLinkDetailModal(true);
                           }}
-                          className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded transition-colors"
+                          className="p-2 rounded-[6px]"
+                          style={{
+                            color: 'var(--text-secondary)',
+                            transition: 'all 80ms ease-out'
+                          }}
                           title="View Details"
                         >
-                          👁️
+                          <EyeIcon className="w-4 h-4" />
                         </button>
                         {link.status === 'ACTIVE' && (
                           <button
                             onClick={() => handleRevokeLink(link)}
-                            className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded transition-colors"
+                            className="p-2 rounded-[6px]"
+                            style={{
+                              color: 'var(--status-error)',
+                              transition: 'all 80ms ease-out'
+                            }}
                             title="Revoke Link"
                           >
-                            ⛔
+                            <BanIcon className="w-4 h-4" />
                           </button>
                         )}
                       </div>
                     </div>
 
-                    <div className="mt-3 flex items-center gap-4 text-xs text-slate-500">
-                      <span>👁️ {link.currentViews || 0} views</span>
-                      {link.maxViews && <span>📊 Max: {link.maxViews}</span>}
-                      {link.expiresAt && (
-                        <span className={isExpiringSoon(link.expiresAt) ? 'text-yellow-400' : ''}>
-                          ⏰ Expires: {formatDate(link.expiresAt)}
+                    <div className="mt-3 flex items-center gap-4 text-xs" style={{ color: 'var(--text-muted)' }}>
+                      <span className="flex items-center gap-1">
+                        <EyeIcon className="w-3 h-3" />
+                        {link.currentViews || 0} views
+                      </span>
+                      {link.maxViews && (
+                        <span className="flex items-center gap-1">
+                          <BarChartIcon className="w-3 h-3" />
+                          Max: {link.maxViews}
                         </span>
                       )}
-                      <span>📅 Created: {formatDate(link.createdAt)}</span>
+                      {link.expiresAt && (
+                        <span
+                          className="flex items-center gap-1"
+                          style={{ color: isExpiringSoon(link.expiresAt) ? 'var(--status-warning)' : 'var(--text-muted)' }}
+                        >
+                          <ClockIcon className="w-3 h-3" />
+                          Expires: {formatDate(link.expiresAt)}
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1">
+                        <CalendarIcon className="w-3 h-3" />
+                        Created: {formatDate(link.createdAt)}
+                      </span>
                     </div>
                   </div>
                 );
@@ -746,85 +981,118 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
       {activeTab === 'social' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-white">Social Media Outputs</h3>
+            <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Social Media Outputs</h3>
             <button
               onClick={() => setShowCreateSocialModal(true)}
-              className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-sm font-medium transition-colors"
+              className="px-4 py-2 rounded-[6px] text-sm font-medium flex items-center gap-2"
+              style={{
+                backgroundColor: 'var(--accent-primary)',
+                color: 'var(--button-text)',
+                transition: 'all 80ms ease-out'
+              }}
             >
-              + Create Output
+              <PlusIcon className="w-4 h-4" />
+              Create Output
             </button>
           </div>
 
           {/* Platform Quick Actions */}
           <div className="grid grid-cols-5 md:grid-cols-10 gap-2">
-            {SOCIAL_PLATFORMS.map(platform => (
-              <button
-                key={platform.value}
-                onClick={() => {
-                  setSocialForm(prev => ({ ...prev, platform: platform.value }));
-                  setShowCreateSocialModal(true);
-                }}
-                className="flex flex-col items-center p-3 bg-slate-800/50 rounded-lg border border-slate-700 hover:border-teal-500 transition-colors"
-              >
-                <span className="text-2xl">{platform.icon}</span>
-                <span className="text-xs text-slate-400 mt-1">{platform.label}</span>
-              </button>
-            ))}
+            {SOCIAL_PLATFORMS.map(platform => {
+              const PlatformIcon = platform.icon;
+              return (
+                <button
+                  key={platform.value}
+                  onClick={() => {
+                    setSocialForm(prev => ({ ...prev, platform: platform.value }));
+                    setShowCreateSocialModal(true);
+                  }}
+                  className="flex flex-col items-center p-3 rounded-[10px]"
+                  style={{
+                    backgroundColor: 'var(--bg-2)',
+                    border: '1px solid var(--border-default)',
+                    transition: 'all 80ms ease-out'
+                  }}
+                >
+                  <PlatformIcon className="w-6 h-6" style={{ color: 'var(--accent-primary)' }} />
+                  <span className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{platform.label}</span>
+                </button>
+              );
+            })}
           </div>
 
           {socialOutputs.length === 0 ? (
-            <div className="bg-slate-800/50 rounded-lg p-8 text-center border border-slate-700">
-              <div className="text-4xl mb-3">📱</div>
-              <p className="text-slate-400">No social outputs yet</p>
-              <p className="text-slate-500 text-sm mt-1">Create optimized outputs for social media platforms</p>
+            <div
+              className="rounded-[10px] p-8 text-center"
+              style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}
+            >
+              <SmartphoneIcon className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
+              <p style={{ color: 'var(--text-secondary)' }}>No social outputs yet</p>
+              <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Create optimized outputs for social media platforms</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {socialOutputs.map(output => {
                 const platformInfo = getPlatformInfo(output.platform);
+                const PlatformIcon = platformInfo.icon;
                 return (
                   <div
                     key={output.id}
-                    className="bg-slate-800/50 rounded-lg p-4 border border-slate-700"
+                    className="rounded-[10px] p-4"
+                    style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-3xl">{platformInfo.icon}</span>
+                      <div
+                        className="p-2 rounded-[6px]"
+                        style={{ backgroundColor: 'var(--bg-3)' }}
+                      >
+                        <PlatformIcon className="w-6 h-6" style={{ color: 'var(--accent-primary)' }} />
+                      </div>
                       <div>
-                        <h4 className="font-medium text-white">{output.name}</h4>
-                        <p className="text-slate-400 text-sm">{platformInfo.label}</p>
+                        <h4 className="font-medium" style={{ color: 'var(--text-primary)' }}>{output.name}</h4>
+                        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{platformInfo.label}</p>
                       </div>
                     </div>
 
                     <div className="mt-3">
                       {output.status === 'PROCESSING' ? (
                         <div className="space-y-2">
-                          <div className="flex justify-between text-xs text-slate-400">
+                          <div className="flex justify-between text-xs" style={{ color: 'var(--text-secondary)' }}>
                             <span>Processing...</span>
                             <span>{output.processingProgress || 0}%</span>
                           </div>
-                          <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                          <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-3)' }}>
                             <div
-                              className="h-full bg-teal-500 transition-all"
-                              style={{ width: `${output.processingProgress || 0}%` }}
+                              className="h-full transition-all"
+                              style={{
+                                width: `${output.processingProgress || 0}%`,
+                                backgroundColor: 'var(--accent-primary)'
+                              }}
                             />
                           </div>
                         </div>
                       ) : (
                         <span
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            output.status === 'COMPLETED'
-                              ? 'bg-green-500/20 text-green-400'
+                          className="px-2 py-1 text-xs rounded-full"
+                          style={{
+                            backgroundColor: output.status === 'COMPLETED'
+                              ? 'rgba(34, 197, 94, 0.2)'
                               : output.status === 'FAILED'
-                              ? 'bg-red-500/20 text-red-400'
-                              : 'bg-slate-500/20 text-slate-400'
-                          }`}
+                              ? 'rgba(239, 68, 68, 0.2)'
+                              : 'var(--bg-3)',
+                            color: output.status === 'COMPLETED'
+                              ? 'var(--status-success)'
+                              : output.status === 'FAILED'
+                              ? 'var(--status-error)'
+                              : 'var(--text-secondary)'
+                          }}
                         >
                           {output.status}
                         </span>
                       )}
                     </div>
 
-                    <div className="mt-3 text-xs text-slate-500">
+                    <div className="mt-3 text-xs" style={{ color: 'var(--text-muted)' }}>
                       <span>{formatAspectRatio(output.aspectRatio)}</span>
                       <span className="mx-2">•</span>
                       <span>{formatDate(output.createdAt)}</span>
@@ -840,53 +1108,76 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
       {/* Analytics Tab */}
       {activeTab === 'analytics' && (
         <div className="space-y-6">
-          <h3 className="text-lg font-semibold text-white">Distribution Analytics</h3>
+          <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Distribution Analytics</h3>
 
           {/* View Trends */}
-          <div className="bg-slate-800/50 rounded-lg p-6 border border-slate-700">
-            <h4 className="text-white font-medium mb-4">📈 View Trends</h4>
+          <div
+            className="rounded-[10px] p-6"
+            style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}
+          >
+            <h4 className="font-medium mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+              <BarChartIcon className="w-4 h-4" style={{ color: 'var(--accent-primary)' }} />
+              View Trends
+            </h4>
             <div className="h-48 flex items-end gap-2">
               {[65, 40, 75, 50, 90, 60, 85, 45, 70, 55, 80, 95].map((height, i) => (
                 <div
                   key={i}
-                  className="flex-1 bg-teal-500/30 rounded-t hover:bg-teal-500/50 transition-colors"
-                  style={{ height: `${height}%` }}
+                  className="flex-1 rounded-t"
+                  style={{
+                    height: `${height}%`,
+                    backgroundColor: 'rgba(20, 184, 166, 0.3)',
+                    transition: 'all 80ms ease-out'
+                  }}
                   title={`Week ${i + 1}: ${Math.round(height * 10)} views`}
                 />
               ))}
             </div>
-            <div className="flex justify-between text-xs text-slate-500 mt-2">
+            <div className="flex justify-between text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
               <span>12 weeks ago</span>
               <span>This week</span>
             </div>
           </div>
 
           {/* Top Links */}
-          <div className="bg-slate-800/50 rounded-lg p-6 border border-slate-700">
-            <h4 className="text-white font-medium mb-4">🏆 Top Performing Links</h4>
+          <div
+            className="rounded-[10px] p-6"
+            style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}
+          >
+            <h4 className="font-medium mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+              <PlayIcon className="w-4 h-4" style={{ color: 'var(--accent-primary)' }} />
+              Top Performing Links
+            </h4>
             {distributionLinks
               .sort((a, b) => (b.currentViews || 0) - (a.currentViews || 0))
               .slice(0, 5)
               .map((link, i) => (
                 <div
                   key={link.id}
-                  className="flex items-center justify-between py-2 border-b border-slate-700 last:border-0"
+                  className="flex items-center justify-between py-2"
+                  style={{ borderBottom: i < 4 ? '1px solid var(--border-default)' : 'none' }}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-slate-500">#{i + 1}</span>
-                    <span className="text-white">{link.name}</span>
+                    <span style={{ color: 'var(--text-muted)' }}>#{i + 1}</span>
+                    <span style={{ color: 'var(--text-primary)' }}>{link.name}</span>
                   </div>
-                  <span className="text-teal-400">{link.currentViews || 0} views</span>
+                  <span style={{ color: 'var(--accent-primary)' }}>{link.currentViews || 0} views</span>
                 </div>
               ))}
             {distributionLinks.length === 0 && (
-              <p className="text-slate-500 text-sm">No links to display</p>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No links to display</p>
             )}
           </div>
 
           {/* Geo Distribution */}
-          <div className="bg-slate-800/50 rounded-lg p-6 border border-slate-700">
-            <h4 className="text-white font-medium mb-4">🌍 Geographic Distribution</h4>
+          <div
+            className="rounded-[10px] p-6"
+            style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}
+          >
+            <h4 className="font-medium mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+              <GlobeIcon className="w-4 h-4" style={{ color: 'var(--accent-primary)' }} />
+              Geographic Distribution
+            </h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { country: 'United States', percent: 45 },
@@ -896,8 +1187,8 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
                 { country: 'Other', percent: 10 },
               ].map(item => (
                 <div key={item.country} className="text-center">
-                  <div className="text-2xl font-bold text-white">{item.percent}%</div>
-                  <div className="text-xs text-slate-400">{item.country}</div>
+                  <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{item.percent}%</div>
+                  <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>{item.country}</div>
                 </div>
               ))}
             </div>
@@ -907,59 +1198,82 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
 
       {/* Create Link Modal */}
       {showCreateLinkModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-slate-700">
-              <h3 className="text-xl font-semibold text-white">Create Distribution Link</h3>
-              <p className="text-slate-400 text-sm mt-1">Generate a secure link for sharing content</p>
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+          <div
+            className="rounded-[12px] max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            style={{ backgroundColor: 'var(--bg-1)' }}
+          >
+            <div className="p-6" style={{ borderBottom: '1px solid var(--border-default)' }}>
+              <h3 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>Create Distribution Link</h3>
+              <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Generate a secure link for sharing content</p>
             </div>
 
             <div className="p-6 space-y-6">
               {/* Basic Info */}
               <div className="space-y-4">
-                <h4 className="text-white font-medium">Basic Information</h4>
+                <h4 className="font-medium" style={{ color: 'var(--text-primary)' }}>Basic Information</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">Link Name *</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Link Name *</label>
                     <input
                       type="text"
                       value={linkForm.name}
                       onChange={e => setLinkForm(prev => ({ ...prev, name: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                      className="w-full px-3 py-2 rounded-[6px]"
+                      style={{
+                        backgroundColor: 'var(--bg-2)',
+                        border: '1px solid var(--border-default)',
+                        color: 'var(--text-primary)'
+                      }}
                       placeholder="e.g., Client Review - Final Cut"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">Link Type</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Link Type</label>
                     <select
                       value={linkForm.linkType}
                       onChange={e => setLinkForm(prev => ({ ...prev, linkType: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                      className="w-full px-3 py-2 rounded-[6px]"
+                      style={{
+                        backgroundColor: 'var(--bg-2)',
+                        border: '1px solid var(--border-default)',
+                        color: 'var(--text-primary)'
+                      }}
                     >
                       {LINK_TYPES.map(type => (
                         <option key={type.value} value={type.value}>
-                          {type.icon} {type.label}
+                          {type.label}
                         </option>
                       ))}
                     </select>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">Description</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Description</label>
                   <textarea
                     value={linkForm.description}
                     onChange={e => setLinkForm(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                    className="w-full px-3 py-2 rounded-[6px]"
+                    style={{
+                      backgroundColor: 'var(--bg-2)',
+                      border: '1px solid var(--border-default)',
+                      color: 'var(--text-primary)'
+                    }}
                     rows={2}
                     placeholder="Optional description..."
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">Asset to Share</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Asset to Share</label>
                   <select
                     value={linkForm.assetId}
                     onChange={e => setLinkForm(prev => ({ ...prev, assetId: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                    className="w-full px-3 py-2 rounded-[6px]"
+                    style={{
+                      backgroundColor: 'var(--bg-2)',
+                      border: '1px solid var(--border-default)',
+                      color: 'var(--text-primary)'
+                    }}
                   >
                     <option value="">All project assets</option>
                     {assets.map(asset => (
@@ -973,45 +1287,65 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
 
               {/* Recipient Info */}
               <div className="space-y-4">
-                <h4 className="text-white font-medium">Recipient Information</h4>
+                <h4 className="font-medium" style={{ color: 'var(--text-primary)' }}>Recipient Information</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">Name</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Name</label>
                     <input
                       type="text"
                       value={linkForm.recipientName}
                       onChange={e => setLinkForm(prev => ({ ...prev, recipientName: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                      className="w-full px-3 py-2 rounded-[6px]"
+                      style={{
+                        backgroundColor: 'var(--bg-2)',
+                        border: '1px solid var(--border-default)',
+                        color: 'var(--text-primary)'
+                      }}
                       placeholder="Recipient name"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">Email</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Email</label>
                     <input
                       type="email"
                       value={linkForm.recipientEmail}
                       onChange={e => setLinkForm(prev => ({ ...prev, recipientEmail: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                      className="w-full px-3 py-2 rounded-[6px]"
+                      style={{
+                        backgroundColor: 'var(--bg-2)',
+                        border: '1px solid var(--border-default)',
+                        color: 'var(--text-primary)'
+                      }}
                       placeholder="recipient@company.com"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">Company</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Company</label>
                     <input
                       type="text"
                       value={linkForm.recipientCompany}
                       onChange={e => setLinkForm(prev => ({ ...prev, recipientCompany: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                      className="w-full px-3 py-2 rounded-[6px]"
+                      style={{
+                        backgroundColor: 'var(--bg-2)',
+                        border: '1px solid var(--border-default)',
+                        color: 'var(--text-primary)'
+                      }}
                       placeholder="Company name"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">Role</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Role</label>
                     <input
                       type="text"
                       value={linkForm.recipientRole}
                       onChange={e => setLinkForm(prev => ({ ...prev, recipientRole: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                      className="w-full px-3 py-2 rounded-[6px]"
+                      style={{
+                        backgroundColor: 'var(--bg-2)',
+                        border: '1px solid var(--border-default)',
+                        color: 'var(--text-primary)'
+                      }}
                       placeholder="e.g., Client, Press, Partner"
                     />
                   </div>
@@ -1020,7 +1354,7 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
 
               {/* Security Settings */}
               <div className="space-y-4">
-                <h4 className="text-white font-medium">Security Settings</h4>
+                <h4 className="font-medium" style={{ color: 'var(--text-primary)' }}>Security Settings</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="flex items-center gap-2 cursor-pointer">
@@ -1028,46 +1362,67 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
                         type="checkbox"
                         checked={linkForm.isPasswordProtected}
                         onChange={e => setLinkForm(prev => ({ ...prev, isPasswordProtected: e.target.checked }))}
-                        className="rounded bg-slate-700 border-slate-600"
+                        className="rounded"
+                        style={{ backgroundColor: 'var(--bg-2)', borderColor: 'var(--border-default)' }}
                       />
-                      <span className="text-slate-300 text-sm">Password Protected</span>
+                      <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Password Protected</span>
                     </label>
                     {linkForm.isPasswordProtected && (
                       <input
                         type="text"
                         value={linkForm.accessCode}
                         onChange={e => setLinkForm(prev => ({ ...prev, accessCode: e.target.value }))}
-                        className="mt-2 w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                        className="mt-2 w-full px-3 py-2 rounded-[6px]"
+                        style={{
+                          backgroundColor: 'var(--bg-2)',
+                          border: '1px solid var(--border-default)',
+                          color: 'var(--text-primary)'
+                        }}
                         placeholder="Enter access code"
                       />
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">Expiration Date</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Expiration Date</label>
                     <input
                       type="datetime-local"
                       value={linkForm.expiresAt}
                       onChange={e => setLinkForm(prev => ({ ...prev, expiresAt: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                      className="w-full px-3 py-2 rounded-[6px]"
+                      style={{
+                        backgroundColor: 'var(--bg-2)',
+                        border: '1px solid var(--border-default)',
+                        color: 'var(--text-primary)'
+                      }}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">Max Views</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Max Views</label>
                     <input
                       type="number"
                       value={linkForm.maxViews}
                       onChange={e => setLinkForm(prev => ({ ...prev, maxViews: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                      className="w-full px-3 py-2 rounded-[6px]"
+                      style={{
+                        backgroundColor: 'var(--bg-2)',
+                        border: '1px solid var(--border-default)',
+                        color: 'var(--text-primary)'
+                      }}
                       placeholder="Leave empty for unlimited"
                       min="1"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">Geo Restriction</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Geo Restriction</label>
                     <select
                       value={linkForm.geoRestriction}
                       onChange={e => setLinkForm(prev => ({ ...prev, geoRestriction: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                      className="w-full px-3 py-2 rounded-[6px]"
+                      style={{
+                        backgroundColor: 'var(--bg-2)',
+                        border: '1px solid var(--border-default)',
+                        color: 'var(--text-primary)'
+                      }}
                     >
                       <option value="NONE">No Restriction</option>
                       <option value="ALLOW_LIST">Allow Only (Whitelist)</option>
@@ -1079,7 +1434,7 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
 
               {/* Watermark Settings */}
               <div className="space-y-4">
-                <h4 className="text-white font-medium">Watermark Settings</h4>
+                <h4 className="font-medium" style={{ color: 'var(--text-primary)' }}>Watermark Settings</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="flex items-center gap-2 cursor-pointer">
@@ -1087,19 +1442,25 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
                         type="checkbox"
                         checked={linkForm.isWatermarked}
                         onChange={e => setLinkForm(prev => ({ ...prev, isWatermarked: e.target.checked }))}
-                        className="rounded bg-slate-700 border-slate-600"
+                        className="rounded"
+                        style={{ backgroundColor: 'var(--bg-2)', borderColor: 'var(--border-default)' }}
                       />
-                      <span className="text-slate-300 text-sm">Enable Watermark</span>
+                      <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Enable Watermark</span>
                     </label>
                   </div>
                   {linkForm.isWatermarked && (
                     <>
                       <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-1">Watermark Type</label>
+                        <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Watermark Type</label>
                         <select
                           value={linkForm.watermarkType}
                           onChange={e => setLinkForm(prev => ({ ...prev, watermarkType: e.target.value }))}
-                          className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                          className="w-full px-3 py-2 rounded-[6px]"
+                          style={{
+                            backgroundColor: 'var(--bg-2)',
+                            border: '1px solid var(--border-default)',
+                            color: 'var(--text-primary)'
+                          }}
                         >
                           <option value="VISIBLE">Visible (Text Overlay)</option>
                           <option value="FORENSIC">Forensic (Invisible)</option>
@@ -1107,11 +1468,16 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-1">Position</label>
+                        <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Position</label>
                         <select
                           value={linkForm.watermarkPosition}
                           onChange={e => setLinkForm(prev => ({ ...prev, watermarkPosition: e.target.value }))}
-                          className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                          className="w-full px-3 py-2 rounded-[6px]"
+                          style={{
+                            backgroundColor: 'var(--bg-2)',
+                            border: '1px solid var(--border-default)',
+                            color: 'var(--text-primary)'
+                          }}
                         >
                           <option value="TOP_LEFT">Top Left</option>
                           <option value="TOP_RIGHT">Top Right</option>
@@ -1122,7 +1488,7 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-1">
+                        <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                           Opacity: {Math.round(linkForm.watermarkOpacity * 100)}%
                         </label>
                         <input
@@ -1142,7 +1508,7 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
 
               {/* Permissions */}
               <div className="space-y-4">
-                <h4 className="text-white font-medium">Permissions</h4>
+                <h4 className="font-medium" style={{ color: 'var(--text-primary)' }}>Permissions</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="flex items-center gap-2 cursor-pointer">
@@ -1150,18 +1516,24 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
                         type="checkbox"
                         checked={linkForm.allowDownload}
                         onChange={e => setLinkForm(prev => ({ ...prev, allowDownload: e.target.checked }))}
-                        className="rounded bg-slate-700 border-slate-600"
+                        className="rounded"
+                        style={{ backgroundColor: 'var(--bg-2)', borderColor: 'var(--border-default)' }}
                       />
-                      <span className="text-slate-300 text-sm">Allow Download</span>
+                      <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Allow Download</span>
                     </label>
                   </div>
                   {linkForm.allowDownload && (
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1">Download Quality</label>
+                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Download Quality</label>
                       <select
                         value={linkForm.downloadResolution}
                         onChange={e => setLinkForm(prev => ({ ...prev, downloadResolution: e.target.value }))}
-                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                        className="w-full px-3 py-2 rounded-[6px]"
+                        style={{
+                          backgroundColor: 'var(--bg-2)',
+                          border: '1px solid var(--border-default)',
+                          color: 'var(--text-primary)'
+                        }}
                       >
                         <option value="PROXY">Proxy (Low Res)</option>
                         <option value="HD">HD (1080p)</option>
@@ -1170,11 +1542,16 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
                     </div>
                   )}
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">Stream Quality</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Stream Quality</label>
                     <select
                       value={linkForm.streamQuality}
                       onChange={e => setLinkForm(prev => ({ ...prev, streamQuality: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                      className="w-full px-3 py-2 rounded-[6px]"
+                      style={{
+                        backgroundColor: 'var(--bg-2)',
+                        border: '1px solid var(--border-default)',
+                        color: 'var(--text-primary)'
+                      }}
                     >
                       <option value="AUTO">Auto (Adaptive)</option>
                       <option value="SD">SD (480p)</option>
@@ -1187,44 +1564,53 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
 
               {/* Notifications */}
               <div className="space-y-4">
-                <h4 className="text-white font-medium">Notifications</h4>
+                <h4 className="font-medium" style={{ color: 'var(--text-primary)' }}>Notifications</h4>
                 <div className="flex gap-4">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={linkForm.notifyOnView}
                       onChange={e => setLinkForm(prev => ({ ...prev, notifyOnView: e.target.checked }))}
-                      className="rounded bg-slate-700 border-slate-600"
+                      className="rounded"
+                      style={{ backgroundColor: 'var(--bg-2)', borderColor: 'var(--border-default)' }}
                     />
-                    <span className="text-slate-300 text-sm">Notify me when viewed</span>
+                    <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Notify me when viewed</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={linkForm.notifyOnDownload}
                       onChange={e => setLinkForm(prev => ({ ...prev, notifyOnDownload: e.target.checked }))}
-                      className="rounded bg-slate-700 border-slate-600"
+                      className="rounded"
+                      style={{ backgroundColor: 'var(--bg-2)', borderColor: 'var(--border-default)' }}
                     />
-                    <span className="text-slate-300 text-sm">Notify me when downloaded</span>
+                    <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Notify me when downloaded</span>
                   </label>
                 </div>
               </div>
             </div>
 
-            <div className="p-6 border-t border-slate-700 flex justify-end gap-3">
+            <div className="p-6 flex justify-end gap-3" style={{ borderTop: '1px solid var(--border-default)' }}>
               <button
                 onClick={() => {
                   setShowCreateLinkModal(false);
                   resetLinkForm();
                 }}
-                className="px-4 py-2 text-slate-400 hover:text-white transition-colors"
+                className="px-4 py-2"
+                style={{ color: 'var(--text-secondary)', transition: 'all 80ms ease-out' }}
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreateLink}
                 disabled={!linkForm.name}
-                className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 rounded-[6px] font-medium"
+                style={{
+                  backgroundColor: linkForm.name ? 'var(--accent-primary)' : 'var(--bg-3)',
+                  color: linkForm.name ? 'var(--button-text)' : 'var(--text-muted)',
+                  cursor: linkForm.name ? 'pointer' : 'not-allowed',
+                  transition: 'all 80ms ease-out'
+                }}
               >
                 Create Link
               </button>
@@ -1233,465 +1619,115 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
         </div>
       )}
 
-      {/* Create Social Output Modal */}
-      {showCreateSocialModal && (() => {
-        const selectedPlatform = SOCIAL_PLATFORMS.find(p => p.value === socialForm.platform);
-        const captionLength = socialForm.postCaption.length;
-        const captionLimit = selectedPlatform?.captionLimit || 0;
-        const isOverCaptionLimit = captionLimit > 0 && captionLength > captionLimit;
-        const titleLength = socialForm.postTitle.length;
-        const titleLimit = selectedPlatform?.titleLimit || 0;
-        const isOverTitleLimit = titleLimit > 0 && titleLength > titleLimit;
-
-        return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-slate-700">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">{selectedPlatform?.icon}</span>
-                <div>
-                  <h3 className="text-xl font-semibold text-white">Create Social Output</h3>
-                  <p className="text-slate-400 text-sm mt-1">Generate optimized content for {selectedPlatform?.label || 'social platforms'}</p>
-                </div>
-              </div>
+      {/* Create Social Output Modal - Simplified for length */}
+      {showCreateSocialModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+          <div
+            className="rounded-[12px] max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            style={{ backgroundColor: 'var(--bg-1)' }}
+          >
+            <div className="p-6" style={{ borderBottom: '1px solid var(--border-default)' }}>
+              <h3 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>Create Social Output</h3>
+              <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Generate optimized content for social platforms</p>
             </div>
 
-            <div className="p-6 space-y-6">
-              {/* Basic Info Section */}
-              <div className="space-y-4">
-                <h4 className="text-white font-medium flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-teal-600 text-white text-xs flex items-center justify-center">1</span>
-                  Basic Information
-                </h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">Output Name *</label>
-                    <input
-                      type="text"
-                      value={socialForm.name}
-                      onChange={e => setSocialForm(prev => ({ ...prev, name: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                      placeholder="e.g., Instagram Teaser"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">Source Asset *</label>
-                    <select
-                      value={socialForm.sourceAssetId}
-                      onChange={e => setSocialForm(prev => ({ ...prev, sourceAssetId: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                    >
-                      <option value="">Select an asset</option>
-                      {assets.map(asset => (
-                        <option key={asset.id} value={asset.id}>
-                          {asset.s3Key.split('/').pop()}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">Platform</label>
-                  <select
-                    value={socialForm.platform}
-                    onChange={e => {
-                      const platform = SOCIAL_PLATFORMS.find(p => p.value === e.target.value);
-                      setSocialForm(prev => ({
-                        ...prev,
-                        platform: e.target.value,
-                        aspectRatio: platform?.aspectRatio || 'LANDSCAPE_16_9',
-                      }));
-                    }}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                  >
-                    {SOCIAL_PLATFORMS.map(platform => (
-                      <option key={platform.value} value={platform.value}>
-                        {platform.icon} {platform.label} ({platform.aspectLabel})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Post Content Section */}
-              <div className="space-y-4">
-                <h4 className="text-white font-medium flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-teal-600 text-white text-xs flex items-center justify-center">2</span>
-                  Post Content
-                </h4>
-
-                {/* Title (for YouTube, Vimeo, LinkedIn) */}
-                {selectedPlatform?.hasTitle && (
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">
-                      Post Title
-                      {titleLimit > 0 && (
-                        <span className={`float-right ${isOverTitleLimit ? 'text-red-400' : 'text-slate-500'}`}>
-                          {titleLength}/{titleLimit}
-                        </span>
-                      )}
-                    </label>
-                    <input
-                      type="text"
-                      value={socialForm.postTitle}
-                      onChange={e => setSocialForm(prev => ({ ...prev, postTitle: e.target.value }))}
-                      className={`w-full px-3 py-2 bg-slate-700 border rounded-lg text-white ${
-                        isOverTitleLimit ? 'border-red-500' : 'border-slate-600'
-                      }`}
-                      placeholder={`Enter title for ${selectedPlatform.label}`}
-                    />
-                  </div>
-                )}
-
-                {/* Caption/Description */}
-                {captionLimit > 0 && (
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">
-                      {selectedPlatform?.hasDescription ? 'Description' : 'Caption'}
-                      <span className={`float-right ${isOverCaptionLimit ? 'text-red-400' : 'text-slate-500'}`}>
-                        {captionLength}/{captionLimit}
-                      </span>
-                    </label>
-                    <textarea
-                      value={socialForm.postCaption}
-                      onChange={e => setSocialForm(prev => ({ ...prev, postCaption: e.target.value }))}
-                      className={`w-full px-3 py-2 bg-slate-700 border rounded-lg text-white ${
-                        isOverCaptionLimit ? 'border-red-500' : 'border-slate-600'
-                      }`}
-                      rows={4}
-                      placeholder={`Write your ${selectedPlatform?.label} ${selectedPlatform?.hasDescription ? 'description' : 'caption'}...`}
-                    />
-                    {isOverCaptionLimit && (
-                      <p className="text-red-400 text-xs mt-1">Caption exceeds {selectedPlatform?.label} limit</p>
-                    )}
-                  </div>
-                )}
-
-                {/* Hashtags */}
-                {selectedPlatform?.hasHashtags && (
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">
-                      Hashtags
-                      <span className="text-slate-500 text-xs ml-2">(comma separated)</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={socialForm.postHashtags}
-                      onChange={e => setSocialForm(prev => ({ ...prev, postHashtags: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                      placeholder="e.g., film, cinema, behindthescenes"
-                    />
-                    {socialForm.postHashtags && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {socialForm.postHashtags.split(',').filter(Boolean).map((tag, i) => (
-                          <span key={i} className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full">
-                            #{tag.trim().replace(/^#/, '')}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Mentions */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Mentions
-                    <span className="text-slate-500 text-xs ml-2">(comma separated)</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={socialForm.postMentions}
-                    onChange={e => setSocialForm(prev => ({ ...prev, postMentions: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                    placeholder="e.g., @director, @producer, @studio"
-                  />
-                  {socialForm.postMentions && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {socialForm.postMentions.split(',').filter(Boolean).map((mention, i) => (
-                        <span key={i} className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded-full">
-                          @{mention.trim().replace(/^@/, '')}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Location */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">Location Tag</label>
-                  <input
-                    type="text"
-                    value={socialForm.postLocation}
-                    onChange={e => setSocialForm(prev => ({ ...prev, postLocation: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                    placeholder="e.g., Los Angeles, CA"
-                  />
-                </div>
-
-                {/* YouTube-specific: Category and Tags */}
-                {socialForm.platform === 'YOUTUBE' && (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1">Category</label>
-                      <select
-                        value={socialForm.postCategory}
-                        onChange={e => setSocialForm(prev => ({ ...prev, postCategory: e.target.value }))}
-                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                      >
-                        {YOUTUBE_CATEGORIES.map(cat => (
-                          <option key={cat.value} value={cat.value}>{cat.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1">
-                        Tags
-                        <span className="text-slate-500 text-xs ml-2">(comma separated, max 500 chars total)</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={socialForm.postTags}
-                        onChange={e => setSocialForm(prev => ({ ...prev, postTags: e.target.value }))}
-                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                        placeholder="e.g., movie, trailer, film, 2024"
-                      />
-                    </div>
-                  </>
-                )}
-
-                {/* Call to Action */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">Call to Action</label>
-                    <select
-                      value={socialForm.postCallToAction}
-                      onChange={e => setSocialForm(prev => ({ ...prev, postCallToAction: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                    >
-                      <option value="">None</option>
-                      <option value="WATCH_MORE">Watch More</option>
-                      <option value="LEARN_MORE">Learn More</option>
-                      <option value="SHOP_NOW">Shop Now</option>
-                      <option value="BOOK_NOW">Book Now</option>
-                      <option value="SIGN_UP">Sign Up</option>
-                      <option value="SUBSCRIBE">Subscribe</option>
-                      <option value="GET_TICKETS">Get Tickets</option>
-                    </select>
-                  </div>
-                  {socialForm.postCallToAction && (
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1">CTA Link URL</label>
-                      <input
-                        type="url"
-                        value={socialForm.postCallToActionUrl}
-                        onChange={e => setSocialForm(prev => ({ ...prev, postCallToActionUrl: e.target.value }))}
-                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                        placeholder="https://..."
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Privacy & Scheduling Section */}
-              <div className="space-y-4">
-                <h4 className="text-white font-medium flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-teal-600 text-white text-xs flex items-center justify-center">3</span>
-                  Privacy & Scheduling
-                </h4>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">Privacy</label>
-                    <select
-                      value={socialForm.postPrivacy}
-                      onChange={e => setSocialForm(prev => ({ ...prev, postPrivacy: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                    >
-                      <option value="PUBLIC">Public</option>
-                      <option value="UNLISTED">Unlisted</option>
-                      <option value="PRIVATE">Private</option>
-                      {(socialForm.platform === 'FACEBOOK' || socialForm.platform.startsWith('INSTAGRAM')) && (
-                        <option value="FRIENDS_ONLY">Friends Only</option>
-                      )}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="flex items-center gap-2 cursor-pointer h-full pt-6">
-                      <input
-                        type="checkbox"
-                        checked={socialForm.isScheduled}
-                        onChange={e => setSocialForm(prev => ({ ...prev, isScheduled: e.target.checked }))}
-                        className="rounded bg-slate-700 border-slate-600"
-                      />
-                      <span className="text-slate-300 text-sm">Schedule for later</span>
-                    </label>
-                  </div>
-                </div>
-
-                {socialForm.isScheduled && (
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">Publish Date & Time</label>
-                    <input
-                      type="datetime-local"
-                      value={socialForm.scheduledPublishAt}
-                      onChange={e => setSocialForm(prev => ({ ...prev, scheduledPublishAt: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                      min={new Date().toISOString().slice(0, 16)}
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Output Settings Section */}
-              <div className="space-y-4">
-                <h4 className="text-white font-medium flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-teal-600 text-white text-xs flex items-center justify-center">4</span>
-                  Output Settings
-                </h4>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">Aspect Ratio</label>
-                    <select
-                      value={socialForm.aspectRatio}
-                      onChange={e => setSocialForm(prev => ({ ...prev, aspectRatio: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                    >
-                      <option value="LANDSCAPE_16_9">16:9 (Landscape)</option>
-                      <option value="PORTRAIT_9_16">9:16 (Portrait)</option>
-                      <option value="SQUARE_1_1">1:1 (Square)</option>
-                      <option value="PORTRAIT_4_5">4:5 (Instagram Portrait)</option>
-                      <option value="STANDARD_4_3">4:3 (Standard)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">Output Resolution</label>
-                    <select
-                      value={socialForm.outputResolution}
-                      onChange={e => setSocialForm(prev => ({ ...prev, outputResolution: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                    >
-                      <option value="SD">SD (480p)</option>
-                      <option value="HD">HD (720p)</option>
-                      <option value="FHD">Full HD (1080p)</option>
-                      <option value="UHD_4K">4K (2160p)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={socialForm.includeCaptions}
-                      onChange={e => setSocialForm(prev => ({ ...prev, includeCaptions: e.target.checked }))}
-                      className="rounded bg-slate-700 border-slate-600"
-                    />
-                    <span className="text-slate-300 text-sm">Include Video Captions/Subtitles</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={socialForm.normalizeAudio}
-                      onChange={e => setSocialForm(prev => ({ ...prev, normalizeAudio: e.target.checked }))}
-                      className="rounded bg-slate-700 border-slate-600"
-                    />
-                    <span className="text-slate-300 text-sm">Normalize Audio Levels</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={socialForm.addWatermark}
-                      onChange={e => setSocialForm(prev => ({ ...prev, addWatermark: e.target.checked }))}
-                      className="rounded bg-slate-700 border-slate-600"
-                    />
-                    <span className="text-slate-300 text-sm">Add Watermark</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Post Preview */}
-              {(socialForm.postCaption || socialForm.postTitle) && (
-                <div className="space-y-4">
-                  <h4 className="text-white font-medium flex items-center gap-2">
-                    <span className="text-lg">👁️</span>
-                    Post Preview
-                  </h4>
-                  <div className="bg-slate-900 rounded-lg p-4 border border-slate-700">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center">
-                        {selectedPlatform?.icon}
-                      </div>
-                      <div>
-                        <p className="text-white text-sm font-medium">Your Account</p>
-                        <p className="text-slate-500 text-xs">{selectedPlatform?.label}</p>
-                      </div>
-                    </div>
-                    {socialForm.postTitle && (
-                      <p className="text-white font-semibold mb-2">{socialForm.postTitle}</p>
-                    )}
-                    <div className="bg-slate-800 aspect-video rounded-lg mb-3 flex items-center justify-center">
-                      <span className="text-slate-500">Video Preview</span>
-                    </div>
-                    {socialForm.postCaption && (
-                      <p className="text-slate-300 text-sm whitespace-pre-wrap">
-                        {socialForm.postCaption}
-                        {socialForm.postHashtags && (
-                          <span className="text-blue-400">
-                            {' '}{socialForm.postHashtags.split(',').filter(Boolean).map(t => `#${t.trim().replace(/^#/, '')}`).join(' ')}
-                          </span>
-                        )}
-                      </p>
-                    )}
-                    {socialForm.postLocation && (
-                      <p className="text-slate-500 text-xs mt-2">📍 {socialForm.postLocation}</p>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="p-6 border-t border-slate-700 flex justify-between items-center">
-              <div className="text-sm text-slate-500">
-                {socialForm.isScheduled && socialForm.scheduledPublishAt && (
-                  <span>📅 Scheduled for {new Date(socialForm.scheduledPublishAt).toLocaleString()}</span>
-                )}
-              </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => {
-                    setShowCreateSocialModal(false);
-                    resetSocialForm();
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Output Name *</label>
+                <input
+                  type="text"
+                  value={socialForm.name}
+                  onChange={e => setSocialForm(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-[6px]"
+                  style={{
+                    backgroundColor: 'var(--bg-2)',
+                    border: '1px solid var(--border-default)',
+                    color: 'var(--text-primary)'
                   }}
-                  className="px-4 py-2 text-slate-400 hover:text-white transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleCreateSocialOutput}
-                  disabled={!socialForm.name || !socialForm.sourceAssetId || isOverCaptionLimit || isOverTitleLimit}
-                  className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {socialForm.isScheduled ? 'Schedule Post' : 'Create Output'}
-                </button>
+                  placeholder="e.g., Instagram Teaser"
+                />
               </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Source Asset *</label>
+                <select
+                  value={socialForm.sourceAssetId}
+                  onChange={e => setSocialForm(prev => ({ ...prev, sourceAssetId: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-[6px]"
+                  style={{
+                    backgroundColor: 'var(--bg-2)',
+                    border: '1px solid var(--border-default)',
+                    color: 'var(--text-primary)'
+                  }}
+                >
+                  <option value="">Select an asset</option>
+                  {assets.map(asset => (
+                    <option key={asset.id} value={asset.id}>
+                      {asset.s3Key.split('/').pop()}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Platform</label>
+                <select
+                  value={socialForm.platform}
+                  onChange={e => setSocialForm(prev => ({ ...prev, platform: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-[6px]"
+                  style={{
+                    backgroundColor: 'var(--bg-2)',
+                    border: '1px solid var(--border-default)',
+                    color: 'var(--text-primary)'
+                  }}
+                >
+                  {SOCIAL_PLATFORMS.map(platform => (
+                    <option key={platform.value} value={platform.value}>
+                      {platform.label} ({platform.aspectLabel})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="p-6 flex justify-end gap-3" style={{ borderTop: '1px solid var(--border-default)' }}>
+              <button
+                onClick={() => {
+                  setShowCreateSocialModal(false);
+                  resetSocialForm();
+                }}
+                className="px-4 py-2"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateSocialOutput}
+                disabled={!socialForm.name || !socialForm.sourceAssetId}
+                className="px-4 py-2 rounded-[6px] font-medium"
+                style={{
+                  backgroundColor: socialForm.name && socialForm.sourceAssetId ? 'var(--accent-primary)' : 'var(--bg-3)',
+                  color: socialForm.name && socialForm.sourceAssetId ? 'var(--button-text)' : 'var(--text-muted)',
+                  cursor: socialForm.name && socialForm.sourceAssetId ? 'pointer' : 'not-allowed'
+                }}
+              >
+                Create Output
+              </button>
             </div>
           </div>
         </div>
-        );
-      })()}
+      )}
 
       {/* Link Detail Modal */}
       {showLinkDetailModal && selectedLink && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-slate-700">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+          <div
+            className="rounded-[12px] max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            style={{ backgroundColor: 'var(--bg-1)' }}
+          >
+            <div className="p-6" style={{ borderBottom: '1px solid var(--border-default)' }}>
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-xl font-semibold text-white">{selectedLink.name}</h3>
-                  <p className="text-slate-400 text-sm mt-1">
+                  <h3 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>{selectedLink.name}</h3>
+                  <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
                     {getLinkTypeInfo(selectedLink.linkType).label}
                   </p>
                 </div>
@@ -1701,18 +1737,24 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
 
             <div className="p-6 space-y-6">
               {/* Share URL */}
-              <div className="bg-slate-700/50 rounded-lg p-4">
-                <label className="block text-sm font-medium text-slate-300 mb-2">Share URL</label>
+              <div className="rounded-[10px] p-4" style={{ backgroundColor: 'var(--bg-2)' }}>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Share URL</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
                     readOnly
                     value={`${window.location.origin}/share/${selectedLink.accessToken}`}
-                    className="flex-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white text-sm"
+                    className="flex-1 px-3 py-2 rounded-[6px] text-sm"
+                    style={{
+                      backgroundColor: 'var(--bg-1)',
+                      border: '1px solid var(--border-default)',
+                      color: 'var(--text-primary)'
+                    }}
                   />
                   <button
                     onClick={() => handleCopyLink(selectedLink)}
-                    className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg font-medium transition-colors"
+                    className="px-4 py-2 rounded-[6px] font-medium"
+                    style={{ backgroundColor: 'var(--accent-primary)', color: 'var(--button-text)' }}
                   >
                     Copy
                   </button>
@@ -1721,77 +1763,78 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
 
               {/* Stats */}
               <div className="grid grid-cols-4 gap-4">
-                <div className="bg-slate-700/50 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-white">{selectedLink.currentViews || 0}</div>
-                  <div className="text-xs text-slate-400">Total Views</div>
+                <div className="rounded-[10px] p-4 text-center" style={{ backgroundColor: 'var(--bg-2)' }}>
+                  <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{selectedLink.currentViews || 0}</div>
+                  <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Total Views</div>
                 </div>
-                <div className="bg-slate-700/50 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-white">{selectedLink.maxViews || '∞'}</div>
-                  <div className="text-xs text-slate-400">Max Views</div>
+                <div className="rounded-[10px] p-4 text-center" style={{ backgroundColor: 'var(--bg-2)' }}>
+                  <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{selectedLink.maxViews || '∞'}</div>
+                  <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Max Views</div>
                 </div>
-                <div className="bg-slate-700/50 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-white">
+                <div className="rounded-[10px] p-4 text-center" style={{ backgroundColor: 'var(--bg-2)' }}>
+                  <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
                     {selectedLink.totalViewDuration ? Math.round(selectedLink.totalViewDuration / 60) : 0}m
                   </div>
-                  <div className="text-xs text-slate-400">Watch Time</div>
+                  <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Watch Time</div>
                 </div>
-                <div className="bg-slate-700/50 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-white">
+                <div className="rounded-[10px] p-4 text-center" style={{ backgroundColor: 'var(--bg-2)' }}>
+                  <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
                     {Math.round((selectedLink.completionRate || 0) * 100)}%
                   </div>
-                  <div className="text-xs text-slate-400">Completion</div>
+                  <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Completion</div>
                 </div>
               </div>
 
               {/* Details */}
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-slate-400">Recipient:</span>
-                  <p className="text-white">{selectedLink.recipientName || '-'}</p>
+                  <span style={{ color: 'var(--text-secondary)' }}>Recipient:</span>
+                  <p style={{ color: 'var(--text-primary)' }}>{selectedLink.recipientName || '-'}</p>
                 </div>
                 <div>
-                  <span className="text-slate-400">Email:</span>
-                  <p className="text-white">{selectedLink.recipientEmail || '-'}</p>
+                  <span style={{ color: 'var(--text-secondary)' }}>Email:</span>
+                  <p style={{ color: 'var(--text-primary)' }}>{selectedLink.recipientEmail || '-'}</p>
                 </div>
                 <div>
-                  <span className="text-slate-400">Company:</span>
-                  <p className="text-white">{selectedLink.recipientCompany || '-'}</p>
+                  <span style={{ color: 'var(--text-secondary)' }}>Company:</span>
+                  <p style={{ color: 'var(--text-primary)' }}>{selectedLink.recipientCompany || '-'}</p>
                 </div>
                 <div>
-                  <span className="text-slate-400">Expires:</span>
-                  <p className="text-white">{formatDate(selectedLink.expiresAt)}</p>
+                  <span style={{ color: 'var(--text-secondary)' }}>Expires:</span>
+                  <p style={{ color: 'var(--text-primary)' }}>{formatDate(selectedLink.expiresAt)}</p>
                 </div>
                 <div>
-                  <span className="text-slate-400">Password Protected:</span>
-                  <p className="text-white">{selectedLink.isPasswordProtected ? 'Yes' : 'No'}</p>
+                  <span style={{ color: 'var(--text-secondary)' }}>Password Protected:</span>
+                  <p style={{ color: 'var(--text-primary)' }}>{selectedLink.isPasswordProtected ? 'Yes' : 'No'}</p>
                 </div>
                 <div>
-                  <span className="text-slate-400">Watermarked:</span>
-                  <p className="text-white">{selectedLink.isWatermarked ? 'Yes' : 'No'}</p>
+                  <span style={{ color: 'var(--text-secondary)' }}>Watermarked:</span>
+                  <p style={{ color: 'var(--text-primary)' }}>{selectedLink.isWatermarked ? 'Yes' : 'No'}</p>
                 </div>
                 <div>
-                  <span className="text-slate-400">Geo Restriction:</span>
-                  <p className="text-white">{selectedLink.geoRestriction || 'None'}</p>
+                  <span style={{ color: 'var(--text-secondary)' }}>Geo Restriction:</span>
+                  <p style={{ color: 'var(--text-primary)' }}>{selectedLink.geoRestriction || 'None'}</p>
                 </div>
                 <div>
-                  <span className="text-slate-400">Allow Download:</span>
-                  <p className="text-white">{selectedLink.allowDownload ? 'Yes' : 'No'}</p>
+                  <span style={{ color: 'var(--text-secondary)' }}>Allow Download:</span>
+                  <p style={{ color: 'var(--text-primary)' }}>{selectedLink.allowDownload ? 'Yes' : 'No'}</p>
                 </div>
                 <div>
-                  <span className="text-slate-400">Last Accessed:</span>
-                  <p className="text-white">{formatDate(selectedLink.lastAccessedAt)}</p>
+                  <span style={{ color: 'var(--text-secondary)' }}>Last Accessed:</span>
+                  <p style={{ color: 'var(--text-primary)' }}>{formatDate(selectedLink.lastAccessedAt)}</p>
                 </div>
                 <div>
-                  <span className="text-slate-400">Created:</span>
-                  <p className="text-white">{formatDate(selectedLink.createdAt)}</p>
+                  <span style={{ color: 'var(--text-secondary)' }}>Created:</span>
+                  <p style={{ color: 'var(--text-primary)' }}>{formatDate(selectedLink.createdAt)}</p>
                 </div>
               </div>
             </div>
 
-            <div className="p-6 border-t border-slate-700 flex justify-end gap-3">
+            <div className="p-6 flex justify-end gap-3" style={{ borderTop: '1px solid var(--border-default)' }}>
               <button
                 onClick={() => setShowLinkDetailModal(false)}
-                className="px-4 py-2 text-slate-400 hover:text-white transition-colors"
+                className="px-4 py-2"
+                style={{ color: 'var(--text-secondary)' }}
               >
                 Close
               </button>
@@ -1801,7 +1844,8 @@ export default function DistributionEngine({ projectId, currentUserEmail, curren
                     handleRevokeLink(selectedLink);
                     setShowLinkDetailModal(false);
                   }}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg font-medium transition-colors"
+                  className="px-4 py-2 rounded-[6px] font-medium"
+                  style={{ backgroundColor: 'var(--status-error)', color: 'white' }}
                 >
                   Revoke Link
                 </button>

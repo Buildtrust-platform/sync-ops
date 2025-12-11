@@ -4,19 +4,55 @@ import type { Schema } from "@/amplify/data/resource";
 
 /**
  * GREENLIGHT GATE COMPONENT
- *
- * PRD Requirement: "Every project must pass Greenlight Gate before production"
- *
- * This component enforces the governance rule that projects cannot advance
- * to PRE_PRODUCTION state until all critical requirements are met:
- * - Smart Brief completed
- * - Legal reviewed and approved
- * - Budget approved by Finance
- * - Insurance documentation uploaded
- * - Required permits identified
- *
- * Visual Checklist + Blocking Mechanism
+ * Design System: Dark mode, CSS variables
+ * Icons: Lucide-style SVGs (stroke-width: 1.5)
  */
+
+// Lucide-style icons
+const TrafficLightIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="6" y="1" width="12" height="22" rx="2"/>
+    <circle cx="12" cy="6" r="2"/>
+    <circle cx="12" cy="12" r="2"/>
+    <circle cx="12" cy="18" r="2"/>
+  </svg>
+);
+
+const CheckCircleIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+    <polyline points="22 4 12 14.01 9 11.01"/>
+  </svg>
+);
+
+const ClockIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <polyline points="12 6 12 12 16 14"/>
+  </svg>
+);
+
+const AlertTriangleIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/>
+    <line x1="12" y1="17" x2="12.01" y2="17"/>
+  </svg>
+);
+
+const ArrowRightIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="5" y1="12" x2="19" y2="12"/>
+    <polyline points="12 5 19 12 12 19"/>
+  </svg>
+);
+
+const LockIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+  </svg>
+);
 
 interface GreenlightGateProps {
   project: Schema["Project"]["type"];
@@ -54,37 +90,57 @@ export default function GreenlightGate({ project, onAdvance }: GreenlightGatePro
   }
 
   return (
-    <div className="bg-gradient-to-br from-indigo-900 to-purple-900 rounded-xl p-6 border-2 border-indigo-500">
+    <div
+      className="rounded-[12px] p-6"
+      style={{
+        background: 'linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%)',
+        border: '1px solid var(--primary)'
+      }}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-            🚦 Greenlight Gate
+          <h3
+            className="text-[20px] font-bold flex items-center gap-2"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            <span style={{ color: 'var(--primary)' }}><TrafficLightIcon /></span>
+            Greenlight Gate
           </h3>
-          <p className="text-indigo-200 text-sm mt-1">
+          <p className="text-[13px] mt-1" style={{ color: 'var(--text-secondary)' }}>
             All requirements must be met before advancing to Pre-Production
           </p>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold text-white">{completedCount}/{totalCount}</div>
-          <div className="text-xs text-indigo-300">Requirements Met</div>
+          <div className="text-[28px] font-bold" style={{ color: 'var(--text-primary)' }}>
+            {completedCount}/{totalCount}
+          </div>
+          <div className="text-[11px] uppercase" style={{ color: 'var(--text-tertiary)' }}>
+            Requirements Met
+          </div>
         </div>
       </div>
 
       {/* Progress Bar */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-bold text-indigo-200">Overall Progress</span>
-          <span className="text-sm font-bold text-white">{Math.round(progressPercentage)}%</span>
+          <span className="text-[13px] font-semibold" style={{ color: 'var(--text-secondary)' }}>
+            Overall Progress
+          </span>
+          <span className="text-[13px] font-bold" style={{ color: 'var(--text-primary)' }}>
+            {Math.round(progressPercentage)}%
+          </span>
         </div>
-        <div className="w-full bg-indigo-950 h-4 rounded-full overflow-hidden">
+        <div
+          className="w-full h-2 rounded-full overflow-hidden"
+          style={{ background: 'var(--bg-2)' }}
+        >
           <div
-            className={`h-full transition-all duration-500 ${
-              allRequirementsMet
-                ? 'bg-gradient-to-r from-green-500 to-emerald-500'
-                : 'bg-gradient-to-r from-yellow-500 to-orange-500'
-            }`}
-            style={{ width: `${progressPercentage}%` }}
+            className="h-full transition-all duration-500"
+            style={{
+              width: `${progressPercentage}%`,
+              background: allRequirementsMet ? 'var(--success)' : 'var(--warning)'
+            }}
           />
         </div>
       </div>
@@ -128,16 +184,21 @@ export default function GreenlightGate({ project, onAdvance }: GreenlightGatePro
 
       {/* Pending Approvers Alert */}
       {!allRequirementsMet && pendingApprovers.length > 0 && (
-        <div className="bg-yellow-900/30 border border-yellow-600 rounded-lg p-4 mb-6">
+        <div
+          className="rounded-[10px] p-4 mb-6"
+          style={{ background: 'var(--warning-muted)', border: '1px solid var(--warning)' }}
+        >
           <div className="flex items-start gap-3">
-            <svg className="w-6 h-6 text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
+            <span style={{ color: 'var(--warning)' }}><AlertTriangleIcon /></span>
             <div className="flex-1">
-              <p className="font-bold text-yellow-200 mb-2">Awaiting Approvals From:</p>
+              <p className="font-semibold text-[14px] mb-2" style={{ color: 'var(--warning)' }}>
+                Awaiting Approvals From:
+              </p>
               <ul className="space-y-1">
                 {pendingApprovers.map((approver, index) => (
-                  <li key={index} className="text-yellow-300 text-sm">• {approver}</li>
+                  <li key={index} className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>
+                    • {approver}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -148,35 +209,44 @@ export default function GreenlightGate({ project, onAdvance }: GreenlightGatePro
       {/* Advance Button or Success Message */}
       {allRequirementsMet ? (
         <div className="space-y-4">
-          <div className="bg-green-900/30 border border-green-500 rounded-lg p-4 flex items-center gap-3">
-            <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+          <div
+            className="rounded-[10px] p-4 flex items-center gap-3"
+            style={{ background: 'var(--success-muted)', border: '1px solid var(--success)' }}
+          >
+            <span style={{ color: 'var(--success)' }}><CheckCircleIcon /></span>
             <div>
-              <p className="font-bold text-green-200">All Requirements Met!</p>
-              <p className="text-green-300 text-sm">Project is ready to advance to Pre-Production phase</p>
+              <p className="font-semibold text-[14px]" style={{ color: 'var(--success)' }}>
+                All Requirements Met!
+              </p>
+              <p className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>
+                Project is ready to advance to Pre-Production phase
+              </p>
             </div>
           </div>
 
           <button
             onClick={() => onAdvance('GREENLIT')}
-            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-lg transition-all shadow-lg hover:shadow-green-500/50 flex items-center justify-center gap-3"
+            className="w-full py-4 px-6 rounded-[6px] font-semibold text-[14px] transition-all duration-[80ms] flex items-center justify-center gap-2 active:scale-[0.98]"
+            style={{ background: 'var(--success)', color: 'white' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.filter = 'brightness(1.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.filter = 'brightness(1)';
+            }}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-            <span>Grant Greenlight & Advance to Pre-Production</span>
+            <ArrowRightIcon />
+            Grant Greenlight & Advance to Pre-Production
           </button>
         </div>
       ) : (
         <button
           disabled
-          className="w-full bg-gray-700 text-gray-400 font-bold py-4 px-6 rounded-lg cursor-not-allowed flex items-center justify-center gap-3"
+          className="w-full py-4 px-6 rounded-[6px] font-semibold text-[14px] flex items-center justify-center gap-2 cursor-not-allowed"
+          style={{ background: 'var(--bg-2)', color: 'var(--text-tertiary)' }}
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-          <span>Greenlight Blocked - Complete All Requirements</span>
+          <LockIcon />
+          Greenlight Blocked - Complete All Requirements
         </button>
       )}
     </div>
@@ -193,40 +263,44 @@ interface RequirementItemProps {
 
 function RequirementItem({ label, completed, description, approvedAt, approvedBy }: RequirementItemProps) {
   return (
-    <div className={`flex items-start gap-3 p-4 rounded-lg border ${
-      completed
-        ? 'bg-green-900/20 border-green-700'
-        : 'bg-indigo-900/20 border-indigo-700'
-    }`}>
+    <div
+      className="flex items-start gap-3 p-4 rounded-[10px]"
+      style={{
+        background: completed ? 'var(--success-muted)' : 'var(--bg-2)',
+        border: `1px solid ${completed ? 'var(--success)' : 'var(--border)'}`
+      }}
+    >
       <div className="flex-shrink-0 mt-0.5">
         {completed ? (
-          <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+          <span style={{ color: 'var(--success)' }}><CheckCircleIcon /></span>
         ) : (
-          <svg className="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+          <span style={{ color: 'var(--text-tertiary)' }}><ClockIcon /></span>
         )}
       </div>
       <div className="flex-1">
         <div className="flex items-center justify-between">
-          <p className={`font-bold ${completed ? 'text-green-200' : 'text-indigo-200'}`}>
+          <p
+            className="font-semibold text-[14px]"
+            style={{ color: completed ? 'var(--success)' : 'var(--text-primary)' }}
+          >
             {label}
           </p>
           {completed && (
-            <span className="text-xs font-bold text-green-400 bg-green-900/50 px-2 py-1 rounded">
-              ✓ COMPLETE
+            <span
+              className="text-[11px] font-bold px-2 py-1 rounded"
+              style={{ background: 'var(--success)', color: 'white' }}
+            >
+              COMPLETE
             </span>
           )}
         </div>
         {description && (
-          <p className={`text-sm mt-1 ${completed ? 'text-green-300' : 'text-indigo-300'}`}>
+          <p className="text-[13px] mt-1" style={{ color: 'var(--text-secondary)' }}>
             {description}
           </p>
         )}
         {completed && approvedAt && (
-          <p className="text-xs text-green-400 mt-2">
+          <p className="text-[12px] mt-2" style={{ color: 'var(--text-tertiary)' }}>
             Approved {new Date(approvedAt).toLocaleString()}
             {approvedBy && ` by ${approvedBy}`}
           </p>

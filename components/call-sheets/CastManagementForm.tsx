@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
 
-const client = generateClient<Schema>();
-
 type CallSheetCast = Schema['CallSheetCast']['type'];
 
 interface CastManagementFormProps {
@@ -17,6 +15,7 @@ export default function CastManagementForm({
   callSheetId,
   onCastUpdated,
 }: CastManagementFormProps) {
+  const [client] = useState(() => generateClient<Schema>());
   const [cast, setCast] = useState<CallSheetCast[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);

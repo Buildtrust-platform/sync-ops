@@ -6,17 +6,81 @@ import type { Schema } from "@/amplify/data/resource";
 
 /**
  * FIELD INTELLIGENCE WIDGET
- *
- * PRD Module 2.3: Field Intelligence Engine
- *
- * Provides situational awareness for shoot locations:
- * - Weather Intelligence (current + 5-day forecast)
- * - Feasibility Score (0-100)
- * - Risk Alerts (weather-based warnings)
- * - Health Alerts (air quality, temperature extremes)
- *
- * Uses OpenWeatherMap API (free tier: 1000 calls/day)
+ * Design System: Dark mode, CSS variables
+ * Icons: Lucide-style SVGs (stroke-width: 1.5)
  */
+
+// Lucide-style icons
+const GlobeIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="2" y1="12" x2="22" y2="12"/>
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+  </svg>
+);
+
+const ThermometerIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+  </svg>
+);
+
+const WindIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/>
+    <path d="M9.6 4.6A2 2 0 1 1 11 8H2"/>
+    <path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>
+  </svg>
+);
+
+const DropletIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+  </svg>
+);
+
+const CloudIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
+  </svg>
+);
+
+const AlertTriangleIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/>
+    <line x1="12" y1="17" x2="12.01" y2="17"/>
+  </svg>
+);
+
+const HeartPulseIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+    <path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/>
+  </svg>
+);
+
+const RefreshIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 2v6h-6"/>
+    <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
+    <path d="M3 22v-6h6"/>
+    <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+  </svg>
+);
+
+const LoaderIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
+    <line x1="12" y1="2" x2="12" y2="6"/>
+    <line x1="12" y1="18" x2="12" y2="22"/>
+    <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/>
+    <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/>
+    <line x1="2" y1="12" x2="6" y2="12"/>
+    <line x1="18" y1="12" x2="22" y2="12"/>
+    <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/>
+    <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/>
+  </svg>
+);
 
 interface FieldIntelligenceProps {
   project: Schema["Project"]["type"];
@@ -49,7 +113,7 @@ interface WeatherData {
       icon: string;
     }>;
     wind_speed: number;
-    pop: number; // Probability of precipitation
+    pop: number;
   }>;
 }
 
@@ -63,34 +127,29 @@ export default function FieldIntelligence({ project, onUpdate }: FieldIntelligen
   const hasLocation = !!(project.shootLocationCity && project.shootLocationCountry);
   const hasCoordinates = !!project.shootLocationCoordinates;
 
-  // Calculate feasibility score
   const calculateFeasibilityScore = (weather: WeatherData, project: Schema["Project"]["type"]): number => {
     let score = 100;
 
-    // Weather conditions (40 points)
     const windSpeed = weather.current.wind_speed;
-    if (windSpeed > 10) score -= 15; // High winds problematic for drones, audio
-    if (windSpeed > 15) score -= 10; // Very high winds
+    if (windSpeed > 10) score -= 15;
+    if (windSpeed > 15) score -= 10;
 
     const temp = weather.current.temp;
-    if (temp < 0 || temp > 35) score -= 10; // Extreme temperatures
+    if (temp < 0 || temp > 35) score -= 10;
 
     const humidity = weather.current.humidity;
-    if (humidity > 80) score -= 5; // High humidity affects equipment
+    if (humidity > 80) score -= 5;
 
-    // Check next 5 days for rain probability
     const avgRainProbability = weather.daily.slice(0, 5).reduce((acc, day) => acc + day.pop, 0) / 5;
-    if (avgRainProbability > 0.5) score -= 10; // High rain probability
+    if (avgRainProbability > 0.5) score -= 10;
 
-    // Time to shoot date (30 points)
     const productionStartDate = project.productionStartDate;
     if (productionStartDate) {
       const daysUntilShoot = Math.floor((new Date(productionStartDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-      if (daysUntilShoot < 7) score -= 15; // Less than a week
-      if (daysUntilShoot < 3) score -= 10; // Less than 3 days - very tight
+      if (daysUntilShoot < 7) score -= 15;
+      if (daysUntilShoot < 3) score -= 10;
     }
 
-    // Documents & approvals ready (30 points)
     const greenlightComplete = project.greenlightProducerApproved &&
                                 project.greenlightLegalApproved &&
                                 project.greenlightFinanceApproved &&
@@ -101,54 +160,51 @@ export default function FieldIntelligence({ project, onUpdate }: FieldIntelligen
     return Math.max(0, Math.min(100, score));
   };
 
-  // Generate risk alerts based on weather
   const generateRiskAlerts = (weather: WeatherData): string[] => {
     const alerts: string[] = [];
 
     if (weather.current.wind_speed > 10) {
-      alerts.push(`⚠️ High winds (${Math.round(weather.current.wind_speed)} m/s) - Drone filming may be unsafe`);
+      alerts.push(`High winds (${Math.round(weather.current.wind_speed)} m/s) - Drone filming may be unsafe`);
     }
 
     if (weather.current.temp < 0) {
-      alerts.push(`❄️ Freezing temperatures (${Math.round(weather.current.temp)}°C) - Equipment protection required`);
+      alerts.push(`Freezing temperatures (${Math.round(weather.current.temp)}°C) - Equipment protection required`);
     }
 
     if (weather.current.temp > 35) {
-      alerts.push(`🌡️ Extreme heat (${Math.round(weather.current.temp)}°C) - Crew safety & equipment cooling needed`);
+      alerts.push(`Extreme heat (${Math.round(weather.current.temp)}°C) - Crew safety & equipment cooling needed`);
     }
 
     const avgRainProbability = weather.daily.slice(0, 5).reduce((acc, day) => acc + day.pop, 0) / 5;
     if (avgRainProbability > 0.6) {
-      alerts.push(`🌧️ High rain probability (${Math.round(avgRainProbability * 100)}%) over next 5 days`);
+      alerts.push(`High rain probability (${Math.round(avgRainProbability * 100)}%) over next 5 days`);
     }
 
     if (weather.current.uvi > 8) {
-      alerts.push(`☀️ Very high UV index (${weather.current.uvi}) - Sun protection essential for crew`);
+      alerts.push(`Very high UV index (${weather.current.uvi}) - Sun protection essential for crew`);
     }
 
     return alerts;
   };
 
-  // Generate health alerts
   const generateHealthAlerts = (weather: WeatherData): string[] => {
     const alerts: string[] = [];
 
     if (weather.current.temp > 32) {
-      alerts.push(`🥵 Heat exhaustion risk - Ensure hydration and shade for crew`);
+      alerts.push(`Heat exhaustion risk - Ensure hydration and shade for crew`);
     }
 
     if (weather.current.temp < 5) {
-      alerts.push(`🥶 Hypothermia risk - Ensure warm clothing and heated breaks`);
+      alerts.push(`Hypothermia risk - Ensure warm clothing and heated breaks`);
     }
 
     if (weather.current.humidity > 85) {
-      alerts.push(`💧 High humidity - Equipment condensation risk`);
+      alerts.push(`High humidity - Equipment condensation risk`);
     }
 
     return alerts;
   };
 
-  // Fetch weather data from OpenWeatherMap
   const fetchWeatherData = async () => {
     if (!hasCoordinates) {
       setError("No shoot location coordinates set. Please add location first.");
@@ -160,16 +216,12 @@ export default function FieldIntelligence({ project, onUpdate }: FieldIntelligen
 
     try {
       const [lat, lng] = project.shootLocationCoordinates!.split(',');
-
-      // Using OpenWeatherMap One Call API 3.0 (free tier)
-      // Note: In production, this should be a serverless function to protect API key
       const apiKey = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
 
       if (!apiKey) {
         throw new Error('OpenWeatherMap API key not configured. Please add NEXT_PUBLIC_OPENWEATHER_API_KEY to your .env.local file.');
       }
 
-      // Real API call to OpenWeatherMap
       const response = await fetch(
         `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lng}&units=metric&appid=${apiKey}`
       );
@@ -181,12 +233,10 @@ export default function FieldIntelligence({ project, onUpdate }: FieldIntelligen
       const data: WeatherData = await response.json();
       setWeatherData(data);
 
-      // Calculate scores and alerts
       const feasibilityScore = calculateFeasibilityScore(data, project);
       const riskAlerts = generateRiskAlerts(data);
       const healthAlerts = generateHealthAlerts(data);
 
-      // Update project with new field intelligence data
       const client = generateClient<Schema>();
 
       await client.models.Project.update({
@@ -211,29 +261,26 @@ export default function FieldIntelligence({ project, onUpdate }: FieldIntelligen
   const riskAlerts = project.fieldIntelligenceRiskAlerts || [];
   const healthAlerts = project.fieldIntelligenceHealthAlerts || [];
 
-  // Determine feasibility color
   const getFeasibilityColor = (score: number) => {
-    if (score >= 80) return 'text-green-400';
-    if (score >= 60) return 'text-yellow-400';
-    if (score >= 40) return 'text-orange-400';
-    return 'text-red-400';
-  };
-
-  const getFeasibilityBgColor = (score: number) => {
-    if (score >= 80) return 'bg-green-600';
-    if (score >= 60) return 'bg-yellow-600';
-    if (score >= 40) return 'bg-orange-600';
-    return 'bg-red-600';
+    if (score >= 80) return 'var(--success)';
+    if (score >= 60) return 'var(--warning)';
+    if (score >= 40) return '#F97316'; // orange
+    return 'var(--error)';
   };
 
   if (!hasLocation) {
     return (
-      <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+      <div
+        className="rounded-[12px] p-6"
+        style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}
+      >
         <div className="flex items-center gap-3 mb-4">
-          <span className="text-2xl">🌍</span>
-          <h3 className="text-lg font-bold text-white">Field Intelligence</h3>
+          <span style={{ color: 'var(--primary)' }}><GlobeIcon /></span>
+          <h3 className="text-[18px] font-bold" style={{ color: 'var(--text-primary)' }}>
+            Field Intelligence
+          </h3>
         </div>
-        <p className="text-slate-400 text-sm">
+        <p className="text-[14px]" style={{ color: 'var(--text-tertiary)' }}>
           Add a shoot location to enable weather intelligence and feasibility scoring.
         </p>
       </div>
@@ -241,24 +288,33 @@ export default function FieldIntelligence({ project, onUpdate }: FieldIntelligen
   }
 
   return (
-    <div className="bg-gradient-to-br from-blue-900 to-indigo-900 rounded-xl p-6 border-2 border-blue-500">
+    <div
+      className="rounded-[12px] p-6"
+      style={{
+        background: 'linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%)',
+        border: '2px solid var(--primary)',
+      }}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-xl font-bold text-white flex items-center gap-2">
-            🌍 Field Intelligence
+          <h3 className="text-[20px] font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+            <span style={{ color: 'var(--primary)' }}><GlobeIcon /></span>
+            Field Intelligence
           </h3>
-          <p className="text-blue-200 text-sm mt-1">
+          <p className="text-[13px] mt-1" style={{ color: 'var(--text-secondary)' }}>
             {project.shootLocationCity}, {project.shootLocationCountry}
           </p>
         </div>
         <div className="text-right">
-          <div className={`text-4xl font-bold ${getFeasibilityColor(feasibilityScore)}`}>
+          <div className="text-[36px] font-bold" style={{ color: getFeasibilityColor(feasibilityScore) }}>
             {feasibilityScore}
           </div>
-          <div className="text-xs text-blue-300">Feasibility Score</div>
+          <div className="text-[11px] uppercase" style={{ color: 'var(--text-tertiary)' }}>
+            Feasibility Score
+          </div>
           {project.fieldIntelligenceLastUpdated && (
-            <div className="text-xs text-blue-400 mt-1">
+            <div className="text-[11px] mt-1" style={{ color: 'var(--text-tertiary)' }}>
               Updated {new Date(project.fieldIntelligenceLastUpdated).toLocaleTimeString()}
             </div>
           )}
@@ -267,10 +323,16 @@ export default function FieldIntelligence({ project, onUpdate }: FieldIntelligen
 
       {/* Feasibility Progress Bar */}
       <div className="mb-6">
-        <div className="w-full bg-blue-950 h-4 rounded-full overflow-hidden">
+        <div
+          className="w-full h-3 rounded-full overflow-hidden"
+          style={{ background: 'var(--bg-2)' }}
+        >
           <div
-            className={`h-full transition-all duration-500 ${getFeasibilityBgColor(feasibilityScore)}`}
-            style={{ width: `${feasibilityScore}%` }}
+            className="h-full transition-all duration-500"
+            style={{
+              width: `${feasibilityScore}%`,
+              background: getFeasibilityColor(feasibilityScore),
+            }}
           />
         </div>
       </div>
@@ -278,33 +340,71 @@ export default function FieldIntelligence({ project, onUpdate }: FieldIntelligen
       {/* Weather Data */}
       {weatherData && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-blue-950/50 rounded-lg p-3">
-            <div className="text-xs text-blue-300 mb-1">Temperature</div>
-            <div className="text-2xl font-bold text-white">
+          <div
+            className="rounded-[10px] p-4"
+            style={{ background: 'var(--bg-2)', border: '1px solid var(--border)' }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span style={{ color: 'var(--primary)' }}><ThermometerIcon /></span>
+              <span className="text-[11px] uppercase" style={{ color: 'var(--text-tertiary)' }}>
+                Temperature
+              </span>
+            </div>
+            <div className="text-[24px] font-bold" style={{ color: 'var(--text-primary)' }}>
               {Math.round(weatherData.current.temp)}°C
             </div>
-            <div className="text-xs text-blue-400">
+            <div className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
               Feels like {Math.round(weatherData.current.feels_like)}°C
             </div>
           </div>
-          <div className="bg-blue-950/50 rounded-lg p-3">
-            <div className="text-xs text-blue-300 mb-1">Wind</div>
-            <div className="text-2xl font-bold text-white">
+
+          <div
+            className="rounded-[10px] p-4"
+            style={{ background: 'var(--bg-2)', border: '1px solid var(--border)' }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span style={{ color: 'var(--primary)' }}><WindIcon /></span>
+              <span className="text-[11px] uppercase" style={{ color: 'var(--text-tertiary)' }}>
+                Wind
+              </span>
+            </div>
+            <div className="text-[24px] font-bold" style={{ color: 'var(--text-primary)' }}>
               {Math.round(weatherData.current.wind_speed)} m/s
             </div>
-            <div className="text-xs text-blue-400">
-              {weatherData.current.wind_speed > 10 ? '⚠️ High' : '✓ Normal'}
+            <div
+              className="text-[12px]"
+              style={{ color: weatherData.current.wind_speed > 10 ? 'var(--warning)' : 'var(--success)' }}
+            >
+              {weatherData.current.wind_speed > 10 ? 'High' : 'Normal'}
             </div>
           </div>
-          <div className="bg-blue-950/50 rounded-lg p-3">
-            <div className="text-xs text-blue-300 mb-1">Humidity</div>
-            <div className="text-2xl font-bold text-white">
+
+          <div
+            className="rounded-[10px] p-4"
+            style={{ background: 'var(--bg-2)', border: '1px solid var(--border)' }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span style={{ color: 'var(--primary)' }}><DropletIcon /></span>
+              <span className="text-[11px] uppercase" style={{ color: 'var(--text-tertiary)' }}>
+                Humidity
+              </span>
+            </div>
+            <div className="text-[24px] font-bold" style={{ color: 'var(--text-primary)' }}>
               {weatherData.current.humidity}%
             </div>
           </div>
-          <div className="bg-blue-950/50 rounded-lg p-3">
-            <div className="text-xs text-blue-300 mb-1">Conditions</div>
-            <div className="text-sm font-bold text-white capitalize">
+
+          <div
+            className="rounded-[10px] p-4"
+            style={{ background: 'var(--bg-2)', border: '1px solid var(--border)' }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span style={{ color: 'var(--primary)' }}><CloudIcon /></span>
+              <span className="text-[11px] uppercase" style={{ color: 'var(--text-tertiary)' }}>
+                Conditions
+              </span>
+            </div>
+            <div className="text-[14px] font-bold capitalize" style={{ color: 'var(--text-primary)' }}>
               {weatherData.current.weather[0]?.description || 'Unknown'}
             </div>
           </div>
@@ -313,12 +413,20 @@ export default function FieldIntelligence({ project, onUpdate }: FieldIntelligen
 
       {/* Risk Alerts */}
       {riskAlerts.length > 0 && (
-        <div className="bg-orange-900/30 border border-orange-600 rounded-lg p-4 mb-4">
-          <div className="font-bold text-orange-200 mb-2">⚠️ Risk Alerts</div>
+        <div
+          className="rounded-[10px] p-4 mb-4"
+          style={{ background: 'var(--warning-muted)', border: '1px solid var(--warning)' }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <span style={{ color: 'var(--warning)' }}><AlertTriangleIcon /></span>
+            <span className="font-bold text-[14px]" style={{ color: 'var(--warning)' }}>
+              Risk Alerts
+            </span>
+          </div>
           <ul className="space-y-1">
             {riskAlerts.map((alert, index) => (
-              <li key={index} className="text-orange-300 text-sm">
-                {alert}
+              <li key={index} className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>
+                • {alert}
               </li>
             ))}
           </ul>
@@ -327,12 +435,20 @@ export default function FieldIntelligence({ project, onUpdate }: FieldIntelligen
 
       {/* Health Alerts */}
       {healthAlerts.length > 0 && (
-        <div className="bg-red-900/30 border border-red-600 rounded-lg p-4 mb-4">
-          <div className="font-bold text-red-200 mb-2">🏥 Health & Safety Alerts</div>
+        <div
+          className="rounded-[10px] p-4 mb-4"
+          style={{ background: 'var(--error-muted)', border: '1px solid var(--error)' }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <span style={{ color: 'var(--error)' }}><HeartPulseIcon /></span>
+            <span className="font-bold text-[14px]" style={{ color: 'var(--error)' }}>
+              Health & Safety Alerts
+            </span>
+          </div>
           <ul className="space-y-1">
             {healthAlerts.map((alert, index) => (
-              <li key={index} className="text-red-300 text-sm">
-                {alert}
+              <li key={index} className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>
+                • {alert}
               </li>
             ))}
           </ul>
@@ -341,9 +457,14 @@ export default function FieldIntelligence({ project, onUpdate }: FieldIntelligen
 
       {/* Error Display */}
       {error && (
-        <div className="bg-red-900/30 border border-red-600 rounded-lg p-4 mb-4">
-          <div className="font-bold text-red-200 mb-1">Error</div>
-          <p className="text-red-300 text-sm">{error}</p>
+        <div
+          className="rounded-[10px] p-4 mb-4"
+          style={{ background: 'var(--error-muted)', border: '1px solid var(--error)' }}
+        >
+          <div className="font-bold text-[14px] mb-1" style={{ color: 'var(--error)' }}>
+            Error
+          </div>
+          <p className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>{error}</p>
         </div>
       )}
 
@@ -351,28 +472,26 @@ export default function FieldIntelligence({ project, onUpdate }: FieldIntelligen
       <button
         onClick={fetchWeatherData}
         disabled={loading || !hasCoordinates}
-        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-lg transition-all flex items-center justify-center gap-3"
+        className="w-full py-3 px-6 rounded-[6px] font-semibold text-[14px] flex items-center justify-center gap-3 transition-all duration-[80ms] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{ background: 'var(--primary)', color: 'var(--bg-0)' }}
+        onMouseEnter={(e) => { if (!e.currentTarget.disabled) e.currentTarget.style.filter = 'brightness(1.1)'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.filter = 'brightness(1)'; }}
       >
         {loading ? (
           <>
-            <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-            </svg>
+            <LoaderIcon />
             <span>Updating Field Intelligence...</span>
           </>
         ) : (
           <>
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
+            <RefreshIcon />
             <span>Refresh Field Intelligence</span>
           </>
         )}
       </button>
 
       {!hasCoordinates && (
-        <p className="text-blue-300 text-xs text-center mt-3">
+        <p className="text-[12px] text-center mt-3" style={{ color: 'var(--text-tertiary)' }}>
           Note: Add GPS coordinates (lat,lng) to enable weather data
         </p>
       )}

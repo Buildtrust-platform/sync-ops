@@ -7,8 +7,6 @@ import type { Schema } from '@/amplify/data/resource';
 import VersionComparison from '@/app/components/VersionComparison';
 import VersionTimeline from '@/app/components/VersionTimeline';
 
-const client = generateClient<Schema>();
-
 interface Asset {
   id: string;
   filename: string;
@@ -21,6 +19,7 @@ export default function AssetVersionsPage({ params }: { params: Promise<{ id: st
   const assetId = resolvedParams.assetId;
   const router = useRouter();
 
+  const [client] = useState(() => generateClient<Schema>());
   const [asset, setAsset] = useState<Asset | null>(null);
   const [activeView, setActiveView] = useState<'timeline' | 'comparison'>('comparison');
   const [loading, setLoading] = useState(true);

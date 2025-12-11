@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
 
-const client = generateClient<Schema>();
-
 type CallSheetCrew = Schema['CallSheetCrew']['type'];
 
 interface CrewManagementFormProps {
@@ -33,6 +31,7 @@ export default function CrewManagementForm({
   callSheetId,
   onCrewUpdated,
 }: CrewManagementFormProps) {
+  const [client] = useState(() => generateClient<Schema>());
   const [crew, setCrew] = useState<CallSheetCrew[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);

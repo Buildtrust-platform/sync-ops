@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
 
-const client = generateClient<Schema>();
-
 interface CallSheetFormProps {
   projectId: string;
   callSheetId?: string; // Optional - if provided, we're editing
@@ -14,6 +12,7 @@ interface CallSheetFormProps {
 }
 
 export default function CallSheetForm({ projectId, callSheetId, onSuccess, onCancel }: CallSheetFormProps) {
+  const [client] = useState(() => generateClient<Schema>());
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(!!callSheetId);
   const [formData, setFormData] = useState({

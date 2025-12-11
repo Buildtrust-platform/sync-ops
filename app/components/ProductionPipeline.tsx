@@ -17,6 +17,132 @@ import type { Schema } from "@/amplify/data/resource";
  * - Stage transition controls
  */
 
+// SVG Icon Components (Lucide-style, stroke-width: 1.5)
+const LightbulbIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+    <path d="M9 18h6" />
+    <path d="M10 22h4" />
+  </svg>
+);
+
+const ClipboardIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+    <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+  </svg>
+);
+
+const ClapperboardIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 11v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8H4z" />
+    <path d="m4 11-.88-2.87a2 2 0 0 1 1.33-2.5l11.48-3.5a2 2 0 0 1 2.5 1.32l.87 2.87L4 11z" />
+    <path d="m6.6 4.99 3.38 4.2" />
+    <path d="m11.86 3.38 3.38 4.2" />
+  </svg>
+);
+
+const ScissorsIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="6" cy="6" r="3" />
+    <circle cx="6" cy="18" r="3" />
+    <line x1="20" y1="4" x2="8.12" y2="15.88" />
+    <line x1="14.47" y1="14.48" x2="20" y2="20" />
+    <line x1="8.12" y1="8.12" x2="12" y2="12" />
+  </svg>
+);
+
+const EyeIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const ScaleIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z" />
+    <path d="M2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z" />
+    <path d="M7 21h10" />
+    <path d="M12 3v18" />
+    <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" />
+  </svg>
+);
+
+const RocketIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+    <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+    <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+    <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+  </svg>
+);
+
+const ArchiveIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="21 8 21 21 3 21 3 8" />
+    <rect x="1" y="3" width="22" height="5" />
+    <line x1="10" y1="12" x2="14" y2="12" />
+  </svg>
+);
+
+const CheckIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+
+const LockIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+);
+
+const ChevronRightIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="9 18 15 12 9 6" />
+  </svg>
+);
+
+const ArrowRightIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="5" y1="12" x2="19" y2="12" />
+    <polyline points="12 5 19 12 12 19" />
+  </svg>
+);
+
+const CalendarIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
+  </svg>
+);
+
+const VideoIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="23 7 16 12 23 17 23 7" />
+    <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+  </svg>
+);
+
+const FlagIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+    <line x1="4" y1="22" x2="4" y2="15" />
+  </svg>
+);
+
+const TargetIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <circle cx="12" cy="12" r="6" />
+    <circle cx="12" cy="12" r="2" />
+  </svg>
+);
+
 type ProjectStatus = Schema["Project"]["type"]["status"];
 
 interface PipelineStage {
@@ -25,8 +151,8 @@ interface PipelineStage {
   shortLabel: string;
   description: string;
   modules: string[];
-  color: string;
-  icon: string;
+  colorVar: string;
+  IconComponent: () => JSX.Element;
   requirements?: string[];
 }
 
@@ -37,8 +163,8 @@ const PIPELINE_STAGES: PipelineStage[] = [
     shortLabel: "Dev",
     description: "Project intake, Smart Brief, and initial planning",
     modules: ["Smart Brief", "Risk Assessment", "Budget Estimation", "Greenlight Gate"],
-    color: "bg-blue-600",
-    icon: "💡",
+    colorVar: "var(--accent-secondary)",
+    IconComponent: LightbulbIcon,
     requirements: ["Project description", "AI brief analysis", "Risk assessment", "Budget approval"]
   },
   {
@@ -47,8 +173,8 @@ const PIPELINE_STAGES: PipelineStage[] = [
     shortLabel: "Pre-Prod",
     description: "Logistics, permits, crew, and planning",
     modules: ["Call Sheets", "Field Intelligence", "Policy Engine", "Equipment OS", "Rights Locker"],
-    color: "bg-purple-600",
-    icon: "📋",
+    colorVar: "var(--accent-secondary)",
+    IconComponent: ClipboardIcon,
     requirements: ["Location permits", "Crew assigned", "Equipment reserved", "Insurance secured"]
   },
   {
@@ -57,8 +183,8 @@ const PIPELINE_STAGES: PipelineStage[] = [
     shortLabel: "Shoot",
     description: "On-location or studio filming",
     modules: ["Live Call Sheets", "Governed Ingest", "On-set Safety", "Real-time Communication"],
-    color: "bg-green-600",
-    icon: "🎬",
+    colorVar: "var(--status-success)",
+    IconComponent: ClapperboardIcon,
     requirements: ["Daily reports", "Asset uploads", "Safety compliance", "Continuity tracking"]
   },
   {
@@ -67,8 +193,8 @@ const PIPELINE_STAGES: PipelineStage[] = [
     shortLabel: "Post",
     description: "Editing, VFX, color grading, sound design",
     modules: ["Version Stacking", "AI Editorial", "Technical QC", "Color & Sound"],
-    color: "bg-yellow-600",
-    icon: "✂️",
+    colorVar: "var(--status-warning)",
+    IconComponent: ScissorsIcon,
     requirements: ["Rough cut", "Color grading", "Sound mix", "VFX completion", "Final master"]
   },
   {
@@ -77,8 +203,8 @@ const PIPELINE_STAGES: PipelineStage[] = [
     shortLabel: "Review",
     description: "Stakeholder review and feedback",
     modules: ["Time-coded Comments", "Multi-stakeholder Review", "AI Feedback Summary", "Conflict Detection"],
-    color: "bg-indigo-600",
-    icon: "👁️",
+    colorVar: "var(--accent-secondary)",
+    IconComponent: EyeIcon,
     requirements: ["Internal review", "Client approval", "Creative sign-off", "Revision tracking"]
   },
   {
@@ -87,8 +213,8 @@ const PIPELINE_STAGES: PipelineStage[] = [
     shortLabel: "Legal",
     description: "Legal clearance and compliance approval",
     modules: ["Legal Approval Lock", "Rights Verification", "Compliance Check", "PII Detection"],
-    color: "bg-orange-600",
-    icon: "⚖️",
+    colorVar: "var(--status-warning)",
+    IconComponent: ScaleIcon,
     requirements: ["Legal approval", "Rights clearance", "Compliance sign-off", "Master locked"]
   },
   {
@@ -97,8 +223,8 @@ const PIPELINE_STAGES: PipelineStage[] = [
     shortLabel: "Deliver",
     description: "Marketing delivery and content publishing",
     modules: ["Distribution Engine", "Watermarking", "Social Crops", "Geo-rights", "CMS Integration"],
-    color: "bg-teal-600",
-    icon: "🚀",
+    colorVar: "var(--accent-primary)",
+    IconComponent: RocketIcon,
     requirements: ["Social versions", "Captions & subtitles", "Marketing copy", "CMS upload", "Publishing scheduled"]
   },
   {
@@ -107,8 +233,8 @@ const PIPELINE_STAGES: PipelineStage[] = [
     shortLabel: "Archive",
     description: "Long-term storage and asset intelligence",
     modules: ["Glacier Migration", "Asset Intelligence", "ROI Tracking", "Usage Analytics"],
-    color: "bg-gray-600",
-    icon: "📦",
+    colorVar: "var(--text-muted)",
+    IconComponent: ArchiveIcon,
     requirements: ["Glacier migration", "Metadata complete", "Proxy retained", "Search indexed"]
   }
 ];
@@ -116,7 +242,7 @@ const PIPELINE_STAGES: PipelineStage[] = [
 interface ProductionPipelineProps {
   currentStatus: ProjectStatus;
   projectId: string;
-  project?: Schema["Project"]["type"]; // For greenlight gate enforcement
+  project?: Schema["Project"]["type"];
   onStatusChange?: (newStatus: ProjectStatus) => void;
   showDetails?: boolean;
 }
@@ -137,7 +263,6 @@ export default function ProductionPipeline({
     : currentStage;
 
   // GREENLIGHT GATE ENFORCEMENT
-  // Check if all required approvals are complete
   function checkGreenlightApprovals(): { isComplete: boolean; missingApprovals: string[] } {
     if (!project) return { isComplete: true, missingApprovals: [] };
 
@@ -160,9 +285,7 @@ export default function ProductionPipeline({
     };
   }
 
-  // Check if transition to target stage is allowed
   function canTransitionTo(targetStage: ProjectStatus): { allowed: boolean; reason?: string } {
-    // GREENLIGHT GATE: Block transition from DEVELOPMENT to PRE_PRODUCTION without approvals
     if (currentStatus === 'DEVELOPMENT' && targetStage === 'PRE_PRODUCTION') {
       const { isComplete, missingApprovals } = checkGreenlightApprovals();
       if (!isComplete) {
@@ -172,69 +295,112 @@ export default function ProductionPipeline({
         };
       }
     }
-
     return { allowed: true };
   }
 
   return (
-    <div className="w-full">
+    <div style={{ width: '100%' }}>
       {/* PIPELINE HEADER */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-2">Production Pipeline</h2>
-        <p className="text-slate-400 text-sm">
-          Current Stage: <span className="font-bold text-white">{currentStage.icon} {currentStage.label}</span>
+      <div style={{ marginBottom: '24px' }}>
+        <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '8px' }}>Production Pipeline</h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
+          Current Stage: <span style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>
+            <span style={{ marginRight: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>{currentStage && <currentStage.IconComponent />}</span>
+            {currentStage?.label}
+          </span>
         </p>
       </div>
 
       {/* VISUAL PIPELINE */}
-      <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 mb-6">
-        <div className="flex items-center justify-between gap-2">
+      <div style={{ backgroundColor: 'var(--bg-2)', borderRadius: '12px', padding: '24px', border: '1px solid var(--border-default)', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
           {PIPELINE_STAGES.map((stage, index) => {
             const isCurrent = stage.id === currentStatus;
             const isPast = index < currentStageIndex;
             const isSelected = stage.id === selectedStage;
+            const StageIcon = stage.IconComponent;
 
             return (
-              <div key={stage.id} className="flex items-center flex-1">
+              <div key={stage.id} style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
                 {/* STAGE BUBBLE */}
                 <button
                   onClick={() => setSelectedStage(isSelected ? null : stage.id)}
-                  className={`
-                    relative flex flex-col items-center justify-center
-                    w-full aspect-square rounded-lg
-                    transition-all duration-300
-                    ${isCurrent ? `${stage.color} text-white shadow-lg scale-110 ring-4 ring-white/20` : ''}
-                    ${isPast ? 'bg-slate-600 text-slate-300' : ''}
-                    ${!isCurrent && !isPast ? 'bg-slate-700 text-slate-400' : ''}
-                    ${isSelected ? 'ring-2 ring-blue-400' : ''}
-                    hover:scale-105 hover:shadow-xl
-                  `}
+                  style={{
+                    position: 'relative',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                    aspectRatio: '1',
+                    borderRadius: '10px',
+                    border: isSelected ? '2px solid var(--accent-secondary)' : 'none',
+                    transition: 'all 80ms ease',
+                    cursor: 'pointer',
+                    backgroundColor: isCurrent
+                      ? stage.colorVar
+                      : isPast
+                        ? 'var(--bg-3)'
+                        : 'var(--bg-3)',
+                    color: isCurrent
+                      ? 'var(--bg-1)'
+                      : isPast
+                        ? 'var(--text-secondary)'
+                        : 'var(--text-muted)',
+                    boxShadow: isCurrent
+                      ? '0 4px 12px rgba(0, 0, 0, 0.3)'
+                      : 'none',
+                    transform: isCurrent ? 'scale(1.1)' : 'scale(1)',
+                  }}
                 >
                   {/* Checkmark for completed stages */}
                   {isPast && (
-                    <div className="absolute -top-2 -right-2 bg-green-500 rounded-full p-1">
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
+                    <div style={{
+                      position: 'absolute',
+                      top: '-8px',
+                      right: '-8px',
+                      backgroundColor: 'var(--status-success)',
+                      borderRadius: '50%',
+                      padding: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <CheckIcon />
                     </div>
                   )}
 
-                  <div className="text-2xl mb-1">{stage.icon}</div>
-                  <div className="text-xs font-bold text-center px-1">{stage.shortLabel}</div>
+                  <div style={{ marginBottom: '4px' }}><StageIcon /></div>
+                  <div style={{ fontSize: '10px', fontWeight: 'bold', textAlign: 'center', padding: '0 4px' }}>{stage.shortLabel}</div>
 
                   {isCurrent && (
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2">
-                      <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '-4px',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                    }}>
+                      <div style={{
+                        width: '8px',
+                        height: '8px',
+                        backgroundColor: 'var(--text-primary)',
+                        borderRadius: '50%',
+                        animation: 'pulse 2s infinite',
+                      }} />
                     </div>
                   )}
                 </button>
 
                 {/* CONNECTOR LINE */}
                 {index < PIPELINE_STAGES.length - 1 && (
-                  <div className={`
-                    h-1 flex-shrink-0 mx-1 w-8
-                    ${index < currentStageIndex ? 'bg-slate-600' : 'bg-slate-700'}
-                  `} />
+                  <div style={{
+                    height: '4px',
+                    flexShrink: 0,
+                    margin: '0 4px',
+                    width: '32px',
+                    borderRadius: '2px',
+                    backgroundColor: index < currentStageIndex ? 'var(--bg-3)' : 'var(--bg-3)',
+                  }} />
                 )}
               </div>
             );
@@ -242,17 +408,17 @@ export default function ProductionPipeline({
         </div>
 
         {/* STAGE LEGEND */}
-        <div className="mt-6 flex items-center justify-center gap-6 text-xs text-slate-400">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-slate-600 rounded"></div>
+        <div style={{ marginTop: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '24px', fontSize: '12px', color: 'var(--text-muted)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '12px', height: '12px', backgroundColor: 'var(--bg-3)', borderRadius: '4px' }} />
             <span>Completed</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-green-600 rounded ring-2 ring-white/20"></div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '12px', height: '12px', backgroundColor: 'var(--status-success)', borderRadius: '4px', boxShadow: '0 0 0 2px rgba(255,255,255,0.2)' }} />
             <span>Current</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-slate-700 rounded"></div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '12px', height: '12px', backgroundColor: 'var(--bg-3)', borderRadius: '4px' }} />
             <span>Upcoming</span>
           </div>
         </div>
@@ -260,13 +426,13 @@ export default function ProductionPipeline({
 
       {/* STAGE DETAILS */}
       {showDetails && viewingStage && (
-        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-          <div className="flex items-start justify-between mb-4">
+        <div style={{ backgroundColor: 'var(--bg-2)', borderRadius: '12px', padding: '24px', border: '1px solid var(--border-default)' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px' }}>
             <div>
-              <h3 className="text-xl font-bold mb-2">
-                {viewingStage.icon} {viewingStage.label}
+              <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <viewingStage.IconComponent /> {viewingStage.label}
               </h3>
-              <p className="text-slate-400 text-sm">{viewingStage.description}</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>{viewingStage.description}</p>
             </div>
 
             {onStatusChange && viewingStage.id !== currentStatus && (() => {
@@ -274,7 +440,7 @@ export default function ProductionPipeline({
               const isBlocked = !transitionCheck.allowed;
 
               return (
-                <div className="flex flex-col items-end gap-3">
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px' }}>
                   <button
                     onClick={() => {
                       if (transitionCheck.allowed) {
@@ -282,24 +448,45 @@ export default function ProductionPipeline({
                       }
                     }}
                     disabled={isBlocked}
-                    className={`px-6 py-3 rounded-xl text-base font-black transition-all shadow-lg ${
-                      isBlocked
-                        ? 'bg-slate-700 text-slate-500 cursor-not-allowed border-2 border-red-500/50'
-                        : 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-blue-500/50'
-                    }`}
-                    title={isBlocked ? transitionCheck.reason : undefined}
+                    style={{
+                      padding: '12px 24px',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                      transition: 'all 80ms ease',
+                      boxShadow: isBlocked ? 'none' : '0 4px 12px rgba(0, 0, 0, 0.3)',
+                      cursor: isBlocked ? 'not-allowed' : 'pointer',
+                      border: isBlocked ? '2px solid var(--status-error)' : 'none',
+                      backgroundColor: isBlocked ? 'var(--bg-3)' : 'var(--accent-secondary)',
+                      color: isBlocked ? 'var(--text-muted)' : 'var(--text-primary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                    }}
                   >
-                    {isBlocked ? '🔒 BLOCKED' : `→ Move to ${viewingStage.label}`}
+                    {isBlocked ? (
+                      <>
+                        <LockIcon /> BLOCKED
+                      </>
+                    ) : (
+                      <>
+                        <ArrowRightIcon /> Move to {viewingStage.label}
+                      </>
+                    )}
                   </button>
                   {isBlocked && transitionCheck.reason && (
-                    <div className="bg-red-900/30 border-2 border-red-500 rounded-lg p-4 max-w-md">
-                      <p className="text-red-400 font-bold text-sm flex items-center gap-2">
-                        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
+                    <div style={{
+                      backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                      border: '2px solid var(--status-error)',
+                      borderRadius: '10px',
+                      padding: '16px',
+                      maxWidth: '320px',
+                    }}>
+                      <p style={{ color: 'var(--status-error)', fontWeight: 'bold', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <LockIcon />
                         {transitionCheck.reason}
                       </p>
-                      <p className="text-red-300 text-xs mt-2">
+                      <p style={{ color: 'var(--status-error)', fontSize: '12px', marginTop: '8px', opacity: 0.8 }}>
                         Complete all required approvals in the Stakeholder Approvals section below to unlock this phase.
                       </p>
                     </div>
@@ -310,13 +497,19 @@ export default function ProductionPipeline({
           </div>
 
           {/* MODULES */}
-          <div className="mb-4">
-            <h4 className="text-sm font-bold text-slate-300 mb-2">Active Modules:</h4>
-            <div className="flex flex-wrap gap-2">
+          <div style={{ marginBottom: '16px' }}>
+            <h4 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-secondary)', marginBottom: '8px' }}>Active Modules:</h4>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
               {viewingStage.modules.map((module) => (
                 <span
                   key={module}
-                  className="bg-slate-700 text-slate-200 px-3 py-1 rounded-full text-xs"
+                  style={{
+                    backgroundColor: 'var(--bg-3)',
+                    color: 'var(--text-secondary)',
+                    padding: '4px 12px',
+                    borderRadius: '9999px',
+                    fontSize: '12px',
+                  }}
                 >
                   {module}
                 </span>
@@ -327,13 +520,11 @@ export default function ProductionPipeline({
           {/* REQUIREMENTS */}
           {viewingStage.requirements && viewingStage.requirements.length > 0 && (
             <div>
-              <h4 className="text-sm font-bold text-slate-300 mb-2">Requirements:</h4>
-              <ul className="space-y-1">
+              <h4 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-secondary)', marginBottom: '8px' }}>Requirements:</h4>
+              <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
                 {viewingStage.requirements.map((req, idx) => (
-                  <li key={idx} className="flex items-center gap-2 text-sm text-slate-400">
-                    <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
+                  <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                    <ChevronRightIcon />
                     {req}
                   </li>
                 ))}
@@ -344,46 +535,55 @@ export default function ProductionPipeline({
       )}
 
       {/* PROGRESS BAR */}
-      <div className="mt-6 bg-slate-800 rounded-xl p-4 border border-slate-700">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-bold text-slate-300">Pipeline Progress</span>
-          <span className="text-sm text-slate-400">
+      <div style={{ marginTop: '24px', backgroundColor: 'var(--bg-2)', borderRadius: '12px', padding: '16px', border: '1px solid var(--border-default)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+          <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Pipeline Progress</span>
+          <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
             {currentStageIndex + 1} / {PIPELINE_STAGES.length} stages
           </span>
         </div>
-        <div className="w-full bg-slate-700 rounded-full h-2">
+        <div style={{ width: '100%', backgroundColor: 'var(--bg-3)', borderRadius: '9999px', height: '8px' }}>
           <div
-            className="bg-green-600 h-2 rounded-full transition-all duration-500"
-            style={{ width: `${((currentStageIndex + 1) / PIPELINE_STAGES.length) * 100}%` }}
+            style={{
+              backgroundColor: 'var(--status-success)',
+              height: '8px',
+              borderRadius: '9999px',
+              transition: 'all 500ms ease',
+              width: `${((currentStageIndex + 1) / PIPELINE_STAGES.length) * 100}%`,
+            }}
           />
         </div>
       </div>
 
       {/* TIMELINE VISUALIZATION */}
       {project && (
-        <div className="mt-6 bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-6 border border-slate-700">
-          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            📅 Project Timeline
+        <div style={{
+          marginTop: '24px',
+          background: 'linear-gradient(135deg, var(--bg-1), var(--bg-2))',
+          borderRadius: '12px',
+          padding: '24px',
+          border: '1px solid var(--border-default)',
+        }}>
+          <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <CalendarIcon /> Project Timeline
           </h3>
 
           {/* Timeline Grid */}
-          <div className="space-y-4">
-            {/* Kickoff Date */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {project.kickoffDate && (
               <TimelineMilestone
                 label="Kickoff"
                 date={project.kickoffDate}
-                icon="🎬"
+                IconComponent={ClapperboardIcon}
                 isPast={new Date(project.kickoffDate) < new Date()}
               />
             )}
 
-            {/* Pre-Production Dates */}
             {project.preProductionStartDate && (
               <TimelineMilestone
                 label="Pre-Production Start"
                 date={project.preProductionStartDate}
-                icon="📋"
+                IconComponent={ClipboardIcon}
                 isPast={new Date(project.preProductionStartDate) < new Date()}
               />
             )}
@@ -391,17 +591,16 @@ export default function ProductionPipeline({
               <TimelineMilestone
                 label="Pre-Production End"
                 date={project.preProductionEndDate}
-                icon="✅"
+                IconComponent={CheckIcon}
                 isPast={new Date(project.preProductionEndDate) < new Date()}
               />
             )}
 
-            {/* Production Dates */}
             {project.productionStartDate && (
               <TimelineMilestone
                 label="Production Start"
                 date={project.productionStartDate}
-                icon="🎥"
+                IconComponent={VideoIcon}
                 isPast={new Date(project.productionStartDate) < new Date()}
                 isCritical={true}
               />
@@ -410,17 +609,16 @@ export default function ProductionPipeline({
               <TimelineMilestone
                 label="Production End"
                 date={project.productionEndDate}
-                icon="🏁"
+                IconComponent={FlagIcon}
                 isPast={new Date(project.productionEndDate) < new Date()}
               />
             )}
 
-            {/* Post-Production Dates */}
             {project.postProductionStartDate && (
               <TimelineMilestone
                 label="Post-Production Start"
                 date={project.postProductionStartDate}
-                icon="✂️"
+                IconComponent={ScissorsIcon}
                 isPast={new Date(project.postProductionStartDate) < new Date()}
               />
             )}
@@ -428,17 +626,16 @@ export default function ProductionPipeline({
               <TimelineMilestone
                 label="Post-Production End"
                 date={project.postProductionEndDate}
-                icon="✅"
+                IconComponent={CheckIcon}
                 isPast={new Date(project.postProductionEndDate) < new Date()}
               />
             )}
 
-            {/* Review & Legal Deadlines */}
             {project.reviewDeadline && (
               <TimelineMilestone
                 label="Review Deadline"
                 date={project.reviewDeadline}
-                icon="👁️"
+                IconComponent={EyeIcon}
                 isPast={new Date(project.reviewDeadline) < new Date()}
                 isCritical={true}
               />
@@ -447,29 +644,27 @@ export default function ProductionPipeline({
               <TimelineMilestone
                 label="Legal Lock Deadline"
                 date={project.legalLockDeadline}
-                icon="⚖️"
+                IconComponent={ScaleIcon}
                 isPast={new Date(project.legalLockDeadline) < new Date()}
                 isCritical={true}
               />
             )}
 
-            {/* Distribution Date */}
             {project.distributionDate && (
               <TimelineMilestone
                 label="Distribution Date"
                 date={project.distributionDate}
-                icon="🚀"
+                IconComponent={RocketIcon}
                 isPast={new Date(project.distributionDate) < new Date()}
                 isCritical={true}
               />
             )}
 
-            {/* Final Deadline */}
             {project.deadline && (
               <TimelineMilestone
                 label="Final Deadline"
                 date={project.deadline}
-                icon="🎯"
+                IconComponent={TargetIcon}
                 isPast={new Date(project.deadline) < new Date()}
                 isCritical={true}
               />
@@ -477,35 +672,37 @@ export default function ProductionPipeline({
           </div>
 
           {/* Timeline Summary Stats */}
-          <div className="mt-6 grid grid-cols-3 gap-4">
-            <div className="bg-slate-800 rounded-lg p-3 text-center">
-              <p className="text-xs text-slate-400 mb-1">Days Since Kickoff</p>
-              <p className="text-2xl font-bold text-white">
+          <div style={{ marginTop: '24px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+            <div style={{ backgroundColor: 'var(--bg-2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Days Since Kickoff</p>
+              <p style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--text-primary)' }}>
                 {project.kickoffDate
                   ? Math.floor((Date.now() - new Date(project.kickoffDate).getTime()) / (1000 * 60 * 60 * 24))
                   : '--'}
               </p>
             </div>
-            <div className="bg-slate-800 rounded-lg p-3 text-center">
-              <p className="text-xs text-slate-400 mb-1">Days to Deadline</p>
-              <p className={`text-2xl font-bold ${
-                project.deadline && new Date(project.deadline) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-                  ? 'text-red-400'
-                  : 'text-teal-400'
-              }`}>
+            <div style={{ backgroundColor: 'var(--bg-2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Days to Deadline</p>
+              <p style={{
+                fontSize: '24px',
+                fontWeight: 'bold',
+                color: project.deadline && new Date(project.deadline) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                  ? 'var(--status-error)'
+                  : 'var(--accent-primary)',
+              }}>
                 {project.deadline
                   ? Math.floor((new Date(project.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
                   : '--'}
               </p>
             </div>
-            <div className="bg-slate-800 rounded-lg p-3 text-center">
-              <p className="text-xs text-slate-400 mb-1">Total Duration</p>
-              <p className="text-2xl font-bold text-white">
+            <div style={{ backgroundColor: 'var(--bg-2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Total Duration</p>
+              <p style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--text-primary)' }}>
                 {project.kickoffDate && project.deadline
                   ? Math.floor((new Date(project.deadline).getTime() - new Date(project.kickoffDate).getTime()) / (1000 * 60 * 60 * 24))
                   : '--'}
               </p>
-              <p className="text-xs text-slate-400">days</p>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>days</p>
             </div>
           </div>
         </div>
@@ -518,72 +715,103 @@ export default function ProductionPipeline({
 interface TimelineMilestoneProps {
   label: string;
   date: string;
-  icon: string;
+  IconComponent: () => JSX.Element;
   isPast: boolean;
   isCritical?: boolean;
 }
 
-function TimelineMilestone({ label, date, icon, isPast, isCritical }: TimelineMilestoneProps) {
+function TimelineMilestone({ label, date, IconComponent, isPast, isCritical }: TimelineMilestoneProps) {
   const dateObj = new Date(date);
   const isToday = dateObj.toDateString() === new Date().toDateString();
-  const isUpcoming = !isPast && dateObj.getTime() < Date.now() + 7 * 24 * 60 * 60 * 1000; // Within 7 days
+  const isUpcoming = !isPast && dateObj.getTime() < Date.now() + 7 * 24 * 60 * 60 * 1000;
 
   return (
-    <div className={`flex items-center gap-4 p-3 rounded-lg border transition-all ${
-      isToday
-        ? 'bg-teal-900/30 border-teal-500 ring-2 ring-teal-500/50'
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '16px',
+      padding: '12px',
+      borderRadius: '10px',
+      border: isToday
+        ? '2px solid var(--accent-primary)'
+        : '1px solid var(--border-default)',
+      backgroundColor: isToday
+        ? 'rgba(45, 212, 191, 0.1)'
         : isPast
-          ? 'bg-slate-800/50 border-slate-700'
+          ? 'rgba(0, 0, 0, 0.2)'
           : isUpcoming && isCritical
-            ? 'bg-orange-900/30 border-orange-600'
-            : 'bg-slate-800 border-slate-700'
-    }`}>
-      <div className="flex-shrink-0">
-        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-xl ${
-          isToday
-            ? 'bg-teal-500 ring-4 ring-teal-500/30'
+            ? 'rgba(249, 115, 22, 0.1)'
+            : 'var(--bg-2)',
+      transition: 'all 80ms ease',
+    }}>
+      <div style={{ flexShrink: 0 }}>
+        <div style={{
+          width: '48px',
+          height: '48px',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: isToday
+            ? 'var(--accent-primary)'
             : isPast
-              ? 'bg-slate-600'
+              ? 'var(--bg-3)'
               : isUpcoming && isCritical
-                ? 'bg-orange-600 ring-4 ring-orange-600/30'
-                : 'bg-slate-700'
-        }`}>
-          {isPast && !isToday ? (
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-            </svg>
-          ) : (
-            icon
-          )}
+                ? 'var(--status-warning)'
+                : 'var(--bg-3)',
+          boxShadow: isToday || (isUpcoming && isCritical)
+            ? '0 0 0 4px rgba(45, 212, 191, 0.3)'
+            : 'none',
+          color: isToday || (isUpcoming && isCritical) ? 'var(--bg-1)' : 'var(--text-muted)',
+        }}>
+          {isPast && !isToday ? <CheckIcon /> : <IconComponent />}
         </div>
       </div>
 
-      <div className="flex-1">
-        <div className="flex items-center gap-2 mb-1">
-          <h4 className={`font-bold ${
-            isToday
-              ? 'text-teal-300'
+      <div style={{ flex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+          <h4 style={{
+            fontWeight: 'bold',
+            color: isToday
+              ? 'var(--accent-primary)'
               : isPast
-                ? 'text-slate-400'
+                ? 'var(--text-muted)'
                 : isUpcoming && isCritical
-                  ? 'text-orange-300'
-                  : 'text-white'
-          }`}>
+                  ? 'var(--status-warning)'
+                  : 'var(--text-primary)',
+          }}>
             {label}
           </h4>
           {isToday && (
-            <span className="bg-teal-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+            <span style={{
+              backgroundColor: 'var(--accent-primary)',
+              color: 'var(--bg-1)',
+              fontSize: '10px',
+              fontWeight: 'bold',
+              padding: '2px 8px',
+              borderRadius: '9999px',
+            }}>
               TODAY
             </span>
           )}
           {isUpcoming && isCritical && !isToday && (
-            <span className="bg-orange-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+            <span style={{
+              backgroundColor: 'var(--status-warning)',
+              color: 'var(--bg-1)',
+              fontSize: '10px',
+              fontWeight: 'bold',
+              padding: '2px 8px',
+              borderRadius: '9999px',
+            }}>
               UPCOMING
             </span>
           )}
         </div>
-        <div className="flex items-center gap-3 text-sm">
-          <span className={isPast ? 'text-slate-500' : isToday ? 'text-teal-400 font-bold' : 'text-slate-300'}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px' }}>
+          <span style={{
+            color: isPast ? 'var(--text-muted)' : isToday ? 'var(--accent-primary)' : 'var(--text-secondary)',
+            fontWeight: isToday ? 'bold' : 'normal',
+          }}>
             {dateObj.toLocaleDateString('en-US', {
               weekday: 'short',
               month: 'short',
@@ -591,8 +819,8 @@ function TimelineMilestone({ label, date, icon, isPast, isCritical }: TimelineMi
               year: 'numeric'
             })}
           </span>
-          <span className="text-slate-600">•</span>
-          <span className={`text-xs ${isPast ? 'text-slate-600' : 'text-slate-400'}`}>
+          <span style={{ color: 'var(--border-default)' }}>•</span>
+          <span style={{ fontSize: '12px', color: isPast ? 'var(--text-muted)' : 'var(--text-muted)' }}>
             {isPast
               ? `${Math.floor((Date.now() - dateObj.getTime()) / (1000 * 60 * 60 * 24))} days ago`
               : `in ${Math.floor((dateObj.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days`

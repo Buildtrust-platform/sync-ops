@@ -123,36 +123,73 @@ export default function App() {
   return (
     // 2. WRAP THE APP IN AUTHENTICATOR
     <Authenticator>
-      {({ signOut, user }) => {
-        // Set authenticated state when user is available
-        if (user && !isAuthenticated) {
-          setIsAuthenticated(true);
-        }
-
-        return (
-          <div className="min-h-screen bg-gray-50">
-            {/* GLOBAL NAVIGATION */}
-            <GlobalNav
-              userEmail={user?.signInDetails?.loginId}
-              onSignOut={signOut}
-            />
-
-            {/* GLOBAL DASHBOARD */}
-            <GlobalDashboard
-              projects={projects}
-              onCreateProject={openIntakeWizard}
-            />
-
-            {/* Comprehensive Intake Wizard */}
-            {showIntakeWizard && (
-              <ComprehensiveIntake
-                onComplete={handleIntakeComplete}
-                onCancel={closeIntakeWizard}
-              />
-            )}
-          </div>
-        );
-      }}
+      {({ signOut, user }) => (
+        <AuthenticatedApp
+          user={user}
+          signOut={signOut}
+          isAuthenticated={isAuthenticated}
+          setIsAuthenticated={setIsAuthenticated}
+          projects={projects}
+          showIntakeWizard={showIntakeWizard}
+          openIntakeWizard={openIntakeWizard}
+          handleIntakeComplete={handleIntakeComplete}
+          closeIntakeWizard={closeIntakeWizard}
+        />
+      )}
     </Authenticator>
+  );
+}
+
+// Separate component to handle auth state updates via useEffect
+function AuthenticatedApp({
+  user,
+  signOut,
+  isAuthenticated,
+  setIsAuthenticated,
+  projects,
+  showIntakeWizard,
+  openIntakeWizard,
+  handleIntakeComplete,
+  closeIntakeWizard,
+}: {
+  user: any;
+  signOut: (() => void) | undefined;
+  isAuthenticated: boolean;
+  setIsAuthenticated: (value: boolean) => void;
+  projects: any[];
+  showIntakeWizard: boolean;
+  openIntakeWizard: () => void;
+  handleIntakeComplete: () => void;
+  closeIntakeWizard: () => void;
+}) {
+  // Set authenticated state when user is available (in useEffect, not during render)
+  useEffect(() => {
+    if (user && !isAuthenticated) {
+      setIsAuthenticated(true);
+    }
+  }, [user, isAuthenticated, setIsAuthenticated]);
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* GLOBAL NAVIGATION */}
+      <GlobalNav
+        userEmail={user?.signInDetails?.loginId}
+        onSignOut={signOut}
+      />
+
+      {/* GLOBAL DASHBOARD */}
+      <GlobalDashboard
+        projects={projects}
+        onCreateProject={openIntakeWizard}
+      />
+
+      {/* Comprehensive Intake Wizard */}
+      {showIntakeWizard && (
+        <ComprehensiveIntake
+          onComplete={handleIntakeComplete}
+          onCancel={closeIntakeWizard}
+        />
+      )}
+    </div>
   );
 }

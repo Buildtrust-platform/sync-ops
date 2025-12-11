@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import { getUrl } from "aws-amplify/storage";
 import type { Schema } from "@/amplify/data/resource";
@@ -9,9 +9,60 @@ import ReviewHeatmap from "./ReviewHeatmap";
 import VideoPlayer from "./VideoPlayer";
 import AudioWaveform from "./AudioWaveform";
 
+/**
+ * ASSET REVIEW COMPONENT
+ * Design System: Dark mode, CSS variables
+ * Icons: Lucide-style SVGs (stroke-width: 1.5)
+ */
+
+// Lucide-style icons
+const XIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18"/>
+    <line x1="6" y1="6" x2="18" y2="18"/>
+  </svg>
+);
+
+const CheckCircleIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+    <polyline points="22 4 12 14.01 9 11.01"/>
+  </svg>
+);
+
+const ShieldCheckIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    <polyline points="9 12 11 14 15 10"/>
+  </svg>
+);
+
+const PlusIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19"/>
+    <line x1="5" y1="12" x2="19" y2="12"/>
+  </svg>
+);
+
+const AlertTriangleIcon = () => (
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/>
+    <line x1="12" y1="17" x2="12.01" y2="17"/>
+  </svg>
+);
+
+const LockIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+  </svg>
+);
+
 interface AssetReviewProps {
   assetId: string;
   projectId: string;
+  organizationId?: string;
   userEmail: string;
   userId: string;
   onClose: () => void;
@@ -20,10 +71,12 @@ interface AssetReviewProps {
 export default function AssetReview({
   assetId,
   projectId,
+  organizationId,
   userEmail,
   userId,
   onClose
 }: AssetReviewProps) {
+  const orgId = organizationId || 'default-org';
   const [client] = useState(() => generateClient<Schema>());
   const [asset, setAsset] = useState<Schema["Asset"]["type"] | null>(null);
   const [reviews, setReviews] = useState<Array<Schema["Review"]["type"]>>([]);
@@ -93,7 +146,7 @@ export default function AssetReview({
       if (isVideoFile(asset.s3Key)) {
         getUrl({
           path: asset.s3Key,
-          options: { expiresIn: 3600 } // 1 hour expiration
+          options: { expiresIn: 3600 }
         }).then(({ url }) => {
           setVideoUrl(url.toString());
         }).catch(err => {
@@ -102,7 +155,7 @@ export default function AssetReview({
       } else if (isAudioFile(asset.s3Key)) {
         getUrl({
           path: asset.s3Key,
-          options: { expiresIn: 3600 } // 1 hour expiration
+          options: { expiresIn: 3600 }
         }).then(({ url }) => {
           setAudioUrl(url.toString());
         }).catch(err => {
@@ -112,33 +165,28 @@ export default function AssetReview({
     }
   }, [asset]);
 
-  // Check if asset is a video file
   function isVideoFile(filename: string): boolean {
     const videoExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.m4v', '.wmv'];
     const lowerFilename = filename.toLowerCase();
     return videoExtensions.some(ext => lowerFilename.endsWith(ext));
   }
 
-  // Check if asset is an audio file
   function isAudioFile(filename: string): boolean {
     const audioExtensions = ['.mp3', '.wav', '.aac', '.ogg', '.flac', '.m4a', '.wma', '.aiff'];
     const lowerFilename = filename.toLowerCase();
     return audioExtensions.some(ext => lowerFilename.endsWith(ext));
   }
 
-  // Handle seek from comment or heatmap click
-  function handleSeekToTimecode(timecode: number) {
-    setSeekToTime(timecode);
-    // Also update the timecode input for comment form
-    setTimecode(timecode);
-    // Clear seekToTime after a short delay to allow re-seeking to same position
+  function handleSeekToTimecode(tc: number) {
+    setSeekToTime(tc);
+    setTimecode(tc);
     setTimeout(() => setSeekToTime(undefined), 100);
   }
 
-  // Create a new review
   async function startReview() {
     try {
       const newReview = await client.models.Review.create({
+        organizationId: orgId,
         assetId,
         projectId,
         reviewerId: userId,
@@ -151,8 +199,8 @@ export default function AssetReview({
       if (newReview.data) {
         setCurrentReviewId(newReview.data.id);
 
-        // Log activity
         await client.models.ActivityLog.create({
+          organizationId: orgId,
           projectId,
           userId,
           userEmail,
@@ -169,12 +217,12 @@ export default function AssetReview({
     }
   }
 
-  // Add a comment
   async function addComment() {
     if (!currentReviewId || !commentText.trim()) return;
 
     try {
       const newComment = await client.models.ReviewComment.create({
+        organizationId: orgId,
         reviewId: currentReviewId,
         assetId,
         projectId,
@@ -190,8 +238,8 @@ export default function AssetReview({
       });
 
       if (newComment.data) {
-        // Log activity
         await client.models.ActivityLog.create({
+          organizationId: orgId,
           projectId,
           userId,
           userEmail,
@@ -203,7 +251,6 @@ export default function AssetReview({
           metadata: { assetId, timecode, commentType, priority: commentPriority },
         });
 
-        // Reset form
         setCommentText("");
         setTimecode(0);
         setShowCommentForm(false);
@@ -213,7 +260,6 @@ export default function AssetReview({
     }
   }
 
-  // Resolve a comment
   async function resolveComment(commentId: string) {
     try {
       await client.models.ReviewComment.update({
@@ -223,8 +269,8 @@ export default function AssetReview({
         resolvedBy: userId,
       });
 
-      // Log activity
       await client.models.ActivityLog.create({
+        organizationId: orgId,
         projectId,
         userId,
         userEmail,
@@ -240,7 +286,6 @@ export default function AssetReview({
     }
   }
 
-  // Complete review
   async function completeReview() {
     if (!currentReviewId) return;
 
@@ -250,8 +295,8 @@ export default function AssetReview({
         status: 'COMPLETED',
       });
 
-      // Log activity
       await client.models.ActivityLog.create({
+        organizationId: orgId,
         projectId,
         userId,
         userEmail,
@@ -269,12 +314,11 @@ export default function AssetReview({
     }
   }
 
-  // Legal Approval (PRD FR-27: Immutable Legal Approval Lock)
   async function approveLegalReview() {
     if (!currentReviewId) return;
 
     const confirmApproval = confirm(
-      "⚠️ LEGAL APPROVAL LOCK\n\n" +
+      "LEGAL APPROVAL LOCK\n\n" +
       "Once you approve this asset, it becomes IMMUTABLE and cannot be modified.\n" +
       "This action cannot be undone.\n\n" +
       "Are you absolutely certain you want to approve this asset for legal compliance?"
@@ -283,7 +327,6 @@ export default function AssetReview({
     if (!confirmApproval) return;
 
     try {
-      // Update review with legal approval
       await client.models.Review.update({
         id: currentReviewId,
         status: 'APPROVED',
@@ -292,8 +335,8 @@ export default function AssetReview({
         legalApprovedBy: userId,
       });
 
-      // Log activity
       await client.models.ActivityLog.create({
+        organizationId: orgId,
         projectId,
         userId,
         userEmail,
@@ -310,7 +353,7 @@ export default function AssetReview({
         },
       });
 
-      alert("✅ Asset legally approved and locked. This asset is now immutable.");
+      alert("Asset legally approved and locked. This asset is now immutable.");
       setShowLegalApproval(false);
       setCurrentReviewId(null);
     } catch (error) {
@@ -319,54 +362,99 @@ export default function AssetReview({
     }
   }
 
-  // Utility: Format timecode
   function formatTimecode(seconds: number): string {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = Math.floor(seconds % 60);
     const ms = Math.floor((seconds % 1) * 10);
-
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${ms}`;
   }
 
-  // Check if current user has legal role
   const isLegalReviewer = selectedRole === 'LEGAL';
   const hasLegalApproval = reviews.some(r => r.isLegalApproved);
 
+  // Style helpers
+  const getPriorityStyles = (priority: string) => {
+    switch (priority) {
+      case 'CRITICAL': return { bg: 'var(--error-muted)', color: 'var(--error)', border: 'var(--error)' };
+      case 'HIGH': return { bg: 'var(--warning-muted)', color: 'var(--warning)', border: 'var(--warning)' };
+      case 'MEDIUM': return { bg: 'var(--primary-muted)', color: 'var(--primary)', border: 'var(--primary)' };
+      default: return { bg: 'var(--bg-2)', color: 'var(--text-secondary)', border: 'var(--border)' };
+    }
+  };
+
+  const getCommentTypeStyles = (type: string) => {
+    switch (type) {
+      case 'ISSUE':
+      case 'REJECTION': return { bg: 'var(--error-muted)', color: 'var(--error)' };
+      case 'APPROVAL': return { bg: 'var(--success-muted)', color: 'var(--success)' };
+      default: return { bg: 'var(--primary-muted)', color: 'var(--primary)' };
+    }
+  };
+
+  const getStatusStyles = (status: string | null | undefined) => {
+    switch (status) {
+      case 'APPROVED': return { bg: 'var(--success-muted)', color: 'var(--success)' };
+      case 'REJECTED': return { bg: 'var(--error-muted)', color: 'var(--error)' };
+      case 'COMPLETED': return { bg: 'var(--primary-muted)', color: 'var(--primary)' };
+      default: return { bg: 'var(--warning-muted)', color: 'var(--warning)' };
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 rounded-2xl border border-slate-700 w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div
+      className="fixed inset-0 flex items-center justify-center z-50 p-4"
+      style={{ background: 'rgba(0, 0, 0, 0.9)', backdropFilter: 'blur(4px)' }}
+    >
+      <div
+        className="rounded-[12px] w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
+        style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}
+      >
         {/* Header */}
-        <div className="bg-slate-900 border-b border-slate-700 p-6">
+        <div
+          className="p-6"
+          style={{ background: 'var(--bg-0)', borderBottom: '1px solid var(--border)' }}
+        >
           <div className="flex justify-between items-start">
             <div>
-              <h2 className="text-3xl font-bold text-teal-400">Asset Review & Approval</h2>
-              <p className="text-slate-400 mt-1">{asset?.s3Key?.split('/').pop()}</p>
+              <h2 className="text-[24px] font-bold" style={{ color: 'var(--primary)' }}>
+                Asset Review & Approval
+              </h2>
+              <p className="text-[14px] mt-1" style={{ color: 'var(--text-tertiary)' }}>
+                {asset?.s3Key?.split('/').pop()}
+              </p>
               {hasLegalApproval && (
-                <div className="mt-3 bg-green-900/30 border border-green-500 rounded-lg px-4 py-2 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="text-green-400 font-bold">LEGALLY APPROVED & LOCKED (IMMUTABLE)</span>
+                <div
+                  className="mt-3 rounded-[8px] px-4 py-2 flex items-center gap-2"
+                  style={{ background: 'var(--success-muted)', border: '1px solid var(--success)' }}
+                >
+                  <span style={{ color: 'var(--success)' }}><CheckCircleIcon /></span>
+                  <span className="font-bold text-[13px]" style={{ color: 'var(--success)' }}>
+                    LEGALLY APPROVED & LOCKED (IMMUTABLE)
+                  </span>
                 </div>
               )}
             </div>
             <button
               onClick={onClose}
-              className="text-slate-400 hover:text-white transition-colors"
+              className="p-2 rounded-[6px] transition-colors"
+              style={{ color: 'var(--text-tertiary)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-tertiary)'; }}
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <XIcon />
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6" id="review-content">
-          {/* Video Player - Show for video assets */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* Video Player */}
           {videoUrl && (
-            <div className="bg-slate-900 rounded-xl border border-slate-700 overflow-hidden">
+            <div
+              className="rounded-[12px] overflow-hidden"
+              style={{ background: 'var(--bg-0)', border: '1px solid var(--border)' }}
+            >
               <VideoPlayer
                 src={videoUrl}
                 onTimeUpdate={(time) => setCurrentVideoTime(time)}
@@ -376,7 +464,7 @@ export default function AssetReview({
             </div>
           )}
 
-          {/* Audio Waveform - Show for audio assets */}
+          {/* Audio Waveform */}
           {audioUrl && (
             <AudioWaveform
               src={audioUrl}
@@ -386,30 +474,27 @@ export default function AssetReview({
             />
           )}
 
-          {/* AI Feedback Summary - Show when there are comments */}
+          {/* AI Feedback Summary */}
           {comments.length > 0 && (
             <FeedbackSummary comments={comments} assetId={assetId} />
           )}
 
-          {/* Review Heatmap - Visual timeline of comment density */}
+          {/* Review Heatmap */}
           {comments.length > 0 && (
             <ReviewHeatmap
               comments={comments}
               duration={videoDuration > 0 ? videoDuration : audioDuration > 0 ? audioDuration : undefined}
               currentTime={videoUrl ? currentVideoTime : audioUrl ? currentAudioTime : undefined}
-              onTimecodeClick={(timecode) => {
-                // Seek video/audio to this timecode
-                handleSeekToTimecode(timecode);
-                // Find the comment at or near this timecode
-                const targetComment = comments.find(c => Math.abs((c.timecode || 0) - timecode) < 5);
+              onTimecodeClick={(tc) => {
+                handleSeekToTimecode(tc);
+                const targetComment = comments.find(c => Math.abs((c.timecode || 0) - tc) < 5);
                 if (targetComment) {
                   const commentElement = document.getElementById(`comment-${targetComment.id}`);
                   if (commentElement) {
                     commentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    // Highlight the comment briefly
-                    commentElement.classList.add('ring-4', 'ring-teal-500');
+                    commentElement.style.boxShadow = '0 0 0 4px var(--primary)';
                     setTimeout(() => {
-                      commentElement.classList.remove('ring-4', 'ring-teal-500');
+                      commentElement.style.boxShadow = 'none';
                     }, 2000);
                   }
                 }
@@ -419,15 +504,30 @@ export default function AssetReview({
 
           {/* Start Review Section */}
           {!currentReviewId && !hasLegalApproval && (
-            <div className="bg-slate-900 rounded-xl border border-slate-700 p-6">
-              <h3 className="text-xl font-bold text-white mb-4">Start New Review</h3>
+            <div
+              className="rounded-[12px] p-6"
+              style={{ background: 'var(--bg-0)', border: '1px solid var(--border)' }}
+            >
+              <h3 className="text-[18px] font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+                Start New Review
+              </h3>
               <div className="flex gap-4 items-end">
                 <div className="flex-1">
-                  <label className="block text-xs font-bold text-slate-400 mb-2">REVIEWER ROLE</label>
+                  <label
+                    className="block text-[11px] font-bold uppercase mb-2"
+                    style={{ color: 'var(--text-tertiary)' }}
+                  >
+                    Reviewer Role
+                  </label>
                   <select
                     value={selectedRole}
-                    onChange={(e) => setSelectedRole(e.target.value as any)}
-                    className="w-full bg-slate-800 border border-slate-600 rounded-lg p-3 text-white"
+                    onChange={(e) => setSelectedRole(e.target.value as typeof selectedRole)}
+                    className="w-full p-3 rounded-[6px] text-[14px]"
+                    style={{
+                      background: 'var(--bg-1)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-primary)',
+                    }}
                   >
                     <option value="INTERNAL">Internal Review</option>
                     <option value="CLIENT">Client Review</option>
@@ -437,7 +537,10 @@ export default function AssetReview({
                 </div>
                 <button
                   onClick={startReview}
-                  className="bg-teal-500 hover:bg-teal-600 text-black font-bold py-3 px-6 rounded-lg transition-all"
+                  className="py-3 px-6 rounded-[6px] font-semibold text-[14px] transition-all duration-[80ms] active:scale-[0.98]"
+                  style={{ background: 'var(--primary)', color: 'var(--bg-0)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.1)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.filter = 'brightness(1)'; }}
                 >
                   Start Review
                 </button>
@@ -447,27 +550,38 @@ export default function AssetReview({
 
           {/* Active Review */}
           {currentReviewId && (
-            <div className="bg-slate-900 rounded-xl border-2 border-teal-500 p-6">
+            <div
+              className="rounded-[12px] p-6"
+              style={{ background: 'var(--bg-0)', border: '2px solid var(--primary)' }}
+            >
               <div className="flex justify-between items-center mb-4">
                 <div>
-                  <h3 className="text-xl font-bold text-teal-400">Active Review: {selectedRole}</h3>
-                  <p className="text-slate-400 text-sm">Reviewer: {userEmail}</p>
+                  <h3 className="text-[18px] font-bold" style={{ color: 'var(--primary)' }}>
+                    Active Review: {selectedRole}
+                  </h3>
+                  <p className="text-[13px]" style={{ color: 'var(--text-tertiary)' }}>
+                    Reviewer: {userEmail}
+                  </p>
                 </div>
                 <div className="flex gap-2">
                   {isLegalReviewer && !hasLegalApproval && (
                     <button
                       onClick={() => setShowLegalApproval(true)}
-                      className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-all flex items-center gap-2"
+                      className="py-2 px-4 rounded-[6px] font-semibold text-[13px] flex items-center gap-2 transition-all duration-[80ms] active:scale-[0.98]"
+                      style={{ background: 'var(--success)', color: 'white' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.1)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.filter = 'brightness(1)'; }}
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                      </svg>
+                      <ShieldCheckIcon />
                       Legal Approve & Lock
                     </button>
                   )}
                   <button
                     onClick={completeReview}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all"
+                    className="py-2 px-4 rounded-[6px] font-semibold text-[13px] transition-all duration-[80ms] active:scale-[0.98]"
+                    style={{ background: 'var(--primary)', color: 'var(--bg-0)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.1)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.filter = 'brightness(1)'; }}
                   >
                     Complete Review
                   </button>
@@ -478,21 +592,40 @@ export default function AssetReview({
               {!showCommentForm && (
                 <button
                   onClick={() => setShowCommentForm(true)}
-                  className="w-full bg-slate-800 hover:bg-slate-700 border-2 border-dashed border-slate-600 hover:border-teal-500 text-slate-400 hover:text-teal-400 font-bold py-4 rounded-lg transition-all flex items-center justify-center gap-2"
+                  className="w-full py-4 rounded-[8px] font-semibold text-[14px] flex items-center justify-center gap-2 transition-all duration-[80ms]"
+                  style={{
+                    background: 'var(--bg-1)',
+                    border: '2px dashed var(--border)',
+                    color: 'var(--text-tertiary)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--primary)';
+                    e.currentTarget.style.color = 'var(--primary)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                    e.currentTarget.style.color = 'var(--text-tertiary)';
+                  }}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
+                  <PlusIcon />
                   Add Time-Coded Comment
                 </button>
               )}
 
               {/* Comment Form */}
               {showCommentForm && (
-                <div className="bg-slate-800 rounded-lg border border-slate-700 p-4 space-y-4">
+                <div
+                  className="rounded-[10px] p-4 space-y-4"
+                  style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}
+                >
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-400 mb-2">TIMECODE (seconds)</label>
+                      <label
+                        className="block text-[11px] font-bold uppercase mb-2"
+                        style={{ color: 'var(--text-tertiary)' }}
+                      >
+                        Timecode (seconds)
+                      </label>
                       <div className="flex gap-2">
                         <input
                           type="number"
@@ -500,27 +633,45 @@ export default function AssetReview({
                           value={timecode}
                           onChange={(e) => setTimecode(parseFloat(e.target.value))}
                           placeholder="0.0"
-                          className="flex-1 bg-slate-900 border border-slate-600 rounded p-2 text-white text-sm"
+                          className="flex-1 p-2 rounded-[6px] text-[13px]"
+                          style={{
+                            background: 'var(--bg-2)',
+                            border: '1px solid var(--border)',
+                            color: 'var(--text-primary)',
+                          }}
                         />
                         {(videoUrl || audioUrl) && (
                           <button
                             type="button"
                             onClick={() => setTimecode(Math.round((videoUrl ? currentVideoTime : currentAudioTime) * 10) / 10)}
-                            className="bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold px-2 py-1 rounded transition-all whitespace-nowrap"
+                            className="px-2 py-1 rounded-[6px] text-[11px] font-bold transition-all duration-[80ms]"
+                            style={{ background: 'var(--primary)', color: 'var(--bg-0)' }}
                             title="Use current playback time"
                           >
                             Use Now
                           </button>
                         )}
                       </div>
-                      <p className="text-xs text-slate-500 mt-1">{formatTimecode(timecode)}</p>
+                      <p className="text-[11px] mt-1" style={{ color: 'var(--text-tertiary)' }}>
+                        {formatTimecode(timecode)}
+                      </p>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-400 mb-2">TYPE</label>
+                      <label
+                        className="block text-[11px] font-bold uppercase mb-2"
+                        style={{ color: 'var(--text-tertiary)' }}
+                      >
+                        Type
+                      </label>
                       <select
                         value={commentType}
-                        onChange={(e) => setCommentType(e.target.value as any)}
-                        className="w-full bg-slate-900 border border-slate-600 rounded p-2 text-white text-sm"
+                        onChange={(e) => setCommentType(e.target.value as typeof commentType)}
+                        className="w-full p-2 rounded-[6px] text-[13px]"
+                        style={{
+                          background: 'var(--bg-2)',
+                          border: '1px solid var(--border)',
+                          color: 'var(--text-primary)',
+                        }}
                       >
                         <option value="NOTE">Note</option>
                         <option value="ISSUE">Issue</option>
@@ -529,11 +680,21 @@ export default function AssetReview({
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-400 mb-2">PRIORITY</label>
+                      <label
+                        className="block text-[11px] font-bold uppercase mb-2"
+                        style={{ color: 'var(--text-tertiary)' }}
+                      >
+                        Priority
+                      </label>
                       <select
                         value={commentPriority}
-                        onChange={(e) => setCommentPriority(e.target.value as any)}
-                        className="w-full bg-slate-900 border border-slate-600 rounded p-2 text-white text-sm"
+                        onChange={(e) => setCommentPriority(e.target.value as typeof commentPriority)}
+                        className="w-full p-2 rounded-[6px] text-[13px]"
+                        style={{
+                          background: 'var(--bg-2)',
+                          border: '1px solid var(--border)',
+                          color: 'var(--text-primary)',
+                        }}
                       >
                         <option value="LOW">Low</option>
                         <option value="MEDIUM">Medium</option>
@@ -543,19 +704,32 @@ export default function AssetReview({
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 mb-2">COMMENT</label>
+                    <label
+                      className="block text-[11px] font-bold uppercase mb-2"
+                      style={{ color: 'var(--text-tertiary)' }}
+                    >
+                      Comment
+                    </label>
                     <textarea
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
                       placeholder="Enter your feedback..."
-                      className="w-full bg-slate-900 border border-slate-600 rounded p-3 text-white h-24 text-sm"
+                      className="w-full p-3 rounded-[6px] text-[13px] h-24 resize-none"
+                      style={{
+                        background: 'var(--bg-2)',
+                        border: '1px solid var(--border)',
+                        color: 'var(--text-primary)',
+                      }}
                     />
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={addComment}
                       disabled={!commentText.trim()}
-                      className="flex-1 bg-teal-500 hover:bg-teal-600 disabled:bg-slate-700 disabled:text-slate-500 text-black font-bold py-2 px-4 rounded-lg transition-all"
+                      className="flex-1 py-2 px-4 rounded-[6px] font-semibold text-[13px] transition-all duration-[80ms] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{ background: 'var(--primary)', color: 'var(--bg-0)' }}
+                      onMouseEnter={(e) => { if (!e.currentTarget.disabled) e.currentTarget.style.filter = 'brightness(1.1)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.filter = 'brightness(1)'; }}
                     >
                       Add Comment
                     </button>
@@ -565,7 +739,14 @@ export default function AssetReview({
                         setCommentText("");
                         setTimecode(0);
                       }}
-                      className="bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-lg transition-all"
+                      className="flex-1 py-2 px-4 rounded-[6px] font-semibold text-[13px] transition-all duration-[80ms] active:scale-[0.98]"
+                      style={{
+                        background: 'var(--bg-2)',
+                        border: '1px solid var(--border)',
+                        color: 'var(--text-primary)',
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-3)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-2)'; }}
                     >
                       Cancel
                     </button>
@@ -576,119 +757,147 @@ export default function AssetReview({
           )}
 
           {/* Comments Timeline */}
-          <div className="bg-slate-900 rounded-xl border border-slate-700 p-6">
-            <h3 className="text-xl font-bold text-white mb-4">
+          <div
+            className="rounded-[12px] p-6"
+            style={{ background: 'var(--bg-0)', border: '1px solid var(--border)' }}
+          >
+            <h3 className="text-[18px] font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
               Comments Timeline ({comments.length})
             </h3>
             {comments.length === 0 ? (
-              <p className="text-slate-500 text-center py-8">No comments yet</p>
+              <p className="text-center py-8" style={{ color: 'var(--text-tertiary)' }}>
+                No comments yet
+              </p>
             ) : (
               <div className="space-y-3">
-                {comments.map((comment) => (
-                  <div
-                    key={comment.id}
-                    id={`comment-${comment.id}`}
-                    className={`bg-slate-800 rounded-lg border p-4 transition-all ${
-                      comment.isResolved
-                        ? 'border-slate-700 opacity-50'
-                        : comment.priority === 'CRITICAL'
-                          ? 'border-red-500'
-                          : comment.priority === 'HIGH'
-                            ? 'border-yellow-500'
-                            : 'border-slate-600'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={() => videoUrl && comment.timecode && handleSeekToTimecode(comment.timecode)}
-                          className={`bg-teal-500 text-black font-mono text-xs px-2 py-1 rounded ${
-                            videoUrl ? 'hover:bg-teal-400 cursor-pointer' : ''
-                          }`}
-                          title={videoUrl ? 'Click to jump to this timecode' : comment.timecodeFormatted || ''}
-                        >
-                          {comment.timecodeFormatted}
-                        </button>
-                        <span className={`text-xs font-bold px-2 py-1 rounded ${
-                          comment.commentType === 'ISSUE' ? 'bg-red-900 text-red-200' :
-                          comment.commentType === 'APPROVAL' ? 'bg-green-900 text-green-200' :
-                          comment.commentType === 'REJECTION' ? 'bg-red-900 text-red-200' :
-                          'bg-blue-900 text-blue-200'
-                        }`}>
-                          {comment.commentType}
-                        </span>
-                        <span className={`text-xs font-bold px-2 py-1 rounded ${
-                          comment.priority === 'CRITICAL' ? 'bg-red-900 text-red-200' :
-                          comment.priority === 'HIGH' ? 'bg-yellow-900 text-yellow-200' :
-                          comment.priority === 'MEDIUM' ? 'bg-blue-900 text-blue-200' :
-                          'bg-slate-700 text-slate-300'
-                        }`}>
-                          {comment.priority}
-                        </span>
-                        {comment.isResolved && (
-                          <span className="bg-green-900 text-green-200 text-xs font-bold px-2 py-1 rounded">
-                            ✓ RESOLVED
+                {comments.map((comment) => {
+                  const priorityStyles = getPriorityStyles(comment.priority || 'LOW');
+                  const typeStyles = getCommentTypeStyles(comment.commentType || 'NOTE');
+
+                  return (
+                    <div
+                      key={comment.id}
+                      id={`comment-${comment.id}`}
+                      className="rounded-[10px] p-4 transition-all"
+                      style={{
+                        background: comment.isResolved ? 'var(--bg-1)' : 'var(--bg-1)',
+                        border: `1px solid ${comment.isResolved ? 'var(--border)' : priorityStyles.border}`,
+                        opacity: comment.isResolved ? 0.6 : 1,
+                      }}
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <button
+                            onClick={() => videoUrl && comment.timecode && handleSeekToTimecode(comment.timecode)}
+                            className="font-mono text-[12px] px-2 py-1 rounded-[4px] transition-all"
+                            style={{
+                              background: 'var(--primary)',
+                              color: 'var(--bg-0)',
+                              cursor: videoUrl ? 'pointer' : 'default',
+                            }}
+                            title={videoUrl ? 'Click to jump to this timecode' : comment.timecodeFormatted || ''}
+                          >
+                            {comment.timecodeFormatted}
+                          </button>
+                          <span
+                            className="text-[11px] font-bold px-2 py-1 rounded-[4px]"
+                            style={{ background: typeStyles.bg, color: typeStyles.color }}
+                          >
+                            {comment.commentType}
                           </span>
+                          <span
+                            className="text-[11px] font-bold px-2 py-1 rounded-[4px]"
+                            style={{ background: priorityStyles.bg, color: priorityStyles.color }}
+                          >
+                            {comment.priority}
+                          </span>
+                          {comment.isResolved && (
+                            <span
+                              className="text-[11px] font-bold px-2 py-1 rounded-[4px] flex items-center gap-1"
+                              style={{ background: 'var(--success-muted)', color: 'var(--success)' }}
+                            >
+                              <CheckCircleIcon /> RESOLVED
+                            </span>
+                          )}
+                        </div>
+                        {!comment.isResolved && currentReviewId && (
+                          <button
+                            onClick={() => resolveComment(comment.id)}
+                            className="text-[11px] font-bold px-3 py-1 rounded-[4px] transition-all duration-[80ms]"
+                            style={{ background: 'var(--success)', color: 'white' }}
+                            onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.1)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.filter = 'brightness(1)'; }}
+                          >
+                            Resolve
+                          </button>
                         )}
                       </div>
-                      {!comment.isResolved && currentReviewId && (
-                        <button
-                          onClick={() => resolveComment(comment.id)}
-                          className="text-xs bg-green-700 hover:bg-green-600 text-white font-bold px-3 py-1 rounded transition-all"
-                        >
-                          Resolve
-                        </button>
-                      )}
+                      <p className="text-[14px] mb-2" style={{ color: 'var(--text-primary)' }}>
+                        {comment.commentText}
+                      </p>
+                      <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
+                        {comment.commenterEmail} • {comment.commenterRole} • {
+                          comment.createdAt ? new Date(comment.createdAt).toLocaleString() : 'N/A'
+                        }
+                      </p>
                     </div>
-                    <p className="text-white mb-2">{comment.commentText}</p>
-                    <p className="text-xs text-slate-500">
-                      {comment.commenterEmail} • {comment.commenterRole} • {
-                        comment.createdAt ? new Date(comment.createdAt).toLocaleString() : 'N/A'
-                      }
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
 
           {/* Review History */}
-          <div className="bg-slate-900 rounded-xl border border-slate-700 p-6">
-            <h3 className="text-xl font-bold text-white mb-4">
+          <div
+            className="rounded-[12px] p-6"
+            style={{ background: 'var(--bg-0)', border: '1px solid var(--border)' }}
+          >
+            <h3 className="text-[18px] font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
               Review History ({reviews.length})
             </h3>
             {reviews.length === 0 ? (
-              <p className="text-slate-500 text-center py-8">No reviews yet</p>
+              <p className="text-center py-8" style={{ color: 'var(--text-tertiary)' }}>
+                No reviews yet
+              </p>
             ) : (
               <div className="space-y-2">
-                {reviews.map((review) => (
-                  <div key={review.id} className="bg-slate-800 rounded-lg border border-slate-700 p-4 flex justify-between items-center">
-                    <div>
-                      <div className="flex items-center gap-3 mb-1">
-                        <span className="text-white font-bold">{review.reviewerRole}</span>
-                        <span className={`text-xs font-bold px-2 py-1 rounded ${
-                          review.status === 'APPROVED' ? 'bg-green-900 text-green-200' :
-                          review.status === 'REJECTED' ? 'bg-red-900 text-red-200' :
-                          review.status === 'COMPLETED' ? 'bg-blue-900 text-blue-200' :
-                          'bg-yellow-900 text-yellow-200'
-                        }`}>
-                          {review.status}
-                        </span>
-                        {review.isLegalApproved && (
-                          <span className="bg-green-600 text-white text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                            </svg>
-                            LEGAL LOCK
+                {reviews.map((review) => {
+                  const statusStyles = getStatusStyles(review.status);
+
+                  return (
+                    <div
+                      key={review.id}
+                      className="rounded-[10px] p-4 flex justify-between items-center"
+                      style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}
+                    >
+                      <div>
+                        <div className="flex items-center gap-3 mb-1">
+                          <span className="font-bold text-[14px]" style={{ color: 'var(--text-primary)' }}>
+                            {review.reviewerRole}
                           </span>
-                        )}
+                          <span
+                            className="text-[11px] font-bold px-2 py-1 rounded-[4px]"
+                            style={{ background: statusStyles.bg, color: statusStyles.color }}
+                          >
+                            {review.status}
+                          </span>
+                          {review.isLegalApproved && (
+                            <span
+                              className="text-[11px] font-bold px-2 py-1 rounded-[4px] flex items-center gap-1"
+                              style={{ background: 'var(--success)', color: 'white' }}
+                            >
+                              <LockIcon />
+                              LEGAL LOCK
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
+                          {review.reviewerEmail} • {review.createdAt ? new Date(review.createdAt).toLocaleString() : 'N/A'}
+                        </p>
                       </div>
-                      <p className="text-xs text-slate-500">
-                        {review.reviewerEmail} • {review.createdAt ? new Date(review.createdAt).toLocaleString() : 'N/A'}
-                      </p>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -696,36 +905,44 @@ export default function AssetReview({
 
         {/* Legal Approval Confirmation Modal */}
         {showLegalApproval && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-slate-800 rounded-2xl border-2 border-red-500 p-8 max-w-2xl">
+          <div
+            className="fixed inset-0 flex items-center justify-center z-50"
+            style={{ background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(4px)' }}
+          >
+            <div
+              className="rounded-[12px] p-8 max-w-2xl"
+              style={{ background: 'var(--bg-1)', border: '2px solid var(--error)' }}
+            >
               <div className="flex items-start gap-4 mb-6">
-                <svg className="w-16 h-16 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
+                <span style={{ color: 'var(--error)' }}>
+                  <AlertTriangleIcon />
+                </span>
                 <div>
-                  <h3 className="text-2xl font-bold text-red-400 mb-2">Legal Approval Lock</h3>
-                  <p className="text-white mb-4">
+                  <h3 className="text-[22px] font-bold mb-2" style={{ color: 'var(--error)' }}>
+                    Legal Approval Lock
+                  </h3>
+                  <p className="mb-4" style={{ color: 'var(--text-primary)' }}>
                     You are about to LEGALLY APPROVE this asset. This action:
                   </p>
-                  <ul className="text-slate-300 space-y-2 mb-4">
+                  <ul className="space-y-2 mb-4" style={{ color: 'var(--text-secondary)' }}>
                     <li className="flex items-start gap-2">
-                      <span className="text-red-400">•</span>
+                      <span style={{ color: 'var(--error)' }}>•</span>
                       Makes the asset <strong>IMMUTABLE</strong> (cannot be modified)
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-red-400">•</span>
+                      <span style={{ color: 'var(--error)' }}>•</span>
                       Locks all review comments permanently
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-red-400">•</span>
+                      <span style={{ color: 'var(--error)' }}>•</span>
                       Creates an <strong>audit trail</strong> record
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-red-400">•</span>
+                      <span style={{ color: 'var(--error)' }}>•</span>
                       <strong>CANNOT BE UNDONE</strong>
                     </li>
                   </ul>
-                  <p className="text-yellow-400 font-bold">
+                  <p className="font-bold" style={{ color: 'var(--warning)' }}>
                     Are you absolutely certain this asset meets all legal and compliance requirements?
                   </p>
                 </div>
@@ -733,17 +950,25 @@ export default function AssetReview({
               <div className="flex gap-4">
                 <button
                   onClick={() => setShowLegalApproval(false)}
-                  className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-6 rounded-lg transition-all"
+                  className="flex-1 py-3 px-6 rounded-[6px] font-semibold text-[14px] transition-all duration-[80ms] active:scale-[0.98]"
+                  style={{
+                    background: 'var(--bg-2)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text-primary)',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-3)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-2)'; }}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={approveLegalReview}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-all flex items-center justify-center gap-2"
+                  className="flex-1 py-3 px-6 rounded-[6px] font-semibold text-[14px] flex items-center justify-center gap-2 transition-all duration-[80ms] active:scale-[0.98]"
+                  style={{ background: 'var(--success)', color: 'white' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.1)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.filter = 'brightness(1)'; }}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
+                  <ShieldCheckIcon />
                   Approve & Lock Asset
                 </button>
               </div>

@@ -4,6 +4,50 @@ import { useState } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
 
+/**
+ * SMART BRIEF - AI-Powered Project Planning
+ * Design System: Dark mode, CSS variables
+ * Icons: Lucide-style SVGs (stroke-width: 1.5)
+ */
+
+// Lucide-style icons
+const CloseIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18"/>
+    <line x1="6" y1="6" x2="18" y2="18"/>
+  </svg>
+);
+
+const SparklesIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+    <path d="M5 3v4"/>
+    <path d="M19 17v4"/>
+    <path d="M3 5h4"/>
+    <path d="M17 19h4"/>
+  </svg>
+);
+
+const ZapIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+  </svg>
+);
+
+const AlertTriangleIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/>
+    <line x1="12" y1="17" x2="12.01" y2="17"/>
+  </svg>
+);
+
+const LoaderIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
+    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+  </svg>
+);
+
 interface SmartBriefOutput {
   projectName: string;
   deliverables: string[];
@@ -173,22 +217,46 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
   const hasHighRisk = aiResults && aiResults.risks && calculateRiskLevel(editableFields.risks || aiResults.risks) === 'HIGH';
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 rounded-2xl border border-slate-700 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 flex items-center justify-center z-50 p-4"
+      style={{ background: 'rgba(0, 0, 0, 0.8)', backdropFilter: 'blur(4px)' }}
+    >
+      <div
+        className="rounded-[12px] w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+        style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}
+      >
         {/* Header */}
-        <div className="sticky top-0 bg-slate-800 border-b border-slate-700 p-6 z-10">
+        <div
+          className="sticky top-0 p-6 z-10"
+          style={{ background: 'var(--bg-1)', borderBottom: '1px solid var(--border)' }}
+        >
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-3xl font-bold text-teal-400">Smart Brief</h2>
-              <p className="text-slate-400 mt-1">AI-powered project planning with Claude</p>
+              <h2
+                className="text-[24px] font-bold flex items-center gap-2"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                <span style={{ color: 'var(--secondary)' }}><SparklesIcon /></span>
+                Smart Brief
+              </h2>
+              <p className="text-[14px] mt-1" style={{ color: 'var(--text-secondary)' }}>
+                AI-powered project planning with Claude
+              </p>
             </div>
             <button
               onClick={onCancel}
-              className="text-slate-400 hover:text-white transition-colors"
+              className="p-2 rounded-[6px] transition-all duration-[80ms]"
+              style={{ color: 'var(--text-tertiary)' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--bg-2)';
+                e.currentTarget.style.color = 'var(--text-primary)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = 'var(--text-tertiary)';
+              }}
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <CloseIcon />
             </button>
           </div>
         </div>
@@ -198,33 +266,68 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
           {!aiResults && (
             <>
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-2">
-                  Project Description <span className="text-red-400">*</span>
+                <label
+                  className="block text-[13px] font-semibold mb-2"
+                  style={{ color: 'var(--text-secondary)' }}
+                >
+                  Project Description <span style={{ color: 'var(--danger)' }}>*</span>
                 </label>
                 <textarea
                   value={projectDescription}
                   onChange={(e) => setProjectDescription(e.target.value)}
                   placeholder="Describe your project: What are you making? Who is it for? What's the vision?"
-                  className="w-full h-32 bg-slate-900 border border-slate-700 rounded-lg p-4 text-white placeholder-slate-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all"
+                  className="w-full h-32 rounded-[10px] p-4 text-[14px] transition-all duration-[80ms] resize-none"
+                  style={{
+                    background: 'var(--bg-2)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text-primary)',
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--primary)';
+                    e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-muted)';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
                   disabled={isAnalyzing}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-2">
+                <label
+                  className="block text-[13px] font-semibold mb-2"
+                  style={{ color: 'var(--text-secondary)' }}
+                >
                   Script or Additional Notes (Optional)
                 </label>
                 <textarea
                   value={scriptOrNotes}
                   onChange={(e) => setScriptOrNotes(e.target.value)}
                   placeholder="Add script, shot list, or any additional details..."
-                  className="w-full h-24 bg-slate-900 border border-slate-700 rounded-lg p-4 text-white placeholder-slate-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all"
+                  className="w-full h-24 rounded-[10px] p-4 text-[14px] transition-all duration-[80ms] resize-none"
+                  style={{
+                    background: 'var(--bg-2)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text-primary)',
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--primary)';
+                    e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-muted)';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
                   disabled={isAnalyzing}
                 />
               </div>
 
               {error && (
-                <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 text-red-400">
+                <div
+                  className="rounded-[10px] p-4 text-[14px]"
+                  style={{ background: 'var(--danger-muted)', border: '1px solid var(--danger)', color: 'var(--danger)' }}
+                >
                   {error}
                 </div>
               )}
@@ -232,21 +335,21 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
               <button
                 onClick={analyzeWithAI}
                 disabled={isAnalyzing || !projectDescription.trim()}
-                className="w-full bg-teal-500 hover:bg-teal-600 disabled:bg-slate-700 disabled:text-slate-500 text-black font-bold py-4 px-6 rounded-lg transition-all shadow-lg hover:shadow-teal-500/20 flex items-center justify-center gap-3"
+                className="w-full py-4 px-6 rounded-[6px] font-semibold text-[14px] transition-all duration-[80ms] flex items-center justify-center gap-2 active:scale-[0.98]"
+                style={{
+                  background: isAnalyzing || !projectDescription.trim() ? 'var(--bg-2)' : 'var(--primary)',
+                  color: isAnalyzing || !projectDescription.trim() ? 'var(--text-tertiary)' : 'white',
+                  cursor: isAnalyzing || !projectDescription.trim() ? 'not-allowed' : 'pointer',
+                }}
               >
                 {isAnalyzing ? (
                   <>
-                    <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
+                    <LoaderIcon />
                     Analyzing with AI...
                   </>
                 ) : (
                   <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
+                    <ZapIcon />
                     Analyze with AI
                   </>
                 )}
@@ -259,29 +362,62 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
             <div className="space-y-6">
               {/* Risk Warning */}
               {hasHighRisk && (
-                <div className="bg-red-500/10 border-2 border-red-500 rounded-lg p-6">
+                <div
+                  className="rounded-[10px] p-6"
+                  style={{ background: 'var(--danger-muted)', border: '2px solid var(--danger)' }}
+                >
                   <div className="flex items-start gap-4">
-                    <svg className="w-8 h-8 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
+                    <span style={{ color: 'var(--danger)' }}><AlertTriangleIcon /></span>
                     <div>
-                      <h3 className="text-xl font-bold text-red-400 mb-2">High Risk Project Detected</h3>
-                      <p className="text-red-200 mb-3">This project requires additional safety protocols and legal approval.</p>
+                      <h3
+                        className="text-[18px] font-semibold mb-2"
+                        style={{ color: 'var(--danger)' }}
+                      >
+                        High Risk Project Detected
+                      </h3>
+                      <p className="text-[14px] mb-3" style={{ color: 'var(--text-secondary)' }}>
+                        This project requires additional safety protocols and legal approval.
+                      </p>
                       <div className="flex flex-wrap gap-2">
                         {(editableFields.risks || aiResults.risks).drones && (
-                          <span className="bg-red-500/20 text-red-300 text-xs font-bold px-3 py-1 rounded-full">Drone Operations</span>
+                          <span
+                            className="text-[12px] font-medium px-3 py-1 rounded-full"
+                            style={{ background: 'rgba(239, 68, 68, 0.2)', color: 'var(--danger)' }}
+                          >
+                            Drone Operations
+                          </span>
                         )}
                         {(editableFields.risks || aiResults.risks).minors && (
-                          <span className="bg-red-500/20 text-red-300 text-xs font-bold px-3 py-1 rounded-full">Minors Involved</span>
+                          <span
+                            className="text-[12px] font-medium px-3 py-1 rounded-full"
+                            style={{ background: 'rgba(239, 68, 68, 0.2)', color: 'var(--danger)' }}
+                          >
+                            Minors Involved
+                          </span>
                         )}
                         {(editableFields.risks || aiResults.risks).publicSpaces && (
-                          <span className="bg-red-500/20 text-red-300 text-xs font-bold px-3 py-1 rounded-full">Public Spaces</span>
+                          <span
+                            className="text-[12px] font-medium px-3 py-1 rounded-full"
+                            style={{ background: 'rgba(239, 68, 68, 0.2)', color: 'var(--danger)' }}
+                          >
+                            Public Spaces
+                          </span>
                         )}
                         {(editableFields.risks || aiResults.risks).stunts && (
-                          <span className="bg-red-500/20 text-red-300 text-xs font-bold px-3 py-1 rounded-full">Stunts</span>
+                          <span
+                            className="text-[12px] font-medium px-3 py-1 rounded-full"
+                            style={{ background: 'rgba(239, 68, 68, 0.2)', color: 'var(--danger)' }}
+                          >
+                            Stunts
+                          </span>
                         )}
                         {(editableFields.risks || aiResults.risks).hazardousLocations && (
-                          <span className="bg-red-500/20 text-red-300 text-xs font-bold px-3 py-1 rounded-full">Hazardous Locations</span>
+                          <span
+                            className="text-[12px] font-medium px-3 py-1 rounded-full"
+                            style={{ background: 'rgba(239, 68, 68, 0.2)', color: 'var(--danger)' }}
+                          >
+                            Hazardous Locations
+                          </span>
                         )}
                       </div>
                     </div>
@@ -292,20 +428,56 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
               {/* Project Overview */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2">PROJECT NAME</label>
+                  <label
+                    className="block text-[11px] font-medium uppercase tracking-wider mb-2"
+                    style={{ color: 'var(--text-tertiary)' }}
+                  >
+                    Project Name
+                  </label>
                   <input
                     type="text"
                     value={editableFields.projectName || aiResults.projectName}
                     onChange={(e) => setEditableFields({ ...editableFields, projectName: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                    className="w-full rounded-[10px] p-3 text-[14px] transition-all duration-[80ms]"
+                    style={{
+                      background: 'var(--bg-2)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-primary)',
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--primary)';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-muted)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--border)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2">COMPLEXITY</label>
+                  <label
+                    className="block text-[11px] font-medium uppercase tracking-wider mb-2"
+                    style={{ color: 'var(--text-tertiary)' }}
+                  >
+                    Complexity
+                  </label>
                   <select
                     value={editableFields.complexity || aiResults.complexity}
                     onChange={(e) => setEditableFields({ ...editableFields, complexity: e.target.value as 'LOW' | 'MEDIUM' | 'HIGH' })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                    className="w-full rounded-[10px] p-3 text-[14px] transition-all duration-[80ms]"
+                    style={{
+                      background: 'var(--bg-2)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-primary)',
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--primary)';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-muted)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--border)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
                   >
                     <option value="LOW">Low</option>
                     <option value="MEDIUM">Medium</option>
@@ -316,52 +488,137 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2">ESTIMATED DURATION</label>
+                  <label
+                    className="block text-[11px] font-medium uppercase tracking-wider mb-2"
+                    style={{ color: 'var(--text-tertiary)' }}
+                  >
+                    Estimated Duration
+                  </label>
                   <input
                     type="text"
                     value={editableFields.estimatedDuration || aiResults.estimatedDuration}
                     onChange={(e) => setEditableFields({ ...editableFields, estimatedDuration: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                    className="w-full rounded-[10px] p-3 text-[14px] transition-all duration-[80ms]"
+                    style={{
+                      background: 'var(--bg-2)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-primary)',
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--primary)';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-muted)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--border)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2">BUDGET RANGE</label>
+                  <label
+                    className="block text-[11px] font-medium uppercase tracking-wider mb-2"
+                    style={{ color: 'var(--text-tertiary)' }}
+                  >
+                    Budget Range
+                  </label>
                   <input
                     type="text"
                     value={editableFields.budgetRange || aiResults.budgetRange}
                     onChange={(e) => setEditableFields({ ...editableFields, budgetRange: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                    className="w-full rounded-[10px] p-3 text-[14px] transition-all duration-[80ms]"
+                    style={{
+                      background: 'var(--bg-2)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-primary)',
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--primary)';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-muted)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--border)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2">TARGET AUDIENCE</label>
+                  <label
+                    className="block text-[11px] font-medium uppercase tracking-wider mb-2"
+                    style={{ color: 'var(--text-tertiary)' }}
+                  >
+                    Target Audience
+                  </label>
                   <input
                     type="text"
                     value={editableFields.targetAudience || aiResults.targetAudience}
                     onChange={(e) => setEditableFields({ ...editableFields, targetAudience: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                    className="w-full rounded-[10px] p-3 text-[14px] transition-all duration-[80ms]"
+                    style={{
+                      background: 'var(--bg-2)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-primary)',
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--primary)';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-muted)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--border)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2">TONE</label>
+                  <label
+                    className="block text-[11px] font-medium uppercase tracking-wider mb-2"
+                    style={{ color: 'var(--text-tertiary)' }}
+                  >
+                    Tone
+                  </label>
                   <input
                     type="text"
                     value={editableFields.tone || aiResults.tone}
                     onChange={(e) => setEditableFields({ ...editableFields, tone: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                    className="w-full rounded-[10px] p-3 text-[14px] transition-all duration-[80ms]"
+                    style={{
+                      background: 'var(--bg-2)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-primary)',
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--primary)';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-muted)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--border)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
                   />
                 </div>
               </div>
 
               {/* Deliverables */}
               <div>
-                <label className="block text-xs font-bold text-slate-400 mb-2">DELIVERABLES</label>
+                <label
+                  className="block text-[11px] font-medium uppercase tracking-wider mb-2"
+                  style={{ color: 'var(--text-tertiary)' }}
+                >
+                  Deliverables
+                </label>
                 <div className="flex flex-wrap gap-2">
                   {(editableFields.deliverables || aiResults.deliverables || []).map((item, idx) => (
-                    <span key={idx} className="bg-teal-500/20 text-teal-300 text-sm px-3 py-1 rounded-full">
+                    <span
+                      key={idx}
+                      className="px-3 py-1 rounded-full text-[13px] font-medium"
+                      style={{
+                        background: 'var(--secondary-muted)',
+                        color: 'var(--secondary)',
+                        border: '1px solid var(--secondary)'
+                      }}
+                    >
                       {item}
                     </span>
                   ))}
@@ -370,10 +627,23 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
 
               {/* Crew Roles */}
               <div>
-                <label className="block text-xs font-bold text-slate-400 mb-2">REQUIRED CREW</label>
+                <label
+                  className="block text-[11px] font-medium uppercase tracking-wider mb-2"
+                  style={{ color: 'var(--text-tertiary)' }}
+                >
+                  Required Crew
+                </label>
                 <div className="flex flex-wrap gap-2">
                   {(editableFields.crewRoles || aiResults.crewRoles || []).map((role, idx) => (
-                    <span key={idx} className="bg-slate-700 text-slate-300 text-sm px-3 py-1 rounded-full">
+                    <span
+                      key={idx}
+                      className="px-3 py-1 rounded-full text-[13px] font-medium"
+                      style={{
+                        background: 'var(--bg-2)',
+                        color: 'var(--text-secondary)',
+                        border: '1px solid var(--border)'
+                      }}
+                    >
                       {role}
                     </span>
                   ))}
@@ -383,10 +653,23 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
               {/* Required Permits */}
               {(editableFields.requiredPermits || aiResults.requiredPermits || []).length > 0 && (
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2">REQUIRED PERMITS</label>
+                  <label
+                    className="block text-[11px] font-medium uppercase tracking-wider mb-2"
+                    style={{ color: 'var(--text-tertiary)' }}
+                  >
+                    Required Permits
+                  </label>
                   <div className="flex flex-wrap gap-2">
                     {(editableFields.requiredPermits || aiResults.requiredPermits || []).map((permit, idx) => (
-                      <span key={idx} className="bg-yellow-500/20 text-yellow-300 text-sm px-3 py-1 rounded-full">
+                      <span
+                        key={idx}
+                        className="px-3 py-1 rounded-full text-[13px] font-medium"
+                        style={{
+                          background: 'var(--warning-muted)',
+                          color: 'var(--warning)',
+                          border: '1px solid var(--warning)'
+                        }}
+                      >
                         {permit}
                       </span>
                     ))}
@@ -397,22 +680,39 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
               {/* Scenes */}
               {(editableFields.scenes || aiResults.scenes || []).length > 0 && (
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 mb-2">SCENE BREAKDOWN</label>
+                  <label
+                    className="block text-[11px] font-medium uppercase tracking-wider mb-2"
+                    style={{ color: 'var(--text-tertiary)' }}
+                  >
+                    Scene Breakdown
+                  </label>
                   <div className="space-y-3">
                     {(editableFields.scenes || aiResults.scenes || []).map((scene, idx) => (
-                      <div key={idx} className="bg-slate-900 border border-slate-700 rounded-lg p-4">
+                      <div
+                        key={idx}
+                        className="rounded-[10px] p-4"
+                        style={{ background: 'var(--bg-2)', border: '1px solid var(--border)' }}
+                      >
                         <div className="flex items-start gap-3">
-                          <span className="bg-teal-500 text-black font-bold text-xs w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span
+                            className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-[12px] font-bold"
+                            style={{ background: 'var(--secondary)', color: 'var(--bg-0)' }}
+                          >
                             {idx + 1}
                           </span>
                           <div className="flex-1">
-                            <p className="text-white font-medium mb-1">{scene.description}</p>
-                            <p className="text-slate-400 text-sm">
-                              <span className="font-bold">Location:</span> {scene.location}
+                            <p
+                              className="font-medium text-[14px] mb-1"
+                              style={{ color: 'var(--text-primary)' }}
+                            >
+                              {scene.description}
+                            </p>
+                            <p className="text-[13px]" style={{ color: 'var(--text-tertiary)' }}>
+                              <span className="font-semibold">Location:</span> {scene.location}
                             </p>
                             {scene.props && scene.props.length > 0 && (
-                              <p className="text-slate-400 text-sm mt-1">
-                                <span className="font-bold">Props:</span> {scene.props.join(', ')}
+                              <p className="text-[13px] mt-1" style={{ color: 'var(--text-tertiary)' }}>
+                                <span className="font-semibold">Props:</span> {scene.props.join(', ')}
                               </p>
                             )}
                           </div>
@@ -424,20 +724,41 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-4 pt-4 border-t border-slate-700">
+              <div
+                className="flex gap-4 pt-4"
+                style={{ borderTop: '1px solid var(--border)' }}
+              >
                 <button
                   onClick={() => {
                     setAiResults(null);
                     setEditableFields({});
                     setError(null);
                   }}
-                  className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-6 rounded-lg transition-all"
+                  className="flex-1 py-4 px-6 rounded-[6px] font-semibold text-[14px] transition-all duration-[80ms] active:scale-[0.98]"
+                  style={{
+                    background: 'var(--bg-2)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--border)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--bg-1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'var(--bg-2)';
+                  }}
                 >
                   Start Over
                 </button>
                 <button
                   onClick={createProjectWithBrief}
-                  className="flex-1 bg-teal-500 hover:bg-teal-600 text-black font-bold py-4 px-6 rounded-lg transition-all shadow-lg hover:shadow-teal-500/20"
+                  className="flex-1 py-4 px-6 rounded-[6px] font-semibold text-[14px] transition-all duration-[80ms] active:scale-[0.98]"
+                  style={{ background: 'var(--primary)', color: 'white' }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.filter = 'brightness(1.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.filter = 'brightness(1)';
+                  }}
                 >
                   Create Project
                 </button>

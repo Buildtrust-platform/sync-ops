@@ -1,7 +1,15 @@
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
 
-const client = generateClient<Schema>();
+// Lazy client initialization to avoid SSR issues
+let _client: ReturnType<typeof generateClient<Schema>> | null = null;
+
+function getClient() {
+  if (!_client) {
+    _client = generateClient<Schema>();
+  }
+  return _client;
+}
 
 /**
  * TASK CONVERSION UTILITIES
@@ -11,6 +19,7 @@ const client = generateClient<Schema>();
  */
 
 interface ConvertCommentToTaskParams {
+  organizationId: string;
   commentId: string;
   commentText: string;
   projectId: string;
@@ -25,6 +34,7 @@ interface ConvertCommentToTaskParams {
 }
 
 interface ConvertMessageToTaskParams {
+  organizationId: string;
   messageId: string;
   messageContent: string;
   projectId: string;
@@ -49,7 +59,8 @@ export async function convertCommentToTask(
       ? params.commentText.substring(0, 100) + '...'
       : params.commentText;
 
-    const { data, errors } = await client.models.Task.create({
+    const { data, errors } = await getClient().models.Task.create({
+      organizationId: params.organizationId,
       projectId: params.projectId,
       title: `Comment: ${title}`,
       description: params.commentText,
@@ -95,7 +106,8 @@ export async function convertMessageToTask(
       ? params.messageContent.substring(0, 100) + '...'
       : params.messageContent;
 
-    const { data, errors } = await client.models.Task.create({
+    const { data, errors } = await getClient().models.Task.create({
+      organizationId: params.organizationId,
       projectId: params.projectId,
       title: `Message: ${title}`,
       description: params.messageContent,
@@ -129,7 +141,7 @@ export async function convertMessageToTask(
  */
 export async function isCommentConvertedToTask(commentId: string): Promise<boolean> {
   try {
-    const { data } = await client.models.Task.list({
+    const { data } = await getClient().models.Task.list({
       filter: { sourceCommentId: { eq: commentId } },
     });
 
@@ -148,7 +160,7 @@ export async function isCommentConvertedToTask(commentId: string): Promise<boole
  */
 export async function isMessageConvertedToTask(messageId: string): Promise<boolean> {
   try {
-    const { data } = await client.models.Task.list({
+    const { data } = await getClient().models.Task.list({
       filter: { sourceMessageId: { eq: messageId } },
     });
 

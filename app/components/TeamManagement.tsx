@@ -4,7 +4,224 @@ import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
 
-const client = generateClient<Schema>();
+/**
+ * TEAM MANAGEMENT COMPONENT
+ * Design System: Dark mode, CSS variables
+ * Icons: Lucide-style SVGs (stroke-width: 1.5)
+ */
+
+// Lucide-style icons
+const UsersIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+    <circle cx="9" cy="7" r="4"/>
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+  </svg>
+);
+
+const UserPlusIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+    <circle cx="8.5" cy="7" r="4"/>
+    <line x1="20" y1="8" x2="20" y2="14"/>
+    <line x1="23" y1="11" x2="17" y2="11"/>
+  </svg>
+);
+
+const SearchIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8"/>
+    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+  </svg>
+);
+
+const CrownIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/>
+  </svg>
+);
+
+const BuildingIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="4" y="2" width="16" height="20" rx="2" ry="2"/>
+    <path d="M9 22v-4h6v4"/>
+    <path d="M8 6h.01"/>
+    <path d="M16 6h.01"/>
+    <path d="M12 6h.01"/>
+    <path d="M12 10h.01"/>
+    <path d="M12 14h.01"/>
+    <path d="M16 10h.01"/>
+    <path d="M16 14h.01"/>
+    <path d="M8 10h.01"/>
+    <path d="M8 14h.01"/>
+  </svg>
+);
+
+const PaletteIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="13.5" cy="6.5" r="0.5" fill="currentColor"/>
+    <circle cx="17.5" cy="10.5" r="0.5" fill="currentColor"/>
+    <circle cx="8.5" cy="7.5" r="0.5" fill="currentColor"/>
+    <circle cx="6.5" cy="12.5" r="0.5" fill="currentColor"/>
+    <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.555C21.965 6.012 17.461 2 12 2Z"/>
+  </svg>
+);
+
+const ClapperboardIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 11v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8H4Z"/>
+    <path d="m4 11-.88-2.87a2 2 0 0 1 1.33-2.5l11.48-3.5a2 2 0 0 1 2.5 1.32l.87 2.87L4 11.01V11Z"/>
+  </svg>
+);
+
+const ScaleIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/>
+    <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/>
+    <path d="M7 21h10"/>
+    <path d="M12 3v18"/>
+    <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>
+  </svg>
+);
+
+const WalletIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+    <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+    <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
+  </svg>
+);
+
+const HandshakeIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m11 17 2 2a1 1 0 1 0 3-3"/>
+    <path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/>
+    <path d="m21 3 1 11h-2"/>
+    <path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/>
+    <path d="M3 4h8"/>
+  </svg>
+);
+
+const VideoIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m22 8-6 4 6 4V8Z"/>
+    <rect x="2" y="6" width="14" height="12" rx="2" ry="2"/>
+  </svg>
+);
+
+const ScissorsIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="6" cy="6" r="3"/>
+    <circle cx="6" cy="18" r="3"/>
+    <line x1="20" y1="4" x2="8.12" y2="15.88"/>
+    <line x1="14.47" y1="14.48" x2="20" y2="20"/>
+    <line x1="8.12" y1="8.12" x2="12" y2="12"/>
+  </svg>
+);
+
+const CameraIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+    <circle cx="12" cy="13" r="3"/>
+  </svg>
+);
+
+const HeadphonesIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+  </svg>
+);
+
+const SparklesIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+  </svg>
+);
+
+const ClipboardIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+  </svg>
+);
+
+const EyeIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+    <circle cx="12" cy="12" r="3"/>
+  </svg>
+);
+
+const UserIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+    <circle cx="12" cy="7" r="4"/>
+  </svg>
+);
+
+const LockIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+  </svg>
+);
+
+const ChartBarIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="20" x2="18" y2="10"/>
+    <line x1="12" y1="20" x2="12" y2="4"/>
+    <line x1="6" y1="20" x2="6" y2="14"/>
+  </svg>
+);
+
+const MailIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="4" width="20" height="16" rx="2"/>
+    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+  </svg>
+);
+
+const PhoneIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+  </svg>
+);
+
+const CalendarIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+    <line x1="16" y1="2" x2="16" y2="6"/>
+    <line x1="8" y1="2" x2="8" y2="6"/>
+    <line x1="3" y1="10" x2="21" y2="10"/>
+  </svg>
+);
+
+const MessageIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+);
+
+const XIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18"/>
+    <line x1="6" y1="6" x2="18" y2="18"/>
+  </svg>
+);
+
+const StarIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+  </svg>
+);
+
+const CheckIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12"/>
+  </svg>
+);
 
 interface TeamManagementProps {
   projectId: string;
@@ -36,89 +253,89 @@ interface InviteModalProps {
   onInvite: (email: string, role: string, permissions: string[], phone?: string, company?: string, title?: string) => void;
 }
 
-// Role definitions with permissions
-const ROLE_DEFINITIONS = {
+// Role definitions with permissions and icons
+const ROLE_DEFINITIONS: Record<string, { Icon: React.FC; color: string; permissions: string[]; description: string }> = {
   'Project Owner': {
-    icon: '👑',
-    color: 'bg-amber-600',
+    Icon: CrownIcon,
+    color: 'var(--warning)',
     permissions: ['admin', 'edit', 'approve', 'view', 'invite'],
     description: 'Full project control'
   },
   'Executive Sponsor': {
-    icon: '🏢',
-    color: 'bg-purple-600',
+    Icon: BuildingIcon,
+    color: '#A855F7',
     permissions: ['approve', 'view'],
     description: 'Strategic oversight & final approval'
   },
   'Creative Director': {
-    icon: '🎨',
-    color: 'bg-pink-600',
+    Icon: PaletteIcon,
+    color: '#EC4899',
     permissions: ['edit', 'approve', 'view'],
     description: 'Creative vision & direction'
   },
   'Producer': {
-    icon: '🎬',
-    color: 'bg-blue-600',
+    Icon: ClapperboardIcon,
+    color: 'var(--primary)',
     permissions: ['admin', 'edit', 'approve', 'view', 'invite'],
     description: 'Production management'
   },
   'Legal Contact': {
-    icon: '⚖️',
-    color: 'bg-indigo-600',
+    Icon: ScaleIcon,
+    color: '#6366F1',
     permissions: ['approve', 'view'],
     description: 'Legal review & compliance'
   },
   'Finance Contact': {
-    icon: '💰',
-    color: 'bg-green-600',
+    Icon: WalletIcon,
+    color: 'var(--success)',
     permissions: ['approve', 'view'],
     description: 'Budget & financial approval'
   },
   'Client Contact': {
-    icon: '🤝',
-    color: 'bg-teal-600',
+    Icon: HandshakeIcon,
+    color: 'var(--secondary)',
     permissions: ['approve', 'view'],
     description: 'Client representative'
   },
   'Director': {
-    icon: '🎥',
-    color: 'bg-red-600',
+    Icon: VideoIcon,
+    color: 'var(--danger)',
     permissions: ['edit', 'view'],
     description: 'Creative & technical direction'
   },
   'Editor': {
-    icon: '✂️',
-    color: 'bg-orange-600',
+    Icon: ScissorsIcon,
+    color: '#F97316',
     permissions: ['edit', 'view'],
     description: 'Post-production editing'
   },
   'Cinematographer': {
-    icon: '📷',
-    color: 'bg-cyan-600',
+    Icon: CameraIcon,
+    color: '#06B6D4',
     permissions: ['view'],
     description: 'Camera & lighting'
   },
   'Sound Designer': {
-    icon: '🎧',
-    color: 'bg-violet-600',
+    Icon: HeadphonesIcon,
+    color: '#8B5CF6',
     permissions: ['edit', 'view'],
     description: 'Audio production'
   },
   'VFX Artist': {
-    icon: '✨',
-    color: 'bg-fuchsia-600',
+    Icon: SparklesIcon,
+    color: '#D946EF',
     permissions: ['edit', 'view'],
     description: 'Visual effects'
   },
   'Production Assistant': {
-    icon: '📋',
-    color: 'bg-slate-600',
+    Icon: ClipboardIcon,
+    color: 'var(--text-tertiary)',
     permissions: ['view'],
     description: 'General production support'
   },
   'Viewer': {
-    icon: '👁️',
-    color: 'bg-gray-600',
+    Icon: EyeIcon,
+    color: 'var(--text-tertiary)',
     permissions: ['view'],
     description: 'View-only access'
   },
@@ -135,7 +352,7 @@ function InviteModal({ isOpen, onClose, onInvite }: InviteModalProps) {
 
   const handleRoleChange = (newRole: string) => {
     setRole(newRole);
-    const rolePerms = ROLE_DEFINITIONS[newRole as keyof typeof ROLE_DEFINITIONS]?.permissions || ['view'];
+    const rolePerms = ROLE_DEFINITIONS[newRole]?.permissions || ['view'];
     setCustomPermissions(rolePerms);
   };
 
@@ -145,7 +362,7 @@ function InviteModal({ isOpen, onClose, onInvite }: InviteModalProps) {
       onInvite(
         email,
         role,
-        useCustomPermissions ? customPermissions : ROLE_DEFINITIONS[role as keyof typeof ROLE_DEFINITIONS]?.permissions || ['view'],
+        useCustomPermissions ? customPermissions : ROLE_DEFINITIONS[role]?.permissions || ['view'],
         phone || undefined,
         company || undefined,
         title || undefined
@@ -161,78 +378,127 @@ function InviteModal({ isOpen, onClose, onInvite }: InviteModalProps) {
 
   if (!isOpen) return null;
 
+  const RoleIcon = ROLE_DEFINITIONS[role]?.Icon || UserIcon;
+
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-      <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md p-6">
+    <div
+      className="fixed inset-0 flex items-center justify-center z-50"
+      style={{ background: 'rgba(0, 0, 0, 0.8)', backdropFilter: 'blur(4px)' }}
+    >
+      <div
+        className="rounded-[12px] w-full max-w-md p-6"
+        style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}
+      >
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold text-white">Invite Team Member</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-white text-2xl">×</button>
+          <h3 className="text-[18px] font-bold" style={{ color: 'var(--text-primary)' }}>
+            Invite Team Member
+          </h3>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-[6px] transition-all duration-[80ms]"
+            style={{ color: 'var(--text-tertiary)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--bg-2)';
+              e.currentTarget.style.color = 'var(--text-primary)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = 'var(--text-tertiary)';
+            }}
+          >
+            <XIcon />
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-slate-400 mb-2">Email Address</label>
+            <label className="block text-[13px] font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>
+              Email Address
+            </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="colleague@company.com"
-              className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white"
+              className="w-full rounded-[10px] px-4 py-3 text-[14px] transition-all duration-[80ms]"
+              style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = 'var(--primary)';
+                e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-muted)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm text-slate-400 mb-2">Role</label>
+            <label className="block text-[13px] font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>
+              Role
+            </label>
             <select
               value={role}
               onChange={(e) => handleRoleChange(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white"
+              className="w-full rounded-[10px] px-4 py-3 text-[14px] transition-all duration-[80ms]"
+              style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = 'var(--primary)';
+                e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-muted)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
             >
-              {Object.entries(ROLE_DEFINITIONS).map(([roleName, info]) => (
-                <option key={roleName} value={roleName}>
-                  {info.icon} {roleName}
-                </option>
+              {Object.keys(ROLE_DEFINITIONS).map((roleName) => (
+                <option key={roleName} value={roleName}>{roleName}</option>
               ))}
             </select>
-            <p className="text-xs text-slate-500 mt-1">
-              {ROLE_DEFINITIONS[role as keyof typeof ROLE_DEFINITIONS]?.description}
+            <p className="text-[12px] mt-1" style={{ color: 'var(--text-tertiary)' }}>
+              {ROLE_DEFINITIONS[role]?.description}
             </p>
           </div>
 
           {/* Contact Information */}
-          <div className="border-t border-slate-700 pt-4 mt-4">
-            <p className="text-sm text-slate-400 mb-3">Contact Information (Optional)</p>
+          <div className="pt-4 mt-4" style={{ borderTop: '1px solid var(--border)' }}>
+            <p className="text-[13px] font-semibold mb-3" style={{ color: 'var(--text-secondary)' }}>
+              Contact Information (Optional)
+            </p>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm text-slate-400 mb-1">Phone Number</label>
+                <label className="block text-[12px] mb-1" style={{ color: 'var(--text-tertiary)' }}>Phone Number</label>
                 <input
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+1 (555) 123-4567"
-                  className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white"
+                  className="w-full rounded-[10px] px-4 py-2 text-[14px]"
+                  style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm text-slate-400 mb-1">Company</label>
+                  <label className="block text-[12px] mb-1" style={{ color: 'var(--text-tertiary)' }}>Company</label>
                   <input
                     type="text"
                     value={company}
                     onChange={(e) => setCompany(e.target.value)}
                     placeholder="Company name"
-                    className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white"
+                    className="w-full rounded-[10px] px-4 py-2 text-[14px]"
+                    style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-400 mb-1">Job Title</label>
+                  <label className="block text-[12px] mb-1" style={{ color: 'var(--text-tertiary)' }}>Job Title</label>
                   <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Job title"
-                    className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white"
+                    className="w-full rounded-[10px] px-4 py-2 text-[14px]"
+                    style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                   />
                 </div>
               </div>
@@ -240,7 +506,7 @@ function InviteModal({ isOpen, onClose, onInvite }: InviteModalProps) {
           </div>
 
           <div>
-            <label className="flex items-center gap-2 text-sm text-slate-400 mb-2">
+            <label className="flex items-center gap-2 text-[13px] mb-2" style={{ color: 'var(--text-secondary)' }}>
               <input
                 type="checkbox"
                 checked={useCustomPermissions}
@@ -253,7 +519,7 @@ function InviteModal({ isOpen, onClose, onInvite }: InviteModalProps) {
             {useCustomPermissions && (
               <div className="grid grid-cols-2 gap-2 mt-2">
                 {['admin', 'edit', 'approve', 'view', 'invite'].map((perm) => (
-                  <label key={perm} className="flex items-center gap-2 text-sm text-slate-300">
+                  <label key={perm} className="flex items-center gap-2 text-[13px]" style={{ color: 'var(--text-primary)' }}>
                     <input
                       type="checkbox"
                       checked={customPermissions.includes(perm)}
@@ -277,13 +543,15 @@ function InviteModal({ isOpen, onClose, onInvite }: InviteModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium"
+              className="flex-1 px-4 py-3 rounded-[6px] font-semibold text-[14px] transition-all duration-[80ms] active:scale-[0.98]"
+              style={{ background: 'var(--bg-2)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium"
+              className="flex-1 px-4 py-3 rounded-[6px] font-semibold text-[14px] transition-all duration-[80ms] active:scale-[0.98]"
+              style={{ background: 'var(--secondary)', color: 'white' }}
             >
               Send Invite
             </button>
@@ -298,19 +566,10 @@ export default function TeamManagement({
   projectId,
   project,
   currentUserEmail,
-  onUpdate
 }: TeamManagementProps) {
+  const [client] = useState(() => generateClient<Schema>());
   const [activeView, setActiveView] = useState<'directory' | 'permissions' | 'activity'>('directory');
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const [showMeetingModal, setShowMeetingModal] = useState<TeamMember | null>(null);
-  const [meetingForm, setMeetingForm] = useState({
-    title: '',
-    date: '',
-    time: '',
-    duration: '30',
-    type: 'video' as 'video' | 'phone' | 'inperson',
-    notes: '',
-  });
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [invitedMembers, setInvitedMembers] = useState<TeamMember[]>([]);
   const [customPermissions, setCustomPermissions] = useState<Record<string, string[]>>({});
@@ -323,7 +582,6 @@ export default function TeamManagement({
     const buildTeamFromProject = () => {
       const members: TeamMember[] = [];
 
-      // Map stakeholder fields to team members
       const stakeholderMap = [
         { field: 'projectOwnerEmail', role: 'Project Owner' },
         { field: 'executiveSponsorEmail', role: 'Executive Sponsor' },
@@ -337,7 +595,7 @@ export default function TeamManagement({
       stakeholderMap.forEach(({ field, role }, index) => {
         const email = project[field];
         if (email) {
-          const roleDef = ROLE_DEFINITIONS[role as keyof typeof ROLE_DEFINITIONS];
+          const roleDef = ROLE_DEFINITIONS[role];
           members.push({
             id: `stakeholder-${index}`,
             name: email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
@@ -356,41 +614,37 @@ export default function TeamManagement({
     };
 
     buildTeamFromProject();
-
-    // Load invited members from TeamMember model if it exists
     loadInvitedMembers();
   }, [project, projectId]);
 
   const loadInvitedMembers = async () => {
     try {
-      // Check if TeamMember model exists (may not be deployed yet)
       if (client.models.TeamMember) {
         const result = await client.models.TeamMember.list({
           filter: { projectId: { eq: projectId } },
         });
 
-        const invited = (result.data || []).map((member: any) => ({
+        const invited = (result.data || []).map((member: Schema['TeamMember']['type']) => ({
           id: member.id,
           name: member.name || member.email.split('@')[0],
           email: member.email,
           role: member.role,
           roleType: 'invited' as const,
-          status: member.status || 'pending',
+          status: (member.status || 'pending') as 'active' | 'pending' | 'inactive',
           permissions: member.permissions ? JSON.parse(member.permissions) : ['view'],
-          joinedAt: member.invitedAt,
-          phone: member.phone,
-          company: member.company,
-          title: member.title,
+          joinedAt: member.invitedAt || undefined,
+          phone: member.phone || undefined,
+          company: member.company || undefined,
+          title: member.title || undefined,
         }));
 
-        setInvitedMembers(invited as TeamMember[]);
+        setInvitedMembers(invited);
       }
     } catch (error) {
       console.warn('TeamMember model not available yet - using stakeholders only');
     }
   };
 
-  // Map display role names to schema enum values
   const roleDisplayToEnum: Record<string, string> = {
     'Project Owner': 'PROJECT_OWNER',
     'Executive Sponsor': 'EXECUTIVE_SPONSOR',
@@ -410,16 +664,17 @@ export default function TeamManagement({
 
   const handleInvite = async (email: string, role: string, permissions: string[], phone?: string, company?: string, title?: string) => {
     try {
-      // Check if TeamMember model exists
       if (client.models.TeamMember) {
         const roleEnum = roleDisplayToEnum[role] || 'VIEWER';
+        const organizationId = project.organizationId || 'default-org';
         await client.models.TeamMember.create({
+          organizationId,
           projectId,
           email,
           name: email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
-          role: roleEnum as any,
+          role: roleEnum as Parameters<typeof client.models.TeamMember.create>[0]['role'],
           permissions: JSON.stringify(permissions),
-          status: 'PENDING' as any,
+          status: 'PENDING' as Parameters<typeof client.models.TeamMember.create>[0]['status'],
           invitedBy: currentUserEmail,
           invitedAt: new Date().toISOString(),
           phone: phone || undefined,
@@ -429,14 +684,14 @@ export default function TeamManagement({
 
         await loadInvitedMembers();
 
-        // Log activity
         if (client.models.ActivityLog) {
           await client.models.ActivityLog.create({
+            organizationId,
             projectId,
             userId: currentUserEmail,
             userEmail: currentUserEmail,
             userRole: 'User',
-            action: 'USER_ADDED' as any,
+            action: 'USER_ADDED' as Parameters<typeof client.models.ActivityLog.create>[0]['action'],
             targetType: 'TeamMember',
             targetId: email,
             targetName: email,
@@ -444,7 +699,6 @@ export default function TeamManagement({
           });
         }
       } else {
-        // Fallback: Show message that schema needs deployment
         alert(`Invitation sent to ${email} as ${role}!\n\nNote: For full team management, deploy the schema with: npx ampx sandbox --once`);
       }
     } catch (error) {
@@ -474,7 +728,6 @@ export default function TeamManagement({
     }
   };
 
-  // Get effective permissions for a member (considering custom overrides)
   const getEffectivePermissions = (member: TeamMember): string[] => {
     return customPermissions[member.id] || member.permissions;
   };
@@ -487,110 +740,58 @@ export default function TeamManagement({
     let newPermissions: string[];
 
     if (currentPermissions.includes(permission)) {
-      // Remove permission (but always keep 'view')
       if (permission === 'view') {
         alert('View permission cannot be removed - it is required for all team members.');
         return;
       }
       newPermissions = currentPermissions.filter(p => p !== permission);
     } else {
-      // Add permission
       newPermissions = [...currentPermissions, permission];
     }
 
-    // For stakeholders, store permissions locally
     if (member.roleType === 'stakeholder') {
-      setCustomPermissions(prev => ({
-        ...prev,
-        [memberId]: newPermissions
-      }));
-
-      // Also update local teamMembers state for immediate UI update
-      setTeamMembers(prev => prev.map(m =>
-        m.id === memberId
-          ? { ...m, permissions: newPermissions }
-          : m
-      ));
+      setCustomPermissions(prev => ({ ...prev, [memberId]: newPermissions }));
+      setTeamMembers(prev => prev.map(m => m.id === memberId ? { ...m, permissions: newPermissions } : m));
       return;
     }
 
-    // For invited members, save to database if available
     if (client.models.TeamMember) {
       try {
-        await client.models.TeamMember.update({
-          id: memberId,
-          permissions: JSON.stringify(newPermissions),
-        });
-
-        // Update local state immediately for responsiveness
-        setInvitedMembers(prev => prev.map(m =>
-          m.id === memberId
-            ? { ...m, permissions: newPermissions }
-            : m
-        ));
-
-        // Log activity
-        if (client.models.ActivityLog) {
-          await client.models.ActivityLog.create({
-            projectId,
-            userId: currentUserEmail,
-            userEmail: currentUserEmail,
-            userRole: 'User',
-            action: 'PERMISSION_CHANGED' as any,
-            targetType: 'TeamMember',
-            targetId: memberId,
-            targetName: member.email,
-            metadata: { permission, newPermissions },
-          });
-        }
+        await client.models.TeamMember.update({ id: memberId, permissions: JSON.stringify(newPermissions) });
+        setInvitedMembers(prev => prev.map(m => m.id === memberId ? { ...m, permissions: newPermissions } : m));
       } catch (error) {
         console.error('Error toggling permission:', error);
-        // Still update locally even if DB fails
-        setInvitedMembers(prev => prev.map(m =>
-          m.id === memberId
-            ? { ...m, permissions: newPermissions }
-            : m
-        ));
+        setInvitedMembers(prev => prev.map(m => m.id === memberId ? { ...m, permissions: newPermissions } : m));
       }
     } else {
-      // No DB, just update locally
-      setInvitedMembers(prev => prev.map(m =>
-        m.id === memberId
-          ? { ...m, permissions: newPermissions }
-          : m
-      ));
+      setInvitedMembers(prev => prev.map(m => m.id === memberId ? { ...m, permissions: newPermissions } : m));
     }
   };
 
-  // Combine and filter members
   const allMembers = [...teamMembers, ...invitedMembers];
   const filteredMembers = allMembers.filter(member => {
     const matchesSearch = searchQuery === '' ||
       member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       member.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       member.role.toLowerCase().includes(searchQuery.toLowerCase());
-
     const matchesRole = filterRole === 'all' || member.role === filterRole;
-
     return matchesSearch && matchesRole;
   });
 
-  // Get unique roles for filter
   const uniqueRoles = [...new Set(allMembers.map(m => m.role))];
 
-  // Permission badge colors
-  const permissionColors: Record<string, string> = {
-    admin: 'bg-red-500/20 text-red-400',
-    edit: 'bg-blue-500/20 text-blue-400',
-    approve: 'bg-green-500/20 text-green-400',
-    view: 'bg-slate-500/20 text-slate-400',
-    invite: 'bg-purple-500/20 text-purple-400',
+  const permissionColors: Record<string, { bg: string; text: string }> = {
+    admin: { bg: 'var(--danger-muted)', text: 'var(--danger)' },
+    edit: { bg: 'var(--primary-muted)', text: 'var(--primary)' },
+    approve: { bg: 'var(--success-muted)', text: 'var(--success)' },
+    view: { bg: 'var(--bg-2)', text: 'var(--text-tertiary)' },
+    invite: { bg: 'rgba(168, 85, 247, 0.1)', text: '#A855F7' },
   };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: 'var(--secondary)' }}></div>
       </div>
     );
   }
@@ -600,17 +801,18 @@ export default function TeamManagement({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold text-white">Team Management</h2>
-          <p className="text-slate-400 mt-1">
+          <h2 className="text-[24px] font-bold" style={{ color: 'var(--text-primary)' }}>Team Management</h2>
+          <p className="text-[14px] mt-1" style={{ color: 'var(--text-secondary)' }}>
             {allMembers.length} team member{allMembers.length !== 1 ? 's' : ''} •
             {allMembers.filter(m => m.status === 'active').length} active
           </p>
         </div>
         <button
           onClick={() => setShowInviteModal(true)}
-          className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium flex items-center gap-2"
+          className="px-4 py-2.5 rounded-[6px] font-semibold text-[14px] transition-all duration-[80ms] flex items-center gap-2 active:scale-[0.98]"
+          style={{ background: 'var(--secondary)', color: 'white' }}
         >
-          <span>➕</span>
+          <UserPlusIcon />
           Invite Member
         </button>
       </div>
@@ -618,42 +820,46 @@ export default function TeamManagement({
       {/* View Tabs */}
       <div className="flex gap-2">
         {[
-          { id: 'directory', label: 'Directory', icon: '👥' },
-          { id: 'permissions', label: 'Permissions', icon: '🔐' },
-          { id: 'activity', label: 'Activity', icon: '📊' },
+          { id: 'directory', label: 'Directory', Icon: UsersIcon },
+          { id: 'permissions', label: 'Permissions', Icon: LockIcon },
+          { id: 'activity', label: 'Activity', Icon: ChartBarIcon },
         ].map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveView(tab.id as any)}
-            className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 ${
-              activeView === tab.id
-                ? 'bg-teal-600 text-white'
-                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-            }`}
+            onClick={() => setActiveView(tab.id as 'directory' | 'permissions' | 'activity')}
+            className="px-4 py-2 rounded-[6px] font-medium text-[14px] flex items-center gap-2 transition-all duration-[80ms]"
+            style={{
+              background: activeView === tab.id ? 'var(--secondary)' : 'var(--bg-2)',
+              color: activeView === tab.id ? 'white' : 'var(--text-secondary)',
+            }}
           >
-            <span>{tab.icon}</span>
+            <tab.Icon />
             {tab.label}
           </button>
         ))}
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="bg-slate-800 rounded-xl border border-slate-700 p-4">
+      <div className="rounded-[12px] p-4" style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}>
         <div className="flex gap-4">
           <div className="flex-1 relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-tertiary)' }}>
+              <SearchIcon />
+            </span>
             <input
               type="text"
               placeholder="Search by name, email, or role..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-600 rounded-lg pl-10 pr-4 py-2 text-white"
+              className="w-full pl-10 pr-4 py-2 rounded-[10px] text-[14px]"
+              style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
             />
           </div>
           <select
             value={filterRole}
             onChange={(e) => setFilterRole(e.target.value)}
-            className="bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white min-w-[200px]"
+            className="rounded-[10px] px-4 py-2 text-[14px] min-w-[200px]"
+            style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
           >
             <option value="all">All Roles</option>
             {uniqueRoles.map((role) => (
@@ -667,36 +873,55 @@ export default function TeamManagement({
       {activeView === 'directory' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredMembers.map((member) => {
-            const roleDef = ROLE_DEFINITIONS[member.role as keyof typeof ROLE_DEFINITIONS];
+            const roleDef = ROLE_DEFINITIONS[member.role];
+            const RoleIcon = roleDef?.Icon || UserIcon;
 
             return (
               <div
                 key={member.id}
-                className="bg-slate-800 rounded-xl border border-slate-700 p-5 hover:border-teal-500/50 transition-all"
+                className="rounded-[12px] p-5 transition-all duration-[80ms]"
+                style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className={`w-12 h-12 rounded-full ${roleDef?.color || 'bg-slate-600'} flex items-center justify-center text-2xl`}>
-                      {roleDef?.icon || '👤'}
+                    <div
+                      className="w-12 h-12 rounded-[6px] flex items-center justify-center"
+                      style={{ background: `${roleDef?.color || 'var(--text-tertiary)'}20`, color: roleDef?.color || 'var(--text-tertiary)' }}
+                    >
+                      <RoleIcon />
                     </div>
                     <div>
-                      <h4 className="font-bold text-white">{member.name}</h4>
-                      <p className="text-xs text-slate-500">{member.email}</p>
+                      <h4 className="font-semibold text-[14px]" style={{ color: 'var(--text-primary)' }}>{member.name}</h4>
+                      <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>{member.email}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className={`w-2 h-2 rounded-full ${
-                      member.status === 'active' ? 'bg-green-500' :
-                      member.status === 'pending' ? 'bg-yellow-500' : 'bg-slate-500'
-                    }`}></span>
-                    <span className="text-xs text-slate-500 capitalize">{member.status}</span>
+                    <span
+                      className="w-2 h-2 rounded-full"
+                      style={{
+                        background: member.status === 'active' ? 'var(--success)' :
+                          member.status === 'pending' ? 'var(--warning)' : 'var(--text-tertiary)'
+                      }}
+                    ></span>
+                    <span className="text-[11px] capitalize" style={{ color: 'var(--text-tertiary)' }}>{member.status}</span>
                   </div>
                 </div>
 
                 <div className="space-y-3">
                   <div>
-                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${roleDef?.color || 'bg-slate-600'}`}>
-                      {roleDef?.icon} {member.role}
+                    <span
+                      className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[12px] font-medium"
+                      style={{ background: `${roleDef?.color || 'var(--text-tertiary)'}20`, color: roleDef?.color || 'var(--text-tertiary)' }}
+                    >
+                      <RoleIcon /> {member.role}
                     </span>
                   </div>
 
@@ -704,15 +929,17 @@ export default function TeamManagement({
                     {['admin', 'edit', 'approve', 'view', 'invite'].map((perm) => {
                       const effectivePerms = getEffectivePermissions(member);
                       const hasPerm = effectivePerms.includes(perm);
+                      const colors = permissionColors[perm];
                       return (
                         <button
                           key={perm}
                           onClick={() => handleTogglePermission(member.id, perm)}
-                          className={`px-2 py-0.5 rounded text-xs transition-all cursor-pointer ${
-                            hasPerm
-                              ? `${permissionColors[perm] || 'bg-slate-600 text-slate-300'} hover:opacity-70`
-                              : 'bg-slate-700/30 text-slate-600 hover:bg-slate-600/50 hover:text-slate-400'
-                          }`}
+                          className="px-2 py-0.5 rounded text-[11px] transition-all duration-[80ms] cursor-pointer"
+                          style={{
+                            background: hasPerm ? colors.bg : 'var(--bg-2)',
+                            color: hasPerm ? colors.text : 'var(--text-tertiary)',
+                            opacity: hasPerm ? 1 : 0.5
+                          }}
                           title={hasPerm ? `Click to remove ${perm}` : `Click to grant ${perm}`}
                         >
                           {perm}
@@ -721,85 +948,65 @@ export default function TeamManagement({
                     })}
                   </div>
 
-                  {/* Contact Info */}
                   {(member.phone || member.company || member.title) && (
-                    <div className="text-xs text-slate-400 space-y-0.5">
-                      {member.title && member.company && (
-                        <p>{member.title} at {member.company}</p>
-                      )}
+                    <div className="text-[12px] space-y-0.5" style={{ color: 'var(--text-tertiary)' }}>
+                      {member.title && member.company && <p>{member.title} at {member.company}</p>}
                       {member.title && !member.company && <p>{member.title}</p>}
                       {!member.title && member.company && <p>{member.company}</p>}
-                      {member.phone && (
-                        <p className="flex items-center gap-1">
-                          <span>📱</span> {member.phone}
-                        </p>
-                      )}
+                      {member.phone && <p className="flex items-center gap-1"><PhoneIcon /> {member.phone}</p>}
                     </div>
                   )}
 
                   {member.roleType === 'stakeholder' && (
-                    <p className="text-xs text-amber-500/80">
-                      ⭐ Core Stakeholder
+                    <p className="text-[12px] flex items-center gap-1" style={{ color: 'var(--warning)' }}>
+                      <StarIcon /> Core Stakeholder
                     </p>
                   )}
 
                   {member.email !== currentUserEmail && (
-                    <div className="space-y-2 pt-2 border-t border-slate-700">
-                      {/* Primary Contact Actions */}
+                    <div className="space-y-2 pt-2" style={{ borderTop: '1px solid var(--border)' }}>
                       <div className="flex gap-2">
                         <button
                           onClick={() => window.location.href = `mailto:${member.email}`}
-                          className="flex-1 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded text-sm flex items-center justify-center gap-1"
-                          title={`Email ${member.name}`}
+                          className="flex-1 px-3 py-1.5 rounded-[6px] text-[12px] flex items-center justify-center gap-1 transition-all duration-[80ms]"
+                          style={{ background: 'var(--bg-2)', color: 'var(--text-primary)' }}
                         >
-                          ✉️ Email
+                          <MailIcon /> Email
                         </button>
                         {member.phone && (
                           <button
                             onClick={() => window.location.href = `tel:${member.phone}`}
-                            className="flex-1 px-3 py-1.5 bg-green-600/20 hover:bg-green-600/30 text-green-400 rounded text-sm flex items-center justify-center gap-1"
-                            title={`Call ${member.phone}`}
+                            className="flex-1 px-3 py-1.5 rounded-[6px] text-[12px] flex items-center justify-center gap-1 transition-all duration-[80ms]"
+                            style={{ background: 'var(--success-muted)', color: 'var(--success)' }}
                           >
-                            📞 Call
+                            <PhoneIcon /> Call
                           </button>
                         )}
                       </div>
-
-                      {/* Meeting & More Actions */}
                       <div className="flex gap-2">
                         <button
-                          onClick={() => {
-                            setMeetingForm({
-                              title: `Meeting with ${member.name}`,
-                              date: '',
-                              time: '10:00',
-                              duration: '30',
-                              type: member.phone ? 'phone' : 'video',
-                              notes: '',
-                            });
-                            setShowMeetingModal(member);
-                          }}
-                          className="flex-1 px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 rounded text-sm flex items-center justify-center gap-1"
-                          title="Schedule meeting"
+                          onClick={() => window.location.href = `mailto:${member.email}?subject=Meeting%20Request`}
+                          className="flex-1 px-3 py-1.5 rounded-[6px] text-[12px] flex items-center justify-center gap-1 transition-all duration-[80ms]"
+                          style={{ background: 'var(--primary-muted)', color: 'var(--primary)' }}
                         >
-                          📅 Meeting
+                          <CalendarIcon /> Meeting
                         </button>
                         {member.phone && (
                           <button
                             onClick={() => window.location.href = `sms:${member.phone}`}
-                            className="flex-1 px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 rounded text-sm flex items-center justify-center gap-1"
-                            title={`Text ${member.name}`}
+                            className="flex-1 px-3 py-1.5 rounded-[6px] text-[12px] flex items-center justify-center gap-1 transition-all duration-[80ms]"
+                            style={{ background: 'rgba(168, 85, 247, 0.1)', color: '#A855F7' }}
                           >
-                            💬 Text
+                            <MessageIcon /> Text
                           </button>
                         )}
                         {member.roleType === 'invited' && (
                           <button
                             onClick={() => handleRemoveMember(member.id)}
-                            className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded text-sm"
-                            title="Remove from project"
+                            className="px-3 py-1.5 rounded-[6px] text-[12px] transition-all duration-[80ms]"
+                            style={{ background: 'var(--danger-muted)', color: 'var(--danger)' }}
                           >
-                            ✕
+                            <XIcon />
                           </button>
                         )}
                       </div>
@@ -810,15 +1017,12 @@ export default function TeamManagement({
             );
           })}
 
-          {/* Empty State */}
           {filteredMembers.length === 0 && (
             <div className="col-span-full text-center py-12">
-              <div className="text-6xl mb-4">👥</div>
-              <h3 className="text-xl font-bold text-white mb-2">No team members found</h3>
-              <p className="text-slate-400">
-                {searchQuery || filterRole !== 'all'
-                  ? 'Try adjusting your search or filter'
-                  : 'Invite team members to get started'}
+              <div className="mb-4" style={{ color: 'var(--text-tertiary)' }}><UsersIcon /></div>
+              <h3 className="text-[18px] font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>No team members found</h3>
+              <p className="text-[14px]" style={{ color: 'var(--text-tertiary)' }}>
+                {searchQuery || filterRole !== 'all' ? 'Try adjusting your search or filter' : 'Invite team members to get started'}
               </p>
             </div>
           )}
@@ -827,38 +1031,40 @@ export default function TeamManagement({
 
       {/* Permissions View */}
       {activeView === 'permissions' && (
-        <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+        <div className="rounded-[12px] overflow-hidden" style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}>
           <table className="w-full">
-            <thead className="bg-slate-900">
+            <thead style={{ background: 'var(--bg-2)' }}>
               <tr>
-                <th className="text-left px-6 py-4 text-sm font-medium text-slate-400">Member</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-slate-400">Role</th>
-                <th className="text-center px-4 py-4 text-sm font-medium text-slate-400">Admin</th>
-                <th className="text-center px-4 py-4 text-sm font-medium text-slate-400">Edit</th>
-                <th className="text-center px-4 py-4 text-sm font-medium text-slate-400">Approve</th>
-                <th className="text-center px-4 py-4 text-sm font-medium text-slate-400">View</th>
-                <th className="text-center px-4 py-4 text-sm font-medium text-slate-400">Invite</th>
+                <th className="text-left px-6 py-4 text-[13px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Member</th>
+                <th className="text-left px-6 py-4 text-[13px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Role</th>
+                {['Admin', 'Edit', 'Approve', 'View', 'Invite'].map(perm => (
+                  <th key={perm} className="text-center px-4 py-4 text-[13px] font-medium" style={{ color: 'var(--text-tertiary)' }}>{perm}</th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-700">
+            <tbody>
               {filteredMembers.map((member) => {
-                const roleDef = ROLE_DEFINITIONS[member.role as keyof typeof ROLE_DEFINITIONS];
+                const roleDef = ROLE_DEFINITIONS[member.role];
+                const RoleIcon = roleDef?.Icon || UserIcon;
 
                 return (
-                  <tr key={member.id} className="hover:bg-slate-700/30">
+                  <tr key={member.id} style={{ borderTop: '1px solid var(--border)' }}>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full ${roleDef?.color || 'bg-slate-600'} flex items-center justify-center text-sm`}>
-                          {roleDef?.icon || '👤'}
+                        <div
+                          className="w-8 h-8 rounded-[6px] flex items-center justify-center"
+                          style={{ background: `${roleDef?.color || 'var(--text-tertiary)'}20`, color: roleDef?.color || 'var(--text-tertiary)' }}
+                        >
+                          <RoleIcon />
                         </div>
                         <div>
-                          <p className="font-medium text-white">{member.name}</p>
-                          <p className="text-xs text-slate-500">{member.email}</p>
+                          <p className="font-medium text-[14px]" style={{ color: 'var(--text-primary)' }}>{member.name}</p>
+                          <p className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>{member.email}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-sm text-slate-300">{member.role}</span>
+                      <span className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>{member.role}</span>
                     </td>
                     {['admin', 'edit', 'approve', 'view', 'invite'].map((perm) => {
                       const effectivePerms = getEffectivePermissions(member);
@@ -867,14 +1073,14 @@ export default function TeamManagement({
                         <td key={perm} className="px-4 py-4 text-center">
                           <button
                             onClick={() => handleTogglePermission(member.id, perm)}
-                            className={`w-8 h-8 rounded-lg transition-all cursor-pointer ${
-                              hasPerm
-                                ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
-                                : 'bg-slate-700/50 text-slate-600 hover:bg-slate-600/50 hover:text-slate-400'
-                            }`}
+                            className="w-8 h-8 rounded-[6px] transition-all duration-[80ms] flex items-center justify-center cursor-pointer"
+                            style={{
+                              background: hasPerm ? 'var(--success-muted)' : 'var(--bg-2)',
+                              color: hasPerm ? 'var(--success)' : 'var(--text-tertiary)'
+                            }}
                             title={hasPerm ? `Remove ${perm} permission` : `Grant ${perm} permission`}
                           >
-                            {hasPerm ? '✓' : '-'}
+                            {hasPerm ? <CheckIcon /> : '-'}
                           </button>
                         </td>
                       );
@@ -889,74 +1095,57 @@ export default function TeamManagement({
 
       {/* Activity View */}
       {activeView === 'activity' && (
-        <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-          <div className="space-y-4">
-            <div className="text-center py-8">
-              <div className="text-5xl mb-4">📊</div>
-              <h3 className="text-xl font-bold text-white mb-2">Team Activity</h3>
-              <p className="text-slate-400 mb-6">
-                Track team member contributions and engagement
-              </p>
+        <div className="rounded-[12px] p-6" style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}>
+          <div className="text-center py-8">
+            <div className="mb-4" style={{ color: 'var(--text-secondary)' }}><ChartBarIcon /></div>
+            <h3 className="text-[18px] font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Team Activity</h3>
+            <p className="text-[14px] mb-6" style={{ color: 'var(--text-tertiary)' }}>
+              Track team member contributions and engagement
+            </p>
 
-              {/* Activity Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                <div className="bg-slate-900 rounded-xl p-4">
-                  <div className="text-3xl font-bold text-teal-400">{allMembers.length}</div>
-                  <div className="text-sm text-slate-400">Total Members</div>
-                </div>
-                <div className="bg-slate-900 rounded-xl p-4">
-                  <div className="text-3xl font-bold text-green-400">
-                    {allMembers.filter(m => m.status === 'active').length}
-                  </div>
-                  <div className="text-sm text-slate-400">Active</div>
-                </div>
-                <div className="bg-slate-900 rounded-xl p-4">
-                  <div className="text-3xl font-bold text-yellow-400">
-                    {allMembers.filter(m => m.status === 'pending').length}
-                  </div>
-                  <div className="text-sm text-slate-400">Pending Invites</div>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+              <div className="rounded-[10px] p-4" style={{ background: 'var(--bg-2)' }}>
+                <div className="text-[28px] font-bold" style={{ color: 'var(--secondary)' }}>{allMembers.length}</div>
+                <div className="text-[13px]" style={{ color: 'var(--text-tertiary)' }}>Total Members</div>
               </div>
-
-              {/* Role Distribution */}
-              <div className="mt-8">
-                <h4 className="text-lg font-bold text-white mb-4">Role Distribution</h4>
-                <div className="flex flex-wrap justify-center gap-3">
-                  {uniqueRoles.map((role) => {
-                    const count = allMembers.filter(m => m.role === role).length;
-                    const roleDef = ROLE_DEFINITIONS[role as keyof typeof ROLE_DEFINITIONS];
-                    return (
-                      <div
-                        key={role}
-                        className={`px-4 py-2 rounded-lg ${roleDef?.color || 'bg-slate-700'} flex items-center gap-2`}
-                      >
-                        <span>{roleDef?.icon}</span>
-                        <span className="font-medium">{role}</span>
-                        <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">{count}</span>
-                      </div>
-                    );
-                  })}
+              <div className="rounded-[10px] p-4" style={{ background: 'var(--bg-2)' }}>
+                <div className="text-[28px] font-bold" style={{ color: 'var(--success)' }}>
+                  {allMembers.filter(m => m.status === 'active').length}
                 </div>
+                <div className="text-[13px]" style={{ color: 'var(--text-tertiary)' }}>Active</div>
+              </div>
+              <div className="rounded-[10px] p-4" style={{ background: 'var(--bg-2)' }}>
+                <div className="text-[28px] font-bold" style={{ color: 'var(--warning)' }}>
+                  {allMembers.filter(m => m.status === 'pending').length}
+                </div>
+                <div className="text-[13px]" style={{ color: 'var(--text-tertiary)' }}>Pending Invites</div>
+              </div>
+            </div>
+
+            <div className="mt-8">
+              <h4 className="text-[16px] font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Role Distribution</h4>
+              <div className="flex flex-wrap justify-center gap-3">
+                {uniqueRoles.map((role) => {
+                  const count = allMembers.filter(m => m.role === role).length;
+                  const roleDef = ROLE_DEFINITIONS[role];
+                  const RoleIcon = roleDef?.Icon || UserIcon;
+                  return (
+                    <div
+                      key={role}
+                      className="px-4 py-2 rounded-[6px] flex items-center gap-2"
+                      style={{ background: `${roleDef?.color || 'var(--text-tertiary)'}20`, color: roleDef?.color || 'var(--text-tertiary)' }}
+                    >
+                      <RoleIcon />
+                      <span className="font-medium text-[13px]">{role}</span>
+                      <span className="px-2 py-0.5 rounded-full text-[11px]" style={{ background: 'rgba(255,255,255,0.2)' }}>{count}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
         </div>
       )}
-
-      {/* Role Legend */}
-      <div className="bg-slate-800/50 rounded-xl border border-slate-700 p-4">
-        <h4 className="text-sm font-medium text-slate-400 mb-3">Role Legend</h4>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
-          {Object.entries(ROLE_DEFINITIONS).slice(0, 7).map(([role, def]) => (
-            <div key={role} className="flex items-center gap-2 text-xs">
-              <span className={`w-6 h-6 rounded ${def.color} flex items-center justify-center`}>
-                {def.icon}
-              </span>
-              <span className="text-slate-400">{role}</span>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* Invite Modal */}
       <InviteModal
@@ -964,181 +1153,6 @@ export default function TeamManagement({
         onClose={() => setShowInviteModal(false)}
         onInvite={handleInvite}
       />
-
-      {/* Meeting Scheduler Modal */}
-      {showMeetingModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-lg p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-xl font-bold text-white">Schedule Meeting</h3>
-                <p className="text-sm text-slate-400">with {showMeetingModal.name}</p>
-              </div>
-              <button onClick={() => setShowMeetingModal(null)} className="text-slate-400 hover:text-white text-2xl">×</button>
-            </div>
-
-            <div className="space-y-4">
-              {/* Meeting Title */}
-              <div>
-                <label className="block text-sm text-slate-400 mb-1">Meeting Title</label>
-                <input
-                  type="text"
-                  value={meetingForm.title}
-                  onChange={(e) => setMeetingForm({ ...meetingForm, title: e.target.value })}
-                  placeholder="Meeting title"
-                  className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white"
-                />
-              </div>
-
-              {/* Date and Time */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-slate-400 mb-1">Date</label>
-                  <input
-                    type="date"
-                    value={meetingForm.date}
-                    onChange={(e) => setMeetingForm({ ...meetingForm, date: e.target.value })}
-                    min={new Date().toISOString().split('T')[0]}
-                    className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-slate-400 mb-1">Time</label>
-                  <input
-                    type="time"
-                    value={meetingForm.time}
-                    onChange={(e) => setMeetingForm({ ...meetingForm, time: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white"
-                  />
-                </div>
-              </div>
-
-              {/* Duration and Type */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-slate-400 mb-1">Duration</label>
-                  <select
-                    value={meetingForm.duration}
-                    onChange={(e) => setMeetingForm({ ...meetingForm, duration: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white"
-                  >
-                    <option value="15">15 minutes</option>
-                    <option value="30">30 minutes</option>
-                    <option value="45">45 minutes</option>
-                    <option value="60">1 hour</option>
-                    <option value="90">1.5 hours</option>
-                    <option value="120">2 hours</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm text-slate-400 mb-1">Meeting Type</label>
-                  <select
-                    value={meetingForm.type}
-                    onChange={(e) => setMeetingForm({ ...meetingForm, type: e.target.value as any })}
-                    className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white"
-                  >
-                    <option value="video">📹 Video Call</option>
-                    <option value="phone">📞 Phone Call</option>
-                    <option value="inperson">🏢 In Person</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Notes */}
-              <div>
-                <label className="block text-sm text-slate-400 mb-1">Notes / Agenda</label>
-                <textarea
-                  value={meetingForm.notes}
-                  onChange={(e) => setMeetingForm({ ...meetingForm, notes: e.target.value })}
-                  placeholder="Meeting agenda or notes..."
-                  rows={3}
-                  className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white"
-                />
-              </div>
-
-              {/* Contact Info Summary */}
-              <div className="bg-slate-900/50 rounded-lg p-3 space-y-1">
-                <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Contact Details</p>
-                <p className="text-sm text-slate-300 flex items-center gap-2">
-                  <span>✉️</span> {showMeetingModal.email}
-                </p>
-                {showMeetingModal.phone && (
-                  <p className="text-sm text-slate-300 flex items-center gap-2">
-                    <span>📱</span> {showMeetingModal.phone}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setShowMeetingModal(null)}
-                className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  // Generate meeting invite email
-                  const dateStr = meetingForm.date ? new Date(meetingForm.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'TBD';
-                  const typeLabel = meetingForm.type === 'video' ? 'Video Call' : meetingForm.type === 'phone' ? 'Phone Call' : 'In-Person Meeting';
-
-                  const subject = encodeURIComponent(meetingForm.title || `Meeting - ${project.name || 'Project'}`);
-                  const body = encodeURIComponent(
-                    `Hi ${showMeetingModal.name},\n\n` +
-                    `I'd like to schedule a meeting with you:\n\n` +
-                    `📅 Date: ${dateStr}\n` +
-                    `🕐 Time: ${meetingForm.time || 'TBD'}\n` +
-                    `⏱️ Duration: ${meetingForm.duration} minutes\n` +
-                    `📍 Type: ${typeLabel}\n` +
-                    (meetingForm.type === 'phone' && showMeetingModal.phone ? `📞 I'll call you at: ${showMeetingModal.phone}\n` : '') +
-                    (meetingForm.notes ? `\nAgenda:\n${meetingForm.notes}\n` : '') +
-                    `\nPlease let me know if this works for you or suggest an alternative time.\n\n` +
-                    `Best regards`
-                  );
-
-                  window.location.href = `mailto:${showMeetingModal.email}?subject=${subject}&body=${body}`;
-                  setShowMeetingModal(null);
-                }}
-                className="flex-1 px-4 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium flex items-center justify-center gap-2"
-              >
-                📧 Send Invite
-              </button>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="mt-4 pt-4 border-t border-slate-700">
-              <p className="text-xs text-slate-500 mb-2">Quick Actions</p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(meetingForm.title)}&dates=${meetingForm.date?.replace(/-/g, '')}T${meetingForm.time?.replace(':', '')}00/${meetingForm.date?.replace(/-/g, '')}T${meetingForm.time?.replace(':', '')}00&add=${showMeetingModal.email}&details=${encodeURIComponent(meetingForm.notes || '')}`, '_blank')}
-                  className="flex-1 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 rounded text-sm"
-                  title="Add to Google Calendar"
-                >
-                  Google Calendar
-                </button>
-                <button
-                  onClick={() => window.open(`https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(meetingForm.title)}&startdt=${meetingForm.date}T${meetingForm.time}:00&enddt=${meetingForm.date}T${meetingForm.time}:00&to=${showMeetingModal.email}&body=${encodeURIComponent(meetingForm.notes || '')}`, '_blank')}
-                  className="flex-1 px-3 py-2 bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-400 rounded text-sm"
-                  title="Add to Outlook"
-                >
-                  Outlook
-                </button>
-                {showMeetingModal.phone && (
-                  <button
-                    onClick={() => window.location.href = `tel:${showMeetingModal.phone}`}
-                    className="flex-1 px-3 py-2 bg-green-600/20 hover:bg-green-600/30 text-green-400 rounded text-sm"
-                    title="Call now"
-                  >
-                    📞 Call Now
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

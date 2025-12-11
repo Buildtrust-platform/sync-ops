@@ -4,7 +4,137 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
 
-const client = generateClient<Schema>();
+// Lucide-style SVG Icons
+const BrainIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z" />
+    <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z" />
+  </svg>
+);
+
+const DatabaseIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <ellipse cx="12" cy="5" rx="9" ry="3" />
+    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+  </svg>
+);
+
+const BarChartIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="20" x2="12" y2="10" />
+    <line x1="18" y1="20" x2="18" y2="4" />
+    <line x1="6" y1="20" x2="6" y2="16" />
+  </svg>
+);
+
+const TrendingUpIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+    <polyline points="17 6 23 6 23 12" />
+  </svg>
+);
+
+const TrendingDownIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
+    <polyline points="17 18 23 18 23 12" />
+  </svg>
+);
+
+const ArrowRightIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="5" y1="12" x2="19" y2="12" />
+    <polyline points="12 5 19 12 12 19" />
+  </svg>
+);
+
+const MoonIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+  </svg>
+);
+
+const StarIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+  </svg>
+);
+
+const ArchiveIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="21 8 21 21 3 21 3 8" />
+    <rect x="1" y="3" width="22" height="5" />
+    <line x1="10" y1="12" x2="14" y2="12" />
+  </svg>
+);
+
+const FileTextIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+    <line x1="16" y1="13" x2="8" y2="13" />
+    <line x1="16" y1="17" x2="8" y2="17" />
+    <polyline points="10 9 9 9 8 9" />
+  </svg>
+);
+
+const EyeIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const ClockIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
+  </svg>
+);
+
+const PlusIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+);
+
+const RefreshIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="23 4 23 10 17 10" />
+    <polyline points="1 20 1 14 7 14" />
+    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+  </svg>
+);
+
+const CheckIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+
+const XIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
+const ZapIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+  </svg>
+);
+
+const PackageIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="16.5" y1="9.4" x2="7.5" y2="4.21" />
+    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+    <line x1="12" y1="22.08" x2="12" y2="12" />
+  </svg>
+);
 
 // Types
 interface Asset {
@@ -31,12 +161,6 @@ interface AssetAnalytics {
   usageScore: number;
   usageTrend?: string | null;
   lastViewedAt?: string | null;
-  estimatedValue?: number | null;
-  productionCost?: number | null;
-  revenueGenerated?: number | null;
-  roiPercentage?: number | null;
-  viewsByHour?: Record<string, number> | null;
-  viewsByDay?: Record<string, number> | null;
 }
 
 interface QualityScore {
@@ -50,9 +174,6 @@ interface QualityScore {
   videoFrameRate?: number | null;
   audioCodec?: string | null;
   audioBitrate?: number | null;
-  videoResolutionScore?: number | null;
-  videoBitrateScore?: number | null;
-  audioQualityScore?: number | null;
   formatCompliance?: boolean | null;
   complianceIssues?: string[] | null;
   analyzedAt?: string;
@@ -96,19 +217,20 @@ interface RestoreRequest {
 
 interface Props {
   projectId: string;
+  organizationId?: string;
   currentUserEmail: string;
   currentUserName?: string;
 }
 
 // Storage class configurations
 const STORAGE_CLASSES = [
-  { value: 'STANDARD', label: 'S3 Standard', icon: '🟢', cost: '$0.023/GB', retrieval: 'Instant', color: 'text-green-400' },
-  { value: 'STANDARD_IA', label: 'Infrequent Access', icon: '🟡', cost: '$0.0125/GB', retrieval: 'Instant', color: 'text-yellow-400' },
-  { value: 'ONEZONE_IA', label: 'One Zone IA', icon: '🟠', cost: '$0.01/GB', retrieval: 'Instant', color: 'text-orange-400' },
-  { value: 'INTELLIGENT_TIERING', label: 'Intelligent Tiering', icon: '🔵', cost: 'Auto-optimized', retrieval: 'Instant', color: 'text-blue-400' },
-  { value: 'GLACIER_IR', label: 'Glacier Instant', icon: '🧊', cost: '$0.004/GB', retrieval: 'Milliseconds', color: 'text-cyan-400' },
-  { value: 'GLACIER_FR', label: 'Glacier Flexible', icon: '❄️', cost: '$0.0036/GB', retrieval: '1-12 hours', color: 'text-indigo-400' },
-  { value: 'GLACIER_DA', label: 'Deep Archive', icon: '🏔️', cost: '$0.00099/GB', retrieval: '12-48 hours', color: 'text-purple-400' },
+  { value: 'STANDARD', label: 'S3 Standard', cost: '$0.023/GB', retrieval: 'Instant', color: 'var(--status-success)' },
+  { value: 'STANDARD_IA', label: 'Infrequent Access', cost: '$0.0125/GB', retrieval: 'Instant', color: 'var(--status-warning)' },
+  { value: 'ONEZONE_IA', label: 'One Zone IA', cost: '$0.01/GB', retrieval: 'Instant', color: '#f97316' },
+  { value: 'INTELLIGENT_TIERING', label: 'Intelligent Tiering', cost: 'Auto-optimized', retrieval: 'Instant', color: 'var(--accent-secondary)' },
+  { value: 'GLACIER_IR', label: 'Glacier Instant', cost: '$0.004/GB', retrieval: 'Milliseconds', color: '#06b6d4' },
+  { value: 'GLACIER_FR', label: 'Glacier Flexible', cost: '$0.0036/GB', retrieval: '1-12 hours', color: '#6366f1' },
+  { value: 'GLACIER_DA', label: 'Deep Archive', cost: '$0.00099/GB', retrieval: '12-48 hours', color: '#a855f7' },
 ];
 
 // Trigger type options
@@ -121,15 +243,18 @@ const TRIGGER_TYPES = [
 ];
 
 // Quality grade colors
-const GRADE_COLORS: Record<string, string> = {
-  'A': 'text-green-400 bg-green-500/20',
-  'B': 'text-blue-400 bg-blue-500/20',
-  'C': 'text-yellow-400 bg-yellow-500/20',
-  'D': 'text-orange-400 bg-orange-500/20',
-  'F': 'text-red-400 bg-red-500/20',
+const GRADE_COLORS: Record<string, { text: string; bg: string }> = {
+  'A': { text: 'var(--status-success)', bg: 'rgba(34, 197, 94, 0.2)' },
+  'B': { text: 'var(--accent-secondary)', bg: 'rgba(59, 130, 246, 0.2)' },
+  'C': { text: 'var(--status-warning)', bg: 'rgba(234, 179, 8, 0.2)' },
+  'D': { text: '#f97316', bg: 'rgba(249, 115, 22, 0.2)' },
+  'F': { text: 'var(--status-error)', bg: 'rgba(239, 68, 68, 0.2)' },
 };
 
-export default function ArchiveIntelligence({ projectId, currentUserEmail, currentUserName }: Props) {
+export default function ArchiveIntelligence({ projectId, organizationId, currentUserEmail }: Props) {
+  const [client] = useState(() => generateClient<Schema>());
+  const orgId = organizationId || 'default-org';
+
   // State
   const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'quality' | 'storage' | 'policies'>('overview');
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -142,7 +267,6 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
 
   // Modal states
   const [showCreatePolicyModal, setShowCreatePolicyModal] = useState(false);
-  const [showAssetDetailModal, setShowAssetDetailModal] = useState<string | null>(null);
   const [showRestoreModal, setShowRestoreModal] = useState<string | null>(null);
 
   // Form state for policy creation
@@ -159,18 +283,16 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
   // Load data
   useEffect(() => {
     loadData();
-  }, [projectId]);
+  }, [projectId, client]);
 
   async function loadData() {
     setIsLoading(true);
     try {
-      // Load assets (this model always exists)
       const assetsResult = await client.models.Asset.list({
         filter: { projectId: { eq: projectId } },
       });
       setAssets((assetsResult.data || []) as Asset[]);
 
-      // Load analytics - check if model exists first (schema may not be deployed)
       if (client.models.AssetAnalytics) {
         try {
           const analyticsResult = await client.models.AssetAnalytics.list({
@@ -182,7 +304,6 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
         }
       }
 
-      // Load quality scores - check if model exists first
       if (client.models.QualityScore) {
         try {
           const qualityResult = await client.models.QualityScore.list({
@@ -194,7 +315,6 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
         }
       }
 
-      // Load storage tiers - check if model exists first
       if (client.models.StorageTier) {
         try {
           const storageResult = await client.models.StorageTier.list({
@@ -206,7 +326,6 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
         }
       }
 
-      // Load archive policies (global + project-specific) - check if model exists first
       if (client.models.ArchivePolicy) {
         try {
           const policiesResult = await client.models.ArchivePolicy.list();
@@ -218,7 +337,6 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
         }
       }
 
-      // Load restore requests - check if model exists first
       if (client.models.RestoreRequest) {
         try {
           const restoreResult = await client.models.RestoreRequest.list({
@@ -248,7 +366,6 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
       .reduce((sum, s) => sum + s.fileSizeBytes, 0);
     const archivedSizeGB = archivedSizeBytes / (1024 * 1024 * 1024);
 
-    const standardAssets = storageTiers.filter(s => s.currentStorageClass === 'STANDARD').length;
     const glacierAssets = storageTiers.filter(s =>
       s.currentStorageClass?.startsWith('GLACIER')
     ).length;
@@ -274,7 +391,6 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
       totalSizeGB,
       archivedAssets,
       archivedSizeGB,
-      standardAssets,
       glacierAssets,
       avgQualityScore,
       totalViews,
@@ -286,9 +402,8 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
   }, [assets, storageTiers, qualityScores, analytics, restoreRequests]);
 
   function calculatePotentialSavings(): number {
-    // Calculate potential savings by moving low-usage assets to Glacier
     const lowUsageAssets = analytics.filter(a => (a.usageScore || 0) < 30);
-    const savingsPerGB = 0.023 - 0.00099; // Standard to Deep Archive savings
+    const savingsPerGB = 0.023 - 0.00099;
     let potentialGB = 0;
 
     lowUsageAssets.forEach(a => {
@@ -301,15 +416,14 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
     return potentialGB * savingsPerGB;
   }
 
-  // Create archive policy
   async function handleCreatePolicy() {
     if (!client.models.ArchivePolicy) {
-      console.warn('ArchivePolicy model not available - please deploy schema first');
       alert('Schema not deployed yet. Run: npx ampx sandbox --once');
       return;
     }
     try {
       await client.models.ArchivePolicy.create({
+        organizationId: orgId,
         name: policyForm.name,
         description: policyForm.description || undefined,
         projectId: projectId,
@@ -333,10 +447,8 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
     }
   }
 
-  // Request restore
   async function handleRequestRestore(assetId: string, tier: 'EXPEDITED' | 'STANDARD' | 'BULK') {
     if (!client.models.RestoreRequest) {
-      console.warn('RestoreRequest model not available - please deploy schema first');
       alert('Schema not deployed yet. Run: npx ampx sandbox --once');
       return;
     }
@@ -344,6 +456,7 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
       const estimatedHours = tier === 'EXPEDITED' ? 1 : tier === 'STANDARD' ? 5 : 12;
 
       await client.models.RestoreRequest.create({
+        organizationId: orgId,
         assetId,
         projectId,
         requestType: 'FULL',
@@ -364,10 +477,8 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
     }
   }
 
-  // Simulate quality analysis (in production, this would call a Lambda)
   async function handleAnalyzeQuality(assetId: string) {
     if (!client.models.QualityScore) {
-      console.warn('QualityScore model not available - please deploy schema first');
       alert('Schema not deployed yet. Run: npx ampx sandbox --once');
       return;
     }
@@ -375,13 +486,13 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
     if (!asset) return;
 
     try {
-      // Simulated quality analysis
       const isVideo = asset.type?.toLowerCase().includes('video');
 
       await client.models.QualityScore.create({
+        organizationId: orgId,
         assetId,
         projectId,
-        overallScore: Math.random() * 30 + 70, // 70-100
+        overallScore: Math.random() * 30 + 70,
         grade: (['A', 'A', 'B', 'B', 'B', 'C'] as const)[Math.floor(Math.random() * 6)],
         videoResolution: isVideo ? '1920x1080' : undefined,
         videoBitrate: isVideo ? Math.floor(Math.random() * 20000 + 5000) : undefined,
@@ -407,15 +518,14 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
     }
   }
 
-  // Initialize analytics for asset
   async function handleInitializeAnalytics(assetId: string) {
     if (!client.models.AssetAnalytics) {
-      console.warn('AssetAnalytics model not available - please deploy schema first');
       alert('Schema not deployed yet. Run: npx ampx sandbox --once');
       return;
     }
     try {
       await client.models.AssetAnalytics.create({
+        organizationId: orgId,
         assetId,
         projectId,
         totalViews: Math.floor(Math.random() * 100),
@@ -470,20 +580,23 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
     return STORAGE_CLASSES.find(s => s.value === storageClass) || STORAGE_CLASSES[0];
   }
 
-  function getUsageTrendIcon(trend?: string | null): string {
+  function getUsageTrendIcon(trend?: string | null) {
     switch (trend) {
-      case 'RISING': return '📈';
-      case 'STABLE': return '➡️';
-      case 'DECLINING': return '📉';
-      case 'INACTIVE': return '💤';
-      default: return '❓';
+      case 'RISING': return <TrendingUpIcon className="w-4 h-4" style={{ color: 'var(--status-success)' }} />;
+      case 'STABLE': return <ArrowRightIcon className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />;
+      case 'DECLINING': return <TrendingDownIcon className="w-4 h-4" style={{ color: 'var(--status-error)' }} />;
+      case 'INACTIVE': return <MoonIcon className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />;
+      default: return <span style={{ color: 'var(--text-muted)' }}>-</span>;
     }
   }
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+        <div
+          className="animate-spin rounded-full h-8 w-8 border-b-2"
+          style={{ borderColor: '#a855f7' }}
+        />
       </div>
     );
   }
@@ -493,10 +606,11 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            🧠 Archive & Asset Intelligence
+          <h2 className="text-2xl font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+            <BrainIcon className="w-6 h-6" style={{ color: '#a855f7' }} />
+            Archive & Asset Intelligence
           </h2>
-          <p className="text-slate-400 mt-1">
+          <p className="mt-1" style={{ color: 'var(--text-secondary)' }}>
             Smart storage optimization, usage analytics, and quality scoring
           </p>
         </div>
@@ -504,99 +618,73 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-        <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-          <div className="text-2xl font-bold text-white">{stats.totalAssets}</div>
-          <div className="text-xs text-slate-400">Total Assets</div>
-          <div className="text-xs text-slate-500 mt-1">{stats.totalSizeGB.toFixed(2)} GB</div>
+        <div className="rounded-[10px] p-4" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
+          <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats.totalAssets}</div>
+          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Total Assets</div>
+          <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{stats.totalSizeGB.toFixed(2)} GB</div>
         </div>
-        <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-          <div className="text-2xl font-bold text-purple-400">{stats.archivedAssets}</div>
-          <div className="text-xs text-slate-400">Archived</div>
-          <div className="text-xs text-slate-500 mt-1">{stats.archivedSizeGB.toFixed(2)} GB</div>
+        <div className="rounded-[10px] p-4" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
+          <div className="text-2xl font-bold" style={{ color: '#a855f7' }}>{stats.archivedAssets}</div>
+          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Archived</div>
+          <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{stats.archivedSizeGB.toFixed(2)} GB</div>
         </div>
-        <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-          <div className="text-2xl font-bold text-cyan-400">{stats.glacierAssets}</div>
-          <div className="text-xs text-slate-400">In Glacier</div>
-          <div className="text-xs text-slate-500 mt-1">Cold storage</div>
+        <div className="rounded-[10px] p-4" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
+          <div className="text-2xl font-bold" style={{ color: '#06b6d4' }}>{stats.glacierAssets}</div>
+          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>In Glacier</div>
+          <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Cold storage</div>
         </div>
-        <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-          <div className="text-2xl font-bold text-blue-400">{stats.avgQualityScore.toFixed(0)}</div>
-          <div className="text-xs text-slate-400">Avg Quality</div>
-          <div className="text-xs text-slate-500 mt-1">Score /100</div>
+        <div className="rounded-[10px] p-4" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
+          <div className="text-2xl font-bold" style={{ color: 'var(--accent-secondary)' }}>{stats.avgQualityScore.toFixed(0)}</div>
+          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Avg Quality</div>
+          <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Score /100</div>
         </div>
-        <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-          <div className="text-2xl font-bold text-green-400">${stats.monthlyCost.toFixed(2)}</div>
-          <div className="text-xs text-slate-400">Monthly Cost</div>
-          <div className="text-xs text-slate-500 mt-1">Storage</div>
+        <div className="rounded-[10px] p-4" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
+          <div className="text-2xl font-bold" style={{ color: 'var(--status-success)' }}>${stats.monthlyCost.toFixed(2)}</div>
+          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Monthly Cost</div>
+          <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Storage</div>
         </div>
-        <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-          <div className="text-2xl font-bold text-yellow-400">${stats.potentialSavings.toFixed(2)}</div>
-          <div className="text-xs text-slate-400">Potential Savings</div>
-          <div className="text-xs text-slate-500 mt-1">Per month</div>
+        <div className="rounded-[10px] p-4" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
+          <div className="text-2xl font-bold" style={{ color: 'var(--status-warning)' }}>${stats.potentialSavings.toFixed(2)}</div>
+          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Potential Savings</div>
+          <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Per month</div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-slate-700">
-        <button
-          onClick={() => setActiveTab('overview')}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
-            activeTab === 'overview'
-              ? 'text-purple-400 border-b-2 border-purple-400'
-              : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          📊 Overview
-        </button>
-        <button
-          onClick={() => setActiveTab('analytics')}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
-            activeTab === 'analytics'
-              ? 'text-purple-400 border-b-2 border-purple-400'
-              : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          🔥 Usage Heatmap
-        </button>
-        <button
-          onClick={() => setActiveTab('quality')}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
-            activeTab === 'quality'
-              ? 'text-purple-400 border-b-2 border-purple-400'
-              : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          ⭐ Quality Scores
-        </button>
-        <button
-          onClick={() => setActiveTab('storage')}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
-            activeTab === 'storage'
-              ? 'text-purple-400 border-b-2 border-purple-400'
-              : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          🗄️ Storage Tiers
-        </button>
-        <button
-          onClick={() => setActiveTab('policies')}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
-            activeTab === 'policies'
-              ? 'text-purple-400 border-b-2 border-purple-400'
-              : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          📋 Archive Policies
-        </button>
+      <div className="flex gap-2" style={{ borderBottom: '1px solid var(--border-default)' }}>
+        {[
+          { id: 'overview', label: 'Overview', icon: BarChartIcon },
+          { id: 'analytics', label: 'Usage Heatmap', icon: TrendingUpIcon },
+          { id: 'quality', label: 'Quality Scores', icon: StarIcon },
+          { id: 'storage', label: 'Storage Tiers', icon: DatabaseIcon },
+          { id: 'policies', label: 'Archive Policies', icon: FileTextIcon },
+        ].map(tab => {
+          const TabIcon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as typeof activeTab)}
+              className="px-4 py-2 text-sm font-medium flex items-center gap-2"
+              style={{
+                color: activeTab === tab.id ? '#a855f7' : 'var(--text-secondary)',
+                borderBottom: activeTab === tab.id ? '2px solid #a855f7' : '2px solid transparent',
+                transition: 'all 80ms ease-out'
+              }}
+            >
+              <TabIcon className="w-4 h-4" />
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Overview Tab */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
-          {/* Storage Distribution */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-slate-800/50 rounded-lg p-6 border border-slate-700">
-              <h3 className="text-white font-semibold mb-4">Storage Distribution</h3>
+            {/* Storage Distribution */}
+            <div className="rounded-[10px] p-6" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
+              <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Storage Distribution</h3>
               <div className="space-y-3">
                 {STORAGE_CLASSES.map(tier => {
                   const count = storageTiers.filter(s => s.currentStorageClass === tier.value).length;
@@ -607,16 +695,16 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
 
                   return (
                     <div key={tier.value} className="flex items-center gap-3">
-                      <span className="text-xl">{tier.icon}</span>
+                      <DatabaseIcon className="w-5 h-5" style={{ color: tier.color }} />
                       <div className="flex-1">
                         <div className="flex justify-between text-sm mb-1">
-                          <span className={tier.color}>{tier.label}</span>
-                          <span className="text-slate-400">{count} assets ({formatBytes(sizeBytes)})</span>
+                          <span style={{ color: tier.color }}>{tier.label}</span>
+                          <span style={{ color: 'var(--text-secondary)' }}>{count} assets ({formatBytes(sizeBytes)})</span>
                         </div>
-                        <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                        <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-3)' }}>
                           <div
-                            className={`h-full ${tier.color.replace('text-', 'bg-').replace('-400', '-500')}`}
-                            style={{ width: `${percentage}%` }}
+                            className="h-full"
+                            style={{ width: `${percentage}%`, backgroundColor: tier.color }}
                           />
                         </div>
                       </div>
@@ -626,47 +714,47 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
               </div>
             </div>
 
-            {/* Asset Intelligence Summary */}
-            <div className="bg-slate-800/50 rounded-lg p-6 border border-slate-700">
-              <h3 className="text-white font-semibold mb-4">Intelligence Summary</h3>
+            {/* Intelligence Summary */}
+            <div className="rounded-[10px] p-6" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
+              <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Intelligence Summary</h3>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
+                <div className="flex items-center justify-between p-3 rounded-[6px]" style={{ backgroundColor: 'var(--bg-3)' }}>
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl">👁️</span>
-                    <span className="text-slate-300">Total Views</span>
+                    <EyeIcon className="w-5 h-5" style={{ color: 'var(--accent-primary)' }} />
+                    <span style={{ color: 'var(--text-secondary)' }}>Total Views</span>
                   </div>
-                  <span className="text-white font-semibold">{stats.totalViews.toLocaleString()}</span>
+                  <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{stats.totalViews.toLocaleString()}</span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
+                <div className="flex items-center justify-between p-3 rounded-[6px]" style={{ backgroundColor: 'var(--bg-3)' }}>
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl">📊</span>
-                    <span className="text-slate-300">Avg Usage Score</span>
+                    <BarChartIcon className="w-5 h-5" style={{ color: 'var(--accent-primary)' }} />
+                    <span style={{ color: 'var(--text-secondary)' }}>Avg Usage Score</span>
                   </div>
-                  <span className="text-white font-semibold">{stats.avgUsageScore.toFixed(1)}/100</span>
+                  <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{stats.avgUsageScore.toFixed(1)}/100</span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
+                <div className="flex items-center justify-between p-3 rounded-[6px]" style={{ backgroundColor: 'var(--bg-3)' }}>
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl">⏳</span>
-                    <span className="text-slate-300">Pending Restores</span>
+                    <ClockIcon className="w-5 h-5" style={{ color: 'var(--accent-primary)' }} />
+                    <span style={{ color: 'var(--text-secondary)' }}>Pending Restores</span>
                   </div>
-                  <span className="text-white font-semibold">{stats.pendingRestores}</span>
+                  <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{stats.pendingRestores}</span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
+                <div className="flex items-center justify-between p-3 rounded-[6px]" style={{ backgroundColor: 'var(--bg-3)' }}>
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl">📋</span>
-                    <span className="text-slate-300">Active Policies</span>
+                    <FileTextIcon className="w-5 h-5" style={{ color: 'var(--accent-primary)' }} />
+                    <span style={{ color: 'var(--text-secondary)' }}>Active Policies</span>
                   </div>
-                  <span className="text-white font-semibold">{archivePolicies.filter(p => p.isEnabled).length}</span>
+                  <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{archivePolicies.filter(p => p.isEnabled).length}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Recent Activity */}
-          <div className="bg-slate-800/50 rounded-lg p-6 border border-slate-700">
-            <h3 className="text-white font-semibold mb-4">Recent Restore Requests</h3>
+          {/* Recent Restore Requests */}
+          <div className="rounded-[10px] p-6" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
+            <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Recent Restore Requests</h3>
             {restoreRequests.length === 0 ? (
-              <p className="text-slate-500 text-center py-4">No restore requests yet</p>
+              <p className="text-center py-4" style={{ color: 'var(--text-muted)' }}>No restore requests yet</p>
             ) : (
               <div className="space-y-2">
                 {restoreRequests.slice(0, 5).map(request => {
@@ -674,20 +762,28 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
                   return (
                     <div
                       key={request.id}
-                      className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg"
+                      className="flex items-center justify-between p-3 rounded-[6px]"
+                      style={{ backgroundColor: 'var(--bg-3)' }}
                     >
                       <div className="flex items-center gap-3">
-                        <span className={`px-2 py-1 rounded text-xs ${
-                          request.status === 'COMPLETED' ? 'bg-green-500/20 text-green-400' :
-                          request.status === 'IN_PROGRESS' ? 'bg-blue-500/20 text-blue-400' :
-                          request.status === 'FAILED' ? 'bg-red-500/20 text-red-400' :
-                          'bg-yellow-500/20 text-yellow-400'
-                        }`}>
+                        <span
+                          className="px-2 py-1 rounded text-xs"
+                          style={{
+                            backgroundColor: request.status === 'COMPLETED' ? 'rgba(34, 197, 94, 0.2)' :
+                              request.status === 'IN_PROGRESS' ? 'rgba(59, 130, 246, 0.2)' :
+                              request.status === 'FAILED' ? 'rgba(239, 68, 68, 0.2)' :
+                              'rgba(234, 179, 8, 0.2)',
+                            color: request.status === 'COMPLETED' ? 'var(--status-success)' :
+                              request.status === 'IN_PROGRESS' ? 'var(--accent-secondary)' :
+                              request.status === 'FAILED' ? 'var(--status-error)' :
+                              'var(--status-warning)'
+                          }}
+                        >
                           {request.status}
                         </span>
-                        <span className="text-white">{asset?.fileName || asset?.s3Key.split('/').pop()}</span>
+                        <span style={{ color: 'var(--text-primary)' }}>{asset?.fileName || asset?.s3Key.split('/').pop()}</span>
                       </div>
-                      <div className="text-slate-400 text-sm">
+                      <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                         {request.restoreTier} • {formatDate(request.requestedAt)}
                       </div>
                     </div>
@@ -702,29 +798,26 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
       {/* Usage Heatmap Tab */}
       {activeTab === 'analytics' && (
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-white">Asset Usage Analytics</h3>
-          </div>
-
-          {/* Usage Heatmap Visualization */}
-          <div className="bg-slate-800/50 rounded-lg p-6 border border-slate-700">
-            <h4 className="text-white font-medium mb-4">Usage Heatmap (Last 7 Days)</h4>
+          {/* Heatmap */}
+          <div className="rounded-[10px] p-6" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
+            <h4 className="font-medium mb-4" style={{ color: 'var(--text-primary)' }}>Usage Heatmap (Last 7 Days)</h4>
             <div className="grid grid-cols-7 gap-2">
               {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
                 <div key={day} className="text-center">
-                  <div className="text-xs text-slate-500 mb-2">{day}</div>
+                  <div className="text-xs mb-2" style={{ color: 'var(--text-muted)' }}>{day}</div>
                   {[0, 1, 2, 3].map(hour => {
                     const intensity = Math.random();
                     return (
                       <div
                         key={hour}
-                        className={`h-8 rounded mb-1 ${
-                          intensity > 0.8 ? 'bg-purple-500' :
-                          intensity > 0.6 ? 'bg-purple-500/70' :
-                          intensity > 0.4 ? 'bg-purple-500/50' :
-                          intensity > 0.2 ? 'bg-purple-500/30' :
-                          'bg-slate-700'
-                        }`}
+                        className="h-8 rounded mb-1"
+                        style={{
+                          backgroundColor: intensity > 0.8 ? '#a855f7' :
+                            intensity > 0.6 ? 'rgba(168, 85, 247, 0.7)' :
+                            intensity > 0.4 ? 'rgba(168, 85, 247, 0.5)' :
+                            intensity > 0.2 ? 'rgba(168, 85, 247, 0.3)' :
+                            'var(--bg-3)'
+                        }}
                         title={`${Math.floor(intensity * 100)} views`}
                       />
                     );
@@ -732,74 +825,74 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
                 </div>
               ))}
             </div>
-            <div className="flex justify-center gap-2 mt-4 text-xs text-slate-500">
+            <div className="flex justify-center gap-2 mt-4 text-xs" style={{ color: 'var(--text-muted)' }}>
               <span>Less</span>
               <div className="flex gap-1">
-                <div className="w-4 h-4 bg-slate-700 rounded" />
-                <div className="w-4 h-4 bg-purple-500/30 rounded" />
-                <div className="w-4 h-4 bg-purple-500/50 rounded" />
-                <div className="w-4 h-4 bg-purple-500/70 rounded" />
-                <div className="w-4 h-4 bg-purple-500 rounded" />
+                <div className="w-4 h-4 rounded" style={{ backgroundColor: 'var(--bg-3)' }} />
+                <div className="w-4 h-4 rounded" style={{ backgroundColor: 'rgba(168, 85, 247, 0.3)' }} />
+                <div className="w-4 h-4 rounded" style={{ backgroundColor: 'rgba(168, 85, 247, 0.5)' }} />
+                <div className="w-4 h-4 rounded" style={{ backgroundColor: 'rgba(168, 85, 247, 0.7)' }} />
+                <div className="w-4 h-4 rounded" style={{ backgroundColor: '#a855f7' }} />
               </div>
               <span>More</span>
             </div>
           </div>
 
-          {/* Asset Analytics Table */}
-          <div className="bg-slate-800/50 rounded-lg border border-slate-700 overflow-hidden">
+          {/* Analytics Table */}
+          <div className="rounded-[10px] overflow-hidden" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
             <table className="w-full">
-              <thead className="bg-slate-700/50">
+              <thead style={{ backgroundColor: 'var(--bg-3)' }}>
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-400">Asset</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Views</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Downloads</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Watch %</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Usage Score</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Trend</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Last View</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Actions</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Asset</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Views</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Downloads</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Watch %</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Usage Score</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Trend</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-700">
+              <tbody>
                 {assets.map(asset => {
                   const assetAnalytics = analytics.find(a => a.assetId === asset.id);
                   return (
-                    <tr key={asset.id} className="hover:bg-slate-700/30">
+                    <tr key={asset.id} style={{ borderBottom: '1px solid var(--border-default)' }}>
                       <td className="px-4 py-3">
-                        <div className="text-white text-sm">{asset.fileName || asset.s3Key.split('/').pop()}</div>
-                        <div className="text-slate-500 text-xs">{formatBytes(asset.fileSize || 0)}</div>
+                        <div className="text-sm" style={{ color: 'var(--text-primary)' }}>{asset.fileName || asset.s3Key.split('/').pop()}</div>
+                        <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{formatBytes(asset.fileSize || 0)}</div>
                       </td>
-                      <td className="px-4 py-3 text-center text-white">
+                      <td className="px-4 py-3 text-center" style={{ color: 'var(--text-primary)' }}>
                         {assetAnalytics?.totalViews ?? '-'}
                       </td>
-                      <td className="px-4 py-3 text-center text-white">
+                      <td className="px-4 py-3 text-center" style={{ color: 'var(--text-primary)' }}>
                         {assetAnalytics?.downloadCount ?? '-'}
                       </td>
-                      <td className="px-4 py-3 text-center text-white">
+                      <td className="px-4 py-3 text-center" style={{ color: 'var(--text-primary)' }}>
                         {assetAnalytics?.averageWatchPercentage?.toFixed(0) ?? '-'}%
                       </td>
                       <td className="px-4 py-3 text-center">
                         {assetAnalytics ? (
-                          <span className={`font-semibold ${
-                            (assetAnalytics.usageScore || 0) >= 70 ? 'text-green-400' :
-                            (assetAnalytics.usageScore || 0) >= 40 ? 'text-yellow-400' :
-                            'text-red-400'
-                          }`}>
+                          <span
+                            className="font-semibold"
+                            style={{
+                              color: (assetAnalytics.usageScore || 0) >= 70 ? 'var(--status-success)' :
+                                (assetAnalytics.usageScore || 0) >= 40 ? 'var(--status-warning)' :
+                                'var(--status-error)'
+                            }}
+                          >
                             {assetAnalytics.usageScore?.toFixed(0) || 0}
                           </span>
                         ) : '-'}
                       </td>
-                      <td className="px-4 py-3 text-center text-lg">
+                      <td className="px-4 py-3 text-center">
                         {assetAnalytics ? getUsageTrendIcon(assetAnalytics.usageTrend) : '-'}
-                      </td>
-                      <td className="px-4 py-3 text-center text-slate-400 text-sm">
-                        {assetAnalytics?.lastViewedAt ? formatDate(assetAnalytics.lastViewedAt) : '-'}
                       </td>
                       <td className="px-4 py-3 text-center">
                         {!assetAnalytics && (
                           <button
                             onClick={() => handleInitializeAnalytics(asset.id)}
-                            className="text-xs text-purple-400 hover:text-purple-300"
+                            className="text-xs"
+                            style={{ color: '#a855f7' }}
                           >
                             Initialize
                           </button>
@@ -817,91 +910,78 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
       {/* Quality Scores Tab */}
       {activeTab === 'quality' && (
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-white">Quality Scoring Engine</h3>
-          </div>
-
-          {/* Quality Distribution */}
+          {/* Grade Distribution */}
           <div className="grid grid-cols-5 gap-4">
             {(['A', 'B', 'C', 'D', 'F'] as const).map(grade => {
               const count = qualityScores.filter(q => q.grade === grade).length;
+              const gradeColor = GRADE_COLORS[grade];
               return (
-                <div key={grade} className="bg-slate-800/50 rounded-lg p-4 border border-slate-700 text-center">
-                  <div className={`text-3xl font-bold ${GRADE_COLORS[grade]?.split(' ')[0] || 'text-white'} mb-1`}>
-                    {grade}
-                  </div>
-                  <div className="text-slate-400 text-sm">{count} assets</div>
+                <div key={grade} className="rounded-[10px] p-4 text-center" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
+                  <div className="text-3xl font-bold mb-1" style={{ color: gradeColor?.text }}>{grade}</div>
+                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{count} assets</div>
                 </div>
               );
             })}
           </div>
 
-          {/* Quality Scores Table */}
-          <div className="bg-slate-800/50 rounded-lg border border-slate-700 overflow-hidden">
+          {/* Quality Table */}
+          <div className="rounded-[10px] overflow-hidden" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
             <table className="w-full">
-              <thead className="bg-slate-700/50">
+              <thead style={{ backgroundColor: 'var(--bg-3)' }}>
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-400">Asset</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Grade</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Score</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Video</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Audio</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Compliance</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Analyzed</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Actions</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Asset</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Grade</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Score</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Video</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Compliance</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-700">
+              <tbody>
                 {assets.map(asset => {
                   const quality = qualityScores.find(q => q.assetId === asset.id);
+                  const gradeColor = quality?.grade ? GRADE_COLORS[quality.grade] : null;
                   return (
-                    <tr key={asset.id} className="hover:bg-slate-700/30">
+                    <tr key={asset.id} style={{ borderBottom: '1px solid var(--border-default)' }}>
                       <td className="px-4 py-3">
-                        <div className="text-white text-sm">{asset.fileName || asset.s3Key.split('/').pop()}</div>
-                        <div className="text-slate-500 text-xs">{asset.type || 'Unknown type'}</div>
+                        <div className="text-sm" style={{ color: 'var(--text-primary)' }}>{asset.fileName || asset.s3Key.split('/').pop()}</div>
+                        <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{asset.type || 'Unknown'}</div>
                       </td>
                       <td className="px-4 py-3 text-center">
                         {quality?.grade ? (
-                          <span className={`px-3 py-1 rounded-full text-sm font-bold ${GRADE_COLORS[quality.grade]}`}>
+                          <span
+                            className="px-3 py-1 rounded-full text-sm font-bold"
+                            style={{ backgroundColor: gradeColor?.bg, color: gradeColor?.text }}
+                          >
                             {quality.grade}
                           </span>
                         ) : '-'}
                       </td>
-                      <td className="px-4 py-3 text-center text-white font-semibold">
+                      <td className="px-4 py-3 text-center font-semibold" style={{ color: 'var(--text-primary)' }}>
                         {quality?.overallScore?.toFixed(0) ?? '-'}
                       </td>
                       <td className="px-4 py-3 text-center">
                         {quality?.videoResolution ? (
                           <div>
-                            <div className="text-white text-sm">{quality.videoResolution}</div>
-                            <div className="text-slate-500 text-xs">{quality.videoCodec} @ {quality.videoFrameRate}fps</div>
-                          </div>
-                        ) : '-'}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {quality?.audioCodec ? (
-                          <div>
-                            <div className="text-white text-sm">{quality.audioCodec}</div>
-                            <div className="text-slate-500 text-xs">{quality.audioBitrate}kbps</div>
+                            <div className="text-sm" style={{ color: 'var(--text-primary)' }}>{quality.videoResolution}</div>
+                            <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{quality.videoCodec}</div>
                           </div>
                         ) : '-'}
                       </td>
                       <td className="px-4 py-3 text-center">
                         {quality ? (
                           quality.formatCompliance ? (
-                            <span className="text-green-400">✓</span>
+                            <CheckIcon className="w-4 h-4 mx-auto" style={{ color: 'var(--status-success)' }} />
                           ) : (
-                            <span className="text-red-400" title={quality.complianceIssues?.join(', ')}>✗</span>
+                            <XIcon className="w-4 h-4 mx-auto" style={{ color: 'var(--status-error)' }} />
                           )
                         ) : '-'}
-                      </td>
-                      <td className="px-4 py-3 text-center text-slate-400 text-sm">
-                        {quality?.analyzedAt ? formatDate(quality.analyzedAt) : '-'}
                       </td>
                       <td className="px-4 py-3 text-center">
                         <button
                           onClick={() => handleAnalyzeQuality(asset.id)}
-                          className="text-xs text-purple-400 hover:text-purple-300"
+                          className="text-xs"
+                          style={{ color: '#a855f7' }}
                         >
                           {quality ? 'Re-analyze' : 'Analyze'}
                         </button>
@@ -918,19 +998,15 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
       {/* Storage Tiers Tab */}
       {activeTab === 'storage' && (
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-white">Storage Tier Management</h3>
-          </div>
-
           {/* Storage Class Guide */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {STORAGE_CLASSES.slice(0, 4).map(tier => (
-              <div key={tier.value} className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+              <div key={tier.value} className="rounded-[10px] p-4" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-2xl">{tier.icon}</span>
-                  <span className={`font-medium ${tier.color}`}>{tier.label}</span>
+                  <DatabaseIcon className="w-5 h-5" style={{ color: tier.color }} />
+                  <span className="font-medium" style={{ color: tier.color }}>{tier.label}</span>
                 </div>
-                <div className="text-xs text-slate-400 space-y-1">
+                <div className="text-xs space-y-1" style={{ color: 'var(--text-secondary)' }}>
                   <div>Cost: {tier.cost}</div>
                   <div>Retrieval: {tier.retrieval}</div>
                 </div>
@@ -938,20 +1014,20 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
             ))}
           </div>
 
-          {/* Assets by Storage Tier */}
-          <div className="bg-slate-800/50 rounded-lg border border-slate-700 overflow-hidden">
+          {/* Storage Table */}
+          <div className="rounded-[10px] overflow-hidden" style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}>
             <table className="w-full">
-              <thead className="bg-slate-700/50">
+              <thead style={{ backgroundColor: 'var(--bg-3)' }}>
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-400">Asset</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Size</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Storage Class</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Status</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Monthly Cost</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-slate-400">Actions</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Asset</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Size</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Storage Class</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Status</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Monthly Cost</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-700">
+              <tbody>
                 {assets.map(asset => {
                   const tier = storageTiers.find(t => t.assetId === asset.id);
                   const storageInfo = tier ? getStorageClassInfo(tier.currentStorageClass) : getStorageClassInfo('STANDARD');
@@ -959,42 +1035,52 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
                   const isRestoring = tier?.isRestoring || false;
 
                   return (
-                    <tr key={asset.id} className="hover:bg-slate-700/30">
+                    <tr key={asset.id} style={{ borderBottom: '1px solid var(--border-default)' }}>
                       <td className="px-4 py-3">
-                        <div className="text-white text-sm">{asset.fileName || asset.s3Key.split('/').pop()}</div>
+                        <div className="text-sm" style={{ color: 'var(--text-primary)' }}>{asset.fileName || asset.s3Key.split('/').pop()}</div>
                       </td>
-                      <td className="px-4 py-3 text-center text-white">
+                      <td className="px-4 py-3 text-center" style={{ color: 'var(--text-primary)' }}>
                         {formatBytes(asset.fileSize || 0)}
                       </td>
                       <td className="px-4 py-3 text-center">
                         <div className="flex items-center justify-center gap-2">
-                          <span>{storageInfo.icon}</span>
-                          <span className={storageInfo.color}>{storageInfo.label}</span>
+                          <DatabaseIcon className="w-4 h-4" style={{ color: storageInfo.color }} />
+                          <span style={{ color: storageInfo.color }}>{storageInfo.label}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-center">
                         {isRestoring ? (
-                          <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full">
+                          <span
+                            className="px-2 py-1 text-xs rounded-full"
+                            style={{ backgroundColor: 'rgba(59, 130, 246, 0.2)', color: 'var(--accent-secondary)' }}
+                          >
                             Restoring...
                           </span>
                         ) : isArchived ? (
-                          <span className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded-full">
+                          <span
+                            className="px-2 py-1 text-xs rounded-full"
+                            style={{ backgroundColor: 'rgba(168, 85, 247, 0.2)', color: '#a855f7' }}
+                          >
                             Archived
                           </span>
                         ) : (
-                          <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">
+                          <span
+                            className="px-2 py-1 text-xs rounded-full"
+                            style={{ backgroundColor: 'rgba(34, 197, 94, 0.2)', color: 'var(--status-success)' }}
+                          >
                             Available
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-center text-slate-400">
+                      <td className="px-4 py-3 text-center" style={{ color: 'var(--text-secondary)' }}>
                         ${tier?.monthlyStorageCost?.toFixed(4) || '0.0000'}
                       </td>
                       <td className="px-4 py-3 text-center">
                         {isArchived && !isRestoring && (
                           <button
                             onClick={() => setShowRestoreModal(asset.id)}
-                            className="text-xs text-cyan-400 hover:text-cyan-300"
+                            className="text-xs"
+                            style={{ color: '#06b6d4' }}
                           >
                             Request Restore
                           </button>
@@ -1013,20 +1099,25 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
       {activeTab === 'policies' && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-white">Archive Policies</h3>
+            <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Archive Policies</h3>
             <button
               onClick={() => setShowCreatePolicyModal(true)}
-              className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-medium transition-colors"
+              className="px-4 py-2 rounded-[6px] text-sm font-medium flex items-center gap-2"
+              style={{ backgroundColor: '#a855f7', color: 'white', transition: 'all 80ms ease-out' }}
             >
-              + Create Policy
+              <PlusIcon className="w-4 h-4" />
+              Create Policy
             </button>
           </div>
 
           {archivePolicies.length === 0 ? (
-            <div className="bg-slate-800/50 rounded-lg p-8 text-center border border-slate-700">
-              <div className="text-4xl mb-3">📋</div>
-              <p className="text-slate-400">No archive policies configured</p>
-              <p className="text-slate-500 text-sm mt-1">Create a policy to automate asset archival</p>
+            <div
+              className="rounded-[10px] p-8 text-center"
+              style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}
+            >
+              <FileTextIcon className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
+              <p style={{ color: 'var(--text-secondary)' }}>No archive policies configured</p>
+              <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Create a policy to automate asset archival</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1035,46 +1126,49 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
                 return (
                   <div
                     key={policy.id}
-                    className="bg-slate-800/50 rounded-lg p-6 border border-slate-700"
+                    className="rounded-[10px] p-6"
+                    style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)' }}
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div>
-                        <h4 className="text-white font-medium">{policy.name}</h4>
-                        <p className="text-slate-400 text-sm">{policy.description}</p>
+                        <h4 className="font-medium" style={{ color: 'var(--text-primary)' }}>{policy.name}</h4>
+                        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{policy.description}</p>
                       </div>
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        policy.isEnabled
-                          ? 'bg-green-500/20 text-green-400'
-                          : 'bg-slate-500/20 text-slate-400'
-                      }`}>
+                      <span
+                        className="px-2 py-1 text-xs rounded-full"
+                        style={{
+                          backgroundColor: policy.isEnabled ? 'rgba(34, 197, 94, 0.2)' : 'var(--bg-3)',
+                          color: policy.isEnabled ? 'var(--status-success)' : 'var(--text-secondary)'
+                        }}
+                      >
                         {policy.isEnabled ? 'Active' : 'Disabled'}
                       </span>
                     </div>
 
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-slate-400">Trigger:</span>
-                        <span className="text-white">
+                        <span style={{ color: 'var(--text-secondary)' }}>Trigger:</span>
+                        <span style={{ color: 'var(--text-primary)' }}>
                           {TRIGGER_TYPES.find(t => t.value === policy.triggerType)?.label}
                         </span>
                       </div>
                       {policy.daysUntilArchive && (
                         <div className="flex justify-between">
-                          <span className="text-slate-400">After:</span>
-                          <span className="text-white">{policy.daysUntilArchive} days</span>
+                          <span style={{ color: 'var(--text-secondary)' }}>After:</span>
+                          <span style={{ color: 'var(--text-primary)' }}>{policy.daysUntilArchive} days</span>
                         </div>
                       )}
                       <div className="flex justify-between">
-                        <span className="text-slate-400">Target:</span>
-                        <span className={targetTier.color}>{targetTier.icon} {targetTier.label}</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>Target:</span>
+                        <span style={{ color: targetTier.color }}>{targetTier.label}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">Assets processed:</span>
-                        <span className="text-white">{policy.assetsProcessed}</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>Assets processed:</span>
+                        <span style={{ color: 'var(--text-primary)' }}>{policy.assetsProcessed}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-400">Storage freed:</span>
-                        <span className="text-green-400">{policy.storageFreedGB.toFixed(2)} GB</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>Storage freed:</span>
+                        <span style={{ color: 'var(--status-success)' }}>{policy.storageFreedGB.toFixed(2)} GB</span>
                       </div>
                     </div>
                   </div>
@@ -1087,42 +1181,48 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
 
       {/* Create Policy Modal */}
       {showCreatePolicyModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-slate-700">
-              <h3 className="text-xl font-semibold text-white">Create Archive Policy</h3>
-              <p className="text-slate-400 text-sm mt-1">Define rules for automatic asset archival</p>
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+          <div
+            className="rounded-[12px] max-w-lg w-full max-h-[90vh] overflow-y-auto"
+            style={{ backgroundColor: 'var(--bg-1)' }}
+          >
+            <div className="p-6" style={{ borderBottom: '1px solid var(--border-default)' }}>
+              <h3 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>Create Archive Policy</h3>
+              <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Define rules for automatic asset archival</p>
             </div>
 
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">Policy Name *</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Policy Name *</label>
                 <input
                   type="text"
                   value={policyForm.name}
                   onChange={e => setPolicyForm(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                  className="w-full px-3 py-2 rounded-[6px]"
+                  style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
                   placeholder="e.g., Archive Inactive Videos"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">Description</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Description</label>
                 <textarea
                   value={policyForm.description}
                   onChange={e => setPolicyForm(prev => ({ ...prev, description: e.target.value }))}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                  className="w-full px-3 py-2 rounded-[6px]"
+                  style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
                   rows={2}
                   placeholder="Describe when this policy applies..."
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">Trigger Type</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Trigger Type</label>
                 <select
                   value={policyForm.triggerType}
                   onChange={e => setPolicyForm(prev => ({ ...prev, triggerType: e.target.value }))}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                  className="w-full px-3 py-2 rounded-[6px]"
+                  style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
                 >
                   {TRIGGER_TYPES.map(trigger => (
                     <option key={trigger.value} value={trigger.value}>
@@ -1134,65 +1234,52 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
 
               {policyForm.triggerType === 'LAST_ACCESS' && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Days Until Archive
-                  </label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Days Until Archive</label>
                   <input
                     type="number"
                     value={policyForm.daysUntilArchive}
                     onChange={e => setPolicyForm(prev => ({ ...prev, daysUntilArchive: parseInt(e.target.value) }))}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                    className="w-full px-3 py-2 rounded-[6px]"
+                    style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
                     min={1}
                   />
                 </div>
               )}
 
-              {policyForm.triggerType === 'USAGE_SCORE' && (
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Usage Score Threshold (archive if below)
-                  </label>
-                  <input
-                    type="number"
-                    value={policyForm.usageScoreThreshold}
-                    onChange={e => setPolicyForm(prev => ({ ...prev, usageScoreThreshold: parseInt(e.target.value) }))}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
-                    min={0}
-                    max={100}
-                  />
-                </div>
-              )}
-
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">Target Storage Class</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Target Storage Class</label>
                 <select
                   value={policyForm.targetStorageClass}
                   onChange={e => setPolicyForm(prev => ({ ...prev, targetStorageClass: e.target.value }))}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                  className="w-full px-3 py-2 rounded-[6px]"
+                  style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
                 >
                   {STORAGE_CLASSES.map(tier => (
                     <option key={tier.value} value={tier.value}>
-                      {tier.icon} {tier.label} ({tier.cost})
+                      {tier.label} ({tier.cost})
                     </option>
                   ))}
                 </select>
               </div>
             </div>
 
-            <div className="p-6 border-t border-slate-700 flex justify-end gap-3">
+            <div className="p-6 flex justify-end gap-3" style={{ borderTop: '1px solid var(--border-default)' }}>
               <button
-                onClick={() => {
-                  setShowCreatePolicyModal(false);
-                  resetPolicyForm();
-                }}
-                className="px-4 py-2 text-slate-400 hover:text-white transition-colors"
+                onClick={() => { setShowCreatePolicyModal(false); resetPolicyForm(); }}
+                className="px-4 py-2"
+                style={{ color: 'var(--text-secondary)' }}
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreatePolicy}
                 disabled={!policyForm.name}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 rounded-[6px] font-medium"
+                style={{
+                  backgroundColor: policyForm.name ? '#a855f7' : 'var(--bg-3)',
+                  color: policyForm.name ? 'white' : 'var(--text-muted)',
+                  cursor: policyForm.name ? 'pointer' : 'not-allowed'
+                }}
               >
                 Create Policy
               </button>
@@ -1203,58 +1290,74 @@ export default function ArchiveIntelligence({ projectId, currentUserEmail, curre
 
       {/* Restore Modal */}
       {showRestoreModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-xl max-w-md w-full">
-            <div className="p-6 border-b border-slate-700">
-              <h3 className="text-xl font-semibold text-white">Request Restore</h3>
-              <p className="text-slate-400 text-sm mt-1">Choose restoration speed</p>
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+          <div
+            className="rounded-[12px] max-w-md w-full"
+            style={{ backgroundColor: 'var(--bg-1)' }}
+          >
+            <div className="p-6" style={{ borderBottom: '1px solid var(--border-default)' }}>
+              <h3 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>Request Restore</h3>
+              <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Choose restoration speed</p>
             </div>
 
             <div className="p-6 space-y-4">
               <button
                 onClick={() => handleRequestRestore(showRestoreModal, 'EXPEDITED')}
-                className="w-full p-4 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 rounded-lg text-left transition-colors"
+                className="w-full p-4 rounded-[10px] text-left"
+                style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)', transition: 'all 80ms ease-out' }}
               >
                 <div className="flex justify-between items-center">
                   <div>
-                    <div className="text-white font-medium">⚡ Expedited</div>
-                    <div className="text-slate-400 text-sm">1-5 minutes</div>
+                    <div className="font-medium flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                      <ZapIcon className="w-4 h-4" style={{ color: 'var(--status-warning)' }} />
+                      Expedited
+                    </div>
+                    <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>1-5 minutes</div>
                   </div>
-                  <div className="text-yellow-400 text-sm">~$0.03/GB</div>
+                  <div className="text-sm" style={{ color: 'var(--status-warning)' }}>~$0.03/GB</div>
                 </div>
               </button>
 
               <button
                 onClick={() => handleRequestRestore(showRestoreModal, 'STANDARD')}
-                className="w-full p-4 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 rounded-lg text-left transition-colors"
+                className="w-full p-4 rounded-[10px] text-left"
+                style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)', transition: 'all 80ms ease-out' }}
               >
                 <div className="flex justify-between items-center">
                   <div>
-                    <div className="text-white font-medium">🕐 Standard</div>
-                    <div className="text-slate-400 text-sm">3-5 hours</div>
+                    <div className="font-medium flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                      <ClockIcon className="w-4 h-4" style={{ color: 'var(--status-success)' }} />
+                      Standard
+                    </div>
+                    <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>3-5 hours</div>
                   </div>
-                  <div className="text-green-400 text-sm">~$0.01/GB</div>
+                  <div className="text-sm" style={{ color: 'var(--status-success)' }}>~$0.01/GB</div>
                 </div>
               </button>
 
               <button
                 onClick={() => handleRequestRestore(showRestoreModal, 'BULK')}
-                className="w-full p-4 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 rounded-lg text-left transition-colors"
+                className="w-full p-4 rounded-[10px] text-left"
+                style={{ backgroundColor: 'var(--bg-2)', border: '1px solid var(--border-default)', transition: 'all 80ms ease-out' }}
               >
                 <div className="flex justify-between items-center">
                   <div>
-                    <div className="text-white font-medium">📦 Bulk</div>
-                    <div className="text-slate-400 text-sm">5-12 hours</div>
+                    <div className="font-medium flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                      <PackageIcon className="w-4 h-4" style={{ color: '#06b6d4' }} />
+                      Bulk
+                    </div>
+                    <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>5-12 hours</div>
                   </div>
-                  <div className="text-cyan-400 text-sm">~$0.0025/GB</div>
+                  <div className="text-sm" style={{ color: '#06b6d4' }}>~$0.0025/GB</div>
                 </div>
               </button>
             </div>
 
-            <div className="p-6 border-t border-slate-700">
+            <div className="p-6" style={{ borderTop: '1px solid var(--border-default)' }}>
               <button
                 onClick={() => setShowRestoreModal(null)}
-                className="w-full px-4 py-2 text-slate-400 hover:text-white transition-colors"
+                className="w-full px-4 py-2"
+                style={{ color: 'var(--text-secondary)' }}
               >
                 Cancel
               </button>
