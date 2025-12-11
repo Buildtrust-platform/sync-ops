@@ -788,6 +788,30 @@ export const Icons = {
       <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
     </IconBase>
   ),
+
+  FileCheck: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+      <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+      <path d="m9 15 2 2 4-4" />
+    </IconBase>
+  ),
+
+  GitPullRequest: (props: IconProps) => (
+    <IconBase {...props}>
+      <circle cx="18" cy="18" r="3" />
+      <circle cx="6" cy="6" r="3" />
+      <path d="M13 6h3a2 2 0 0 1 2 2v7" />
+      <line x1="6" x2="6" y1="9" y2="21" />
+    </IconBase>
+  ),
+
+  Briefcase: (props: IconProps) => (
+    <IconBase {...props}>
+      <rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
+      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+    </IconBase>
+  ),
 };
 
 export type IconName = keyof typeof Icons;

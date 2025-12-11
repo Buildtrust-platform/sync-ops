@@ -17,6 +17,16 @@ import SmartBrief from "@/app/components/SmartBrief";
 import BudgetTracker from "@/app/components/BudgetTracker";
 import GreenlightGate from "@/app/components/GreenlightGate";
 import GreenlightStatus from "@/app/components/GreenlightStatus";
+import TreatmentBuilder from "@/app/components/TreatmentBuilder";
+import MoodboardLibrary from "@/app/components/MoodboardLibrary";
+import ScopeDocument from "@/app/components/ScopeDocument";
+import ROIProjections from "@/app/components/ROIProjections";
+import VendorBidManager from "@/app/components/VendorBidManager";
+import ContractManager from "@/app/components/ContractManager";
+import DevelopmentTimeline from "@/app/components/DevelopmentTimeline";
+import DecisionLog from "@/app/components/DecisionLog";
+import ChangeRequestWorkflow from "@/app/components/ChangeRequestWorkflow";
+import ClientPortal from "@/app/components/ClientPortal";
 
 // Pre-Production Phase
 import TeamManagement from "@/app/components/TeamManagement";
@@ -424,6 +434,46 @@ export default function ProjectDetail() {
                   onApprovalChange={refreshProjectData}
                 />
               </div>
+            )}
+
+            {activeModule === 'treatment' && (
+              <TreatmentBuilder project={project} />
+            )}
+
+            {activeModule === 'moodboard' && (
+              <MoodboardLibrary project={project} />
+            )}
+
+            {activeModule === 'scope' && (
+              <ScopeDocument projectId={projectId} />
+            )}
+
+            {activeModule === 'roi' && (
+              <ROIProjections project={project} />
+            )}
+
+            {activeModule === 'vendors' && (
+              <VendorBidManager project={project} />
+            )}
+
+            {activeModule === 'contracts' && (
+              <ContractManager project={project} />
+            )}
+
+            {activeModule === 'dev-timeline' && (
+              <DevelopmentTimeline project={project} />
+            )}
+
+            {activeModule === 'decisions' && (
+              <DecisionLog project={project} />
+            )}
+
+            {activeModule === 'change-requests' && (
+              <ChangeRequestWorkflow project={project} />
+            )}
+
+            {activeModule === 'client-portal' && (
+              <ClientPortal project={project} />
             )}
 
             {/* PRE-PRODUCTION PHASE MODULES */}
