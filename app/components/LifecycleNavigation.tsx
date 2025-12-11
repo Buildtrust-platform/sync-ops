@@ -85,6 +85,11 @@ const PHASE_MODULES: Record<string, Module[]> = {
     { id: 'call-sheets', label: 'Call Sheets', icon: 'ClipboardList' },
     { id: 'calendar', label: 'Schedule', icon: 'Calendar' },
     { id: 'rights', label: 'Rights & Permits', icon: 'Shield' },
+    { id: 'compliance', label: 'Compliance', icon: 'ShieldCheck' },
+    { id: 'casting', label: 'Talent & Casting', icon: 'Star' },
+    { id: 'safety', label: 'Safety & Risk', icon: 'AlertTriangle' },
+    { id: 'insurance', label: 'Insurance', icon: 'Receipt' },
+    { id: 'crew-scheduling', label: 'Crew Scheduling', icon: 'Clock' },
   ],
   production: [
     { id: 'field-intel', label: 'Field Intelligence', icon: 'Globe' },

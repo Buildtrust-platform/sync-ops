@@ -25,6 +25,10 @@ import EquipmentOS from "@/app/components/EquipmentOS";
 import CalendarSync from "@/app/components/CalendarSync";
 import DigitalRightsLocker from "@/app/components/DigitalRightsLocker";
 import PolicyEngine from "@/app/components/PolicyEngine";
+import TalentCasting from "@/app/components/TalentCasting";
+import SafetyRisk from "@/app/components/SafetyRisk";
+import InsuranceTracker from "@/app/components/InsuranceTracker";
+import CrewScheduling from "@/app/components/CrewScheduling";
 
 // Production Phase
 import FieldIntelligence from "@/app/components/FieldIntelligence";
@@ -487,6 +491,38 @@ export default function ProjectDetail() {
                 hasDrones={brief?.hasDroneRisk || false}
                 hasMinors={brief?.hasMinorRisk || false}
                 hasForeignCrew={false}
+              />
+            )}
+
+            {activeModule === 'casting' && (
+              <TalentCasting
+                projectId={projectId}
+                organizationId={project.organizationId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'safety' && (
+              <SafetyRisk
+                projectId={projectId}
+                organizationId={project.organizationId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'insurance' && (
+              <InsuranceTracker
+                projectId={projectId}
+                organizationId={project.organizationId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'crew-scheduling' && (
+              <CrewScheduling
+                projectId={projectId}
+                organizationId={project.organizationId}
+                currentUserEmail={userEmail}
               />
             )}
 
