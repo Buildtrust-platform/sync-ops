@@ -170,7 +170,7 @@ function AuthenticatedApp({
   }, [user, isAuthenticated, setIsAuthenticated]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[var(--bg-0)]">
       {/* GLOBAL NAVIGATION */}
       <GlobalNav
         userEmail={user?.signInDetails?.loginId}
