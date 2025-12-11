@@ -18,15 +18,20 @@ export default function NotificationCenter({
   isOpen,
   onClose,
 }: NotificationCenterProps) {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filter, setFilter] = useState<string>('ALL');
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
   const router = useRouter();
 
+  // Initialize client on mount only (avoids SSR hydration issues)
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
+
   // Load notifications
   useEffect(() => {
-    if (!currentUserEmail) return;
+    if (!currentUserEmail || !client) return;
 
     // Check if Notification model is available (schema deployed)
     if (!client.models.Notification) {
@@ -93,7 +98,7 @@ export default function NotificationCenter({
 
   // Mark as read
   const markAsRead = async (notification: Notification) => {
-    if (notification.isRead) return;
+    if (notification.isRead || !client) return;
 
     try {
       await client.models.Notification.update({
@@ -108,6 +113,7 @@ export default function NotificationCenter({
 
   // Mark all as read
   const markAllAsRead = async () => {
+    if (!client) return;
     const unread = notifications.filter(n => !n.isRead);
 
     try {
@@ -127,6 +133,7 @@ export default function NotificationCenter({
 
   // Delete notification
   const deleteNotification = async (notification: Notification) => {
+    if (!client) return;
     try {
       await client.models.Notification.delete({ id: notification.id });
     } catch (error) {

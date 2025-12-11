@@ -10,6 +10,29 @@ import ComprehensiveIntake from "./components/ComprehensiveIntake";
 import GlobalNav from "./components/GlobalNav";
 import GlobalDashboard from "./components/GlobalDashboard";
 
+// Hydration-safe wrapper that only renders on client
+function ClientOnly({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    // Return a placeholder with the same structure to minimize layout shift
+    return (
+      <div className="min-h-screen bg-[var(--bg-0)]">
+        <div className="sticky top-0 z-50 h-14 bg-[var(--bg-1)] border-b border-[var(--border-default)]" />
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="animate-pulse text-[var(--text-tertiary)]">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}
+
 export default function App() {
   const [projects, setProjects] = useState<Array<Schema["Project"]["type"]>>([]);
   const [showIntakeWizard, setShowIntakeWizard] = useState(false);
@@ -121,22 +144,24 @@ export default function App() {
   }
 
   return (
-    // 2. WRAP THE APP IN AUTHENTICATOR
-    <Authenticator>
-      {({ signOut, user }) => (
-        <AuthenticatedApp
-          user={user}
-          signOut={signOut}
-          isAuthenticated={isAuthenticated}
-          setIsAuthenticated={setIsAuthenticated}
-          projects={projects}
-          showIntakeWizard={showIntakeWizard}
-          openIntakeWizard={openIntakeWizard}
-          handleIntakeComplete={handleIntakeComplete}
-          closeIntakeWizard={closeIntakeWizard}
-        />
-      )}
-    </Authenticator>
+    // Wrap in ClientOnly to prevent hydration mismatch from Authenticator
+    <ClientOnly>
+      <Authenticator>
+        {({ signOut, user }) => (
+          <AuthenticatedApp
+            user={user}
+            signOut={signOut}
+            isAuthenticated={isAuthenticated}
+            setIsAuthenticated={setIsAuthenticated}
+            projects={projects}
+            showIntakeWizard={showIntakeWizard}
+            openIntakeWizard={openIntakeWizard}
+            handleIntakeComplete={handleIntakeComplete}
+            closeIntakeWizard={closeIntakeWizard}
+          />
+        )}
+      </Authenticator>
+    </ClientOnly>
   );
 }
 

@@ -30,7 +30,7 @@ interface NavItem {
 
 export default function GlobalNav({ userEmail, onSignOut }: GlobalNavProps) {
   const pathname = usePathname();
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -41,8 +41,13 @@ export default function GlobalNav({ userEmail, onSignOut }: GlobalNavProps) {
     { href: '/reports', label: 'Reports', icon: 'BarChart' },
   ];
 
+  // Initialize client on mount only (avoids SSR hydration issues)
   useEffect(() => {
-    if (!userEmail) return;
+    setClient(generateClient<Schema>());
+  }, []);
+
+  useEffect(() => {
+    if (!userEmail || !client) return;
     if (!client.models.Notification) return;
 
     const subscription = client.models.Notification.observeQuery({

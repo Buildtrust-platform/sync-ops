@@ -4,11 +4,11 @@ import { ReactNode, useEffect, useState } from 'react';
 import { Amplify } from 'aws-amplify';
 import outputs from '@/amplify_outputs.json';
 
-// Track if Amplify has been configured
+// Track if Amplify has been configured (module-level singleton)
 let isConfigured = false;
 
 function configureAmplifyOnce() {
-  if (!isConfigured && typeof window !== 'undefined') {
+  if (!isConfigured) {
     try {
       Amplify.configure(outputs, { ssr: true });
       isConfigured = true;
@@ -19,22 +19,17 @@ function configureAmplifyOnce() {
   }
 }
 
-// Configure immediately when module loads
-configureAmplifyOnce();
-
 export default function ConfigureAmplify({ children }: { children: ReactNode }) {
-  const [ready, setReady] = useState(isConfigured);
+  // Always start with false on both server and client to ensure consistent hydration
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Ensure configuration on mount (handles HMR scenarios)
+    // Configure Amplify only on client side
     configureAmplifyOnce();
-    setReady(true);
+    setMounted(true);
   }, []);
 
-  // Don't render children until configured
-  if (!ready) {
-    return null;
-  }
-
+  // Always render children - Amplify SSR mode handles server-side
+  // The key is that the initial render is the same on server and client
   return <>{children}</>;
 }
