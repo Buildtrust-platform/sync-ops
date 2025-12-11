@@ -119,14 +119,19 @@ interface FeedbackSummaryProps {
 }
 
 export default function FeedbackSummary({ comments }: FeedbackSummaryProps) {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [summary, setSummary] = useState<FeedbackSummaryData | null>(null);
+
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(true);
 
   // Generate AI summary when comments change
   useEffect(() => {
+    if (!client) return;
     if (comments.length === 0) {
       setSummary(null);
       return;
@@ -175,7 +180,7 @@ export default function FeedbackSummary({ comments }: FeedbackSummaryProps) {
     }
 
     generateSummary();
-  }, [comments]);
+  }, [comments, client]);
 
   if (comments.length === 0) {
     return null;

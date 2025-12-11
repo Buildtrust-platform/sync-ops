@@ -252,8 +252,12 @@ const GRADE_COLORS: Record<string, { text: string; bg: string }> = {
 };
 
 export default function ArchiveIntelligence({ projectId, organizationId, currentUserEmail }: Props) {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const orgId = organizationId || 'default-org';
+
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
 
   // State
   const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'quality' | 'storage' | 'policies'>('overview');
@@ -282,10 +286,12 @@ export default function ArchiveIntelligence({ projectId, organizationId, current
 
   // Load data
   useEffect(() => {
+    if (!client) return;
     loadData();
   }, [projectId, client]);
 
   async function loadData() {
+    if (!client) return;
     setIsLoading(true);
     try {
       const assetsResult = await client.models.Asset.list({
@@ -417,7 +423,7 @@ export default function ArchiveIntelligence({ projectId, organizationId, current
   }
 
   async function handleCreatePolicy() {
-    if (!client.models.ArchivePolicy) {
+    if (!client || !client.models.ArchivePolicy) {
       alert('Schema not deployed yet. Run: npx ampx sandbox --once');
       return;
     }
@@ -448,7 +454,7 @@ export default function ArchiveIntelligence({ projectId, organizationId, current
   }
 
   async function handleRequestRestore(assetId: string, tier: 'EXPEDITED' | 'STANDARD' | 'BULK') {
-    if (!client.models.RestoreRequest) {
+    if (!client || !client.models.RestoreRequest) {
       alert('Schema not deployed yet. Run: npx ampx sandbox --once');
       return;
     }
@@ -478,7 +484,7 @@ export default function ArchiveIntelligence({ projectId, organizationId, current
   }
 
   async function handleAnalyzeQuality(assetId: string) {
-    if (!client.models.QualityScore) {
+    if (!client || !client.models.QualityScore) {
       alert('Schema not deployed yet. Run: npx ampx sandbox --once');
       return;
     }
@@ -519,7 +525,7 @@ export default function ArchiveIntelligence({ projectId, organizationId, current
   }
 
   async function handleInitializeAnalytics(assetId: string) {
-    if (!client.models.AssetAnalytics) {
+    if (!client || !client.models.AssetAnalytics) {
       alert('Schema not deployed yet. Run: npx ampx sandbox --once');
       return;
     }

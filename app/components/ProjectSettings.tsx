@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
 
@@ -20,8 +20,13 @@ interface ProjectSettingsProps {
 }
 
 export default function ProjectSettings({ project, onUpdate }: ProjectSettingsProps) {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Initialize client on mount only (avoids SSR hydration issues)
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   // Form state
@@ -69,7 +74,7 @@ export default function ProjectSettings({ project, onUpdate }: ProjectSettingsPr
   };
 
   const handleSave = async () => {
-    if (!project.id) return;
+    if (!project.id || !client) return;
 
     setIsSaving(true);
     setSaveMessage(null);

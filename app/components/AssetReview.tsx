@@ -77,8 +77,13 @@ export default function AssetReview({
   onClose
 }: AssetReviewProps) {
   const orgId = organizationId || 'default-org';
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [asset, setAsset] = useState<Schema["Asset"]["type"] | null>(null);
+
+  // Initialize client on mount only (avoids SSR hydration issues)
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
   const [reviews, setReviews] = useState<Array<Schema["Review"]["type"]>>([]);
   const [comments, setComments] = useState<Array<Schema["ReviewComment"]["type"]>>([]);
 
@@ -109,6 +114,7 @@ export default function AssetReview({
 
   // Load asset and reviews
   useEffect(() => {
+    if (!client) return;
     if (assetId) {
       // Load asset
       client.models.Asset.get({ id: assetId }).then((data) => {
@@ -184,6 +190,7 @@ export default function AssetReview({
   }
 
   async function startReview() {
+    if (!client) return;
     try {
       const newReview = await client.models.Review.create({
         organizationId: orgId,
@@ -218,7 +225,7 @@ export default function AssetReview({
   }
 
   async function addComment() {
-    if (!currentReviewId || !commentText.trim()) return;
+    if (!currentReviewId || !commentText.trim() || !client) return;
 
     try {
       const newComment = await client.models.ReviewComment.create({
@@ -261,6 +268,7 @@ export default function AssetReview({
   }
 
   async function resolveComment(commentId: string) {
+    if (!client) return;
     try {
       await client.models.ReviewComment.update({
         id: commentId,
@@ -287,7 +295,7 @@ export default function AssetReview({
   }
 
   async function completeReview() {
-    if (!currentReviewId) return;
+    if (!currentReviewId || !client) return;
 
     try {
       await client.models.Review.update({
@@ -315,7 +323,7 @@ export default function AssetReview({
   }
 
   async function approveLegalReview() {
-    if (!currentReviewId) return;
+    if (!currentReviewId || !client) return;
 
     const confirmApproval = confirm(
       "LEGAL APPROVAL LOCK\n\n" +

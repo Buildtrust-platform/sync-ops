@@ -119,14 +119,19 @@ const smallLabelStyle: React.CSSProperties = {
 
 export default function ComprehensiveIntake({ onComplete, onCancel }: ComprehensiveIntakeProps) {
   const router = useRouter();
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
+
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>('');
 
   useEffect(() => {
+    if (!client) return;
     async function fetchUserOrganization() {
       try {
         const attributes = await fetchUserAttributes();
@@ -211,6 +216,7 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
       setError("Please enter a project description");
       return;
     }
+    if (!client) return;
 
     setIsProcessing(true);
     setError(null);
@@ -236,6 +242,7 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
   }
 
   async function createProject() {
+    if (!client) return;
     setIsProcessing(true);
     setError(null);
 

@@ -205,6 +205,12 @@ export const Icons = {
   ),
 
   // Status & Feedback
+  Circle: (props: IconProps) => (
+    <IconBase {...props}>
+      <circle cx="12" cy="12" r="10" />
+    </IconBase>
+  ),
+
   Check: (props: IconProps) => (
     <IconBase {...props}>
       <polyline points="20 6 9 17 4 12" />
@@ -292,6 +298,14 @@ export const Icons = {
       <path d="M10 9H8" />
       <path d="M16 13H8" />
       <path d="M16 17H8" />
+    </IconBase>
+  ),
+
+  FileEdit: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5" />
+      <polyline points="14 2 14 8 20 8" />
+      <path d="M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95 5.43-5.44Z" />
     </IconBase>
   ),
 
@@ -709,6 +723,69 @@ export const Icons = {
   Loader: (props: IconProps) => (
     <IconBase {...props}>
       <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+    </IconBase>
+  ),
+
+  // Additional icons for LifecycleNavigation
+  Lightbulb: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+      <path d="M9 18h6" />
+      <path d="M10 22h4" />
+    </IconBase>
+  ),
+
+  Clipboard: (props: IconProps) => (
+    <IconBase {...props}>
+      <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+    </IconBase>
+  ),
+
+  ClipboardList: (props: IconProps) => (
+    <IconBase {...props}>
+      <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+      <path d="M12 11h4" />
+      <path d="M12 16h4" />
+      <path d="M8 11h.01" />
+      <path d="M8 16h.01" />
+    </IconBase>
+  ),
+
+  Scissors: (props: IconProps) => (
+    <IconBase {...props}>
+      <circle cx="6" cy="6" r="3" />
+      <path d="M8.12 8.12 12 12" />
+      <path d="M20 4 8.12 15.88" />
+      <circle cx="6" cy="18" r="3" />
+      <path d="M14.8 14.8 20 20" />
+    </IconBase>
+  ),
+
+  MapPin: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+      <circle cx="12" cy="10" r="3" />
+    </IconBase>
+  ),
+
+  GitBranch: (props: IconProps) => (
+    <IconBase {...props}>
+      <line x1="6" x2="6" y1="3" y2="15" />
+      <circle cx="18" cy="6" r="3" />
+      <circle cx="6" cy="18" r="3" />
+      <path d="M18 9a9 9 0 0 1-9 9" />
+    </IconBase>
+  ),
+
+  Share2: (props: IconProps) => (
+    <IconBase {...props}>
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
+      <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
     </IconBase>
   ),
 };

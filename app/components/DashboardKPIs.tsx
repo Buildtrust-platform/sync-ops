@@ -33,15 +33,20 @@ interface BudgetBreakdown {
 }
 
 export default function DashboardKPIs({ projectId, project }: DashboardKPIsProps) {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [assets, setAssets] = useState<Schema['Asset']['type'][]>([]);
+
+  // Initialize client on mount only (avoids SSR hydration issues)
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
   const [tasks, setTasks] = useState<Schema['Task']['type'][]>([]);
   const [activityLogs, setActivityLogs] = useState<Schema['ActivityLog']['type'][]>([]);
   const [timeframe, setTimeframe] = useState<'7d' | '30d' | '90d' | 'all'>('30d');
 
   // Load related data
   useEffect(() => {
-    if (!projectId) return;
+    if (!projectId || !client) return;
 
     const assetSub = client.models.Asset.observeQuery({
       filter: { projectId: { eq: projectId } }

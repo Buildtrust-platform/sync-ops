@@ -119,8 +119,12 @@ const REPORT_TYPES: ReportConfig[] = [
 ];
 
 export default function ReportsExports({ project }: ReportsExportsProps) {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [activeTab, setActiveTab] = useState<'reports' | 'exports' | 'scheduled'>('reports');
+
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
   const [selectedReports, setSelectedReports] = useState<string[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [exportFormat, setExportFormat] = useState<'pdf' | 'csv' | 'xlsx' | 'json'>('pdf');

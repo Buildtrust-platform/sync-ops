@@ -12,7 +12,7 @@ interface CallSheetFormProps {
 }
 
 export default function CallSheetForm({ projectId, callSheetId, onSuccess, onCancel }: CallSheetFormProps) {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(!!callSheetId);
   const [formData, setFormData] = useState({
@@ -61,15 +61,20 @@ export default function CallSheetForm({ projectId, callSheetId, onSuccess, onCan
     nextDaySchedule: '',
   });
 
+  // Initialize client on mount only (avoids SSR hydration issues)
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
+
   // Load existing call sheet data if editing
   useEffect(() => {
-    if (callSheetId) {
+    if (callSheetId && client) {
       loadCallSheet();
     }
-  }, [callSheetId]);
+  }, [callSheetId, client]);
 
   const loadCallSheet = async () => {
-    if (!callSheetId) return;
+    if (!callSheetId || !client) return;
 
     try {
       setLoadingData(true);
@@ -121,6 +126,7 @@ export default function CallSheetForm({ projectId, callSheetId, onSuccess, onCan
 
   const handleSubmit = async (e: React.FormEvent, status: 'DRAFT' | 'PUBLISHED') => {
     e.preventDefault();
+    if (!client) return;
     setLoading(true);
 
     try {

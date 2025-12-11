@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
 
@@ -83,7 +83,11 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiResults, setAiResults] = useState<SmartBriefOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
+
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
 
   // Editable fields after AI analysis
   const [editableFields, setEditableFields] = useState<Partial<SmartBriefOutput>>({
@@ -95,6 +99,7 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
   });
 
   async function analyzeWithAI() {
+    if (!client) return;
     if (!projectDescription.trim()) {
       setError("Please enter a project description");
       return;
@@ -130,6 +135,7 @@ export default function SmartBrief({ onComplete, onCancel }: SmartBriefProps) {
   }
 
   async function createProjectWithBrief() {
+    if (!client) return;
     if (!aiResults || !editableFields) return;
 
     try {

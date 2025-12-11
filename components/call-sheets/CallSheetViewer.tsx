@@ -16,15 +16,21 @@ interface CallSheetViewerProps {
 }
 
 export default function CallSheetViewer({ callSheetId, onEdit }: CallSheetViewerProps) {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [callSheet, setCallSheet] = useState<CallSheet | null>(null);
   const [scenes, setScenes] = useState<CallSheetScene[]>([]);
   const [cast, setCast] = useState<CallSheetCast[]>([]);
   const [crew, setCrew] = useState<CallSheetCrew[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Initialize client on mount only (avoids SSR hydration issues)
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
+
   // Real-time subscriptions for auto-updating call sheet
   useEffect(() => {
+    if (!client) return;
     setLoading(true);
 
     // Subscribe to call sheet updates
@@ -80,7 +86,7 @@ export default function CallSheetViewer({ callSheetId, onEdit }: CallSheetViewer
       castSub.unsubscribe();
       crewSub.unsubscribe();
     };
-  }, [callSheetId]);
+  }, [callSheetId, client]);
 
   if (loading) {
     return (

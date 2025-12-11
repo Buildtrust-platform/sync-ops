@@ -146,8 +146,13 @@ export default function EquipmentOS({
   currentUserName,
 }: EquipmentOSProps) {
   const orgId = organizationId || 'default-org';
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
+
+  // Initialize client on mount only (avoids SSR hydration issues)
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
   const [checkouts, setCheckouts] = useState<EquipmentCheckoutRecord[]>([]);
   const [rentals, setRentals] = useState<EquipmentRental[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -207,6 +212,7 @@ export default function EquipmentOS({
 
   // Load equipment data
   useEffect(() => {
+    if (!client) return;
     setIsLoading(true);
 
     // Check if Equipment model exists
@@ -321,7 +327,7 @@ export default function EquipmentOS({
 
   // Add new equipment
   const handleAddEquipment = async () => {
-    if (!newEquipment.name.trim()) return;
+    if (!newEquipment.name.trim() || !client) return;
 
     try {
       await client.models.Equipment.create({
@@ -363,7 +369,7 @@ export default function EquipmentOS({
 
   // Check out equipment
   const handleCheckout = async () => {
-    if (!showCheckoutModal) return;
+    if (!showCheckoutModal || !client) return;
 
     try {
       // Create checkout record
@@ -402,7 +408,7 @@ export default function EquipmentOS({
 
   // Check in equipment
   const handleCheckin = async () => {
-    if (!showCheckinModal) return;
+    if (!showCheckinModal || !client) return;
 
     const checkoutRecord = getCheckoutRecord(showCheckinModal.id);
     if (!checkoutRecord) return;
@@ -442,6 +448,7 @@ export default function EquipmentOS({
 
   // Add equipment rental
   const handleAddRental = async () => {
+    if (!client) return;
     if (!rentalForm.equipmentName || !rentalForm.vendorName || !rentalForm.dailyRate || !projectId) {
       alert("Please fill in all required fields");
       return;

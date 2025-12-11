@@ -15,7 +15,7 @@ export default function SceneManagementForm({
   callSheetId,
   onScenesUpdated,
 }: SceneManagementFormProps) {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [scenes, setScenes] = useState<CallSheetScene[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -32,11 +32,17 @@ export default function SceneManagementForm({
     sortOrder: 0,
   });
 
+  // Initialize client on mount only (avoids SSR hydration issues)
   useEffect(() => {
-    loadScenes();
-  }, [callSheetId]);
+    setClient(generateClient<Schema>());
+  }, []);
+
+  useEffect(() => {
+    if (client) loadScenes();
+  }, [callSheetId, client]);
 
   const loadScenes = async () => {
+    if (!client) return;
     try {
       setLoading(true);
       const { data } = await client.models.CallSheetScene.list({
@@ -86,6 +92,7 @@ export default function SceneManagementForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!client) return;
 
     try {
       if (editingSceneId) {
@@ -115,6 +122,7 @@ export default function SceneManagementForm({
   };
 
   const handleDelete = async (sceneId: string) => {
+    if (!client) return;
     if (!confirm('Are you sure you want to delete this scene?')) {
       return;
     }

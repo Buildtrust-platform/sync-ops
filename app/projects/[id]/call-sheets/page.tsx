@@ -12,15 +12,22 @@ export default function CallSheetsListPage() {
   const params = useParams();
   const projectId = params.id as string;
 
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [callSheets, setCallSheets] = useState<CallSheet[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Initialize client on mount only (avoids SSR hydration issues)
   useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
+
+  useEffect(() => {
+    if (!client) return;
     loadCallSheets();
-  }, [projectId]);
+  }, [projectId, client]);
 
   const loadCallSheets = async () => {
+    if (!client) return;
     try {
       setLoading(true);
       const { data } = await client.models.CallSheet.list({

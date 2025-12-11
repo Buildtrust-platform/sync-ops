@@ -31,7 +31,7 @@ export default function CrewManagementForm({
   callSheetId,
   onCrewUpdated,
 }: CrewManagementFormProps) {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [crew, setCrew] = useState<CallSheetCrew[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -49,11 +49,17 @@ export default function CrewManagementForm({
     sortOrder: 0,
   });
 
+  // Initialize client on mount only (avoids SSR hydration issues)
   useEffect(() => {
-    loadCrew();
-  }, [callSheetId]);
+    setClient(generateClient<Schema>());
+  }, []);
+
+  useEffect(() => {
+    if (client) loadCrew();
+  }, [callSheetId, client]);
 
   const loadCrew = async () => {
+    if (!client) return;
     try {
       setLoading(true);
       const { data } = await client.models.CallSheetCrew.list({
@@ -105,6 +111,7 @@ export default function CrewManagementForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!client) return;
 
     try {
       if (editingCrewId) {
@@ -134,6 +141,7 @@ export default function CrewManagementForm({
   };
 
   const handleDelete = async (crewId: string) => {
+    if (!client) return;
     if (!confirm('Are you sure you want to delete this crew member?')) {
       return;
     }

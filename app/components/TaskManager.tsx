@@ -197,8 +197,13 @@ export default function TaskManager({
   linkedTimecode,
   onTaskCreated,
 }: TaskManagerProps) {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const orgId = organizationId || 'default-org';
+
+  // Initialize client on mount only (avoids SSR hydration issues)
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -217,6 +222,7 @@ export default function TaskManager({
 
   // Load tasks
   useEffect(() => {
+    if (!client) return;
     loadTasks();
 
     // Subscribe to real-time updates
@@ -235,6 +241,7 @@ export default function TaskManager({
   }, [projectId, client]);
 
   const loadTasks = async () => {
+    if (!client) return;
     setLoading(true);
     try {
       const { data, errors } = await client.models.Task.list({
@@ -254,7 +261,7 @@ export default function TaskManager({
   };
 
   async function createTask() {
-    if (!newTask.title.trim() || !currentUserEmail) return;
+    if (!newTask.title.trim() || !currentUserEmail || !client) return;
 
     try {
       const { data, errors } = await client.models.Task.create({
@@ -289,6 +296,7 @@ export default function TaskManager({
   }
 
   async function updateTaskStatus(taskId: string, newStatus: TaskStatus) {
+    if (!client) return;
     try {
       const updates: Record<string, unknown> = { status: newStatus };
 
@@ -309,6 +317,7 @@ export default function TaskManager({
 
   async function deleteTask(taskId: string) {
     if (!confirm('Are you sure you want to delete this task?')) return;
+    if (!client) return;
 
     try {
       await client.models.Task.delete({ id: taskId });

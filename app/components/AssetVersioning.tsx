@@ -78,7 +78,11 @@ export default function AssetVersioning({
   onClose,
 }: AssetVersioningProps) {
   const orgId = organizationId || 'default-org';
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
+
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
   const [versions, setVersions] = useState<Array<Schema["AssetVersion"]["type"]>>([]);
   const [uploadStatus, setUploadStatus] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -94,11 +98,13 @@ export default function AssetVersioning({
   const [selectedVersions, setSelectedVersions] = useState<string[]>([]);
 
   useEffect(() => {
+    if (!client) return;
     loadVersions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [assetId]);
+  }, [assetId, client]);
 
   async function loadVersions() {
+    if (!client) return;
     const { data } = await client.models.AssetVersion.list({
       filter: { assetId: { eq: assetId } },
     });
@@ -120,8 +126,8 @@ export default function AssetVersioning({
   }
 
   async function handleUploadVersion() {
-    if (!selectedFile) {
-      alert("Please select a file");
+    if (!selectedFile || !client) {
+      if (!selectedFile) alert("Please select a file");
       return;
     }
 
@@ -203,6 +209,7 @@ export default function AssetVersioning({
   }
 
   async function toggleVersionReady(versionId: string, currentStatus: boolean) {
+    if (!client) return;
     await client.models.AssetVersion.update({
       id: versionId,
       isReviewReady: !currentStatus,
@@ -211,6 +218,7 @@ export default function AssetVersioning({
   }
 
   async function markAsCurrent(versionId: string) {
+    if (!client) return;
     for (const version of versions) {
       if (version.isCurrentVersion) {
         await client.models.AssetVersion.update({

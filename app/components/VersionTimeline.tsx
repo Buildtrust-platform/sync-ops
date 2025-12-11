@@ -27,14 +27,19 @@ interface VersionTimelineProps {
 }
 
 export default function VersionTimeline({ assetId, onVersionSelect, onCompare, compact = false }: VersionTimelineProps) {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [versions, setVersions] = useState<AssetVersion[]>([]);
+
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null);
   const [compareMode, setCompareMode] = useState(false);
   const [compareVersions, setCompareVersions] = useState<[string | null, string | null]>([null, null]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!client) return;
     const subscription = client.models.AssetVersion.observeQuery({
       filter: { assetId: { eq: assetId } }
     }).subscribe({

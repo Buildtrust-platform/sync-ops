@@ -43,8 +43,13 @@ const CALENDAR_PROVIDERS: CalendarProvider[] = [
 ];
 
 export default function CalendarSync({ projectId, project, currentUserEmail }: CalendarSyncProps) {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [activeTab, setActiveTab] = useState<'events' | 'sync' | 'settings'>('events');
+
+  // Initialize client on mount only (avoids SSR hydration issues)
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
   const [tasks, setTasks] = useState<Schema['Task']['type'][]>([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [providers, setProviders] = useState(CALENDAR_PROVIDERS);
@@ -69,7 +74,7 @@ export default function CalendarSync({ projectId, project, currentUserEmail }: C
 
   // Load tasks
   useEffect(() => {
-    if (!projectId) return;
+    if (!projectId || !client) return;
 
     const taskSub = client.models.Task.observeQuery({
       filter: { projectId: { eq: projectId } }

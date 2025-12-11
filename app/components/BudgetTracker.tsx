@@ -49,9 +49,14 @@ const PHASES = {
 };
 
 export default function BudgetTracker({ project }: BudgetTrackerProps) {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [activeTab, setActiveTab] = useState<"overview" | "expenses" | "crew" | "equipment" | "locations" | "daily">("overview");
   const [isLoading, setIsLoading] = useState(true);
+
+  // Initialize client on mount only (avoids SSR hydration issues)
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
 
   // Data state
   const [budgetLineItems, setBudgetLineItems] = useState<any[]>([]);
@@ -136,10 +141,13 @@ export default function BudgetTracker({ project }: BudgetTrackerProps) {
 
   // Load data
   useEffect(() => {
-    loadData();
-  }, [project.id]);
+    if (client) {
+      loadData();
+    }
+  }, [project.id, client]);
 
   async function loadData() {
+    if (!client) return;
     setIsLoading(true);
     try {
       // Load budget line items
@@ -238,6 +246,7 @@ export default function BudgetTracker({ project }: BudgetTrackerProps) {
 
   // Handle form submissions
   async function handleAddExpense() {
+    if (!client) return;
     if (!client.models.Expense) {
       alert("Schema not deployed yet. Run: npx ampx sandbox --once");
       return;
@@ -283,6 +292,7 @@ export default function BudgetTracker({ project }: BudgetTrackerProps) {
   }
 
   async function handleAddCrewCost() {
+    if (!client) return;
     if (!client.models.CrewCost) {
       alert("Schema not deployed yet. Run: npx ampx sandbox --once");
       return;
@@ -348,6 +358,7 @@ export default function BudgetTracker({ project }: BudgetTrackerProps) {
   }
 
   async function handleAddEquipmentRental() {
+    if (!client) return;
     if (!client.models.EquipmentRental) {
       alert("Schema not deployed yet. Run: npx ampx sandbox --once");
       return;
@@ -404,6 +415,7 @@ export default function BudgetTracker({ project }: BudgetTrackerProps) {
   }
 
   async function handleAddLocationCost() {
+    if (!client) return;
     if (!client.models.LocationCost) {
       alert("Schema not deployed yet. Run: npx ampx sandbox --once");
       return;

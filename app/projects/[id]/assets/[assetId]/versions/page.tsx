@@ -19,13 +19,18 @@ export default function AssetVersionsPage({ params }: { params: Promise<{ id: st
   const assetId = resolvedParams.assetId;
   const router = useRouter();
 
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [asset, setAsset] = useState<Asset | null>(null);
   const [activeView, setActiveView] = useState<'timeline' | 'comparison'>('comparison');
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
+
   // Fetch asset details
   useEffect(() => {
+    if (!client) return;
     async function fetchAsset() {
       try {
         const { data } = await client.models.Asset.get({ id: assetId });
@@ -40,7 +45,7 @@ export default function AssetVersionsPage({ params }: { params: Promise<{ id: st
     }
 
     fetchAsset();
-  }, [assetId]);
+  }, [assetId, client]);
 
   if (loading) {
     return (

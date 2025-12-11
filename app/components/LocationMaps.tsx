@@ -68,8 +68,13 @@ const PERMIT_STATUS_CONFIG = {
 };
 
 export default function LocationMaps({ projectId, project, currentUserEmail }: LocationMapsProps) {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [locations, setLocations] = useState<ProductionLocation[]>([]);
+
+  // Initialize client on mount only (avoids SSR hydration issues)
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'map' | 'list' | 'distances' | 'route'>('map');
   const [selectedLocation, setSelectedLocation] = useState<ProductionLocation | null>(null);

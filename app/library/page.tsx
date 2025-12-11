@@ -69,13 +69,18 @@ const PackageIcon = () => (
 );
 
 export default function LibraryPage() {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [assets, setAssets] = useState<Schema['Asset']['type'][]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('ALL');
 
   useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
+
+  useEffect(() => {
+    if (!client) return;
     async function fetchAssets() {
       try {
         const { data } = await client.models.Asset.list();

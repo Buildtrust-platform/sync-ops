@@ -41,8 +41,12 @@ interface VersionComparisonProps {
 }
 
 export default function VersionComparison({ assetId, projectId }: VersionComparisonProps) {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [versions, setVersions] = useState<AssetVersion[]>([]);
+
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
   const [leftVersion, setLeftVersion] = useState<AssetVersion | null>(null);
   const [rightVersion, setRightVersion] = useState<AssetVersion | null>(null);
   const [leftUrl, setLeftUrl] = useState<string>('');
@@ -51,6 +55,7 @@ export default function VersionComparison({ assetId, projectId }: VersionCompari
 
   // Fetch all versions for this asset
   useEffect(() => {
+    if (!client) return;
     const subscription = client.models.AssetVersion.observeQuery({
       filter: { assetId: { eq: assetId } }
     }).subscribe({

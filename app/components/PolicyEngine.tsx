@@ -619,7 +619,12 @@ export default function PolicyEngine({
   const [policyBrief, setPolicyBrief] = useState<PolicyBrief | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState<"overview" | "laws" | "cultural" | "checklist">("overview");
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
+
+  // Initialize client on mount only (avoids SSR hydration issues)
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
 
   // Available countries from database
   const availableCountries = Object.keys(FILMING_LAWS_DATABASE).map((code) => ({

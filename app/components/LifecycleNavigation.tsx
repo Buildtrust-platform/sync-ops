@@ -100,7 +100,8 @@ const PHASE_MODULES: Record<string, Module[]> = {
   ],
   delivery: [
     { id: 'distribution', label: 'Distribution', icon: 'Share2' },
-    { id: 'archive', label: 'Archive', icon: 'Archive' },
+    { id: 'master-archive', label: 'MasterOps Archive', icon: 'Library' },
+    { id: 'archive', label: 'Legacy Archive', icon: 'Archive' },
     { id: 'reports', label: 'Reports', icon: 'BarChart' },
     { id: 'kpis', label: 'Analytics', icon: 'TrendingUp' },
   ],

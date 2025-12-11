@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
 import { useRouter } from 'next/navigation';
@@ -40,7 +40,12 @@ export default function UniversalSearch() {
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
+
+  // Initialize client on mount only (avoids SSR hydration issues)
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
 
   // Apply filter to results
   useEffect(() => {
@@ -126,6 +131,8 @@ export default function UniversalSearch() {
   }, [query]);
 
   async function performSearch(searchQuery: string) {
+    if (!client) return;
+
     setIsSearching(true);
     try {
       console.log('🔍 Searching for:', searchQuery);

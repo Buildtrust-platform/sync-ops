@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
 
@@ -160,8 +160,12 @@ const APPROVAL_ROLES: ApprovalRole[] = [
 ];
 
 export default function GreenlightStatus({ project, currentUserEmail, onApprovalChange }: GreenlightStatusProps) {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [expandedRole, setExpandedRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
   const [comment, setComment] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -179,7 +183,7 @@ export default function GreenlightStatus({ project, currentUserEmail, onApproval
   );
 
   async function handleApproval(role: ApprovalRole, approved: boolean) {
-    if (!project.id) return;
+    if (!project.id || !client) return;
 
     setIsProcessing(true);
 

@@ -567,8 +567,12 @@ export default function TeamManagement({
   project,
   currentUserEmail,
 }: TeamManagementProps) {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [activeView, setActiveView] = useState<'directory' | 'permissions' | 'activity'>('directory');
+
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [invitedMembers, setInvitedMembers] = useState<TeamMember[]>([]);
@@ -618,6 +622,7 @@ export default function TeamManagement({
   }, [project, projectId]);
 
   const loadInvitedMembers = async () => {
+    if (!client) return;
     try {
       if (client.models.TeamMember) {
         const result = await client.models.TeamMember.list({
@@ -663,6 +668,7 @@ export default function TeamManagement({
   };
 
   const handleInvite = async (email: string, role: string, permissions: string[], phone?: string, company?: string, title?: string) => {
+    if (!client) return;
     try {
       if (client.models.TeamMember) {
         const roleEnum = roleDisplayToEnum[role] || 'VIEWER';
@@ -718,7 +724,7 @@ export default function TeamManagement({
 
     if (!confirm(`Remove ${member.name} from the project?`)) return;
 
-    if (client.models.TeamMember) {
+    if (client?.models.TeamMember) {
       try {
         await client.models.TeamMember.delete({ id: memberId });
         await loadInvitedMembers();
@@ -755,7 +761,7 @@ export default function TeamManagement({
       return;
     }
 
-    if (client.models.TeamMember) {
+    if (client?.models.TeamMember) {
       try {
         await client.models.TeamMember.update({ id: memberId, permissions: JSON.stringify(newPermissions) });
         setInvitedMembers(prev => prev.map(m => m.id === memberId ? { ...m, permissions: newPermissions } : m));

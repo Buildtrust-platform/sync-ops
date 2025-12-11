@@ -41,6 +41,7 @@ import ProjectTimeline from "@/app/components/ProjectTimeline";
 // Delivery Phase
 import DistributionEngine from "@/app/components/DistributionEngine";
 import ArchiveIntelligence from "@/app/components/ArchiveIntelligence";
+import MasterOpsArchive from "@/app/components/MasterOpsArchive";
 import ReportsExports from "@/app/components/ReportsExports";
 import DashboardKPIs from "@/app/components/DashboardKPIs";
 
@@ -720,6 +721,14 @@ export default function ProjectDetail() {
                 projectId={projectId}
                 currentUserEmail={userEmail}
                 currentUserName={userEmail.split('@')[0]}
+              />
+            )}
+
+            {activeModule === 'master-archive' && (
+              <MasterOpsArchive
+                projectId={projectId}
+                project={project}
+                currentUserEmail={userEmail}
               />
             )}
 

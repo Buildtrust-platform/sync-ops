@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import { uploadData } from "aws-amplify/storage";
 import type { Schema } from "@/amplify/data/resource";
@@ -79,7 +79,11 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024 * 1024; // 10GB
 
 export default function GovernedIngest({ projectId, organizationId, onUploadComplete, onCancel }: GovernedIngestProps) {
   const orgId = organizationId || 'default-org';
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
+
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
 
   // File state
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -127,7 +131,7 @@ export default function GovernedIngest({ projectId, organizationId, onUploadComp
   };
 
   const handleUpload = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile || !client) return;
 
     // Validate mandatory metadata
     if (!cameraId.trim()) {

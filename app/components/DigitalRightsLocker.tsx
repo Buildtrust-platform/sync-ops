@@ -303,8 +303,12 @@ export default function DigitalRightsLocker({
   currentUserEmail,
   currentUserName,
 }: DigitalRightsLockerProps) {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [documents, setDocuments] = useState<RightsDocument[]>([]);
+
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
   const [isLoading, setIsLoading] = useState(true);
 
   // UI State
@@ -349,6 +353,7 @@ export default function DigitalRightsLocker({
 
   // Load documents
   useEffect(() => {
+    if (!client) return;
     setIsLoading(true);
 
     // Check if RightsDocument model exists
@@ -541,7 +546,7 @@ export default function DigitalRightsLocker({
 
   // Add new document
   const handleAddDocument = async () => {
-    if (!newDocument.name.trim()) return;
+    if (!newDocument.name.trim() || !client) return;
 
     try {
       let fileData: { key: string; fileName: string; fileSize: number; mimeType: string } | null = null;
@@ -598,6 +603,7 @@ export default function DigitalRightsLocker({
 
   // Update document status
   const handleUpdateStatus = async (doc: RightsDocument, newStatus: DocumentStatus) => {
+    if (!client) return;
     try {
       if (newStatus === "APPROVED") {
         await client.models.RightsDocument.update({

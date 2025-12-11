@@ -22,13 +22,18 @@ const DownloadIcon = () => (
 );
 
 export default function ReportsPage() {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [projects, setProjects] = useState<Schema['Project']['type'][]>([]);
   const [assets, setAssets] = useState<Schema['Asset']['type'][]>([]);
   const [tasks, setTasks] = useState<Schema['Task']['type'][]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
+
+  useEffect(() => {
+    if (!client) return;
     async function fetchData() {
       try {
         const [projectsRes, assetsRes, tasksRes] = await Promise.all([

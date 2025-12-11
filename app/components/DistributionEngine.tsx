@@ -285,7 +285,11 @@ const COUNTRIES = [
 
 export default function DistributionEngine({ projectId, organizationId, currentUserEmail, currentUserName }: Props) {
   const orgId = organizationId || 'default-org';
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
+
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
 
   // State
   const [activeTab, setActiveTab] = useState<'links' | 'social' | 'analytics'>('links');
@@ -359,10 +363,12 @@ export default function DistributionEngine({ projectId, organizationId, currentU
 
   // Load data
   useEffect(() => {
+    if (!client) return;
     loadData();
-  }, [projectId]);
+  }, [projectId, client]);
 
   async function loadData() {
+    if (!client) return;
     setIsLoading(true);
     try {
       // Load distribution links
@@ -398,6 +404,7 @@ export default function DistributionEngine({ projectId, organizationId, currentU
 
   // Create distribution link
   async function handleCreateLink() {
+    if (!client) return;
     try {
       const accessToken = generateAccessToken();
       const expiresAt = linkForm.expiresAt ? new Date(linkForm.expiresAt).toISOString() : undefined;
@@ -448,6 +455,7 @@ export default function DistributionEngine({ projectId, organizationId, currentU
 
   // Create social output
   async function handleCreateSocialOutput() {
+    if (!client) return;
     try {
       const platform = SOCIAL_PLATFORMS.find(p => p.value === socialForm.platform);
 
@@ -509,6 +517,7 @@ export default function DistributionEngine({ projectId, organizationId, currentU
 
   // Revoke link
   async function handleRevokeLink(link: DistributionLink) {
+    if (!client) return;
     if (!confirm('Are you sure you want to revoke this link? It will no longer be accessible.')) return;
 
     try {

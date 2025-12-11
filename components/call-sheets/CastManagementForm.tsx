@@ -15,7 +15,7 @@ export default function CastManagementForm({
   callSheetId,
   onCastUpdated,
 }: CastManagementFormProps) {
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [cast, setCast] = useState<CallSheetCast[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -35,11 +35,17 @@ export default function CastManagementForm({
     sortOrder: 0,
   });
 
+  // Initialize client on mount only (avoids SSR hydration issues)
   useEffect(() => {
-    loadCast();
-  }, [callSheetId]);
+    setClient(generateClient<Schema>());
+  }, []);
+
+  useEffect(() => {
+    if (client) loadCast();
+  }, [callSheetId, client]);
 
   const loadCast = async () => {
+    if (!client) return;
     try {
       setLoading(true);
       const { data } = await client.models.CallSheetCast.list({
@@ -95,6 +101,7 @@ export default function CastManagementForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!client) return;
 
     try {
       if (editingCastId) {
@@ -124,6 +131,7 @@ export default function CastManagementForm({
   };
 
   const handleDelete = async (castId: string) => {
+    if (!client) return;
     if (!confirm('Are you sure you want to delete this cast member?')) {
       return;
     }

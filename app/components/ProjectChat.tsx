@@ -97,8 +97,12 @@ export default function ProjectChat({
   currentUserRole = 'Team Member',
 }: ProjectChatProps) {
   const orgId = organizationId || 'default-org';
-  const [client] = useState(() => generateClient<Schema>());
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+  }, []);
   const [newMessageText, setNewMessageText] = useState('');
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
@@ -109,6 +113,7 @@ export default function ProjectChat({
   const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
+    if (!client) return;
     if (!client.models.Message) {
       console.log('Message model not yet available - waiting for schema deployment');
       return;
@@ -165,6 +170,7 @@ export default function ProjectChat({
   }, [filteredMessages]);
 
   const handleSendMessage = async () => {
+    if (!client) return;
     if (!newMessageText.trim() || isSending) return;
 
     setIsSending(true);
@@ -199,6 +205,7 @@ export default function ProjectChat({
   };
 
   const handleEditMessage = async () => {
+    if (!client) return;
     if (!editingMessage || !editText.trim()) return;
 
     try {
@@ -218,6 +225,7 @@ export default function ProjectChat({
   };
 
   const handleDeleteMessage = async (message: Message) => {
+    if (!client) return;
     if (!confirm('Are you sure you want to delete this message?')) return;
 
     try {
@@ -233,6 +241,7 @@ export default function ProjectChat({
   };
 
   const handleConvertToTask = async (message: Message) => {
+    if (!client) return;
     const assignTo = prompt('Assign task to (email):');
     if (!assignTo) return;
 

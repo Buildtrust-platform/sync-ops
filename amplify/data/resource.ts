@@ -2547,7 +2547,310 @@ const schema = a.schema({
     allow.groups(['Admin', 'Producer', 'Finance']).to(['create', 'read', 'update', 'delete']),
   ]),
 
-  // 16. CUSTOM QUERIES
+  // ============================================
+  // 17. MASTEROPS ARCHIVE - INTELLIGENT LIVING ARCHIVE SYSTEM
+  // A living, intelligent ecosystem that reconstructs production history,
+  // understands asset relationships, and enables AI-powered retrieval
+  // ============================================
+
+  // PROJECT ARCHIVE - Complete archive record for each production
+  // Enables "time-travel reconstruction" of any past production
+  ProjectArchive: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+    projectId: a.id().required(),
+
+    // Timeline Phases - Capture the complete production journey
+    timelinePhases: a.json(), // Array of { phase, startDate, endDate, status, notes, key_events }
+
+    // Key Assets - Flagged important deliverables
+    keyAssets: a.string().array(), // Array of asset IDs marked as key deliverables
+    keyAssetsMetadata: a.json(), // { assetId: { reason, flaggedBy, flaggedAt, importance } }
+
+    // Approvals Summary - Who approved what and when
+    approvals: a.json(), // { role: { approved, by, at, comment } }
+    greenlightHistory: a.json(), // Complete greenlight gate history
+
+    // Deliverables - What was actually delivered
+    deliverables: a.json(), // Array of { type, format, destination, deliveredAt, deliveredBy, recipientAck }
+    masterDeliverableIds: a.string().array(), // Final master file IDs
+
+    // Metadata Summary - Aggregated project metadata
+    metadataSummary: a.json(), // { totalAssets, totalSize, formats, cameras, duration, participants }
+    productionStats: a.json(), // { shootDays, crewCount, locationsUsed, equipmentUsed }
+
+    // Legal Status - Complete legal snapshot
+    legalStatus: a.enum(['CLEAR', 'PENDING_REVIEW', 'RESTRICTED', 'EMBARGOED', 'EXPIRED']),
+    legalDetails: a.json(), // { rights: [], releases: [], permits: [], restrictions: [], expirations: [] }
+    rightsExpirations: a.datetime().array(), // Key dates when rights expire
+    regionRestrictions: a.string().array(), // Regions where content cannot be used
+
+    // Budget Summary - Final financial snapshot
+    budgetSummary: a.json(), // { planned, actual, variance, byCategory, byCrew, byEquipment }
+    totalCost: a.float(),
+    costPerDeliverable: a.float(),
+    roiCalculated: a.float(),
+
+    // Archive Status
+    archiveStatus: a.enum(['ACTIVE', 'WARM', 'COLD', 'DEEP_ARCHIVE', 'PENDING_DELETION']),
+    archivedAt: a.datetime(),
+    archivedBy: a.string(),
+    archiveReason: a.string(),
+    lastAccessedAt: a.datetime(),
+    accessCount: a.integer().default(0),
+
+    // Reconstruction Data - Enable project reconstruction
+    reconstructionManifest: a.json(), // Complete manifest for rebuilding project state
+    assetGraph: a.json(), // Relationship graph of all assets
+    versionTree: a.json(), // Complete version history tree
+
+    // Search & Discovery
+    searchEmbedding: a.string(), // Vector embedding for semantic search
+    keywords: a.string().array(),
+    topics: a.string().array(),
+    themes: a.string().array(),
+
+    // AI Summary
+    aiSummary: a.string(), // AI-generated project summary
+    aiKeyMoments: a.json(), // AI-identified key moments
+    aiLessonsLearned: a.json(), // AI-extracted lessons
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // ARCHIVE ASSET - Enhanced asset with comprehensive metadata for archive intelligence
+  ArchiveAsset: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+    assetId: a.id().required(), // Link to original Asset
+    projectId: a.id().required(),
+
+    // === TECHNICAL METADATA ===
+    technicalMetadata: a.json(), // Full technical specs blob
+    codec: a.string(), // e.g., "H.264", "ProRes 422"
+    resolution: a.string(), // e.g., "3840x2160"
+    aspectRatio: a.string(), // e.g., "16:9", "2.39:1"
+    frameRate: a.float(), // e.g., 23.976, 29.97
+    bitrate: a.integer(), // kbps
+    duration: a.float(), // seconds
+    colorSpace: a.string(), // e.g., "Rec.709", "Rec.2020"
+    bitDepth: a.integer(), // 8, 10, 12
+    hdr: a.boolean(),
+    audioCodec: a.string(),
+    audioChannels: a.integer(),
+    audioSampleRate: a.integer(),
+
+    // Camera & Lens Info
+    camera: a.string(), // e.g., "Sony FX3", "ARRI Alexa Mini"
+    lens: a.string(), // e.g., "24-70mm f/2.8"
+    cameraSettings: a.json(), // { iso, shutter, aperture, whiteBalance }
+
+    // === CREATIVE METADATA ===
+    creativeMetadata: a.json(), // Full creative metadata blob
+    shotType: a.enum(['WIDE', 'MEDIUM', 'CLOSE_UP', 'EXTREME_CLOSE_UP', 'AERIAL', 'POV', 'TRACKING', 'STATIC', 'HANDHELD', 'OTHER']),
+    sceneNumber: a.string(),
+    takeNumber: a.integer(),
+    subjects: a.string().array(), // People/objects in frame
+    transcriptKeywords: a.string().array(), // Keywords from transcript
+    labels: a.string().array(), // Manual and AI labels
+    mood: a.enum(['ENERGETIC', 'CALM', 'DRAMATIC', 'HAPPY', 'SAD', 'TENSE', 'NEUTRAL', 'INSPIRATIONAL', 'HUMOROUS']),
+    colorPalette: a.string().array(), // Dominant colors
+    visualStyle: a.string(), // e.g., "cinematic", "documentary", "corporate"
+
+    // AI-Generated Content Analysis
+    aiTranscript: a.string(), // Full transcript
+    aiSummary: a.string(), // AI summary of content
+    aiSceneDescription: a.string(), // What's happening in scene
+    aiSentiment: a.float(), // -1 to 1
+    aiEmotions: a.json(), // { emotion: confidence }
+    aiFaces: a.json(), // Detected faces and identities
+    aiObjects: a.json(), // Detected objects
+    aiTextOnScreen: a.string().array(), // OCR results
+
+    // === OPERATIONAL METADATA ===
+    operationalMetadata: a.json(), // Full operational metadata blob
+    uploaderEmail: a.string(),
+    uploaderName: a.string(),
+    uploadTimestamp: a.datetime(),
+    workflowStage: a.enum(['INGEST', 'REVIEW', 'EDIT', 'COLOR', 'SOUND', 'VFX', 'FINAL', 'DELIVERED', 'ARCHIVED']),
+    usageCount: a.integer().default(0),
+    lastUsedAt: a.datetime(),
+    lastUsedBy: a.string(),
+    linkedVersions: a.string().array(), // Related version IDs
+    linkedProjects: a.string().array(), // Projects this asset is used in
+    parentAssetId: a.id(), // If this is derived from another asset
+    childAssetIds: a.string().array(), // Assets derived from this
+
+    // === LEGAL METADATA ===
+    legalMetadata: a.json(), // Full legal metadata blob
+    releaseStatus: a.enum(['CLEARED', 'PENDING', 'RESTRICTED', 'NO_RELEASE', 'PARTIAL']),
+    permitId: a.string(),
+    permitExpiry: a.datetime(),
+    talentReleases: a.json(), // { personName: { signed, date, expiryDate, restrictions } }
+    locationReleases: a.json(), // { location: { signed, date, restrictions } }
+    rightsExpiration: a.datetime(),
+    regionRestrictions: a.string().array(), // Regions where cannot use
+    usageRestrictions: a.string().array(), // e.g., "No broadcast", "Social only"
+    riskScore: a.integer(), // 0-100, legal risk assessment
+    riskFactors: a.string().array(), // What contributes to risk
+
+    // === STORAGE METADATA ===
+    storageMetadata: a.json(), // Full storage metadata blob
+    storageTier: a.enum(['HOT', 'WARM', 'COLD', 'GLACIER', 'DEEP_ARCHIVE']),
+    s3Key: a.string(),
+    s3Bucket: a.string(),
+    glacierVaultId: a.string(),
+    glacierArchiveId: a.string(),
+    proxyKey: a.string(), // Hot storage proxy path
+    thumbnailKey: a.string(),
+    waveformKey: a.string(), // Audio waveform data
+    fileSizeBytes: a.integer(),
+    partialRetrievalSupported: a.boolean().default(true),
+    thawCostEstimate: a.float(), // Estimated cost to restore from glacier
+    lastTierChangeAt: a.datetime(),
+    tierChangeHistory: a.json(), // Array of { from, to, date, reason }
+
+    // Search & Discovery
+    searchVector: a.string(), // Vector embedding for semantic search
+    fullTextIndex: a.string(), // Combined searchable text
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'Editor']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // ASSET LINEAGE - Family tree of asset relationships
+  AssetLineage: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
+    // Master Asset (the original source)
+    masterAssetId: a.id().required(),
+    masterAssetName: a.string(),
+    masterProjectId: a.id(),
+
+    // Child Assets - Derived versions
+    childAssets: a.json(), // Array of { assetId, type, generationNumber, createdAt, createdBy }
+
+    // Generation tracking
+    generationNumber: a.integer().default(0), // 0 = master, 1 = first derivative, etc.
+
+    // Derivation Type
+    derivationType: a.enum([
+      'LANGUAGE_VERSION',    // Dubbed/subtitled versions
+      'ASPECT_RATIO_CROP',   // Different aspect ratios (9:16, 1:1)
+      'SOCIAL_CUT',          // Platform-specific edits
+      'HIGHLIGHT_REEL',      // Highlight compilation
+      'TRAILER',             // Trailer/teaser
+      'BUMPER',              // Short bumper version
+      'GIF',                 // Animated GIF extract
+      'THUMBNAIL',           // Thumbnail image
+      'AUDIO_ONLY',          // Audio extracted
+      'TRANSCRIPT',          // Text transcript
+      'PROXY',               // Low-res proxy
+      'ARCHIVE_MASTER',      // Archive-ready master
+      'OTHER'
+    ]),
+    derivationDetails: a.json(), // { language, targetPlatform, duration, etc. }
+
+    // Version History
+    versionHistory: a.json(), // Array of { version, date, changes, changedBy }
+    currentVersion: a.integer().default(1),
+
+    // Approvals for this derivation
+    approvals: a.json(), // { role: { approved, by, at, comment } }
+    isApproved: a.boolean().default(false),
+    approvedAt: a.datetime(),
+    approvedBy: a.string(),
+
+    // Usage Tracking
+    usageCount: a.integer().default(0),
+    lastUsedAt: a.datetime(),
+    usedInProjects: a.string().array(),
+    usedInDeliverables: a.string().array(),
+
+    // Metadata Inheritance
+    inheritedMetadata: a.json(), // What metadata carries over from parent
+    overriddenMetadata: a.json(), // What metadata is specific to this derivation
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'Editor']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // ASSET USAGE HEATMAP - Detailed usage analytics
+  AssetUsageHeatmap: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+    assetId: a.id().required(),
+    projectId: a.id().required(),
+
+    // Time-based usage
+    lastUsed: a.datetime(),
+    useFrequencyDaily: a.float(), // Average uses per day
+    useFrequencyWeekly: a.float(),
+    useFrequencyMonthly: a.float(),
+
+    // Usage by time periods
+    usageByHour: a.json(), // { "0": 5, "1": 3, ... "23": 10 }
+    usageByDayOfWeek: a.json(), // { "Mon": 50, "Tue": 45, ... }
+    usageByWeek: a.json(), // Last 52 weeks
+    usageByMonth: a.json(), // Last 24 months
+
+    // Usage by team/role
+    useByTeam: a.json(), // { "Marketing": 45, "Sales": 30, "Production": 25 }
+    useByRole: a.json(), // { "Editor": 60, "Producer": 20, "Client": 20 }
+    useByUser: a.json(), // { email: { count, lastUsed } }
+    topUsers: a.string().array(), // Top 10 user emails
+
+    // Related deliverables
+    relatedDeliverables: a.json(), // Array of { deliverableId, type, date, platform }
+    deliverableCount: a.integer().default(0),
+
+    // Platform distribution
+    platformUsage: a.json(), // { "YouTube": 30, "LinkedIn": 25, "Instagram": 45 }
+
+    // ROI Metrics
+    roiScore: a.float(), // 0-100 composite ROI score
+    productionCost: a.float(),
+    estimatedRevenueGenerated: a.float(),
+    estimatedImpressions: a.integer(),
+    engagementRate: a.float(),
+
+    // Value Metrics
+    reusabilityScore: a.float(), // 0-100 how reusable is this asset
+    uniquenessScore: a.float(), // 0-100 how unique/irreplaceable
+    strategicValue: a.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
+    valueJustification: a.string(),
+
+    // Trend Analysis
+    usageTrend: a.enum(['RISING', 'STABLE', 'DECLINING', 'INACTIVE', 'SEASONAL']),
+    trendAnalysis: a.json(), // { direction, velocity, seasonality }
+    peakUsageDate: a.datetime(),
+    peakUsageCount: a.integer(),
+
+    // Predictions
+    predictedUsageNext30Days: a.integer(),
+    recommendedStorageTier: a.enum(['HOT', 'WARM', 'COLD', 'ARCHIVE']),
+    archiveRecommendation: a.boolean(),
+    archiveRecommendationReason: a.string(),
+
+    // Last updated
+    lastCalculated: a.datetime(),
+    dataQuality: a.enum(['HIGH', 'MEDIUM', 'LOW', 'INSUFFICIENT']),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'Marketing']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // 18. CUSTOM QUERIES
   analyzeProjectBrief: a
     .query()
     .arguments({
