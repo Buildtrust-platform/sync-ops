@@ -597,6 +597,23 @@ const schema = a.schema({
     scenes: a.json(), // Array of {description, location, props}
     complexity: a.enum(['LOW', 'MEDIUM', 'HIGH']),
 
+    // AI-Generated Creative Proposals (3 options)
+    creativeProposals: a.json(), // Array of {
+    //   id: string,
+    //   name: string (e.g., "Cinematic Narrative", "Documentary Style", "Motion Graphics")
+    //   concept: string (detailed creative vision)
+    //   visualStyle: string (cinematography approach)
+    //   narrativeApproach: string (storytelling method)
+    //   moodBoard: string[] (visual reference descriptions)
+    //   script: { voiceover: string, onScreenText: string[], dialogues: Array<{speaker, line}> }
+    //   shotList: Array<{ shotNumber, shotType, description, duration, framing, movement, notes }>
+    //   estimatedBudget: string
+    //   estimatedDays: number
+    //   technicalRequirements: { camera, lens, lighting, audio, specialEquipment }
+    //   postProduction: { colorGrade, vfx, soundDesign, music }
+    // }
+    selectedProposalId: a.string(), // Which proposal the user selected
+
     // Approval tracking
     aiProcessedAt: a.datetime(),
     approvedByProducer: a.boolean(),

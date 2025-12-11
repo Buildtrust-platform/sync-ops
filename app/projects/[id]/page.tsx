@@ -363,16 +363,19 @@ export default function ProjectDetail() {
                     </div>
                   </div>
                 ) : (
-                  <SmartBrief projectId={projectId} onBriefCreated={() => {
-                    if (!client) return;
-                    client.models.Brief.list({
-                      filter: { projectId: { eq: projectId } }
-                    }).then((data) => {
-                      if (data.data && data.data.length > 0) {
-                        setBrief(data.data[0]);
-                      }
-                    });
-                  }} />
+                  <SmartBrief
+                    onComplete={() => {
+                      if (!client) return;
+                      client.models.Brief.list({
+                        filter: { projectId: { eq: projectId } }
+                      }).then((data) => {
+                        if (data.data && data.data.length > 0) {
+                          setBrief(data.data[0]);
+                        }
+                      });
+                    }}
+                    onCancel={() => setActiveModule('overview')}
+                  />
                 )}
               </div>
             )}
