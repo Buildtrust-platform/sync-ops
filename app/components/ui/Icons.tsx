@@ -11,7 +11,7 @@
 
 import React from 'react';
 
-interface IconProps {
+export interface IconProps {
   className?: string;
   strokeWidth?: number;
 }
@@ -218,6 +218,13 @@ export const Icons = {
     </IconBase>
   ),
 
+  CheckSquare: (props: IconProps) => (
+    <IconBase {...props}>
+      <polyline points="9 11 12 14 22 4" />
+      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+    </IconBase>
+  ),
+
   AlertCircle: (props: IconProps) => (
     <IconBase {...props}>
       <circle cx="12" cy="12" r="10" />
@@ -239,6 +246,14 @@ export const Icons = {
       <circle cx="12" cy="12" r="10" />
       <path d="M12 16v-4" />
       <path d="M12 8h.01" />
+    </IconBase>
+  ),
+
+  HelpCircle: (props: IconProps) => (
+    <IconBase {...props}>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+      <path d="M12 17h.01" />
     </IconBase>
   ),
 
@@ -394,6 +409,12 @@ export const Icons = {
     </IconBase>
   ),
 
+  MessageSquare: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </IconBase>
+  ),
+
   Send: (props: IconProps) => (
     <IconBase {...props}>
       <line x1="22" x2="11" y1="2" y2="13" />
@@ -513,6 +534,22 @@ export const Icons = {
     </IconBase>
   ),
 
+  LogOut: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" x2="9" y1="12" y2="12" />
+    </IconBase>
+  ),
+
+  LogIn: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+      <polyline points="10 17 15 12 10 7" />
+      <line x1="15" x2="3" y1="12" y2="12" />
+    </IconBase>
+  ),
+
   Eye: (props: IconProps) => (
     <IconBase {...props}>
       <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
@@ -584,6 +621,15 @@ export const Icons = {
       <line x1="3" x2="3.01" y1="6" y2="6" />
       <line x1="3" x2="3.01" y1="12" y2="12" />
       <line x1="3" x2="3.01" y1="18" y2="18" />
+    </IconBase>
+  ),
+
+  Library: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="m16 6 4 14" />
+      <path d="M12 6v14" />
+      <path d="M8 8v12" />
+      <path d="M4 4v16" />
     </IconBase>
   ),
 
