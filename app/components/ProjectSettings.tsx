@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
+import TeamPermissions from "./TeamPermissions";
 
 /**
  * PROJECT SETTINGS & CONFIGURATION
@@ -210,6 +211,12 @@ export default function ProjectSettings({ project, onUpdate }: ProjectSettingsPr
           </div>
         </div>
       </div>
+
+      {/* TEAM & PERMISSIONS (RBAC) */}
+      <TeamPermissions
+        projectId={project.id}
+        organizationId={project.organizationId}
+      />
 
       {/* SHOOT LOCATION */}
       <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">

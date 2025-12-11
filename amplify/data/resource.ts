@@ -485,12 +485,189 @@ const schema = a.schema({
     activityLogs: a.hasMany('ActivityLog', 'projectId'),
     reviews: a.hasMany('Review', 'projectId'),
     messages: a.hasMany('Message', 'projectId'),
+    // RBAC: Team members with role-based permissions
+    teamMembers: a.hasMany('ProjectMember', 'projectId'),
   })
   .authorization(allow => [
     allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.owner(), // Creator can do anything
     allow.authenticated().to(['read']), // Logged in users can view projects
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // ============================================
+  // RBAC: PROJECT TEAM MEMBERS
+  // Enterprise-grade role-based access control
+  // ============================================
+
+  ProjectMember: a.model({
+    // Linkages
+    organizationId: a.id().required(),
+    projectId: a.id().required(),
+    project: a.belongsTo('Project', 'projectId'),
+
+    // User Identity
+    userId: a.string().required(), // Cognito user ID
+    email: a.string().required(),
+    name: a.string(),
+    avatar: a.string(), // S3 key for profile picture
+    title: a.string(), // Job title
+
+    // Project Role (determines permissions within this project)
+    projectRole: a.enum([
+      'PROJECT_OWNER',       // Full control within project
+      'PROJECT_MANAGER',     // Manage schedules, team, assets
+      'PROJECT_EDITOR',      // Edit assigned assets
+      'PROJECT_VIEWER',      // Read-only access
+      'PROJECT_REVIEWER',    // Can view and leave feedback
+      'PROJECT_LEGAL',       // Legal controls for this project
+      'PROJECT_FINANCE',     // Budget controls for this project
+    ]),
+
+    // External user flag and role
+    isExternal: a.boolean().default(false),
+    externalRole: a.enum([
+      'EXTERNAL_EDITOR',     // Very restricted: assigned tasks/assets only
+      'EXTERNAL_REVIEWER',   // Limited: view-only on assigned versions
+      'EXTERNAL_VENDOR',     // Task-based: upload to controlled folders
+      'GUEST_VIEWER',        // Minimal: time-limited, watermark-only
+    ]),
+
+    // Scoped Access (for SCOPED permissions)
+    assignedAssetIds: a.string().array(), // Specific assets this user can access
+    assignedTaskIds: a.string().array(), // Specific tasks this user can access
+    assignedPhases: a.string().array(), // Phases: 'BRIEF', 'PRE_PRODUCTION', etc.
+
+    // Time-Limited Access
+    accessStartsAt: a.datetime(),
+    accessExpiresAt: a.datetime(), // Auto-revoke after this time
+
+    // Status
+    status: a.enum(['ACTIVE', 'SUSPENDED', 'REVOKED']),
+    invitedBy: a.string(),
+    invitedAt: a.datetime(),
+    joinedAt: a.datetime(),
+    lastActiveAt: a.datetime(),
+    suspendedAt: a.datetime(),
+    suspendedBy: a.string(),
+    suspendedReason: a.string(),
+    revokedAt: a.datetime(),
+    revokedBy: a.string(),
+    revokedReason: a.string(),
+
+    // Custom Permission Overrides (JSON)
+    // Format: { "VIEW": true, "EDIT": false, "DOWNLOAD_MASTER": false }
+    customPermissions: a.json(),
+
+    // Notification Preferences
+    emailNotifications: a.boolean().default(true),
+    slackUserId: a.string(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.owner(),
+    allow.authenticated().to(['read']),
+    allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // ============================================
+  // RBAC: ACCESS EXCEPTION REQUESTS
+  // For time-limited permission escalations
+  // ============================================
+
+  AccessException: a.model({
+    organizationId: a.id().required(),
+    projectId: a.id(),
+
+    // Who is requesting
+    requestedBy: a.string().required(), // User ID
+    requestedByEmail: a.string().required(),
+    requestedAt: a.datetime().required(),
+
+    // Target user
+    targetUserId: a.string().required(),
+    targetUserEmail: a.string().required(),
+
+    // What's being requested
+    requestedAction: a.string().required(), // Action type
+    requestedAssetId: a.string(), // Specific asset if applicable
+
+    // Duration
+    durationHours: a.integer().required(),
+    expiresAt: a.datetime().required(),
+
+    // Justification
+    reason: a.string().required(),
+
+    // Approval Status
+    status: a.enum(['PENDING', 'APPROVED', 'DENIED', 'EXPIRED']),
+    approvedBy: a.string(),
+    approvedByEmail: a.string(),
+    approvedAt: a.datetime(),
+    approverRole: a.enum(['LEGAL', 'ADMIN', 'OWNER']),
+    denialReason: a.string(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.owner(),
+    allow.authenticated().to(['read']),
+    allow.groups(['Admin', 'Legal']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // ============================================
+  // RBAC: AUDIT LOG
+  // Immutable record of all actions
+  // ============================================
+
+  AuditLog: a.model({
+    organizationId: a.id().required(),
+
+    // Timestamp
+    timestamp: a.datetime().required(),
+
+    // Who performed the action
+    userId: a.string().required(),
+    userEmail: a.string().required(),
+    userRole: a.string().required(), // Role at time of action
+    isExternal: a.boolean().default(false),
+
+    // What action was performed
+    action: a.string().required(), // Action type from RBAC
+    actionCategory: a.enum([
+      'VIEW',
+      'EDIT',
+      'DELETE',
+      'DOWNLOAD',
+      'APPROVE',
+      'SHARE',
+      'ACCESS',
+      'ADMIN',
+    ]),
+
+    // Where (resource identifiers)
+    projectId: a.string(),
+    assetId: a.string(),
+    resourceType: a.string(), // 'PROJECT', 'ASSET', 'REVIEW', etc.
+    resourceId: a.string(),
+
+    // Details (JSON blob for action-specific data)
+    details: a.json(),
+
+    // Result
+    success: a.boolean().required(),
+    deniedReason: a.string(),
+
+    // Client metadata
+    ipAddress: a.string(),
+    userAgent: a.string(),
+    sessionId: a.string(),
+    geoLocation: a.string(), // Country/region for compliance
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    // Audit logs are append-only - no updates or deletes
+    allow.authenticated().to(['create', 'read']),
+    allow.groups(['Admin', 'Legal', 'Finance']).to(['read']),
   ]),
 
   // 2. THE ASSET (Video Files)

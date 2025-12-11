@@ -19,13 +19,33 @@ export default function LandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="text-xl font-semibold tracking-tight text-gray-900">SyncOps</div>
-          <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-6">
+            <button
+              onClick={() => router.push('/features')}
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              Features
+            </button>
             <button
               onClick={() => router.push('/pricing')}
               className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
             >
               Pricing
             </button>
+            <button
+              onClick={() => router.push('/about')}
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              About
+            </button>
+            <button
+              onClick={() => router.push('/contact')}
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              Contact
+            </button>
+          </div>
+          <div className="flex items-center gap-4">
             <button
               onClick={handleStartProject}
               className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
