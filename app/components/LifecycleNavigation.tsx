@@ -93,7 +93,12 @@ const PHASE_MODULES: Record<string, Module[]> = {
   ],
   production: [
     { id: 'field-intel', label: 'Field Intelligence', icon: 'Globe' },
+    { id: 'progress-board', label: 'Progress Board', icon: 'Activity' },
+    { id: 'dpr', label: 'Daily Report', icon: 'FileText' },
+    { id: 'shot-logger', label: 'Shot Logger', icon: 'Clapperboard' },
     { id: 'ingest', label: 'Media Ingest', icon: 'Upload' },
+    { id: 'media-verification', label: 'Media Verification', icon: 'ShieldCheck' },
+    { id: 'crew-time', label: 'Crew Time Clock', icon: 'Clock' },
     { id: 'tasks', label: 'Tasks', icon: 'CheckSquare', hasBadge: true },
     { id: 'communication', label: 'Communication', icon: 'MessageSquare' },
   ],

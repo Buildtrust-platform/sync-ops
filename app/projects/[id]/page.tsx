@@ -35,6 +35,11 @@ import FieldIntelligence from "@/app/components/FieldIntelligence";
 import GovernedIngest from "@/app/components/GovernedIngest";
 import TaskManager from "@/app/components/TaskManager";
 import ProjectChat from "@/app/components/ProjectChat";
+import DailyProductionReport from "@/app/components/DailyProductionReport";
+import ShotLogger from "@/app/components/ShotLogger";
+import MediaVerification from "@/app/components/MediaVerification";
+import CrewTimeClock from "@/app/components/CrewTimeClock";
+import LiveProgressBoard from "@/app/components/LiveProgressBoard";
 
 // Post-Production Phase
 import VideoThumbnail from "@/app/components/VideoThumbnail";
@@ -606,6 +611,46 @@ export default function ProjectDetail() {
                   currentUserRole="Producer"
                 />
               </div>
+            )}
+
+            {activeModule === 'dpr' && (
+              <DailyProductionReport
+                projectId={projectId}
+                organizationId={project.organizationId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'shot-logger' && (
+              <ShotLogger
+                projectId={projectId}
+                organizationId={project.organizationId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'media-verification' && (
+              <MediaVerification
+                projectId={projectId}
+                organizationId={project.organizationId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'crew-time' && (
+              <CrewTimeClock
+                projectId={projectId}
+                organizationId={project.organizationId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'progress-board' && (
+              <LiveProgressBoard
+                projectId={projectId}
+                organizationId={project.organizationId}
+                currentUserEmail={userEmail}
+              />
             )}
 
             {/* POST-PRODUCTION PHASE MODULES */}
