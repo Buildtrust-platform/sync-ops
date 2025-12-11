@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Icons } from './Icons';
 import { Button } from './Button';
@@ -42,6 +42,12 @@ export function Modal({
 }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure we only render portal on client
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Handle escape key
   const handleKeyDown = useCallback(
@@ -153,12 +159,10 @@ export function Modal({
     </div>
   );
 
-  // Use portal to render at document root
-  if (typeof window !== 'undefined') {
-    return createPortal(modalContent, document.body);
-  }
+  // Use portal to render at document root (only after client mount)
+  if (!mounted) return null;
 
-  return null;
+  return createPortal(modalContent, document.body);
 }
 
 // Confirm Modal - specialized for confirmations
