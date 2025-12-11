@@ -107,6 +107,12 @@ const PHASE_MODULES: Record<string, Module[]> = {
     { id: 'versions', label: 'Versions', icon: 'GitBranch' },
     { id: 'review', label: 'Review & Notes', icon: 'Eye' },
     { id: 'timeline', label: 'Timeline', icon: 'Clock' },
+    { id: 'edit-pipeline', label: 'Edit Pipeline', icon: 'Scissors' },
+    { id: 'vfx-tracker', label: 'VFX Tracker', icon: 'Sparkles' },
+    { id: 'color-pipeline', label: 'Color Pipeline', icon: 'Layers' },
+    { id: 'audio-post', label: 'Audio Post', icon: 'Music' },
+    { id: 'deliverables', label: 'Deliverables', icon: 'Package' },
+    { id: 'qc-checklist', label: 'QC Checklist', icon: 'ShieldCheck' },
   ],
   delivery: [
     { id: 'distribution', label: 'Distribution', icon: 'Share2' },

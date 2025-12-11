@@ -46,6 +46,12 @@ import VideoThumbnail from "@/app/components/VideoThumbnail";
 import AssetVersioning from "@/app/components/AssetVersioning";
 import AssetReview from "@/app/components/AssetReview";
 import ProjectTimeline from "@/app/components/ProjectTimeline";
+import EditPipeline from "@/app/components/EditPipeline";
+import VFXShotTracker from "@/app/components/VFXShotTracker";
+import ColorPipeline from "@/app/components/ColorPipeline";
+import AudioPostTracker from "@/app/components/AudioPostTracker";
+import DeliverableMatrix from "@/app/components/DeliverableMatrix";
+import QCChecklist from "@/app/components/QCChecklist";
 
 // Delivery Phase
 import DistributionEngine from "@/app/components/DistributionEngine";
@@ -797,6 +803,47 @@ export default function ProjectDetail() {
 
             {activeModule === 'timeline' && (
               <ProjectTimeline project={project} />
+            )}
+
+            {activeModule === 'edit-pipeline' && (
+              <EditPipeline
+                projectId={projectId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'vfx-tracker' && (
+              <VFXShotTracker
+                projectId={projectId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'color-pipeline' && (
+              <ColorPipeline
+                projectId={projectId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'audio-post' && (
+              <AudioPostTracker
+                projectId={projectId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'deliverables' && (
+              <DeliverableMatrix
+                projectId={projectId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'qc-checklist' && (
+              <QCChecklist
+                projectId={projectId}
+              />
             )}
 
             {/* DELIVERY PHASE MODULES */}
