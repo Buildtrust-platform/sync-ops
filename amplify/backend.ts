@@ -18,13 +18,37 @@ const backend = defineBackend({
   notificationGenerator,
 });
 
-// Grant Rekognition permissions to Lambda
+// Grant Rekognition permissions to Lambda (including face detection for AI Analysis)
 backend.mediaProcessor.resources.lambda.addToRolePolicy(
   new PolicyStatement({
     actions: [
       'rekognition:DetectLabels',
       'rekognition:DetectText',
       'rekognition:DetectModerationLabels',
+      'rekognition:DetectFaces',
+      'rekognition:RecognizeCelebrities',
+      // Video analysis (async operations)
+      'rekognition:StartLabelDetection',
+      'rekognition:GetLabelDetection',
+      'rekognition:StartFaceDetection',
+      'rekognition:GetFaceDetection',
+      'rekognition:StartSegmentDetection',
+      'rekognition:GetSegmentDetection',
+      'rekognition:StartContentModeration',
+      'rekognition:GetContentModeration',
+    ],
+    resources: ['*'],
+  })
+);
+
+// Grant Transcribe permissions for audio/video transcription
+backend.mediaProcessor.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: [
+      'transcribe:StartTranscriptionJob',
+      'transcribe:GetTranscriptionJob',
+      'transcribe:ListTranscriptionJobs',
+      'transcribe:DeleteTranscriptionJob',
     ],
     resources: ['*'],
   })

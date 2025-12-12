@@ -699,6 +699,12 @@ const schema = a.schema({
     // Relationships
     reviews: a.hasMany('Review', 'assetId'),
     versions: a.hasMany('AssetVersion', 'assetId'),
+
+    // AI Analysis Relationships
+    aiFaceDetections: a.hasMany('AIFaceDetection', 'assetId'),
+    aiSceneDetections: a.hasMany('AISceneDetection', 'assetId'),
+    aiTranscripts: a.hasMany('AITranscript', 'assetId'),
+    aiAnalysisJobs: a.hasMany('AIAnalysisJob', 'assetId'),
   })
   .authorization(allow => [
     allow.publicApiKey(), // TEMPORARY: Allow public access for development
@@ -1112,6 +1118,178 @@ const schema = a.schema({
     allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.authenticated().to(['read']),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // ============================================
+  // AI ANALYSIS MODELS (Rekognition, Transcribe)
+  // ============================================
+
+  // AI Face Detection Results (from AWS Rekognition)
+  AIFaceDetection: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+    projectId: a.id(),
+
+    // Link to Asset
+    assetId: a.id().required(),
+    asset: a.belongsTo('Asset', 'assetId'),
+
+    // Face Detection Data
+    timestamp: a.float(), // For video: timestamp in seconds where face was detected
+    boundingBox: a.json(), // { left, top, width, height } - normalized coordinates
+    confidence: a.float().required(), // Detection confidence (0-100)
+
+    // Person Identification
+    personId: a.string(), // For grouping same person across detections
+    personName: a.string(), // User-assigned name for the person
+
+    // Face Attributes (from Rekognition)
+    emotions: a.json(), // { happy, sad, angry, surprised, neutral } scores
+    ageRange: a.json(), // { low, high }
+    gender: a.json(), // { value, confidence }
+    smile: a.json(), // { value, confidence }
+    eyeglasses: a.json(), // { value, confidence }
+    sunglasses: a.json(), // { value, confidence }
+    beard: a.json(), // { value, confidence }
+    mustache: a.json(), // { value, confidence }
+    eyesOpen: a.json(), // { value, confidence }
+    mouthOpen: a.json(), // { value, confidence }
+
+    // Landmarks (for face mapping)
+    landmarks: a.json(), // Array of { type, x, y } points
+
+    // Processing metadata
+    processingJobId: a.string(), // Links to AIAnalysisJob
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'update']), // Users can update personName
+    allow.groups(['Admin', 'Editor']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // AI Scene Detection Results (from AWS Rekognition Video)
+  AISceneDetection: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+    projectId: a.id(),
+
+    // Link to Asset
+    assetId: a.id().required(),
+    asset: a.belongsTo('Asset', 'assetId'),
+
+    // Scene Data
+    startTime: a.float().required(), // Start timestamp in seconds
+    endTime: a.float().required(), // End timestamp in seconds
+    duration: a.float(), // Duration in seconds
+
+    // Scene Labels
+    labels: a.string().array(), // Detected scene labels (e.g., "Office", "Outdoor", "Meeting")
+    confidence: a.float().required(), // Average confidence
+
+    // Shot Classification
+    shotType: a.enum(['WIDE', 'MEDIUM', 'CLOSE_UP', 'EXTREME_CLOSE_UP', 'ESTABLISHING', 'UNKNOWN']),
+    movement: a.enum(['STATIC', 'PAN', 'TILT', 'ZOOM', 'TRACKING', 'HANDHELD', 'UNKNOWN']),
+    lighting: a.enum(['NATURAL', 'ARTIFICIAL', 'MIXED', 'LOW_KEY', 'HIGH_KEY', 'UNKNOWN']),
+
+    // Thumbnail (S3 key for scene thumbnail)
+    thumbnailKey: a.string(),
+
+    // Processing metadata
+    processingJobId: a.string(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read']),
+    allow.groups(['Admin', 'Editor']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // AI Transcript Segments (from AWS Transcribe)
+  AITranscript: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+    projectId: a.id(),
+
+    // Link to Asset
+    assetId: a.id().required(),
+    asset: a.belongsTo('Asset', 'assetId'),
+
+    // Transcript Data
+    startTime: a.float().required(), // Start timestamp in seconds
+    endTime: a.float().required(), // End timestamp in seconds
+    text: a.string().required(), // Transcribed text
+
+    // Speaker Identification
+    speakerId: a.string(), // Speaker label from Transcribe (e.g., "spk_0")
+    speakerName: a.string(), // User-assigned speaker name
+    confidence: a.float(), // Transcription confidence
+
+    // Word-level timing (for highlighting)
+    words: a.json(), // Array of { word, startTime, endTime, confidence }
+
+    // Language
+    languageCode: a.string(), // e.g., "en-US"
+
+    // Processing metadata
+    processingJobId: a.string(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'update']), // Users can update speakerName
+    allow.groups(['Admin', 'Editor']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // AI Analysis Job (tracks processing status)
+  AIAnalysisJob: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+    projectId: a.id(),
+
+    // Link to Asset
+    assetId: a.id().required(),
+    asset: a.belongsTo('Asset', 'assetId'),
+    assetName: a.string(), // For display
+
+    // Job Configuration
+    analysisType: a.enum([
+      'FACE_DETECTION',
+      'SCENE_DETECTION',
+      'TRANSCRIPTION',
+      'LABEL_DETECTION',
+      'TEXT_DETECTION',
+      'MODERATION',
+      'FULL_ANALYSIS', // All of the above
+    ]),
+
+    // Status
+    status: a.enum([
+      'QUEUED',
+      'PROCESSING',
+      'COMPLETED',
+      'FAILED',
+      'CANCELLED',
+    ]),
+    progress: a.integer().default(0), // 0-100
+
+    // Timing
+    queuedAt: a.datetime(),
+    startedAt: a.datetime(),
+    completedAt: a.datetime(),
+
+    // Results Summary
+    resultsCount: a.integer(), // Number of detections/segments
+    errorMessage: a.string(), // If failed
+
+    // AWS Job IDs (for tracking async operations)
+    rekognitionJobId: a.string(), // For video analysis
+    transcribeJobName: a.string(), // For transcription
+
+    // Who triggered the analysis
+    triggeredBy: a.string(), // 'SYSTEM' for auto, or user email
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read']),
+    allow.groups(['Admin', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
 
   // 7. COMMUNICATION LAYER (PRD FR-28 to FR-30)
@@ -3044,7 +3222,1029 @@ const schema = a.schema({
     allow.groups(['Admin', 'Producer', 'Marketing']).to(['create', 'read', 'update', 'delete']),
   ]),
 
-  // 18. CUSTOM QUERIES
+  // ============================================
+  // PRODUCTION PHASE MODELS (Missing - Critical)
+  // These support data persistence for production tracking
+  // ============================================
+
+  // Daily Production Report (DPR) - The legal document of what happened on set
+  DailyProductionReport: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+    projectId: a.id().required(),
+
+    // Report Identification
+    date: a.date().required(),
+    shootDay: a.integer().required(), // Day 1, 2, 3, etc.
+    unit: a.string(), // "Main Unit", "2nd Unit", etc.
+
+    // Key Personnel
+    director: a.string(),
+    firstAD: a.string(),
+    upm: a.string(), // Unit Production Manager
+    producer: a.string(),
+
+    // Time Tracking
+    crewCall: a.string(), // HH:mm format
+    firstShot: a.string(),
+    lunchStart: a.string(),
+    lunchEnd: a.string(),
+    lastShot: a.string(),
+    crewWrap: a.string(),
+    cameraWrap: a.string(),
+
+    // Scene Progress
+    scheduledScenes: a.string().array(), // Scene numbers scheduled
+    completedScenes: a.string().array(),
+    partialScenes: a.string().array(),
+    totalSetups: a.integer(),
+    totalTakes: a.integer(),
+    goodTakes: a.integer(),
+
+    // Media Stats
+    totalMinutesShot: a.float(),
+    runningTotal: a.float(), // Cumulative minutes shot
+    cardsUsed: a.integer(),
+    storageUsedGB: a.float(),
+
+    // Crew Stats
+    totalCrewMembers: a.integer(),
+    overtimeCrew: a.integer(),
+    mealPenalties: a.integer(),
+
+    // Weather & Conditions
+    weatherConditions: a.string(),
+    temperature: a.string(),
+
+    // Notes
+    productionNotes: a.string(),
+    tomorrowPrep: a.string(),
+
+    // Incidents (JSON array)
+    incidents: a.json(), // [{ type, description, resolved, action }]
+
+    // Status & Approval
+    status: a.enum(['DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED']),
+    submittedBy: a.string(),
+    submittedAt: a.datetime(),
+    approvedBy: a.string(),
+    approvedAt: a.datetime(),
+    rejectionReason: a.string(),
+
+    // Creator
+    createdBy: a.string().required(),
+    createdByEmail: a.string(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'ProjectManager']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // Shot Log - Individual shot/take records during production
+  ShotLog: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+    projectId: a.id().required(),
+    dprId: a.id(), // Link to Daily Production Report
+
+    // Shot Identification
+    scene: a.string().required(),
+    shot: a.string().required(), // "1A", "2B", etc.
+    take: a.integer().required(),
+
+    // Status
+    status: a.enum(['GOOD', 'NG', 'HOLD', 'CIRCLE', 'FALSE_START']),
+    circled: a.boolean().default(false), // Print/circle take
+
+    // Timecode
+    timecodeIn: a.string(), // HH:MM:SS:FF
+    timecodeOut: a.string(),
+    duration: a.float(), // seconds
+
+    // Camera & Technical
+    camera: a.string(), // "A Cam", "B Cam"
+    lens: a.string(), // "50mm", "24-70mm"
+    fStop: a.string(),
+    iso: a.string(),
+    fps: a.float(),
+    cardId: a.string(), // Media card ID
+
+    // Notes
+    notes: a.string(),
+    continuityNotes: a.string(),
+    performanceNotes: a.string(),
+    technicalNotes: a.string(),
+
+    // Metadata
+    timestamp: a.datetime(),
+    loggedBy: a.string(),
+    loggedByEmail: a.string(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'Editor']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // VFX Shot - VFX shot tracking with vendor management
+  VFXShot: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+    projectId: a.id().required(),
+
+    // Shot Identification
+    shotCode: a.string().required(), // "VFX_010_020"
+    sequence: a.string(), // "SEQ_010"
+    description: a.string(),
+
+    // Frame Range
+    frameIn: a.integer(),
+    frameOut: a.integer(),
+    frameCount: a.integer(),
+
+    // Complexity & Cost
+    complexity: a.enum(['SIMPLE', 'MEDIUM', 'COMPLEX', 'HERO']),
+    bidAmount: a.float(),
+    actualAmount: a.float(),
+    variance: a.float(),
+
+    // Vendor Assignment
+    vendor: a.string(),
+    vendorContact: a.string(),
+    vendorEmail: a.string(),
+
+    // Status Workflow
+    status: a.enum([
+      'PLATE_PREP',
+      'TURNOVER',
+      'IN_PROGRESS',
+      'INTERNAL_REVIEW',
+      'CLIENT_REVIEW',
+      'REVISIONS',
+      'APPROVED',
+      'FINAL',
+    ]),
+
+    // Delivery Tracking
+    deliveryStage: a.enum(['NONE', 'TEMP', 'WIP_1', 'WIP_2', 'WIP_3', 'FINAL']),
+    currentVersion: a.integer().default(1),
+    dueDate: a.date(),
+
+    // Plate & Reference
+    plateDelivered: a.boolean().default(false),
+    plateDeliveredAt: a.datetime(),
+    referenceDelivered: a.boolean().default(false),
+    referenceDeliveredAt: a.datetime(),
+
+    // Notes & Attachments
+    notes: a.string(),
+    briefKey: a.string(), // S3 key for VFX brief document
+    plateKey: a.string(), // S3 key for source plate
+    latestDeliveryKey: a.string(), // S3 key for latest delivery
+
+    // Creator
+    createdBy: a.string().required(),
+    createdAt: a.datetime(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'VFX']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // Edit Session - Tracks editing workflow stages
+  EditSession: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+    projectId: a.id().required(),
+
+    // Session Identification
+    name: a.string().required(), // "Assembly v1", "Fine Cut v3"
+    stage: a.enum([
+      'ASSEMBLY',
+      'ROUGH_CUT',
+      'FINE_CUT',
+      'PICTURE_LOCK',
+      'CONFORM',
+      'ONLINE',
+      'FINAL_MASTER',
+    ]),
+
+    // Version Info
+    versionNumber: a.integer().required(),
+    isCurrentVersion: a.boolean().default(false),
+
+    // Duration & Specs
+    duration: a.string(), // "HH:MM:SS"
+    frameRate: a.float(),
+    resolution: a.string(),
+
+    // Editor Assignment
+    editorEmail: a.string(),
+    editorName: a.string(),
+
+    // Timeline File
+    timelineKey: a.string(), // S3 key for project file
+    exportKey: a.string(), // S3 key for exported video
+
+    // Notes Tracking
+    totalNotes: a.integer().default(0),
+    addressedNotes: a.integer().default(0),
+
+    // Status
+    status: a.enum(['DRAFT', 'IN_PROGRESS', 'REVIEW', 'APPROVED', 'SUPERSEDED']),
+
+    // Dates
+    startedAt: a.datetime(),
+    completedAt: a.datetime(),
+    approvedAt: a.datetime(),
+    approvedBy: a.string(),
+
+    // Creator
+    createdBy: a.string().required(),
+    createdAt: a.datetime(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'Editor']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // Color Session - Color grading sessions
+  ColorSession: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+    projectId: a.id().required(),
+
+    // Session Identification
+    name: a.string().required(),
+    stage: a.enum([
+      'DAILIES',
+      'LOOK_DEV',
+      'FIRST_PASS',
+      'HERO_GRADE',
+      'FINAL',
+      'DELIVERABLES',
+    ]),
+
+    // Colorist
+    coloristEmail: a.string(),
+    coloristName: a.string(),
+    facility: a.string(),
+    suite: a.string(),
+
+    // Session Details
+    sessionDate: a.date(),
+    durationHours: a.float(),
+    cost: a.float(),
+
+    // Technical Specs
+    colorSpace: a.string(), // "Rec.709", "DCI-P3", "Rec.2020"
+    hdrFormat: a.string(), // "HDR10", "Dolby Vision", "SDR"
+    peakNits: a.integer(),
+
+    // LUT/CDL Info
+    lutFileName: a.string(),
+    lutKey: a.string(), // S3 key
+    cdlSlope: a.string(), // RGB values
+    cdlOffset: a.string(),
+    cdlPower: a.string(),
+    cdlSaturation: a.float(),
+
+    // Status
+    status: a.enum(['SCHEDULED', 'IN_PROGRESS', 'REVIEW', 'APPROVED', 'SUPERSEDED']),
+    lookApproved: a.boolean().default(false),
+    lookApprovedBy: a.string(),
+    lookApprovedAt: a.datetime(),
+
+    // Notes
+    notes: a.string(),
+
+    // Creator
+    createdBy: a.string().required(),
+    createdAt: a.datetime(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'Colorist']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // Audio Cue - Audio post-production cues (ADR, Music, SFX)
+  AudioCue: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+    projectId: a.id().required(),
+
+    // Cue Identification
+    cueType: a.enum(['ADR', 'VO', 'SFX', 'FOLEY', 'MUSIC', 'AMBIENCE']),
+    cueNumber: a.string().required(), // "ADR_001", "MX_015"
+    name: a.string().required(),
+
+    // Timecode
+    timecodeIn: a.string().required(), // HH:MM:SS:FF
+    timecodeOut: a.string(),
+    duration: a.float(), // seconds
+
+    // For ADR/VO
+    character: a.string(),
+    actor: a.string(),
+    lineText: a.string(),
+
+    // For Music
+    composer: a.string(),
+    publisher: a.string(),
+    masterOwner: a.string(),
+    syncOwner: a.string(),
+    licenseFee: a.float(),
+    territories: a.string().array(),
+    term: a.string(), // "Perpetual", "5 Years"
+
+    // Clearance Status
+    clearanceStatus: a.enum(['PENDING', 'REQUESTED', 'CLEARED', 'DENIED', 'ALT_NEEDED']),
+    clearanceNotes: a.string(),
+    clearanceDate: a.datetime(),
+
+    // Recording Status (for ADR/VO/Foley)
+    recordingStatus: a.enum(['SPOTTED', 'SCHEDULED', 'RECORDED', 'EDITED', 'APPROVED']),
+    recordingDate: a.date(),
+    recordingFacility: a.string(),
+
+    // Files
+    sourceKey: a.string(), // S3 key for source audio
+    editedKey: a.string(), // S3 key for edited audio
+
+    // Notes
+    notes: a.string(),
+
+    // Creator
+    createdBy: a.string().required(),
+    createdAt: a.datetime(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'Sound']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // QC Report - Quality Control check results
+  QCReport: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+    projectId: a.id().required(),
+    assetId: a.id(), // Optional link to specific asset
+    deliverableId: a.id(), // Optional link to deliverable
+
+    // Report Identification
+    name: a.string().required(),
+    reportType: a.enum(['FULL_QC', 'TECHNICAL_ONLY', 'QUALITY_REVIEW', 'EDITORIAL_REVIEW', 'COMPLIANCE_ONLY']),
+
+    // Overall Results
+    overallStatus: a.enum(['PASS', 'FAIL', 'CONDITIONAL', 'PENDING']),
+    totalChecks: a.integer(),
+    passedChecks: a.integer(),
+    failedChecks: a.integer(),
+    warningChecks: a.integer(),
+
+    // Individual Check Results (JSON array)
+    checkResults: a.json(), // [{ category, check, status, severity, notes }]
+
+    // Categories Summary
+    videoTechnical: a.enum(['PASS', 'FAIL', 'WARNING', 'N_A']),
+    videoQuality: a.enum(['PASS', 'FAIL', 'WARNING', 'N_A']),
+    audioTechnical: a.enum(['PASS', 'FAIL', 'WARNING', 'N_A']),
+    audioQuality: a.enum(['PASS', 'FAIL', 'WARNING', 'N_A']),
+    editorial: a.enum(['PASS', 'FAIL', 'WARNING', 'N_A']),
+    graphicsText: a.enum(['PASS', 'FAIL', 'WARNING', 'N_A']),
+    compliance: a.enum(['PASS', 'FAIL', 'WARNING', 'N_A']),
+
+    // Issues List
+    criticalIssues: a.string().array(),
+    majorIssues: a.string().array(),
+    minorIssues: a.string().array(),
+
+    // QC Operator
+    qcOperator: a.string(),
+    qcOperatorEmail: a.string(),
+    qcDate: a.datetime(),
+    qcDuration: a.integer(), // minutes
+
+    // Sign-off
+    signedOffBy: a.string(),
+    signedOffAt: a.datetime(),
+    signOffNotes: a.string(),
+
+    // Report File
+    reportKey: a.string(), // S3 key for PDF report
+
+    // Creator
+    createdBy: a.string().required(),
+    createdAt: a.datetime(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'QC']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // ============================================
+  // 18. DIGITAL ASSET MANAGEMENT (DAM) ENHANCEMENTS
+  // Collections, Transcriptions, Proxies, Custom Metadata, Saved Searches
+  // ============================================
+
+  // COLLECTION - Lightboxes and asset groupings for organization and sharing
+  Collection: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
+    // Collection Info
+    name: a.string().required(),
+    description: a.string(),
+    coverImageKey: a.string(), // S3 key for collection cover image
+    color: a.string(), // Color code for visual identification
+    icon: a.string(), // Icon name from icon set
+
+    // Collection Type
+    collectionType: a.enum(['LIGHTBOX', 'FOLDER', 'PROJECT_SELECTION', 'DELIVERY', 'ARCHIVE', 'SMART']),
+
+    // Smart Collection Rules (for automated population)
+    isSmartCollection: a.boolean().default(false),
+    smartRules: a.json(), // { operator: 'AND'|'OR', conditions: [{ field, operator, value }] }
+    smartLastUpdated: a.datetime(),
+
+    // Project Scope (optional - can be org-wide or project-specific)
+    projectId: a.id(),
+
+    // Access Control
+    visibility: a.enum(['PRIVATE', 'PROJECT', 'ORGANIZATION', 'SHARED_LINK']),
+    shareLink: a.string(), // Unique share link token
+    shareLinkExpiry: a.datetime(),
+    shareLinkPassword: a.string(), // Optional password for share link
+    allowDownloads: a.boolean().default(true),
+    allowComments: a.boolean().default(false),
+
+    // Shared Users (for specific sharing)
+    sharedWith: a.json(), // [{ email, permission: 'VIEW'|'EDIT'|'ADMIN', addedAt, addedBy }]
+
+    // Asset Count (denormalized for performance)
+    assetCount: a.integer().default(0),
+    totalSizeBytes: a.integer().default(0),
+
+    // Sort & Display
+    sortBy: a.enum(['NAME', 'DATE_ADDED', 'DATE_CREATED', 'SIZE', 'CUSTOM']),
+    sortOrder: a.enum(['ASC', 'DESC']),
+    viewMode: a.enum(['GRID', 'LIST', 'MASONRY']),
+
+    // Metadata
+    tags: a.string().array(),
+
+    // Creator & Timestamps
+    createdBy: a.string().required(),
+    createdByEmail: a.string(),
+    lastModifiedBy: a.string(),
+    lastModifiedAt: a.datetime(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update', 'delete']),
+  ]),
+
+  // COLLECTION ASSET - Junction table for collection-asset relationships
+  CollectionAsset: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
+    // Relationships
+    collectionId: a.id().required(),
+    assetId: a.id().required(),
+
+    // Order within collection
+    sortOrder: a.integer().default(0),
+
+    // Custom notes for this asset in this collection
+    notes: a.string(),
+
+    // Selection metadata
+    selectedFrameTimecode: a.string(), // If a specific frame was selected
+    selectedClipIn: a.string(), // Clip in point
+    selectedClipOut: a.string(), // Clip out point
+
+    // Added by
+    addedBy: a.string().required(),
+    addedByEmail: a.string(),
+    addedAt: a.datetime(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update', 'delete']),
+  ]),
+
+  // TRANSCRIPTION - Speech-to-text transcripts with timecodes
+  Transcription: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
+    // Relationships
+    assetId: a.id().required(),
+    assetVersionId: a.id(), // Optional specific version
+
+    // Transcription Metadata
+    language: a.string().required(), // ISO language code (en-US, es-ES, etc.)
+    languageConfidence: a.float(), // Auto-detected language confidence
+
+    // Status
+    status: a.enum(['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'CANCELLED']),
+    progress: a.float(), // 0-100 progress percentage
+    errorMessage: a.string(),
+
+    // Processing Info
+    provider: a.enum(['AWS_TRANSCRIBE', 'OPENAI_WHISPER', 'GOOGLE_SPEECH', 'MANUAL']),
+    jobId: a.string(), // External job ID from provider
+
+    // Transcript Content
+    fullText: a.string(), // Complete transcript text
+    wordCount: a.integer(),
+
+    // Timed Segments (for timecode sync)
+    segments: a.json(), // [{ startTime, endTime, text, confidence, speaker }]
+
+    // Word-level timing (for precise sync)
+    words: a.json(), // [{ word, startTime, endTime, confidence }]
+
+    // Speaker Diarization
+    speakerCount: a.integer(),
+    speakers: a.json(), // [{ speakerId, label, totalSpeakingTime, segments }]
+
+    // Quality Metrics
+    averageConfidence: a.float(), // 0-1 overall confidence
+    lowConfidenceSegments: a.integer(), // Count of segments below threshold
+
+    // Searchable Keywords (extracted from transcript)
+    keywords: a.string().array(),
+
+    // Manual Edits
+    hasManualEdits: a.boolean().default(false),
+    lastEditedBy: a.string(),
+    lastEditedAt: a.datetime(),
+
+    // S3 Storage
+    transcriptKey: a.string(), // S3 key for full transcript JSON
+    srtKey: a.string(), // S3 key for SRT subtitle file
+    vttKey: a.string(), // S3 key for WebVTT file
+
+    // Creator
+    createdBy: a.string().required(),
+    createdAt: a.datetime(),
+    completedAt: a.datetime(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update', 'delete']),
+  ]),
+
+  // PROXY FILE - Auto-generated proxy versions for streaming and preview
+  ProxyFile: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
+    // Relationships
+    assetId: a.id().required(),
+    assetVersionId: a.id(),
+
+    // Proxy Type
+    proxyType: a.enum([
+      'STREAMING_HD',      // 1080p H.264 for web streaming
+      'STREAMING_SD',      // 480p H.264 for mobile/slow connections
+      'THUMBNAIL_STRIP',   // Filmstrip of thumbnails
+      'THUMBNAIL_GRID',    // Grid of thumbnails
+      'WAVEFORM',          // Audio waveform visualization
+      'AUDIO_PREVIEW',     // Low-bitrate audio for preview
+      'ANIMATION_GIF',     // Animated GIF preview
+      'POSTER_FRAME',      // Single frame poster image
+      'SOCIAL_PREVIEW',    // Social media optimized preview
+    ]),
+
+    // Technical Specs
+    resolution: a.string(), // "1920x1080", "1280x720"
+    codec: a.string(), // "H.264", "VP9"
+    bitrate: a.integer(), // kbps
+    frameRate: a.float(),
+    audioCodec: a.string(),
+    audioBitrate: a.integer(),
+    duration: a.float(), // seconds
+    fileSizeBytes: a.integer(),
+
+    // Status
+    status: a.enum(['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'CANCELLED']),
+    progress: a.float(), // 0-100
+    errorMessage: a.string(),
+
+    // Processing Info
+    processor: a.enum(['AWS_MEDIACONVERT', 'FFMPEG', 'MANUAL']),
+    jobId: a.string(),
+    processingStarted: a.datetime(),
+    processingCompleted: a.datetime(),
+    processingDuration: a.integer(), // milliseconds
+
+    // S3 Storage
+    s3Key: a.string().required(),
+    s3Bucket: a.string(),
+    cdnUrl: a.string(), // CloudFront or CDN URL
+
+    // Access Stats
+    viewCount: a.integer().default(0),
+    lastViewedAt: a.datetime(),
+
+    // Creator
+    createdBy: a.string(),
+    createdAt: a.datetime(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update', 'delete']),
+  ]),
+
+  // CUSTOM METADATA SCHEMA - Organization-defined metadata fields
+  CustomMetadataSchema: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
+    // Schema Info
+    name: a.string().required(), // "Brand Guidelines", "Campaign Info"
+    description: a.string(),
+    slug: a.string().required(), // URL-safe identifier
+
+    // Schema Version
+    version: a.integer().default(1),
+    isActive: a.boolean().default(true),
+
+    // Scope - What this schema applies to
+    appliesTo: a.enum(['ASSET', 'PROJECT', 'COLLECTION', 'ALL']),
+    assetTypes: a.string().array(), // ['VIDEO', 'AUDIO', 'IMAGE'] or empty for all
+
+    // Field Definitions
+    fields: a.json(), // Array of field definitions:
+    // [{
+    //   id, name, type: 'TEXT'|'NUMBER'|'DATE'|'SELECT'|'MULTI_SELECT'|'BOOLEAN'|'URL'|'EMAIL'|'TIMECODE',
+    //   required, defaultValue, placeholder, helpText,
+    //   options: [{ value, label, color }], // For SELECT/MULTI_SELECT
+    //   validation: { min, max, pattern, customMessage }
+    // }]
+
+    // Display Settings
+    displayOrder: a.integer().default(0),
+    collapsedByDefault: a.boolean().default(false),
+    showInList: a.boolean().default(true),
+    showInDetail: a.boolean().default(true),
+
+    // Permissions
+    canEditRoles: a.string().array(), // Roles that can edit values
+    canViewRoles: a.string().array(), // Roles that can view values
+
+    // Creator
+    createdBy: a.string().required(),
+    createdAt: a.datetime(),
+    lastModifiedBy: a.string(),
+    lastModifiedAt: a.datetime(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read']),
+    allow.groups(['Admin']).to(['create', 'update', 'delete']),
+  ]),
+
+  // CUSTOM METADATA VALUE - Actual metadata values on assets
+  CustomMetadataValue: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
+    // Relationships
+    schemaId: a.id().required(), // Link to CustomMetadataSchema
+    targetType: a.enum(['ASSET', 'PROJECT', 'COLLECTION']),
+    targetId: a.id().required(), // ID of asset/project/collection
+
+    // Field Values
+    values: a.json(), // { fieldId: value, ... }
+
+    // Audit
+    createdBy: a.string().required(),
+    createdAt: a.datetime(),
+    lastModifiedBy: a.string(),
+    lastModifiedAt: a.datetime(),
+    changeHistory: a.json(), // [{ fieldId, oldValue, newValue, changedBy, changedAt }]
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update', 'delete']),
+  ]),
+
+  // SAVED SEARCH - Persistent search queries for quick access
+  SavedSearch: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
+    // Search Info
+    name: a.string().required(),
+    description: a.string(),
+    icon: a.string(),
+    color: a.string(),
+
+    // Search Parameters
+    searchQuery: a.string(), // Free text query
+    filters: a.json(), // Structured filters:
+    // {
+    //   assetTypes: ['VIDEO', 'AUDIO'],
+    //   dateRange: { start, end, field: 'created'|'modified'|'uploaded' },
+    //   projects: ['projectId1', 'projectId2'],
+    //   tags: ['tag1', 'tag2'],
+    //   status: ['APPROVED', 'IN_REVIEW'],
+    //   uploadedBy: ['email1', 'email2'],
+    //   customMetadata: { schemaId: { fieldId: value } },
+    //   technicalSpecs: { codec: [], resolution: [], frameRate: [] },
+    //   hasTranscript: true,
+    //   duration: { min: 0, max: 300 },
+    //   fileSize: { min: 0, max: 1000000000 }
+    // }
+
+    // Sort Settings
+    sortBy: a.string(),
+    sortOrder: a.enum(['ASC', 'DESC']),
+
+    // Scope
+    scope: a.enum(['ORGANIZATION', 'PROJECT', 'PERSONAL']),
+    projectId: a.id(), // If project-scoped
+
+    // Visibility
+    visibility: a.enum(['PRIVATE', 'PROJECT', 'ORGANIZATION']),
+    sharedWith: a.string().array(), // Email addresses for specific sharing
+
+    // Usage Stats
+    usageCount: a.integer().default(0),
+    lastUsedAt: a.datetime(),
+
+    // Quick Access
+    isPinned: a.boolean().default(false),
+    displayOrder: a.integer(),
+
+    // Notification Settings (for smart alerts)
+    notifyOnNewMatches: a.boolean().default(false),
+    notifyEmail: a.string(),
+    lastNotifiedAt: a.datetime(),
+
+    // Creator
+    createdBy: a.string().required(),
+    createdByEmail: a.string(),
+    createdAt: a.datetime(),
+    lastModifiedBy: a.string(),
+    lastModifiedAt: a.datetime(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update', 'delete']),
+  ]),
+
+  // WORKFLOW RULE - Automation rules engine for DAM operations
+  WorkflowRule: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
+    // Rule Info
+    name: a.string().required(),
+    description: a.string(),
+
+    // Status
+    isActive: a.boolean().default(true),
+    priority: a.integer().default(0), // Higher = runs first
+
+    // Trigger Configuration
+    triggerType: a.enum([
+      'ASSET_UPLOADED',
+      'ASSET_UPDATED',
+      'ASSET_APPROVED',
+      'ASSET_REJECTED',
+      'ASSET_MOVED_TO_COLLECTION',
+      'COLLECTION_CREATED',
+      'PROJECT_PHASE_CHANGED',
+      'SCHEDULED',
+      'MANUAL',
+    ]),
+    triggerConditions: a.json(), // Conditions for when trigger fires:
+    // {
+    //   assetTypes: ['VIDEO'],
+    //   projects: ['projectId'],
+    //   uploadedBy: ['email'],
+    //   tags: ['tag1'],
+    //   customConditions: [{ field, operator, value }]
+    // }
+
+    // Schedule (for SCHEDULED trigger)
+    schedule: a.string(), // Cron expression
+    nextRunAt: a.datetime(),
+    lastRunAt: a.datetime(),
+
+    // Actions to Execute
+    actions: a.json(), // Array of actions:
+    // [{
+    //   type: 'ADD_TO_COLLECTION'|'REMOVE_FROM_COLLECTION'|'ADD_TAGS'|'SET_METADATA'|'NOTIFY'|'GENERATE_PROXY'|'TRANSCRIBE'|'MOVE_STORAGE_TIER'|'SEND_WEBHOOK',
+    //   config: { ... action-specific config ... }
+    // }]
+
+    // Scope
+    scope: a.enum(['ORGANIZATION', 'PROJECT']),
+    projectId: a.id(),
+
+    // Execution Stats
+    totalExecutions: a.integer().default(0),
+    successfulExecutions: a.integer().default(0),
+    failedExecutions: a.integer().default(0),
+
+    // Last Execution
+    lastExecutionStatus: a.enum(['SUCCESS', 'PARTIAL', 'FAILED', 'SKIPPED']),
+    lastExecutionAt: a.datetime(),
+    lastExecutionLog: a.json(), // { duration, assetsProcessed, errors: [] }
+
+    // Creator
+    createdBy: a.string().required(),
+    createdAt: a.datetime(),
+    lastModifiedBy: a.string(),
+    lastModifiedAt: a.datetime(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read']),
+    allow.groups(['Admin', 'Producer']).to(['create', 'update', 'delete']),
+  ]),
+
+  // WORKFLOW EXECUTION LOG - Audit log of workflow executions
+  WorkflowExecutionLog: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
+    // Relationships
+    workflowRuleId: a.id().required(),
+
+    // Trigger Info
+    triggeredBy: a.enum(['AUTOMATIC', 'MANUAL', 'SCHEDULED']),
+    triggerEvent: a.string(),
+    triggeredByUser: a.string(),
+
+    // Execution Details
+    startedAt: a.datetime().required(),
+    completedAt: a.datetime(),
+    durationMs: a.integer(),
+
+    // Results
+    status: a.enum(['RUNNING', 'SUCCESS', 'PARTIAL', 'FAILED', 'CANCELLED']),
+
+    // Assets Processed
+    assetsProcessed: a.integer().default(0),
+    assetsSucceeded: a.integer().default(0),
+    assetsFailed: a.integer().default(0),
+    assetIds: a.string().array(), // IDs of processed assets
+
+    // Action Results
+    actionResults: a.json(), // [{ actionType, status, message, affectedCount }]
+
+    // Errors
+    errorMessage: a.string(),
+    errorDetails: a.json(),
+
+    // Full Log
+    executionLog: a.json(), // Detailed step-by-step log
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read']),
+    allow.groups(['Admin']).to(['delete']),
+  ]),
+
+  // DOWNLOAD REQUEST - Track download requests and format conversions
+  DownloadRequest: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
+    // Request Info
+    requestType: a.enum(['SINGLE_ASSET', 'COLLECTION', 'SELECTION', 'SEARCH_RESULTS']),
+
+    // Source - What to download
+    assetIds: a.string().array(), // Individual asset IDs
+    collectionId: a.id(), // If downloading entire collection
+
+    // Format Conversion Options
+    outputFormat: a.string(), // "ORIGINAL", "MP4", "MOV", "WAV", "PNG", etc.
+    outputCodec: a.string(),
+    outputResolution: a.string(),
+    outputFrameRate: a.float(),
+    includeMetadata: a.boolean().default(true),
+    includeSidecar: a.boolean().default(false), // Include XML/JSON metadata sidecar
+    includeTranscript: a.boolean().default(false),
+
+    // Watermark Options
+    applyWatermark: a.boolean().default(false),
+    watermarkText: a.string(),
+    watermarkPosition: a.enum(['TOP_LEFT', 'TOP_RIGHT', 'BOTTOM_LEFT', 'BOTTOM_RIGHT', 'CENTER']),
+    watermarkOpacity: a.float(),
+
+    // Burn-in Options
+    burnInTimecode: a.boolean().default(false),
+    burnInSubtitles: a.boolean().default(false),
+
+    // Package Options
+    packageFormat: a.enum(['ZIP', 'TAR', 'NONE']),
+    folderStructure: a.enum(['FLAT', 'BY_PROJECT', 'BY_DATE', 'BY_TYPE']),
+
+    // Status
+    status: a.enum(['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'EXPIRED']),
+    progress: a.float(), // 0-100
+    errorMessage: a.string(),
+
+    // Processing Info
+    startedAt: a.datetime(),
+    completedAt: a.datetime(),
+    expiresAt: a.datetime(), // When download link expires
+
+    // Output
+    downloadUrl: a.string(), // Signed S3 URL or CloudFront URL
+    downloadKey: a.string(), // S3 key
+    totalSizeBytes: a.integer(),
+    fileCount: a.integer(),
+
+    // Audit
+    downloadCount: a.integer().default(0),
+    lastDownloadedAt: a.datetime(),
+    downloadedBy: a.string().array(), // Emails of users who downloaded
+
+    // Creator
+    requestedBy: a.string().required(),
+    requestedByEmail: a.string(),
+    requestedAt: a.datetime(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+  ]),
+
+  // SHARE LINK - Secure sharing links for assets and collections
+  ShareLink: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
+    // Link Info
+    token: a.string().required(), // Unique token for URL
+    name: a.string(),
+
+    // What's being shared
+    shareType: a.enum(['ASSET', 'COLLECTION', 'PROJECT', 'SELECTION']),
+    targetIds: a.string().array().required(), // IDs of shared items
+
+    // Access Control
+    password: a.string(), // Optional password (hashed)
+    requiresPassword: a.boolean().default(false),
+    allowedEmails: a.string().array(), // If restricted to specific emails
+    allowedDomains: a.string().array(), // e.g., ["@company.com"]
+
+    // Permissions
+    allowPreview: a.boolean().default(true),
+    allowDownload: a.boolean().default(false),
+    allowComment: a.boolean().default(false),
+    downloadQuality: a.enum(['ORIGINAL', 'HIGH', 'MEDIUM', 'LOW', 'PROXY_ONLY']),
+
+    // Expiration
+    expiresAt: a.datetime(),
+    maxViews: a.integer(), // Max number of views (null = unlimited)
+    maxDownloads: a.integer(), // Max number of downloads
+
+    // Usage Tracking
+    viewCount: a.integer().default(0),
+    downloadCount: a.integer().default(0),
+    lastAccessedAt: a.datetime(),
+    lastAccessedBy: a.string(),
+
+    // Access Log (recent accesses)
+    accessLog: a.json(), // [{ email, ip, userAgent, timestamp, action }]
+
+    // Status
+    isActive: a.boolean().default(true),
+    deactivatedAt: a.datetime(),
+    deactivatedBy: a.string(),
+    deactivationReason: a.string(),
+
+    // Notification
+    notifyOnAccess: a.boolean().default(false),
+    notifyEmail: a.string(),
+
+    // Creator
+    createdBy: a.string().required(),
+    createdByEmail: a.string(),
+    createdAt: a.datetime(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update', 'delete']),
+  ]),
+
+  // 19. CUSTOM QUERIES
   analyzeProjectBrief: a
     .query()
     .arguments({

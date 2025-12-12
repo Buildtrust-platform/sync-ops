@@ -3,7 +3,18 @@ import { Amplify } from 'aws-amplify';
 import { generateClient } from 'aws-amplify/data';
 import { getAmplifyDataClientConfig } from '@aws-amplify/backend/function/runtime';
 import type { Schema } from '../../data/resource';
-import { RekognitionClient, DetectLabelsCommand } from '@aws-sdk/client-rekognition';
+import {
+  RekognitionClient,
+  DetectLabelsCommand,
+  DetectFacesCommand,
+  StartLabelDetectionCommand,
+  StartFaceDetectionCommand,
+  StartSegmentDetectionCommand,
+} from '@aws-sdk/client-rekognition';
+import {
+  TranscribeClient,
+  StartTranscriptionJobCommand,
+} from '@aws-sdk/client-transcribe';
 import { S3Client, HeadObjectCommand } from '@aws-sdk/client-s3';
 
 const { resourceConfig, libraryOptions } = await getAmplifyDataClientConfig(process.env as any);
@@ -11,7 +22,12 @@ Amplify.configure(resourceConfig, libraryOptions);
 
 const client = generateClient<Schema>();
 const rekognitionClient = new RekognitionClient({ region: process.env.AWS_REGION });
+const transcribeClient = new TranscribeClient({ region: process.env.AWS_REGION });
 const s3Client = new S3Client({ region: process.env.AWS_REGION });
+
+// SNS topic ARN for Rekognition async notifications (set via environment variable)
+const REKOGNITION_SNS_TOPIC = process.env.REKOGNITION_SNS_TOPIC_ARN;
+const REKOGNITION_ROLE_ARN = process.env.REKOGNITION_ROLE_ARN;
 
 
 export const handler = async (event: any) => {
@@ -50,9 +66,10 @@ export const handler = async (event: any) => {
 
       console.log(`File metadata: ${fileSize} bytes, ${mimeType}`);
 
-      // Determine if file is an image or video
+      // Determine if file is an image, video, or audio
       const isImage = mimeType.startsWith('image/');
       const isVideo = mimeType.startsWith('video/');
+      const isAudio = mimeType.startsWith('audio/');
 
       // 3. UPDATE STATUS: Mark as processing
       await client.models.Asset.update({
@@ -76,37 +93,21 @@ export const handler = async (event: any) => {
         metadata: { fileSize, mimeType },
       });
 
-      // 4. AI ANALYSIS (Images only for now)
+      // 4. AI ANALYSIS
       let aiTags: string[] = [];
       let aiConfidence = 0;
 
       if (isImage) {
-        // RUN REKOGNITION: Detect labels in images
-        const rekognitionParams = {
-          Image: {
-            S3Object: {
-              Bucket: bucketName,
-              Name: key,
-            },
-          },
-          MaxLabels: 20,
-          MinConfidence: 70,
-        };
-
-        console.log(`Calling Rekognition for image ${key}...`);
-        const rekognitionCommand = new DetectLabelsCommand(rekognitionParams);
-        const rekognitionResponse = await rekognitionClient.send(rekognitionCommand);
-
-        const labels = rekognitionResponse.Labels || [];
-        aiTags = labels.map((label: any) => label.Name || '').filter(Boolean);
-        aiConfidence = labels.length > 0
-          ? labels.reduce((sum: number, label: any) => sum + (label.Confidence || 0), 0) / labels.length
-          : 0;
-
-        console.log(`Rekognition detected ${aiTags.length} labels with avg confidence ${aiConfidence.toFixed(2)}%`);
-        console.log(`Tags: ${aiTags.join(', ')}`);
+        // === IMAGE PROCESSING: Synchronous analysis ===
+        const results = await processImage(bucketName, key, assetToUpdate);
+        aiTags = results.aiTags;
+        aiConfidence = results.aiConfidence;
       } else if (isVideo) {
-        console.log(`Video file detected: ${key}. Skipping AI analysis (videos require async processing)`);
+        // === VIDEO PROCESSING: Start async jobs ===
+        await processVideoAsync(bucketName, key, assetToUpdate);
+      } else if (isAudio) {
+        // === AUDIO PROCESSING: Start transcription job ===
+        await processAudioAsync(bucketName, key, assetToUpdate);
       } else {
         console.log(`Document file detected: ${key}. No AI analysis needed`);
       }
@@ -138,7 +139,7 @@ export const handler = async (event: any) => {
         metadata: {
           tagsDetected: aiTags.length,
           confidence: aiConfidence.toFixed(2),
-          processingType: isImage ? 'image' : isVideo ? 'video' : 'document'
+          processingType: isImage ? 'image' : isVideo ? 'video' : isAudio ? 'audio' : 'document'
         },
       });
 
@@ -155,3 +156,309 @@ export const handler = async (event: any) => {
   console.log('--- AI INGEST PIPELINE END ---');
   return { statusCode: 200, body: JSON.stringify({ message: "AI pipeline completed." }) };
 };
+
+
+/**
+ * Process image files synchronously with Rekognition
+ * - DetectLabels: General object/scene detection
+ * - DetectFaces: Face detection with attributes
+ */
+async function processImage(bucketName: string, key: string, asset: any) {
+  const s3Object = { Bucket: bucketName, Name: key };
+  let aiTags: string[] = [];
+  let aiConfidence = 0;
+
+  // 1. DETECT LABELS (objects, scenes, concepts)
+  console.log(`Calling Rekognition DetectLabels for image ${key}...`);
+  const labelsCommand = new DetectLabelsCommand({
+    Image: { S3Object: s3Object },
+    MaxLabels: 20,
+    MinConfidence: 70,
+  });
+
+  const labelsResponse = await rekognitionClient.send(labelsCommand);
+  const labels = labelsResponse.Labels || [];
+  aiTags = labels.map((label: any) => label.Name || '').filter(Boolean);
+  aiConfidence = labels.length > 0
+    ? labels.reduce((sum: number, label: any) => sum + (label.Confidence || 0), 0) / labels.length
+    : 0;
+
+  console.log(`DetectLabels: ${aiTags.length} labels with avg confidence ${aiConfidence.toFixed(2)}%`);
+
+  // 2. DETECT FACES
+  console.log(`Calling Rekognition DetectFaces for image ${key}...`);
+  try {
+    const facesCommand = new DetectFacesCommand({
+      Image: { S3Object: s3Object },
+      Attributes: ['ALL'], // Get all face attributes (emotions, age, gender, etc.)
+    });
+
+    const facesResponse = await rekognitionClient.send(facesCommand);
+    const faces = facesResponse.FaceDetails || [];
+
+    console.log(`DetectFaces: Found ${faces.length} faces`);
+
+    // Create AIAnalysisJob for tracking
+    const jobResult = await client.models.AIAnalysisJob.create({
+      organizationId: asset.organizationId,
+      projectId: asset.projectId,
+      assetId: asset.id,
+      assetName: key.split('/').pop() || key,
+      analysisType: 'FACE_DETECTION',
+      status: 'COMPLETED',
+      progress: 100,
+      queuedAt: new Date().toISOString(),
+      startedAt: new Date().toISOString(),
+      completedAt: new Date().toISOString(),
+      resultsCount: faces.length,
+      triggeredBy: 'S3_UPLOAD_TRIGGER',
+    });
+
+    // Save each detected face to AIFaceDetection model
+    for (const face of faces) {
+      await client.models.AIFaceDetection.create({
+        organizationId: asset.organizationId,
+        projectId: asset.projectId,
+        assetId: asset.id,
+        confidence: face.Confidence || 0,
+        boundingBox: face.BoundingBox ? JSON.stringify(face.BoundingBox) : null,
+        emotions: face.Emotions ? JSON.stringify(face.Emotions) : null,
+        ageRange: face.AgeRange ? JSON.stringify(face.AgeRange) : null,
+        gender: face.Gender ? JSON.stringify(face.Gender) : null,
+        smile: face.Smile ? JSON.stringify(face.Smile) : null,
+        eyeglasses: face.Eyeglasses ? JSON.stringify(face.Eyeglasses) : null,
+        sunglasses: face.Sunglasses ? JSON.stringify(face.Sunglasses) : null,
+        beard: face.Beard ? JSON.stringify(face.Beard) : null,
+        mustache: face.Mustache ? JSON.stringify(face.Mustache) : null,
+        eyesOpen: face.EyesOpen ? JSON.stringify(face.EyesOpen) : null,
+        mouthOpen: face.MouthOpen ? JSON.stringify(face.MouthOpen) : null,
+        landmarks: face.Landmarks ? JSON.stringify(face.Landmarks) : null,
+        processingJobId: jobResult.data?.id,
+      });
+    }
+
+    // Add "Person" or "Face" tag if faces were detected
+    if (faces.length > 0 && !aiTags.includes('Person')) {
+      aiTags.push('Person');
+    }
+
+    console.log(`Saved ${faces.length} face detection records to database`);
+  } catch (faceError: any) {
+    console.warn(`Face detection failed for ${key}:`, faceError.message);
+  }
+
+  return { aiTags, aiConfidence };
+}
+
+
+/**
+ * Process video files asynchronously with Rekognition Video
+ * Starts async jobs and saves job IDs to track completion
+ */
+async function processVideoAsync(bucketName: string, key: string, asset: any) {
+  console.log(`Starting async video analysis for ${key}...`);
+
+  const video = {
+    S3Object: {
+      Bucket: bucketName,
+      Name: key,
+    },
+  };
+
+  // Build notification channel if SNS topic is configured
+  const notificationChannel = REKOGNITION_SNS_TOPIC && REKOGNITION_ROLE_ARN ? {
+    SNSTopicArn: REKOGNITION_SNS_TOPIC,
+    RoleArn: REKOGNITION_ROLE_ARN,
+  } : undefined;
+
+  try {
+    // 1. START LABEL DETECTION (objects, scenes in video)
+    const labelJobResult = await client.models.AIAnalysisJob.create({
+      organizationId: asset.organizationId,
+      projectId: asset.projectId,
+      assetId: asset.id,
+      assetName: key.split('/').pop() || key,
+      analysisType: 'LABEL_DETECTION',
+      status: 'QUEUED',
+      progress: 0,
+      queuedAt: new Date().toISOString(),
+      triggeredBy: 'S3_UPLOAD_TRIGGER',
+    });
+
+    const startLabelsCommand = new StartLabelDetectionCommand({
+      Video: video,
+      MinConfidence: 70,
+      NotificationChannel: notificationChannel,
+      ClientRequestToken: labelJobResult.data?.id,
+    });
+
+    const labelsJobResponse = await rekognitionClient.send(startLabelsCommand);
+
+    // Update job with Rekognition job ID
+    await client.models.AIAnalysisJob.update({
+      id: labelJobResult.data?.id || '',
+      status: 'PROCESSING',
+      startedAt: new Date().toISOString(),
+      rekognitionJobId: labelsJobResponse.JobId,
+    });
+
+    console.log(`Started video label detection job: ${labelsJobResponse.JobId}`);
+
+    // 2. START FACE DETECTION (faces in video)
+    const faceJobResult = await client.models.AIAnalysisJob.create({
+      organizationId: asset.organizationId,
+      projectId: asset.projectId,
+      assetId: asset.id,
+      assetName: key.split('/').pop() || key,
+      analysisType: 'FACE_DETECTION',
+      status: 'QUEUED',
+      progress: 0,
+      queuedAt: new Date().toISOString(),
+      triggeredBy: 'S3_UPLOAD_TRIGGER',
+    });
+
+    const startFacesCommand = new StartFaceDetectionCommand({
+      Video: video,
+      FaceAttributes: 'ALL',
+      NotificationChannel: notificationChannel,
+      ClientRequestToken: faceJobResult.data?.id,
+    });
+
+    const facesJobResponse = await rekognitionClient.send(startFacesCommand);
+
+    await client.models.AIAnalysisJob.update({
+      id: faceJobResult.data?.id || '',
+      status: 'PROCESSING',
+      startedAt: new Date().toISOString(),
+      rekognitionJobId: facesJobResponse.JobId,
+    });
+
+    console.log(`Started video face detection job: ${facesJobResponse.JobId}`);
+
+    // 3. START SEGMENT DETECTION (scene/shot boundaries)
+    const segmentJobResult = await client.models.AIAnalysisJob.create({
+      organizationId: asset.organizationId,
+      projectId: asset.projectId,
+      assetId: asset.id,
+      assetName: key.split('/').pop() || key,
+      analysisType: 'SCENE_DETECTION',
+      status: 'QUEUED',
+      progress: 0,
+      queuedAt: new Date().toISOString(),
+      triggeredBy: 'S3_UPLOAD_TRIGGER',
+    });
+
+    const startSegmentCommand = new StartSegmentDetectionCommand({
+      Video: video,
+      SegmentTypes: ['SHOT', 'TECHNICAL_CUE'],
+      NotificationChannel: notificationChannel,
+      ClientRequestToken: segmentJobResult.data?.id,
+    });
+
+    const segmentJobResponse = await rekognitionClient.send(startSegmentCommand);
+
+    await client.models.AIAnalysisJob.update({
+      id: segmentJobResult.data?.id || '',
+      status: 'PROCESSING',
+      startedAt: new Date().toISOString(),
+      rekognitionJobId: segmentJobResponse.JobId,
+    });
+
+    console.log(`Started video segment detection job: ${segmentJobResponse.JobId}`);
+
+    // 4. START TRANSCRIPTION (audio track)
+    await startTranscriptionJob(bucketName, key, asset, 'video');
+
+  } catch (videoError: any) {
+    console.error(`Video processing failed for ${key}:`, videoError.message);
+    throw videoError;
+  }
+}
+
+
+/**
+ * Process audio files - start transcription job
+ */
+async function processAudioAsync(bucketName: string, key: string, asset: any) {
+  console.log(`Starting audio transcription for ${key}...`);
+  await startTranscriptionJob(bucketName, key, asset, 'audio');
+}
+
+
+/**
+ * Start AWS Transcribe job for audio/video files
+ */
+async function startTranscriptionJob(bucketName: string, key: string, asset: any, mediaType: 'audio' | 'video') {
+  try {
+    // Create job tracking record
+    const transcriptJobResult = await client.models.AIAnalysisJob.create({
+      organizationId: asset.organizationId,
+      projectId: asset.projectId,
+      assetId: asset.id,
+      assetName: key.split('/').pop() || key,
+      analysisType: 'TRANSCRIPTION',
+      status: 'QUEUED',
+      progress: 0,
+      queuedAt: new Date().toISOString(),
+      triggeredBy: 'S3_UPLOAD_TRIGGER',
+    });
+
+    const jobName = `syncops-${asset.id}-${Date.now()}`;
+    const mediaUri = `s3://${bucketName}/${key}`;
+    const outputBucket = bucketName;
+    const outputKey = `transcripts/${asset.id}/${jobName}.json`;
+
+    const startTranscribeCommand = new StartTranscriptionJobCommand({
+      TranscriptionJobName: jobName,
+      LanguageCode: 'en-US', // Default to English, could be made configurable
+      MediaFormat: getMediaFormat(key),
+      Media: {
+        MediaFileUri: mediaUri,
+      },
+      OutputBucketName: outputBucket,
+      OutputKey: outputKey,
+      Settings: {
+        ShowSpeakerLabels: true,
+        MaxSpeakerLabels: 10,
+        ShowAlternatives: false,
+      },
+    });
+
+    const transcribeResponse = await transcribeClient.send(startTranscribeCommand);
+
+    // Update job with Transcribe job name
+    await client.models.AIAnalysisJob.update({
+      id: transcriptJobResult.data?.id || '',
+      status: 'PROCESSING',
+      startedAt: new Date().toISOString(),
+      transcribeJobName: jobName,
+    });
+
+    console.log(`Started transcription job: ${jobName} for ${mediaType} file ${key}`);
+    console.log(`Transcribe job status: ${transcribeResponse.TranscriptionJob?.TranscriptionJobStatus}`);
+
+  } catch (transcribeError: any) {
+    console.error(`Transcription job failed for ${key}:`, transcribeError.message);
+    // Don't throw - transcription failure shouldn't stop other processing
+  }
+}
+
+
+/**
+ * Get media format from file extension for Transcribe
+ */
+function getMediaFormat(key: string): 'mp3' | 'mp4' | 'wav' | 'flac' | 'ogg' | 'amr' | 'webm' {
+  const ext = key.split('.').pop()?.toLowerCase();
+  switch (ext) {
+    case 'mp3': return 'mp3';
+    case 'mp4':
+    case 'm4a':
+    case 'mov': return 'mp4';
+    case 'wav': return 'wav';
+    case 'flac': return 'flac';
+    case 'ogg': return 'ogg';
+    case 'amr': return 'amr';
+    case 'webm': return 'webm';
+    default: return 'mp4'; // Default to mp4
+  }
+}

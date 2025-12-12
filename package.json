@@ -17,6 +17,7 @@
     "next": "16.0.7",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "rimraf": "^6.1.2",
     "stripe": "^20.0.0"
   },
   "devDependencies": {
