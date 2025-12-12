@@ -114,8 +114,15 @@ const PHASE_MODULES: Record<string, Module[]> = {
   ],
   postproduction: [
     { id: 'assets', label: 'Asset Library', icon: 'Image', hasBadge: true },
+    { id: 'collections', label: 'Collections', icon: 'Folder' },
     { id: 'versions', label: 'Versions', icon: 'GitBranch' },
     { id: 'review', label: 'Review & Notes', icon: 'Eye' },
+    { id: 'ai-analysis', label: 'AI Analysis', icon: 'Brain' },
+    { id: 'smart-asset-hub', label: 'Smart Asset Hub', icon: 'Gauge' },
+    { id: 'asset-relationships', label: 'Asset Graph', icon: 'Network' },
+    { id: 'stakeholder-portal', label: 'Stakeholder Portal', icon: 'Users' },
+    { id: 'downloads', label: 'Downloads', icon: 'Download' },
+    { id: 'asset-analytics', label: 'Asset Analytics', icon: 'BarChart' },
     { id: 'timeline', label: 'Timeline', icon: 'Clock' },
     { id: 'edit-pipeline', label: 'Edit Pipeline', icon: 'Scissors' },
     { id: 'vfx-tracker', label: 'VFX Tracker', icon: 'Sparkles' },
@@ -126,6 +133,9 @@ const PHASE_MODULES: Record<string, Module[]> = {
   ],
   delivery: [
     { id: 'distribution', label: 'Distribution', icon: 'Share2' },
+    { id: 'delivery-pipeline', label: 'Delivery Pipeline', icon: 'Rocket' },
+    { id: 'archive-dam', label: 'Archive DAM', icon: 'Database' },
+    { id: 'archive-intelligence', label: 'Archive Intelligence', icon: 'Brain' },
     { id: 'master-archive', label: 'MasterOps Archive', icon: 'Library' },
     { id: 'archive', label: 'Legacy Archive', icon: 'Archive' },
     { id: 'reports', label: 'Reports', icon: 'BarChart' },
@@ -366,6 +376,7 @@ export default function LifecycleNavigation({
         {/* Utility Links */}
         <div className="px-2 pb-4">
           {[
+            { id: 'workflows', label: 'Workflows', icon: 'Zap' as IconName },
             { id: 'activity', label: 'Activity Log', icon: 'Clock' as IconName },
             { id: 'settings', label: 'Settings', icon: 'Settings' as IconName },
           ].map((item) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import { getUrl } from "aws-amplify/storage";
 import type { Schema } from "@/amplify/data/resource";
@@ -8,6 +8,13 @@ import FeedbackSummary from "./FeedbackSummary";
 import ReviewHeatmap from "./ReviewHeatmap";
 import VideoPlayer from "./VideoPlayer";
 import AudioWaveform from "./AudioWaveform";
+import {
+  FRAME_RATES,
+  secondsToSMPTE,
+  smpteToSeconds,
+  TimecodeToolbar,
+  type FrameRateKey,
+} from "./SMPTETimecode";
 
 /**
  * ASSET REVIEW COMPONENT
@@ -106,6 +113,10 @@ export default function AssetReview({
   const [videoDuration, setVideoDuration] = useState<number>(0);
   const [currentVideoTime, setCurrentVideoTime] = useState<number>(0);
   const [seekToTime, setSeekToTime] = useState<number | undefined>(undefined);
+  const [frameRateKey, setFrameRateKey] = useState<FrameRateKey>('24'); // Default to 24fps for film
+
+  // Get numeric frame rate from key
+  const frameRate = FRAME_RATES[frameRateKey].fps;
 
   // Audio player state
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -370,12 +381,9 @@ export default function AssetReview({
     }
   }
 
+  // SMPTE timecode formatting using selected frame rate
   function formatTimecode(seconds: number): string {
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = Math.floor(seconds % 60);
-    const ms = Math.floor((seconds % 1) * 10);
-    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${ms}`;
+    return secondsToSMPTE(seconds, frameRate);
   }
 
   const isLegalReviewer = selectedRole === 'LEGAL';
@@ -472,6 +480,17 @@ export default function AssetReview({
             </div>
           )}
 
+          {/* SMPTE Timecode Toolbar - shows when video or audio is loaded */}
+          {(videoUrl || audioUrl) && (
+            <TimecodeToolbar
+              currentTime={videoUrl ? currentVideoTime : currentAudioTime}
+              duration={videoUrl ? videoDuration : audioDuration}
+              frameRate={frameRateKey}
+              onFrameRateChange={setFrameRateKey}
+              onSeek={(time: number) => setSeekToTime(time)}
+            />
+          )}
+
           {/* Audio Waveform */}
           {audioUrl && (
             <AudioWaveform
@@ -493,6 +512,7 @@ export default function AssetReview({
               comments={comments}
               duration={videoDuration > 0 ? videoDuration : audioDuration > 0 ? audioDuration : undefined}
               currentTime={videoUrl ? currentVideoTime : audioUrl ? currentAudioTime : undefined}
+              frameRate={frameRate}
               onTimecodeClick={(tc) => {
                 handleSeekToTimecode(tc);
                 const targetComment = comments.find(c => Math.abs((c.timecode || 0) - tc) < 5);
@@ -632,16 +652,17 @@ export default function AssetReview({
                         className="block text-[11px] font-bold uppercase mb-2"
                         style={{ color: 'var(--text-tertiary)' }}
                       >
-                        Timecode (seconds)
+                        Timecode (SMPTE @ {frameRate}fps)
                       </label>
                       <div className="flex gap-2">
                         <input
                           type="number"
-                          step="0.1"
+                          step="0.04166666"
+                          min="0"
                           value={timecode}
-                          onChange={(e) => setTimecode(parseFloat(e.target.value))}
+                          onChange={(e) => setTimecode(parseFloat(e.target.value) || 0)}
                           placeholder="0.0"
-                          className="flex-1 p-2 rounded-[6px] text-[13px]"
+                          className="flex-1 p-2 rounded-[6px] text-[13px] font-mono"
                           style={{
                             background: 'var(--bg-2)',
                             border: '1px solid var(--border)',
@@ -651,7 +672,7 @@ export default function AssetReview({
                         {(videoUrl || audioUrl) && (
                           <button
                             type="button"
-                            onClick={() => setTimecode(Math.round((videoUrl ? currentVideoTime : currentAudioTime) * 10) / 10)}
+                            onClick={() => setTimecode(Math.round((videoUrl ? currentVideoTime : currentAudioTime) * frameRate) / frameRate)}
                             className="px-2 py-1 rounded-[6px] text-[11px] font-bold transition-all duration-[80ms]"
                             style={{ background: 'var(--primary)', color: 'var(--bg-0)' }}
                             title="Use current playback time"
@@ -660,7 +681,7 @@ export default function AssetReview({
                           </button>
                         )}
                       </div>
-                      <p className="text-[11px] mt-1" style={{ color: 'var(--text-tertiary)' }}>
+                      <p className="text-[12px] mt-1 font-mono" style={{ color: 'var(--primary)' }}>
                         {formatTimecode(timecode)}
                       </p>
                     </div>

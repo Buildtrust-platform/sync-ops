@@ -210,6 +210,7 @@ export default function GreenlightStatus({ project, currentUserEmail, onApproval
 
       // Log activity
       await client.models.ActivityLog.create({
+        organizationId: project.organizationId,
         projectId: project.id,
         userId: currentUserEmail,
         userEmail: currentUserEmail,

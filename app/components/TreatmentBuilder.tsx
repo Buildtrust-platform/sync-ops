@@ -272,18 +272,45 @@ export default function TreatmentBuilder({ project, onSave }: TreatmentBuilderPr
 
   const generateAIContent = async (sectionId: string) => {
     setIsGenerating(sectionId);
-    // Simulate AI generation - in production, this would call an AI API
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Simulate brief thinking time
+    await new Promise(resolve => setTimeout(resolve, 800));
 
     const section = sections.find(s => s.id === sectionId);
     if (section) {
-      const sectionConfig = TREATMENT_SECTIONS[section.type];
-      // Placeholder AI-generated content based on project info
-      const generatedContent = `[AI Generated ${sectionConfig.label} for "${project.name}"]\n\n` +
-        `Based on the project brief and objectives, this ${sectionConfig.label.toLowerCase()} captures the creative vision...`;
+      // Generate contextual content based on section type and project info
+      const generatedContent = generateSectionContent(section.type, project);
       updateSectionContent(sectionId, generatedContent);
     }
     setIsGenerating(null);
+  };
+
+  // Generate contextual content based on section type
+  const generateSectionContent = (sectionType: keyof typeof TREATMENT_SECTIONS, proj: Schema["Project"]["type"]): string => {
+    const projectName = proj.name || 'Untitled Project';
+    const projectDesc = proj.description || '';
+    const projectType = proj.projectType || 'COMMERCIAL';
+
+    const templates: Record<string, string> = {
+      logline: `${projectName} is a ${projectType.toLowerCase().replace('_', ' ')} production that ${projectDesc ? `aims to ${projectDesc.toLowerCase().substring(0, 100)}` : 'tells a compelling visual story that engages audiences and delivers measurable impact for stakeholders'}.`,
+
+      synopsis: `## Overview\n\n${projectName} presents a carefully crafted visual narrative designed to ${projectDesc || 'captivate audiences and communicate key messages effectively'}.\n\n## Structure\n\nThe piece opens with an attention-grabbing hook that establishes the tone and draws viewers in. The middle section develops the core message through dynamic visuals and purposeful pacing. We conclude with a memorable call-to-action that resonates with the target audience.\n\n## Key Moments\n\n- **Opening (0:00-0:10)**: Establish mood and capture attention\n- **Development (0:10-0:40)**: Unfold the narrative, introduce key elements\n- **Climax (0:40-0:50)**: Deliver the core message with impact\n- **Resolution (0:50-0:60)**: Close with memorable branding/CTA`,
+
+      visualStyle: `## Cinematography\n\nWe will employ a modern, cinematic visual language with carefully composed frames and purposeful camera movement. The shooting style balances stability with dynamic energy.\n\n## Color Palette\n\n- **Primary**: Rich, saturated tones that command attention\n- **Secondary**: Complementary accent colors for visual interest\n- **Mood**: Warm highlights with controlled shadows for depth\n\n## Lighting Approach\n\nNatural-looking lighting with subtle enhancement. Key light positioned for flattering coverage with soft fill to maintain detail in shadows. Practical lights incorporated for authenticity.\n\n## Camera Movement\n\n- Smooth dolly/gimbal moves for professional feel\n- Static locked-off shots for emphasis\n- Subtle handheld for intimate moments`,
+
+      narrative: `## Storytelling Approach\n\nThe narrative structure follows a classic three-act format adapted for ${projectType.toLowerCase().replace('_', ' ')} content:\n\n### Act 1 - Setup\nEstablish the world, introduce the subject, and create emotional connection with the audience.\n\n### Act 2 - Journey\nDevelop the story through conflict, discovery, or progression. Build tension and maintain engagement through varied pacing.\n\n### Act 3 - Resolution\nDeliver payoff, reinforce key messages, and leave audience with clear takeaway.\n\n## Voice & Tone\n\nThe narrative voice is confident yet approachable, authoritative but not distant. We speak TO the audience, not AT them.`,
+
+      characters: `## Primary Subjects\n\n### Main Character/Talent\n- **Role**: The face and voice of the piece\n- **Characteristics**: Relatable, authentic, engaging presence\n- **Arc**: Transformation or journey that mirrors the message\n\n### Supporting Elements\n- **Secondary Talent**: Provide context and social proof\n- **B-Roll Subjects**: Real people in authentic situations\n\n## Casting Considerations\n\n- Diversity and representation aligned with target audience\n- Authentic performances over polished delivery\n- Chemistry between any paired talent`,
+
+      locations: `## Primary Locations\n\n### Hero Location\n- **Description**: Main setting that establishes visual identity\n- **Requirements**: Good natural light, minimal noise, visual interest\n- **Backup**: Alternative location identified\n\n### Secondary Locations\n- Support locations for variety and narrative progression\n- Controlled environments for interview/dialogue\n\n## Location Considerations\n\n- Permit requirements assessed\n- Power and equipment access confirmed\n- Parking and crew areas identified\n- Weather contingencies planned`,
+
+      soundtrack: `## Music Direction\n\n### Style\nModern, emotive score that supports without overwhelming. Think subtle electronic elements with organic instrumentation.\n\n### Key Moments\n- Opening: Builds anticipation, sets tone\n- Middle: Drives momentum, supports narrative\n- Closing: Emotional payoff, memorable finish\n\n## Sound Design\n\n- Clean dialogue capture priority\n- Ambient sound for authenticity\n- Foley for tactile moments\n- SFX for emphasis and transitions\n\n## Music Licensing\n\n- Original composition or licensed track options\n- Full broadcast/digital rights required`,
+
+      technical: `## Camera & Format\n\n- **Camera**: Cinema camera (RED, Sony Venice, or ARRI)\n- **Resolution**: 4K minimum, 6K for flexibility\n- **Frame Rate**: 24fps primary, 60/120fps for slow motion\n- **Codec**: ProRes 4444 or RAW\n\n## Lens Package\n\n- Primes: 24mm, 35mm, 50mm, 85mm\n- Zoom: 24-70mm for versatility\n- Specialty: Macro for detail shots\n\n## Lighting & Grip\n\n- LED panels for key/fill\n- HMI for daylight balance\n- Practicals for ambient\n- Full grip package\n\n## Audio\n\n- Boom mic for dialogue\n- Lavaliers as backup\n- Separate recorder for quality`,
+
+      references: `## Visual References\n\n### Tone & Style\n- [Reference 1]: Similar project that captures desired energy\n- [Reference 2]: Cinematography style inspiration\n- [Reference 3]: Color grading reference\n\n### Specific Elements\n- Camera movement references\n- Lighting mood boards\n- Edit pacing examples\n\n## Brand Alignment\n\n- Previous successful campaigns\n- Competitor analysis\n- Industry benchmarks\n\n## Creative Inspiration\n\n- Director's vision references\n- Music/sound design examples\n- Typography and graphics style`
+    };
+
+    return templates[sectionType] || `## ${TREATMENT_SECTIONS[sectionType].label}\n\n[Content for ${projectName}]\n\n${TREATMENT_SECTIONS[sectionType].placeholder}`;
   };
 
   const saveVersion = () => {

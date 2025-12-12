@@ -32,6 +32,7 @@ import ClientPortal from "@/app/components/ClientPortal";
 import TeamManagement from "@/app/components/TeamManagement";
 import LocationMaps from "@/app/components/LocationMaps";
 import EquipmentOS from "@/app/components/EquipmentOS";
+import CallSheetManager from "@/app/components/CallSheetManager";
 import CalendarSync from "@/app/components/CalendarSync";
 import DigitalRightsLocker from "@/app/components/DigitalRightsLocker";
 import PolicyEngine from "@/app/components/PolicyEngine";
@@ -63,15 +64,32 @@ import AudioPostTracker from "@/app/components/AudioPostTracker";
 import DeliverableMatrix from "@/app/components/DeliverableMatrix";
 import QCChecklist from "@/app/components/QCChecklist";
 
+// DAM Components
+import WorkflowAutomation from "@/app/components/WorkflowAutomation";
+import DownloadManager from "@/app/components/DownloadManager";
+import AssetAnalytics from "@/app/components/AssetAnalytics";
+import ArchiveDAM from "@/app/components/ArchiveDAM";
+import AIEnhancements from "@/app/components/AIEnhancements";
+import SmartAssetHub from "@/app/components/SmartAssetHub";
+import StakeholderPortal from "@/app/components/StakeholderPortal";
+import AssetRelationshipGraph from "@/app/components/AssetRelationshipGraph";
+import AutomatedDeliveryPipeline from "@/app/components/AutomatedDeliveryPipeline";
+import Collections from "@/app/components/Collections";
+
 // Delivery Phase
 import DistributionEngine from "@/app/components/DistributionEngine";
 import ArchiveIntelligence from "@/app/components/ArchiveIntelligence";
+import SmartArchiveIntelligence from "@/app/components/SmartArchiveIntelligence";
 import MasterOpsArchive from "@/app/components/MasterOpsArchive";
 import ReportsExports from "@/app/components/ReportsExports";
 import DashboardKPIs from "@/app/components/DashboardKPIs";
 
 // Settings
 import ProjectSettings from "@/app/components/ProjectSettings";
+
+// Lifecycle Enforcement
+import LockedModule from "@/app/components/LockedModule";
+import { canAccessModule, LifecycleState, STATE_TO_PHASE } from "@/lib/lifecycle";
 
 export default function ProjectDetail() {
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
@@ -101,6 +119,83 @@ export default function ProjectDetail() {
   // USER STATE
   const [userEmail] = useState("user@syncops.app");
   const [userId] = useState("USER");
+
+  // Helper function to get human-readable module names
+  const getModuleName = (moduleId: string): string => {
+    const moduleNames: Record<string, string> = {
+      // Development
+      'overview': 'Overview',
+      'brief': 'Creative Brief',
+      'treatment': 'Treatment Builder',
+      'moodboard': 'Moodboard Library',
+      'scope': 'Scope Document',
+      'budget': 'Budget',
+      'roi': 'ROI Projections',
+      'vendors': 'Vendor Bids',
+      'contracts': 'Contracts',
+      'dev-timeline': 'Dev Timeline',
+      'decisions': 'Decision Log',
+      'change-requests': 'Change Requests',
+      'client-portal': 'Client Portal',
+      'greenlight': 'Greenlight Gate',
+      'approvals': 'Approvals',
+      // Pre-Production
+      'team': 'Team & Crew',
+      'locations': 'Locations',
+      'equipment': 'Equipment',
+      'call-sheets': 'Call Sheets',
+      'calendar': 'Schedule',
+      'rights': 'Rights & Permits',
+      'compliance': 'Compliance',
+      'casting': 'Talent & Casting',
+      'safety': 'Safety & Risk',
+      'insurance': 'Insurance',
+      'crew-scheduling': 'Crew Scheduling',
+      // Production
+      'field-intel': 'Field Intelligence',
+      'progress-board': 'Progress Board',
+      'dpr': 'Daily Report',
+      'shot-logger': 'Shot Logger',
+      'ingest': 'Media Ingest',
+      'media-verification': 'Media Verification',
+      'crew-time': 'Crew Time Clock',
+      'tasks': 'Tasks',
+      'communication': 'Communication',
+      // Post-Production
+      'assets': 'Asset Library',
+      'collections': 'Collections',
+      'versions': 'Versions',
+      'review': 'Review & Notes',
+      'timeline': 'Timeline',
+      'edit-pipeline': 'Edit Pipeline',
+      'vfx-tracker': 'VFX Tracker',
+      'color-pipeline': 'Color Pipeline',
+      'audio-post': 'Audio Post',
+      'deliverables': 'Deliverables',
+      'qc-checklist': 'QC Checklist',
+      // Delivery
+      'distribution': 'Distribution',
+      'master-archive': 'MasterOps Archive',
+      'archive': 'Legacy Archive',
+      'reports': 'Reports',
+      'kpis': 'Analytics',
+      // DAM
+      'workflows': 'Workflow Automation',
+      'downloads': 'Download Manager',
+      'asset-analytics': 'Asset Analytics',
+      'archive-dam': 'Archive DAM',
+      'archive-intelligence': 'Archive Intelligence',
+      'ai-analysis': 'AI Analysis',
+      'smart-asset-hub': 'Smart Asset Hub',
+      'stakeholder-portal': 'Stakeholder Portal',
+      'asset-relationships': 'Asset Relationships',
+      'delivery-pipeline': 'Delivery Pipeline',
+      // Utility
+      'activity': 'Activity Log',
+      'settings': 'Settings',
+    };
+    return moduleNames[moduleId] || moduleId;
+  };
 
   // Initialize Amplify client after mount to avoid SSR issues
   useEffect(() => {
@@ -170,6 +265,7 @@ export default function ProjectDetail() {
       });
 
       await client.models.ActivityLog.create({
+        organizationId: project?.organizationId || '',
         projectId: projectId,
         userId: userId,
         userEmail: userEmail,
@@ -178,10 +274,10 @@ export default function ProjectDetail() {
         targetType: 'Project',
         targetId: projectId,
         targetName: project?.name || 'Project',
-        metadata: {
+        metadata: JSON.stringify({
           previousState: project?.lifecycleState,
           newState: newState,
-        },
+        }),
       });
 
       await refreshProjectData();
@@ -319,6 +415,27 @@ export default function ProjectDetail() {
 
           {/* MODULE CONTENT */}
           <div className="p-6">
+            {/* LIFECYCLE ENFORCEMENT CHECK */}
+            {!canAccessModule((project.lifecycleState || 'INTAKE') as LifecycleState, activeModule) ? (
+              <LockedModule
+                moduleId={activeModule}
+                moduleName={getModuleName(activeModule)}
+                currentState={(project.lifecycleState || 'INTAKE') as LifecycleState}
+                onNavigateToPhase={() => {
+                  // Navigate to first accessible module in current phase
+                  const currentPhase = STATE_TO_PHASE[(project.lifecycleState || 'INTAKE') as LifecycleState];
+                  const phaseModules: Record<string, string> = {
+                    development: 'overview',
+                    preproduction: 'team',
+                    production: 'field-intel',
+                    postproduction: 'assets',
+                    delivery: 'distribution',
+                  };
+                  setActiveModule(phaseModules[currentPhase] || 'overview');
+                }}
+              />
+            ) : (
+            <>
             {/* DEVELOPMENT PHASE MODULES */}
             {activeModule === 'overview' && (
               <div className="space-y-8">
@@ -342,7 +459,7 @@ export default function ProjectDetail() {
                         <div className="space-y-4">
                           <div>
                             <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Description</label>
-                            <p className="text-slate-300 mt-1">{brief.description || 'No description'}</p>
+                            <p className="text-slate-300 mt-1">{brief.projectDescription || 'No description'}</p>
                           </div>
                           <div>
                             <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Deliverables</label>
@@ -355,31 +472,31 @@ export default function ProjectDetail() {
                         </div>
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-white mb-4">AI Analysis</h3>
+                        <h3 className="text-lg font-semibold text-white mb-4">Brief Analysis</h3>
                         <div className="space-y-4">
                           <div className="p-4 bg-slate-800/50 rounded-lg">
                             <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm text-slate-400">Risk Score</span>
+                              <span className="text-sm text-slate-400">Risk Level</span>
                               <span className={`text-lg font-bold ${
-                                (brief.riskScore || 0) < 30 ? 'text-emerald-400' :
-                                (brief.riskScore || 0) < 70 ? 'text-amber-400' : 'text-red-400'
-                              }`}>{brief.riskScore || 0}/100</span>
+                                brief.riskLevel === 'LOW' ? 'text-emerald-400' :
+                                brief.riskLevel === 'MEDIUM' ? 'text-amber-400' : 'text-red-400'
+                              }`}>{brief.riskLevel || 'N/A'}</span>
                             </div>
                             <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
                               <div
                                 className={`h-full ${
-                                  (brief.riskScore || 0) < 30 ? 'bg-emerald-500' :
-                                  (brief.riskScore || 0) < 70 ? 'bg-amber-500' : 'bg-red-500'
+                                  brief.riskLevel === 'LOW' ? 'bg-emerald-500' :
+                                  brief.riskLevel === 'MEDIUM' ? 'bg-amber-500' : 'bg-red-500'
                                 }`}
-                                style={{ width: `${brief.riskScore || 0}%` }}
+                                style={{ width: brief.riskLevel === 'LOW' ? '30%' : brief.riskLevel === 'MEDIUM' ? '60%' : '90%' }}
                               />
                             </div>
                           </div>
-                          {brief.budgetEstimate && (
+                          {brief.budgetRange && (
                             <div>
-                              <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Budget Estimate</label>
+                              <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Budget Range</label>
                               <p className="text-2xl font-bold text-emerald-400 mt-1">
-                                ${brief.budgetEstimate.toLocaleString()}
+                                {brief.budgetRange}
                               </p>
                             </div>
                           )}
@@ -389,6 +506,7 @@ export default function ProjectDetail() {
                   </div>
                 ) : (
                   <SmartBrief
+                    organizationId={project.organizationId}
                     onComplete={() => {
                       if (!client) return;
                       client.models.Brief.list({
@@ -503,29 +621,10 @@ export default function ProjectDetail() {
             )}
 
             {activeModule === 'call-sheets' && (
-              <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h2 className="text-2xl font-bold text-white">Call Sheets</h2>
-                    <p className="text-slate-400 mt-1">Production schedules and crew assignments</p>
-                  </div>
-                  <button
-                    onClick={() => router.push(`/projects/${projectId}/call-sheets/new`)}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    Create Call Sheet
-                  </button>
-                </div>
-                <iframe
-                  src={`/projects/${projectId}/call-sheets`}
-                  className="w-full bg-slate-900 rounded-xl border border-slate-800"
-                  style={{ height: 'calc(100vh - 320px)', minHeight: '500px' }}
-                  title="Call Sheets"
-                />
-              </div>
+              <CallSheetManager
+                projectId={projectId}
+                project={project}
+              />
             )}
 
             {activeModule === 'calendar' && (
@@ -538,6 +637,7 @@ export default function ProjectDetail() {
 
             {activeModule === 'rights' && (
               <DigitalRightsLocker
+                organizationId={project.organizationId}
                 projectId={projectId}
                 currentUserEmail={userEmail}
                 currentUserName={userEmail.split('@')[0]}
@@ -803,6 +903,15 @@ export default function ProjectDetail() {
               </div>
             )}
 
+            {activeModule === 'collections' && (
+              <Collections
+                organizationId={project.organizationId}
+                projectId={projectId}
+                userEmail={userEmail}
+                userId={userEmail}
+              />
+            )}
+
             {activeModule === 'versions' && (
               <div className="space-y-6">
                 <div>
@@ -857,6 +966,7 @@ export default function ProjectDetail() {
 
             {activeModule === 'edit-pipeline' && (
               <EditPipeline
+                organizationId={project.organizationId}
                 projectId={projectId}
                 currentUserEmail={userEmail}
               />
@@ -864,6 +974,7 @@ export default function ProjectDetail() {
 
             {activeModule === 'vfx-tracker' && (
               <VFXShotTracker
+                organizationId={project.organizationId}
                 projectId={projectId}
                 currentUserEmail={userEmail}
               />
@@ -871,6 +982,7 @@ export default function ProjectDetail() {
 
             {activeModule === 'color-pipeline' && (
               <ColorPipeline
+                organizationId={project.organizationId}
                 projectId={projectId}
                 currentUserEmail={userEmail}
               />
@@ -878,6 +990,7 @@ export default function ProjectDetail() {
 
             {activeModule === 'audio-post' && (
               <AudioPostTracker
+                organizationId={project.organizationId}
                 projectId={projectId}
                 currentUserEmail={userEmail}
               />
@@ -885,6 +998,7 @@ export default function ProjectDetail() {
 
             {activeModule === 'deliverables' && (
               <DeliverableMatrix
+                organizationId={project.organizationId}
                 projectId={projectId}
                 currentUserEmail={userEmail}
               />
@@ -932,6 +1046,93 @@ export default function ProjectDetail() {
               />
             )}
 
+            {/* DAM MODULES */}
+            {activeModule === 'workflows' && (
+              <WorkflowAutomation
+                projectId={projectId}
+                organizationId={project.organizationId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'downloads' && (
+              <DownloadManager
+                organizationId={project.organizationId}
+                projectId={projectId}
+                assets={assets.map(a => ({
+                  id: a.id,
+                  name: a.s3Key.split('/').pop() || 'Asset',
+                  type: (a.type?.toLowerCase().includes('video') ? 'video' :
+                        a.type?.toLowerCase().includes('audio') ? 'audio' :
+                        a.type?.toLowerCase().includes('image') ? 'image' : 'document') as 'video' | 'image' | 'audio' | 'document',
+                  s3Key: a.s3Key,
+                  fileSize: a.fileSize || 0,
+                }))}
+              />
+            )}
+
+            {activeModule === 'asset-analytics' && (
+              <AssetAnalytics
+                projectId={projectId}
+                organizationId={project.organizationId}
+              />
+            )}
+
+            {activeModule === 'archive-dam' && (
+              <ArchiveDAM
+                organizationId={project.organizationId}
+                projectId={projectId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'archive-intelligence' && (
+              <SmartArchiveIntelligence
+                organizationId={project.organizationId}
+                projectId={projectId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'ai-analysis' && (
+              <AIEnhancements
+                organizationId={project.organizationId}
+                projectId={projectId}
+              />
+            )}
+
+            {activeModule === 'smart-asset-hub' && (
+              <SmartAssetHub
+                organizationId={project.organizationId}
+                projectId={projectId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'stakeholder-portal' && (
+              <StakeholderPortal
+                organizationId={project.organizationId}
+                projectId={projectId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'asset-relationships' && (
+              <AssetRelationshipGraph
+                organizationId={project.organizationId}
+                projectId={projectId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'delivery-pipeline' && (
+              <AutomatedDeliveryPipeline
+                organizationId={project.organizationId}
+                projectId={projectId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
             {/* SETTINGS & ACTIVITY */}
             {activeModule === 'settings' && (
               <ProjectSettings
@@ -972,6 +1173,8 @@ export default function ProjectDetail() {
                   </div>
                 </div>
               </div>
+            )}
+            </>
             )}
           </div>
         </main>

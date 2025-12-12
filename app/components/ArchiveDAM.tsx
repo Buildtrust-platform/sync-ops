@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { generateClient } from "aws-amplify/data";
 import { getUrl, uploadData } from "aws-amplify/storage";
 import type { Schema } from "@/amplify/data/resource";
+import AssetCard from "./AssetCard";
 
 /**
  * ARCHIVE DAM - Professional Digital Asset Management
@@ -833,121 +834,90 @@ export default function ArchiveDAM({
                     {viewMode === 'grid' ? (
                       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                         {currentAssets.map(asset => (
-                          <div
-                            key={asset.id}
-                            className={`
-                              group relative rounded-lg border overflow-hidden cursor-pointer transition-all
-                              ${selectedAssets.has(asset.id)
-                                ? 'border-[var(--primary)] ring-2 ring-[var(--primary)]/30'
-                                : 'border-[var(--border-default)] hover:border-[var(--primary)]/50'
-                              }
-                            `}
-                            onClick={(e) => toggleAssetSelection(asset.id, e.shiftKey || e.ctrlKey || e.metaKey)}
-                            onDoubleClick={() => setShowDetailsPanel(true)}
-                            onContextMenu={(e) => handleContextMenu(e, 'asset', asset.id)}
-                          >
-                            {/* Checkbox */}
+                          <div key={asset.id} className="relative">
+                            {/* Storage Tier Badge - overlaid on card */}
                             <div
-                              className={`
-                                absolute top-2 left-2 z-10 w-5 h-5 rounded border-2 flex items-center justify-center transition-all
-                                ${selectedAssets.has(asset.id)
-                                  ? 'bg-[var(--primary)] border-[var(--primary)] text-white'
-                                  : 'bg-black/40 border-white/60 opacity-0 group-hover:opacity-100'
-                                }
-                              `}
-                            >
-                              {selectedAssets.has(asset.id) && <CheckIcon className="w-3 h-3" />}
-                            </div>
-
-                            {/* Tier Badge */}
-                            <div
-                              className="absolute top-2 right-2 z-10 w-2 h-2 rounded-full"
+                              className="absolute top-2 right-8 z-30 px-1.5 py-0.5 rounded text-[10px] font-semibold text-white"
                               style={{ backgroundColor: STORAGE_TIERS[asset.storageTier].color }}
-                              title={STORAGE_TIERS[asset.storageTier].label}
+                              title={`${STORAGE_TIERS[asset.storageTier].label} - ${STORAGE_TIERS[asset.storageTier].retrievalTime}`}
+                            >
+                              {STORAGE_TIERS[asset.storageTier].label}
+                            </div>
+                            <AssetCard
+                              id={asset.id}
+                              name={asset.name}
+                              s3Key={asset.s3Key}
+                              mimeType={asset.mimeType}
+                              fileSize={asset.fileSize}
+                              metadata={{
+                                width: asset.metadata?.width,
+                                height: asset.metadata?.height,
+                                duration: asset.metadata?.duration,
+                                codec: asset.metadata?.codec,
+                                frameRate: asset.metadata?.frameRate,
+                              }}
+                              createdAt={asset.archiveDate}
+                              isSelected={selectedAssets.has(asset.id)}
+                              onSelect={(id, multi) => toggleAssetSelection(id, multi)}
+                              onDoubleClick={() => setShowDetailsPanel(true)}
+                              onContextMenu={(e, id) => handleContextMenu(e, 'asset', id)}
+                              viewMode="grid"
+                              showMetadata={true}
                             />
-
-                            {/* Thumbnail */}
-                            <div className="aspect-square bg-[var(--bg-2)]">
-                              {asset.thumbnailUrl ? (
-                                <img src={asset.thumbnailUrl} alt={asset.name} className="w-full h-full object-cover" />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <FileIcon type={asset.type} className="w-10 h-10 text-[var(--text-tertiary)]" />
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Info */}
-                            <div className="p-2 bg-[var(--bg-1)]">
-                              <p className="text-xs font-medium text-[var(--text-primary)] truncate" title={asset.name}>
-                                {asset.name}
-                              </p>
-                              <p className="text-xs text-[var(--text-tertiary)]">{formatBytes(asset.fileSize)}</p>
-                            </div>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="bg-[var(--bg-1)] rounded-lg border border-[var(--border-default)] overflow-hidden">
-                        <table className="w-full">
-                          <thead>
-                            <tr className="border-b border-[var(--border-default)] text-xs text-[var(--text-tertiary)]">
-                              <th className="w-10 p-2">
-                                <input
-                                  type="checkbox"
-                                  checked={selectedAssets.size === currentAssets.length && currentAssets.length > 0}
-                                  onChange={selectAllAssets}
-                                  className="rounded"
-                                />
-                              </th>
-                              <th className="text-left p-2 font-medium">Name</th>
-                              <th className="text-left p-2 font-medium w-24">Size</th>
-                              <th className="text-left p-2 font-medium w-24">Type</th>
-                              <th className="text-left p-2 font-medium w-20">Tier</th>
-                              <th className="text-left p-2 font-medium w-28">Date</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {currentAssets.map(asset => (
-                              <tr
-                                key={asset.id}
-                                className={`
-                                  border-b border-[var(--border-default)] last:border-0 cursor-pointer
-                                  ${selectedAssets.has(asset.id) ? 'bg-[var(--primary)]/10' : 'hover:bg-[var(--bg-2)]'}
-                                `}
-                                onClick={(e) => toggleAssetSelection(asset.id, e.shiftKey || e.ctrlKey || e.metaKey)}
-                                onContextMenu={(e) => handleContextMenu(e, 'asset', asset.id)}
-                              >
-                                <td className="p-2">
-                                  <input
-                                    type="checkbox"
-                                    checked={selectedAssets.has(asset.id)}
-                                    onChange={() => toggleAssetSelection(asset.id)}
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="rounded"
-                                  />
-                                </td>
-                                <td className="p-2">
-                                  <div className="flex items-center gap-2">
-                                    <FileIcon type={asset.type} className="w-4 h-4 text-[var(--text-tertiary)]" />
-                                    <span className="text-sm text-[var(--text-primary)] truncate">{asset.name}</span>
-                                  </div>
-                                </td>
-                                <td className="p-2 text-sm text-[var(--text-secondary)]">{formatBytes(asset.fileSize)}</td>
-                                <td className="p-2 text-sm text-[var(--text-secondary)] capitalize">{asset.type}</td>
-                                <td className="p-2">
-                                  <span
-                                    className="inline-block px-1.5 py-0.5 text-xs rounded text-white"
-                                    style={{ backgroundColor: STORAGE_TIERS[asset.storageTier].color }}
-                                  >
-                                    {STORAGE_TIERS[asset.storageTier].label}
-                                  </span>
-                                </td>
-                                <td className="p-2 text-sm text-[var(--text-secondary)]">{formatDate(asset.archiveDate)}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                      <div className="space-y-1">
+                        {/* List header */}
+                        <div className="flex items-center gap-3 px-3 py-2 text-xs text-[var(--text-tertiary)] font-medium border-b border-[var(--border-default)]">
+                          <div className="w-5">
+                            <input
+                              type="checkbox"
+                              checked={selectedAssets.size === currentAssets.length && currentAssets.length > 0}
+                              onChange={selectAllAssets}
+                              className="rounded"
+                            />
+                          </div>
+                          <div className="w-12" />
+                          <div className="flex-1">Name</div>
+                          <div className="w-20 text-right hidden md:block">Size</div>
+                          <div className="w-16 hidden lg:block">Tier</div>
+                          <div className="w-24 text-right hidden lg:block">Date</div>
+                        </div>
+                        {currentAssets.map(asset => (
+                          <div key={asset.id} className="flex items-center gap-3">
+                            <AssetCard
+                              id={asset.id}
+                              name={asset.name}
+                              s3Key={asset.s3Key}
+                              mimeType={asset.mimeType}
+                              fileSize={asset.fileSize}
+                              metadata={{
+                                width: asset.metadata?.width,
+                                height: asset.metadata?.height,
+                                duration: asset.metadata?.duration,
+                                codec: asset.metadata?.codec,
+                                frameRate: asset.metadata?.frameRate,
+                              }}
+                              createdAt={asset.archiveDate}
+                              isSelected={selectedAssets.has(asset.id)}
+                              onSelect={(id, multi) => toggleAssetSelection(id, multi)}
+                              onDoubleClick={() => setShowDetailsPanel(true)}
+                              onContextMenu={(e, id) => handleContextMenu(e, 'asset', id)}
+                              viewMode="list"
+                              showMetadata={true}
+                              className="flex-1"
+                            />
+                            {/* Storage tier badge for list view */}
+                            <span
+                              className="px-2 py-0.5 text-xs rounded text-white flex-shrink-0 hidden lg:inline-block"
+                              style={{ backgroundColor: STORAGE_TIERS[asset.storageTier].color }}
+                            >
+                              {STORAGE_TIERS[asset.storageTier].label}
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>

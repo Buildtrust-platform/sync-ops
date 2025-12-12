@@ -123,7 +123,7 @@ export function ErrorState({
               label: 'Try again',
               onClick: onRetry,
               variant: 'primary',
-              icon: 'RefreshCw',
+              icon: 'Refresh',
             }
           : undefined
       }

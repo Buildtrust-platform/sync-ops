@@ -1,10 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { generateClient } from 'aws-amplify/data';
+import type { Schema } from '@/amplify/data/resource';
 
 /**
  * SHOT LOGGER COMPONENT
  * Essential for tracking what was captured on set
+ * Now with full database persistence via Amplify
  *
  * Features:
  * - Scene/Shot/Take logging
@@ -16,29 +19,7 @@ import { useState, useEffect } from 'react';
  * - Export to post-production
  */
 
-// Types
-interface ShotLog {
-  id: string;
-  scene: string;
-  shot: string;
-  take: number;
-  status: 'GOOD' | 'NG' | 'HOLD' | 'CIRCLE';
-  timecodeIn: string;
-  timecodeOut: string;
-  duration: string;
-  camera: string;
-  lens: string;
-  fStop: string;
-  iso: string;
-  fps: string;
-  cardId: string;
-  notes: string;
-  continuityNotes: string;
-  performanceNotes: string;
-  technicalNotes: string;
-  circled: boolean;
-  timestamp: string;
-}
+type ShotLogType = Schema['ShotLog']['type'];
 
 interface ShotLoggerProps {
   projectId: string;
@@ -51,16 +32,19 @@ export default function ShotLogger({
   organizationId,
   currentUserEmail,
 }: ShotLoggerProps) {
-  const [shots, setShots] = useState<ShotLog[]>([]);
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
+  const [shots, setShots] = useState<ShotLogType[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [filterScene, setFilterScene] = useState<string>('ALL');
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
-  const [currentShot, setCurrentShot] = useState<Partial<ShotLog>>({
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [currentShot, setCurrentShot] = useState({
     scene: '',
     shot: '',
     take: 1,
-    status: 'HOLD',
+    status: 'HOLD' as 'GOOD' | 'NG' | 'HOLD' | 'CIRCLE' | 'FALSE_START',
     timecodeIn: '',
     timecodeOut: '',
     camera: 'A',
@@ -76,128 +60,57 @@ export default function ShotLogger({
     circled: false,
   });
 
-  // Mock data
+  // Initialize client
   useEffect(() => {
-    setShots([
-      {
-        id: '1',
-        scene: '12',
-        shot: '1A',
-        take: 1,
-        status: 'NG',
-        timecodeIn: '01:12:34:05',
-        timecodeOut: '01:12:58:18',
-        duration: '00:24:13',
-        camera: 'A',
-        lens: '35mm',
-        fStop: '2.8',
-        iso: '800',
-        fps: '24',
-        cardId: 'A001',
-        notes: 'Focus issue at end',
-        continuityNotes: '',
-        performanceNotes: '',
-        technicalNotes: 'Soft focus on rack',
-        circled: false,
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
-      },
-      {
-        id: '2',
-        scene: '12',
-        shot: '1A',
-        take: 2,
-        status: 'GOOD',
-        timecodeIn: '01:13:45:00',
-        timecodeOut: '01:14:12:15',
-        duration: '00:27:15',
-        camera: 'A',
-        lens: '35mm',
-        fStop: '2.8',
-        iso: '800',
-        fps: '24',
-        cardId: 'A001',
-        notes: 'Good performance, clean take',
-        continuityNotes: 'Coffee cup left hand',
-        performanceNotes: 'Great emotion on "I never knew"',
-        technicalNotes: '',
-        circled: true,
-        timestamp: new Date(Date.now() - 3500000).toISOString(),
-      },
-      {
-        id: '3',
-        scene: '12',
-        shot: '1A',
-        take: 3,
-        status: 'CIRCLE',
-        timecodeIn: '01:15:20:12',
-        timecodeOut: '01:15:48:22',
-        duration: '00:28:10',
-        camera: 'A',
-        lens: '35mm',
-        fStop: '2.8',
-        iso: '800',
-        fps: '24',
-        cardId: 'A001',
-        notes: 'PRINT - Director\'s choice',
-        continuityNotes: 'Coffee cup left hand',
-        performanceNotes: 'Best read of the line',
-        technicalNotes: '',
-        circled: true,
-        timestamp: new Date(Date.now() - 3400000).toISOString(),
-      },
-      {
-        id: '4',
-        scene: '12',
-        shot: '2',
-        take: 1,
-        status: 'GOOD',
-        timecodeIn: '01:22:05:00',
-        timecodeOut: '01:22:45:18',
-        duration: '00:40:18',
-        camera: 'A',
-        lens: '50mm',
-        fStop: '2.0',
-        iso: '800',
-        fps: '24',
-        cardId: 'A001',
-        notes: 'CU insert',
-        continuityNotes: '',
-        performanceNotes: '',
-        technicalNotes: '',
-        circled: true,
-        timestamp: new Date(Date.now() - 3000000).toISOString(),
-      },
-      {
-        id: '5',
-        scene: '14',
-        shot: '1',
-        take: 1,
-        status: 'HOLD',
-        timecodeIn: '02:05:12:08',
-        timecodeOut: '02:06:02:14',
-        duration: '00:50:06',
-        camera: 'A',
-        lens: '24mm',
-        fStop: '4.0',
-        iso: '400',
-        fps: '24',
-        cardId: 'A002',
-        notes: 'Wide establishing',
-        continuityNotes: '',
-        performanceNotes: '',
-        technicalNotes: 'Waiting for color approval',
-        circled: false,
-        timestamp: new Date(Date.now() - 1800000).toISOString(),
-      },
-    ]);
+    setClient(generateClient<Schema>());
   }, []);
 
-  const getStatusColor = (status: string) => {
+  // Load shots for this project
+  useEffect(() => {
+    if (!client || !projectId) return;
+
+    const loadShots = async () => {
+      try {
+        const { data } = await client.models.ShotLog.list({
+          filter: { projectId: { eq: projectId } }
+        });
+
+        if (data) {
+          // Sort by timestamp descending (newest first)
+          const sorted = [...data].sort((a, b) =>
+            new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime()
+          );
+          setShots(sorted);
+        }
+      } catch (error) {
+        console.error('Error loading shots:', error);
+      }
+    };
+
+    loadShots();
+
+    // Subscribe to real-time updates
+    const subscription = client.models.ShotLog.observeQuery({
+      filter: { projectId: { eq: projectId } }
+    }).subscribe({
+      next: ({ items }) => {
+        const sorted = [...items].sort((a, b) =>
+          new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime()
+        );
+        setShots(sorted);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [client, projectId]);
+
+  const getStatusColor = (status: string | null | undefined) => {
     switch (status) {
       case 'GOOD': return 'var(--success)';
       case 'CIRCLE': return 'var(--primary)';
       case 'NG': return 'var(--error)';
       case 'HOLD': return 'var(--warning)';
+      case 'FALSE_START': return 'var(--text-tertiary)';
       default: return 'var(--text-secondary)';
     }
   };
@@ -218,60 +131,116 @@ export default function ShotLogger({
     circled: shots.filter(s => s.circled).length,
   };
 
-  const handleAddShot = () => {
-    if (!currentShot.scene || !currentShot.shot) return;
+  const handleAddShot = async () => {
+    if (!client || !currentShot.scene || !currentShot.shot) return;
+    setIsSaving(true);
 
-    const newShot: ShotLog = {
-      id: `shot-${Date.now()}`,
-      scene: currentShot.scene || '',
-      shot: currentShot.shot || '',
-      take: currentShot.take || 1,
-      status: currentShot.status as ShotLog['status'] || 'HOLD',
-      timecodeIn: currentShot.timecodeIn || '',
-      timecodeOut: currentShot.timecodeOut || '',
-      duration: calculateDuration(currentShot.timecodeIn || '', currentShot.timecodeOut || ''),
-      camera: currentShot.camera || 'A',
-      lens: currentShot.lens || '',
-      fStop: currentShot.fStop || '',
-      iso: currentShot.iso || '',
-      fps: currentShot.fps || '24',
-      cardId: currentShot.cardId || '',
-      notes: currentShot.notes || '',
-      continuityNotes: currentShot.continuityNotes || '',
-      performanceNotes: currentShot.performanceNotes || '',
-      technicalNotes: currentShot.technicalNotes || '',
-      circled: currentShot.circled || false,
-      timestamp: new Date().toISOString(),
-    };
+    try {
+      // Calculate duration from timecodes
+      const duration = calculateDuration(currentShot.timecodeIn, currentShot.timecodeOut);
 
-    setShots([newShot, ...shots]);
-    setShowAddModal(false);
+      await client.models.ShotLog.create({
+        organizationId,
+        projectId,
+        scene: currentShot.scene,
+        shot: currentShot.shot,
+        take: currentShot.take,
+        status: currentShot.circled ? 'CIRCLE' : currentShot.status,
+        timecodeIn: currentShot.timecodeIn || undefined,
+        timecodeOut: currentShot.timecodeOut || undefined,
+        duration: duration || undefined,
+        camera: currentShot.camera,
+        lens: currentShot.lens || undefined,
+        fStop: currentShot.fStop || undefined,
+        iso: currentShot.iso || undefined,
+        fps: currentShot.fps,
+        cardId: currentShot.cardId || undefined,
+        notes: currentShot.notes || undefined,
+        continuityNotes: currentShot.continuityNotes || undefined,
+        performanceNotes: currentShot.performanceNotes || undefined,
+        technicalNotes: currentShot.technicalNotes || undefined,
+        circled: currentShot.circled,
+        loggedBy: currentUserEmail,
+      });
 
-    // Auto-increment take for next entry
-    setCurrentShot({
-      ...currentShot,
-      take: (currentShot.take || 1) + 1,
-      timecodeIn: '',
-      timecodeOut: '',
-      notes: '',
-      continuityNotes: '',
-      performanceNotes: '',
-      technicalNotes: '',
-      circled: false,
-      status: 'HOLD',
-    });
+      setShowAddModal(false);
+
+      // Auto-increment take for next entry
+      setCurrentShot({
+        ...currentShot,
+        take: currentShot.take + 1,
+        timecodeIn: '',
+        timecodeOut: '',
+        notes: '',
+        continuityNotes: '',
+        performanceNotes: '',
+        technicalNotes: '',
+        circled: false,
+        status: 'HOLD',
+      });
+    } catch (error) {
+      console.error('Error adding shot:', error);
+      alert('Failed to log shot');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const calculateDuration = (tcIn: string, tcOut: string): string => {
-    if (!tcIn || !tcOut) return '00:00:00';
-    // Simple placeholder - would need proper TC math
-    return '00:30:00';
+  const calculateDuration = (tcIn: string, tcOut: string): string | null => {
+    if (!tcIn || !tcOut) return null;
+    // Simple placeholder - would need proper TC math in production
+    // For now, return a formatted string
+    try {
+      // Parse timecodes (assuming HH:MM:SS:FF format)
+      const parseTC = (tc: string) => {
+        const parts = tc.split(':').map(Number);
+        if (parts.length !== 4) return null;
+        const [hh, mm, ss, ff] = parts;
+        return hh * 3600 + mm * 60 + ss + ff / 24;
+      };
+
+      const inSec = parseTC(tcIn);
+      const outSec = parseTC(tcOut);
+
+      if (inSec === null || outSec === null) return null;
+
+      const durSec = outSec - inSec;
+      if (durSec <= 0) return null;
+
+      const hours = Math.floor(durSec / 3600);
+      const minutes = Math.floor((durSec % 3600) / 60);
+      const seconds = Math.floor(durSec % 60);
+      const frames = Math.round((durSec % 1) * 24);
+
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}:${frames.toString().padStart(2, '0')}`;
+    } catch {
+      return null;
+    }
   };
 
-  const toggleCircle = (shotId: string) => {
-    setShots(shots.map(shot =>
-      shot.id === shotId ? { ...shot, circled: !shot.circled, status: !shot.circled ? 'CIRCLE' : 'GOOD' } : shot
-    ));
+  const toggleCircle = async (shotId: string, currentCircled: boolean) => {
+    if (!client) return;
+
+    try {
+      await client.models.ShotLog.update({
+        id: shotId,
+        circled: !currentCircled,
+        status: !currentCircled ? 'CIRCLE' : 'GOOD',
+      });
+    } catch (error) {
+      console.error('Error updating shot:', error);
+    }
+  };
+
+  const deleteShot = async (shotId: string) => {
+    if (!client) return;
+    if (!confirm('Are you sure you want to delete this shot log?')) return;
+
+    try {
+      await client.models.ShotLog.delete({ id: shotId });
+    } catch (error) {
+      console.error('Error deleting shot:', error);
+    }
   };
 
   return (
@@ -352,6 +321,7 @@ export default function ShotLogger({
             <option value="GOOD">Good</option>
             <option value="NG">NG</option>
             <option value="HOLD">Hold</option>
+            <option value="FALSE_START">False Start</option>
           </select>
         </div>
         <div className="ml-auto flex gap-2">
@@ -379,7 +349,25 @@ export default function ShotLogger({
       </div>
 
       {/* Shot List */}
-      {viewMode === 'list' ? (
+      {shots.length === 0 ? (
+        <div className="rounded-xl p-12 text-center" style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}>
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'var(--bg-2)' }}>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--text-tertiary)' }}>
+              <polygon points="23 7 16 12 23 17 23 7" />
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+            </svg>
+          </div>
+          <h3 className="text-[18px] font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>No Shots Logged Yet</h3>
+          <p className="text-[14px] mb-6" style={{ color: 'var(--text-tertiary)' }}>Start logging shots to track your production progress</p>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="px-6 py-3 rounded-lg text-[14px] font-semibold"
+            style={{ background: 'var(--primary)', color: 'white' }}
+          >
+            Log First Shot
+          </button>
+        </div>
+      ) : viewMode === 'list' ? (
         <div className="rounded-xl overflow-hidden" style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}>
           <table className="w-full">
             <thead>
@@ -393,6 +381,7 @@ export default function ShotLogger({
                 <th className="px-4 py-3 text-center text-[12px] font-semibold" style={{ color: 'var(--text-tertiary)' }}>Lens</th>
                 <th className="px-4 py-3 text-left text-[12px] font-semibold" style={{ color: 'var(--text-tertiary)' }}>Notes</th>
                 <th className="px-4 py-3 text-center text-[12px] font-semibold" style={{ color: 'var(--text-tertiary)' }}>Circle</th>
+                <th className="px-4 py-3 text-center text-[12px] font-semibold" style={{ color: 'var(--text-tertiary)' }}></th>
               </tr>
             </thead>
             <tbody>
@@ -408,17 +397,17 @@ export default function ShotLogger({
                       className="px-2 py-1 rounded text-[12px] font-semibold"
                       style={{ background: `${getStatusColor(shot.status)}20`, color: getStatusColor(shot.status) }}
                     >
-                      {shot.status}
+                      {shot.status || 'N/A'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-center font-mono text-[13px]" style={{ color: 'var(--text-secondary)' }}>{shot.timecodeIn}</td>
-                  <td className="px-4 py-3 text-center font-mono text-[13px]" style={{ color: 'var(--text-secondary)' }}>{shot.timecodeOut}</td>
-                  <td className="px-4 py-3 text-center text-[14px]" style={{ color: 'var(--text-primary)' }}>{shot.camera}</td>
-                  <td className="px-4 py-3 text-center text-[14px]" style={{ color: 'var(--text-secondary)' }}>{shot.lens}</td>
-                  <td className="px-4 py-3 text-[13px] max-w-[200px] truncate" style={{ color: 'var(--text-tertiary)' }}>{shot.notes}</td>
+                  <td className="px-4 py-3 text-center font-mono text-[13px]" style={{ color: 'var(--text-secondary)' }}>{shot.timecodeIn || '—'}</td>
+                  <td className="px-4 py-3 text-center font-mono text-[13px]" style={{ color: 'var(--text-secondary)' }}>{shot.timecodeOut || '—'}</td>
+                  <td className="px-4 py-3 text-center text-[14px]" style={{ color: 'var(--text-primary)' }}>{shot.camera || 'A'}</td>
+                  <td className="px-4 py-3 text-center text-[14px]" style={{ color: 'var(--text-secondary)' }}>{shot.lens || '—'}</td>
+                  <td className="px-4 py-3 text-[13px] max-w-[200px] truncate" style={{ color: 'var(--text-tertiary)' }}>{shot.notes || '—'}</td>
                   <td className="px-4 py-3 text-center">
                     <button
-                      onClick={() => toggleCircle(shot.id)}
+                      onClick={() => toggleCircle(shot.id, shot.circled || false)}
                       className="w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all"
                       style={{
                         borderColor: shot.circled ? 'var(--primary)' : 'var(--border)',
@@ -430,6 +419,18 @@ export default function ShotLogger({
                           <polyline points="20 6 9 17 4 12" />
                         </svg>
                       )}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <button
+                      onClick={() => deleteShot(shot.id)}
+                      className="p-1 rounded hover:bg-red-500/20 transition-all"
+                      style={{ color: 'var(--text-tertiary)' }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      </svg>
                     </button>
                   </td>
                 </tr>
@@ -459,22 +460,22 @@ export default function ShotLogger({
                   className="px-2 py-1 rounded text-[12px] font-semibold"
                   style={{ background: `${getStatusColor(shot.status)}20`, color: getStatusColor(shot.status) }}
                 >
-                  {shot.status}
+                  {shot.status || 'N/A'}
                 </span>
               </div>
 
               <div className="space-y-2 text-[13px]" style={{ color: 'var(--text-tertiary)' }}>
                 <div className="flex justify-between">
                   <span>TC In:</span>
-                  <span className="font-mono" style={{ color: 'var(--text-secondary)' }}>{shot.timecodeIn}</span>
+                  <span className="font-mono" style={{ color: 'var(--text-secondary)' }}>{shot.timecodeIn || '—'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>TC Out:</span>
-                  <span className="font-mono" style={{ color: 'var(--text-secondary)' }}>{shot.timecodeOut}</span>
+                  <span className="font-mono" style={{ color: 'var(--text-secondary)' }}>{shot.timecodeOut || '—'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Camera:</span>
-                  <span style={{ color: 'var(--text-secondary)' }}>{shot.camera} - {shot.lens}</span>
+                  <span style={{ color: 'var(--text-secondary)' }}>{shot.camera || 'A'} - {shot.lens || 'N/A'}</span>
                 </div>
               </div>
 
@@ -486,15 +487,27 @@ export default function ShotLogger({
 
               <div className="mt-3 pt-3 flex items-center justify-between" style={{ borderTop: '1px solid var(--border)' }}>
                 <button
-                  onClick={() => toggleCircle(shot.id)}
+                  onClick={() => toggleCircle(shot.id, shot.circled || false)}
                   className="flex items-center gap-2 text-[13px] font-semibold"
                   style={{ color: shot.circled ? 'var(--primary)' : 'var(--text-tertiary)' }}
                 >
                   {shot.circled ? '✓ Circled' : 'Circle Take'}
                 </button>
-                <span className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
-                  {new Date(shot.timestamp).toLocaleTimeString()}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+                    {shot.createdAt ? new Date(shot.createdAt).toLocaleTimeString() : ''}
+                  </span>
+                  <button
+                    onClick={() => deleteShot(shot.id)}
+                    className="p-1 rounded hover:bg-red-500/20 transition-all"
+                    style={{ color: 'var(--text-tertiary)' }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -544,7 +557,7 @@ export default function ShotLogger({
                   <input
                     type="number"
                     value={currentShot.take}
-                    onChange={(e) => setCurrentShot({ ...currentShot, take: parseInt(e.target.value) })}
+                    onChange={(e) => setCurrentShot({ ...currentShot, take: parseInt(e.target.value) || 1 })}
                     min={1}
                     className="w-full px-3 py-2 rounded-lg text-[14px]"
                     style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
@@ -554,7 +567,7 @@ export default function ShotLogger({
                   <label className="block text-[12px] font-semibold mb-1" style={{ color: 'var(--text-tertiary)' }}>Status</label>
                   <select
                     value={currentShot.status}
-                    onChange={(e) => setCurrentShot({ ...currentShot, status: e.target.value as ShotLog['status'] })}
+                    onChange={(e) => setCurrentShot({ ...currentShot, status: e.target.value as any })}
                     className="w-full px-3 py-2 rounded-lg text-[14px]"
                     style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                   >
@@ -562,6 +575,7 @@ export default function ShotLogger({
                     <option value="GOOD">Good</option>
                     <option value="NG">NG</option>
                     <option value="CIRCLE">Circle/Print</option>
+                    <option value="FALSE_START">False Start</option>
                   </select>
                 </div>
               </div>
@@ -605,6 +619,7 @@ export default function ShotLogger({
                     <option value="A">A Cam</option>
                     <option value="B">B Cam</option>
                     <option value="C">C Cam</option>
+                    <option value="D">D Cam</option>
                   </select>
                 </div>
                 <div>
@@ -717,11 +732,11 @@ export default function ShotLogger({
               <div className="flex gap-3">
                 <button
                   onClick={handleAddShot}
-                  disabled={!currentShot.scene || !currentShot.shot}
+                  disabled={!currentShot.scene || !currentShot.shot || isSaving}
                   className="flex-1 py-3 rounded-lg font-semibold text-[14px] transition-all disabled:opacity-50"
                   style={{ background: 'var(--primary)', color: 'white' }}
                 >
-                  Log Shot
+                  {isSaving ? 'Saving...' : 'Log Shot'}
                 </button>
                 <button
                   onClick={() => setShowAddModal(false)}

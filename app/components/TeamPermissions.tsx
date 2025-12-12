@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Amplify } from 'aws-amplify';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
 import {
@@ -16,6 +17,14 @@ import {
   EXTERNAL_ROLES,
   PHASE_ACCESS_MATRIX,
 } from '@/lib/rbac/matrices';
+import outputs from '@/amplify_outputs.json';
+
+// Ensure Amplify is configured before generating client
+try {
+  Amplify.configure(outputs, { ssr: true });
+} catch {
+  // Already configured
+}
 
 const client = generateClient<Schema>();
 

@@ -1,13 +1,15 @@
 "use client";
 
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import type { Schema } from "@/amplify/data/resource";
+import { secondsToSMPTE } from "./SMPTETimecode";
 
 interface ReviewHeatmapProps {
   comments: Array<Schema["ReviewComment"]["type"]>;
   duration?: number; // Asset duration in seconds (optional, will auto-calculate if not provided)
   onTimecodeClick?: (timecode: number) => void; // Callback for video player integration
   currentTime?: number; // Current playhead position from video player
+  frameRate?: number; // Frame rate for SMPTE display (defaults to 24fps)
 }
 
 interface HeatmapSegment {
@@ -19,7 +21,7 @@ interface HeatmapSegment {
   color: string;
 }
 
-export default function ReviewHeatmap({ comments, duration, onTimecodeClick, currentTime }: ReviewHeatmapProps) {
+export default function ReviewHeatmap({ comments, duration, onTimecodeClick, currentTime, frameRate = 24 }: ReviewHeatmapProps) {
   // Calculate heatmap segments
   const { segments, maxDuration } = useMemo(() => {
     // Filter comments that have timecodes
@@ -84,16 +86,9 @@ export default function ReviewHeatmap({ comments, duration, onTimecodeClick, cur
     return { segments: heatmapSegments, maxDuration: calculatedDuration };
   }, [comments, duration]);
 
-  // Format timecode for display
+  // Format timecode for display using SMPTE format
   const formatTimecode = (seconds: number): string => {
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = Math.floor(seconds % 60);
-
-    if (hrs > 0) {
-      return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    }
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return secondsToSMPTE(seconds, frameRate);
   };
 
   // Handle segment click

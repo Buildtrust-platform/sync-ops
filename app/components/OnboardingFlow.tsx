@@ -1,6 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { generateClient } from 'aws-amplify/data';
+import { fetchUserAttributes } from 'aws-amplify/auth';
+import type { Schema } from '@/amplify/data/resource';
 
 interface OnboardingStep {
   id: number;
@@ -58,7 +62,30 @@ const PLANS = [
   },
 ];
 
+// Map plan IDs to subscription tiers
+const PLAN_TO_TIER: Record<string, 'FREE' | 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE' | 'STUDIO'> = {
+  'starter': 'STARTER',
+  'professional': 'PROFESSIONAL',
+  'enterprise': 'ENTERPRISE',
+};
+
+// Map team sizes to max users
+const TEAM_SIZE_TO_MAX_USERS: Record<string, number> = {
+  '1-5': 5,
+  '6-15': 15,
+  '16-50': 50,
+  '51-200': 200,
+  '200+': 500,
+};
+
 export default function OnboardingFlow() {
+  const router = useRouter();
+  const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
+  const [userEmail, setUserEmail] = useState('');
+  const [userId, setUserId] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     // Step 1: Organization
@@ -76,6 +103,24 @@ export default function OnboardingFlow() {
     projectType: '',
   });
 
+  // Initialize Amplify client and fetch user info
+  useEffect(() => {
+    setClient(generateClient<Schema>());
+
+    async function fetchUser() {
+      try {
+        const attributes = await fetchUserAttributes();
+        setUserEmail(attributes.email || '');
+        setUserId(attributes.sub || '');
+      } catch (err) {
+        console.error('Error fetching user:', err);
+        // User not authenticated, redirect to home (which will show login)
+        router.push('/');
+      }
+    }
+    fetchUser();
+  }, [router]);
+
   const handleNext = () => {
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
@@ -88,10 +133,113 @@ export default function OnboardingFlow() {
     }
   };
 
-  const handleComplete = () => {
-    // In real app, submit data and redirect to dashboard
-    console.log('Onboarding complete:', formData);
-    window.location.href = '/';
+  const handleComplete = async () => {
+    if (!client || !userId || !userEmail) {
+      setError('Not authenticated. Please refresh and try again.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // Generate organization slug from name
+      const slug = formData.organizationName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') + '-' + Date.now().toString(36);
+
+      // Determine limits based on plan
+      const tier = PLAN_TO_TIER[formData.selectedPlan] || 'FREE';
+      const maxUsers = TEAM_SIZE_TO_MAX_USERS[formData.teamSize] || 5;
+
+      // Step 1: Create the Organization
+      const { data: newOrg, errors: orgErrors } = await client.models.Organization.create({
+        name: formData.organizationName,
+        slug,
+        email: userEmail,
+        website: formData.website || undefined,
+        industry: formData.industry as 'PRODUCTION_STUDIO' | 'ADVERTISING_AGENCY' | 'CORPORATE_MEDIA' | 'BROADCAST' | 'STREAMING' | 'INDEPENDENT' | 'EDUCATION' | 'NONPROFIT' | 'GOVERNMENT' | 'OTHER',
+        subscriptionTier: tier,
+        subscriptionStatus: 'TRIALING',
+        trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 14-day trial
+        maxProjects: tier === 'STARTER' ? 10 : tier === 'PROFESSIONAL' ? 50 : 200,
+        maxUsers,
+        maxStorageGB: tier === 'STARTER' ? 50 : tier === 'PROFESSIONAL' ? 500 : 2000,
+        maxAICredits: tier === 'STARTER' ? 1000 : tier === 'PROFESSIONAL' ? 5000 : 20000,
+        createdBy: userId,
+      });
+
+      if (orgErrors || !newOrg) {
+        throw new Error(orgErrors?.[0]?.message || 'Failed to create organization');
+      }
+
+      // Step 2: Add current user as OWNER
+      const { errors: memberErrors } = await client.models.OrganizationMember.create({
+        organizationId: newOrg.id,
+        userId,
+        email: userEmail,
+        role: 'OWNER',
+        status: 'ACTIVE',
+      });
+
+      if (memberErrors) {
+        console.error('Failed to create owner membership:', memberErrors);
+      }
+
+      // Step 3: Send team invitations (optional - create pending members with ACTIVE status, invitedAt timestamp)
+      const validEmails = formData.inviteEmails.filter(
+        email => email.trim() && email.includes('@') && email !== userEmail
+      );
+
+      for (const email of validEmails) {
+        await client.models.OrganizationMember.create({
+          organizationId: newOrg.id,
+          userId: `pending-${Date.now()}-${Math.random().toString(36).slice(2)}`, // Placeholder until user signs up
+          email: email.trim(),
+          role: 'MEMBER',
+          status: 'ACTIVE', // Will be set to ACTIVE when they accept invite
+          invitedBy: userId,
+          invitedAt: new Date().toISOString(),
+        });
+      }
+
+      // Step 4: Create the first project if specified
+      if (formData.projectName.trim()) {
+        // Map UI project type to schema enum
+        const projectTypeMap: Record<string, 'COMMERCIAL' | 'CORPORATE' | 'SOCIAL_MEDIA' | 'EVENT' | 'TRAINING' | 'DOCUMENTARY' | 'OTHER'> = {
+          'COMMERCIAL': 'COMMERCIAL',
+          'CORPORATE': 'CORPORATE',
+          'SOCIAL_MEDIA': 'SOCIAL_MEDIA',
+          'EVENT': 'EVENT',
+          'TRAINING': 'TRAINING',
+          'DOCUMENTARY': 'DOCUMENTARY',
+          'MUSIC_VIDEO': 'OTHER', // Not in schema, map to OTHER
+          'OTHER': 'OTHER',
+        };
+
+        const { errors: projectErrors } = await client.models.Project.create({
+          organizationId: newOrg.id,
+          name: formData.projectName,
+          projectType: projectTypeMap[formData.projectType] || 'OTHER',
+          status: 'DEVELOPMENT', // Start in development phase
+          lifecycleState: 'INTAKE',
+          projectOwnerEmail: userEmail, // Track who created the project
+        });
+
+        if (projectErrors) {
+          console.error('Failed to create initial project:', projectErrors);
+        }
+      }
+
+      // Success - redirect to dashboard
+      router.push('/');
+    } catch (err) {
+      console.error('Onboarding error:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred during setup');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const addInviteEmail = () => {
@@ -474,6 +622,13 @@ export default function OnboardingFlow() {
               {currentStep === 4 && renderStep4()}
             </div>
 
+            {/* Error Message */}
+            {error && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
+
             {/* Navigation */}
             <div className="flex items-center justify-between mt-6">
               {currentStep > 1 ? (
@@ -506,12 +661,22 @@ export default function OnboardingFlow() {
                 <button
                   type="button"
                   onClick={handleComplete}
-                  className="flex items-center gap-2 px-8 py-3 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors"
+                  disabled={isSubmitting || !formData.organizationName || !formData.industry}
+                  className="flex items-center gap-2 px-8 py-3 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Complete Setup
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      Complete Setup
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </>
+                  )}
                 </button>
               )}
             </div>

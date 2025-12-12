@@ -253,6 +253,7 @@ export default function BudgetTracker({ project }: BudgetTrackerProps) {
     }
     try {
       await client.models.Expense.create({
+        organizationId: project.organizationId,
         projectId: project.id,
         category: expenseForm.category as any,
         subcategory: expenseForm.subcategory || undefined,
@@ -311,6 +312,7 @@ export default function BudgetTracker({ project }: BudgetTrackerProps) {
       const totalCost = baseCost + overtimeCost + kitFee + perDiem;
 
       await client.models.CrewCost.create({
+        organizationId: project.organizationId,
         projectId: project.id,
         crewMemberEmail: crewCostForm.crewMemberEmail,
         crewMemberName: crewCostForm.crewMemberName,
@@ -373,6 +375,7 @@ export default function BudgetTracker({ project }: BudgetTrackerProps) {
       const depositAmount = parseFloat(equipmentRentalForm.depositAmount) || 0;
 
       await client.models.EquipmentRental.create({
+        organizationId: project.organizationId,
         projectId: project.id,
         equipmentName: equipmentRentalForm.equipmentName,
         equipmentCategory: equipmentRentalForm.equipmentCategory as any,
@@ -432,6 +435,7 @@ export default function BudgetTracker({ project }: BudgetTrackerProps) {
       const totalCost = subtotal + permitFee + parkingFee + securityFee;
 
       await client.models.LocationCost.create({
+        organizationId: project.organizationId,
         projectId: project.id,
         locationName: locationCostForm.locationName,
         locationAddress: locationCostForm.locationAddress || undefined,

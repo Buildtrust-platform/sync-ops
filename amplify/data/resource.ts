@@ -468,6 +468,60 @@ const schema = a.schema({
 
     greenlightCompletedAt: a.datetime(), // When all approvals were completed
 
+    // ============================================
+    // PHASE TRANSITION TRACKING FIELDS
+    // These fields track completion of phase requirements
+    // ============================================
+
+    // Development → Pre-Production transition
+    briefComplete: a.boolean().default(false),
+    briefCompletedAt: a.datetime(),
+    legalApproved: a.boolean().default(false),
+    legalApprovedAt: a.datetime(),
+    contractsSigned: a.boolean().default(false),
+    contractsSignedAt: a.datetime(),
+    budgetApproved: a.boolean().default(false),
+    budgetApprovedAt: a.datetime(),
+    stakeholderSignoff: a.boolean().default(false),
+    stakeholderSignoffAt: a.datetime(),
+
+    // Pre-Production → Production transition
+    teamAssigned: a.integer().default(0), // Count of team members
+    locationsConfirmed: a.boolean().default(false),
+    locationsConfirmedAt: a.datetime(),
+    callSheetsReady: a.boolean().default(false),
+    callSheetsReadyAt: a.datetime(),
+    permitsObtained: a.boolean().default(false),
+    permitsObtainedAt: a.datetime(),
+
+    // Production → Post-Production transition
+    principalPhotographyComplete: a.boolean().default(false),
+    principalPhotographyCompleteAt: a.datetime(),
+    mediaIngested: a.integer().default(0), // Count of ingested assets
+
+    // Post-Production → Review transition
+    roughCutComplete: a.boolean().default(false),
+    roughCutCompleteAt: a.datetime(),
+    roughCutAssetId: a.id(), // Reference to rough cut asset
+
+    // Review → Distribution transition
+    finalApproved: a.boolean().default(false),
+    finalApprovedAt: a.datetime(),
+    finalApprovedBy: a.string(),
+    deliverablesReady: a.boolean().default(false),
+    deliverablesReadyAt: a.datetime(),
+    finalAssetId: a.id(), // Reference to final approved asset
+
+    // Distribution → Completed transition
+    assetsDelivered: a.boolean().default(false),
+    assetsDeliveredAt: a.datetime(),
+    deliveryConfirmedBy: a.string(),
+
+    // Completed → Archived transition
+    archiveComplete: a.boolean().default(false),
+    archiveCompletedAt: a.datetime(),
+    archiveLocation: a.string(), // S3 path or Glacier vault
+
     // FIELD INTELLIGENCE: Situational Awareness for Shoots
     shootLocationCity: a.string(), // Primary shoot location city
     shootLocationCountry: a.string(), // Primary shoot location country
@@ -696,6 +750,54 @@ const schema = a.schema({
     duration: a.float(), // Video duration in seconds
     thumbnailKey: a.string(), // S3 key for thumbnail image
 
+    // ============================================
+    // ASSET APPROVAL STATE TRACKING
+    // Prevents distribution of unapproved assets
+    // ============================================
+    approvalState: a.enum([
+      'DRAFT',           // Initial state - not ready for review
+      'PENDING_REVIEW',  // Submitted for review
+      'IN_REVIEW',       // Currently being reviewed
+      'CHANGES_REQUESTED', // Reviewer requested changes
+      'APPROVED',        // Fully approved and ready for distribution
+      'REJECTED',        // Rejected - will not be used
+      'LOCKED',          // Legally locked - no further changes allowed
+    ]),
+    approvalRequirements: a.string().array(), // ['INTERNAL', 'CLIENT', 'LEGAL'] - which approvals needed
+
+    // Internal approval
+    internalApproved: a.boolean().default(false),
+    internalApprovedAt: a.datetime(),
+    internalApprovedBy: a.string(),
+    internalApprovalNote: a.string(),
+
+    // Client approval
+    clientApproved: a.boolean().default(false),
+    clientApprovedAt: a.datetime(),
+    clientApprovedBy: a.string(),
+    clientApprovalNote: a.string(),
+
+    // Legal approval (locks the asset)
+    legalApproved: a.boolean().default(false),
+    legalApprovedAt: a.datetime(),
+    legalApprovedBy: a.string(),
+    legalApprovalNote: a.string(),
+    isLegalLocked: a.boolean().default(false), // Once true, asset cannot be modified
+    legalLockedAt: a.datetime(),
+
+    // Final approval tracking
+    finalApprovedAt: a.datetime(),
+    finalApprovedBy: a.string(),
+
+    // ============================================
+    // SHOT LIST TRACKING
+    // Links asset back to Brief shot list
+    // ============================================
+    shotListItemId: a.string(), // Reference to Brief.creativeProposals[].shotList[].shotNumber
+    shotDescription: a.string(), // Copy of shot description for quick reference
+    isPlannedShot: a.boolean().default(false), // Was this in the original shot list?
+    isBRoll: a.boolean().default(false), // Additional/unplanned footage
+
     // Relationships
     reviews: a.hasMany('Review', 'assetId'),
     versions: a.hasMany('AssetVersion', 'assetId'),
@@ -806,6 +908,71 @@ const schema = a.schema({
   .authorization(allow => [
     allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.authenticated(),
+  ]),
+
+  // ============================================
+  // SHOT LIST TRACKER - Links Brief shot list to captured Assets
+  // Verifies all planned shots were captured during production
+  // (Different from ShotLog which tracks individual takes during DPR)
+  // ============================================
+  ShotListTracker: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+    projectId: a.id().required(),
+
+    // Link to Brief
+    briefId: a.id().required(),
+    proposalId: a.string().required(), // Which creative proposal this shot is from
+
+    // Shot identification from Brief
+    shotNumber: a.string().required(), // e.g., "1", "2A", "2B"
+    shotType: a.string(), // "Wide", "Close-up", "Medium", etc.
+    shotDescription: a.string().required(),
+    plannedDuration: a.float(), // Planned duration in seconds
+    framing: a.string(), // "Landscape", "Portrait", etc.
+    movement: a.string(), // "Static", "Pan", "Dolly", etc.
+    notes: a.string(), // Director/DP notes
+
+    // Capture status
+    captureStatus: a.enum([
+      'PLANNED',        // In shot list, not yet filmed
+      'IN_PROGRESS',    // Currently being filmed
+      'CAPTURED',       // Shot was captured
+      'PARTIAL',        // Some takes captured, more needed
+      'SKIPPED',        // Intentionally skipped
+      'CANCELLED',      // Removed from shot list
+    ]),
+
+    // Linked assets (multiple takes may exist)
+    capturedAssetIds: a.string().array(), // Array of Asset IDs that match this shot
+    selectedAssetId: a.id(), // The chosen/best take
+    takeCount: a.integer().default(0), // How many takes were captured
+
+    // Capture metadata
+    capturedAt: a.datetime(),
+    capturedBy: a.string(), // Camera operator
+    shootDay: a.integer(), // Which production day
+    callSheetId: a.id(), // Link to call sheet
+
+    // Quality assessment
+    qualityRating: a.enum(['EXCELLENT', 'GOOD', 'ACCEPTABLE', 'NEEDS_RESHOOT']),
+    qualityNotes: a.string(),
+
+    // Continuity tracking
+    continuityNotes: a.string(),
+    wardrobeNotes: a.string(),
+    propNotes: a.string(),
+
+    // Review status
+    directorApproved: a.boolean().default(false),
+    directorApprovedAt: a.datetime(),
+    dpApproved: a.boolean().default(false),
+    dpApprovedAt: a.datetime(),
+  })
+  .authorization(allow => [
+    allow.publicApiKey(),
+    allow.authenticated().to(['read', 'create', 'update']),
+    allow.groups(['Admin', 'Producer', 'Director']).to(['create', 'read', 'update', 'delete']),
   ]),
 
   // CALL SHEETS - Live Production Coordination (PRD FR-12)
@@ -1003,6 +1170,16 @@ const schema = a.schema({
     isResolved: a.boolean().default(false),
     resolvedAt: a.datetime(),
     resolvedBy: a.string(),
+    resolvedByEmail: a.string(),
+
+    // ============================================
+    // TASK LINKAGE - Bidirectional link to Task
+    // When a comment is converted to a task, track both ways
+    // ============================================
+    linkedTaskId: a.id(), // If a task was created from this comment
+    linkedTaskStatus: a.string(), // Mirror of task status for quick display
+    linkedAssetVersionId: a.id(), // Which version the comment was made on
+    resolvedInAssetVersionId: a.id(), // Which version addressed this comment
 
     // Attachments
     attachmentKeys: a.string().array(), // S3 keys for attached files/screenshots
@@ -1249,6 +1426,11 @@ const schema = a.schema({
     asset: a.belongsTo('Asset', 'assetId'),
     assetName: a.string(), // For display
 
+    // VERSION AWARENESS: Track which version was analyzed
+    assetVersionId: a.id(), // Specific version that was analyzed
+    assetVersionNumber: a.integer(), // Version number for quick reference
+    s3KeyAtAnalysis: a.string(), // S3 key at time of analysis (for verification)
+
     // Job Configuration
     analysisType: a.enum([
       'FACE_DETECTION',
@@ -1278,6 +1460,9 @@ const schema = a.schema({
     // Results Summary
     resultsCount: a.integer(), // Number of detections/segments
     errorMessage: a.string(), // If failed
+
+    // Results snapshot (for version comparison)
+    resultsSnapshot: a.json(), // Snapshot of AI results at completion
 
     // AWS Job IDs (for tracking async operations)
     rekognitionJobId: a.string(), // For video analysis
@@ -1480,6 +1665,14 @@ const schema = a.schema({
     completedAt: a.datetime(),
     completedBy: a.string(),
     completedByEmail: a.string(),
+
+    // ============================================
+    // RESOLUTION TRACKING
+    // Track how and when this task was resolved
+    // ============================================
+    resolvedInAssetVersionId: a.id(), // Which asset version addressed this task
+    resolvedInAssetVersionNumber: a.integer(), // Version number for quick reference
+    resolutionNote: a.string(), // How it was resolved
 
     // Blockers and dependencies (PRD: Blockers and dependencies)
     blockedBy: a.string().array(), // Array of task IDs that block this task

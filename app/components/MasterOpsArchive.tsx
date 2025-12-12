@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import { uploadData } from 'aws-amplify/storage';
 import type { Schema } from '@/amplify/data/resource';
+import VideoThumbnail from './VideoThumbnail';
 
 
 /**
@@ -551,17 +552,26 @@ export default function MasterOpsArchive({ projectId, project, organizationId, c
                     borderColor: selectedAssets.includes(asset.id) ? 'var(--accent-primary)' : 'var(--border-primary)',
                   }}
                 >
-                  {/* Selection indicator */}
+                  {/* Thumbnail with hover-to-play */}
                   <div className="relative">
-                    <div
-                      className="aspect-video flex items-center justify-center text-4xl"
-                      style={{ background: 'var(--bg-tertiary)' }}
-                    >
-                      {getFileIcon(asset.contentType)}
-                    </div>
+                    {asset.s3Key ? (
+                      <VideoThumbnail
+                        s3Key={asset.s3Key}
+                        alt={asset.filename}
+                        className="aspect-video"
+                        enableHoverPlay={true}
+                      />
+                    ) : (
+                      <div
+                        className="aspect-video flex items-center justify-center text-4xl"
+                        style={{ background: 'var(--bg-tertiary)' }}
+                      >
+                        {getFileIcon(asset.contentType)}
+                      </div>
+                    )}
                     {selectedAssets.includes(asset.id) && (
                       <div
-                        className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
+                        className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-10"
                         style={{ background: 'var(--accent-primary)' }}
                       >
                         <span className="text-white text-sm">✓</span>
@@ -605,11 +615,22 @@ export default function MasterOpsArchive({ projectId, project, organizationId, c
                       <span className="text-white text-xs">✓</span>
                     )}
                   </div>
-                  <div
-                    className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl flex-shrink-0"
-                    style={{ background: 'var(--bg-tertiary)' }}
-                  >
-                    {getFileIcon(asset.contentType)}
+                  <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                    {asset.s3Key ? (
+                      <VideoThumbnail
+                        s3Key={asset.s3Key}
+                        alt={asset.filename}
+                        className="w-full h-full"
+                        enableHoverPlay={false}
+                      />
+                    ) : (
+                      <div
+                        className="w-full h-full flex items-center justify-center text-2xl"
+                        style={{ background: 'var(--bg-tertiary)' }}
+                      >
+                        {getFileIcon(asset.contentType)}
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate" style={{ color: 'var(--text-primary)' }}>

@@ -91,6 +91,7 @@ interface RightsDocument {
 
 interface DigitalRightsLockerProps {
   projectId: string;
+  organizationId: string;
   currentUserEmail: string;
   currentUserName?: string;
 }
@@ -300,6 +301,7 @@ const COVERAGE_AMOUNTS = [
 
 export default function DigitalRightsLocker({
   projectId,
+  organizationId,
   currentUserEmail,
   currentUserName,
 }: DigitalRightsLockerProps) {
@@ -561,6 +563,7 @@ export default function DigitalRightsLocker({
       }
 
       await client.models.RightsDocument.create({
+        organizationId,
         name: newDocument.name,
         description: newDocument.description || undefined,
         documentType: newDocument.documentType,

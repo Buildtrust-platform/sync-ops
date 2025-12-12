@@ -1,8 +1,17 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
+import { Amplify } from 'aws-amplify';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
+import outputs from '@/amplify_outputs.json';
+
+// Ensure Amplify is configured before generating client
+try {
+  Amplify.configure(outputs, { ssr: true });
+} catch {
+  // Already configured
+}
 
 const client = generateClient<Schema>();
 
@@ -191,6 +200,19 @@ const EditIcon = () => (
   </svg>
 );
 
+// Helper to determine file type from s3Key extension
+const getFileTypeFromKey = (s3Key: string): string => {
+  const ext = s3Key.toLowerCase().split('.').pop() || '';
+  const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'svg'];
+  const videoExts = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'wmv', 'm4v'];
+  const audioExts = ['mp3', 'wav', 'aac', 'm4a', 'flac', 'ogg', 'wma'];
+
+  if (imageExts.includes(ext)) return `image/${ext === 'jpg' ? 'jpeg' : ext}`;
+  if (videoExts.includes(ext)) return `video/${ext}`;
+  if (audioExts.includes(ext)) return `audio/${ext === 'mp3' ? 'mpeg' : ext}`;
+  return 'application/octet-stream';
+};
+
 // Format time helper
 const formatTime = (seconds: number): string => {
   const hrs = Math.floor(seconds / 3600);
@@ -225,6 +247,11 @@ export default function AIEnhancements({
   const [editingPerson, setEditingPerson] = useState<string | null>(null);
   const [newPersonName, setNewPersonName] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [availableAssets, setAvailableAssets] = useState<Array<{ id: string; name: string; type: string; s3Key: string }>>([]);
+  const [selectedAssetIds, setSelectedAssetIds] = useState<string[]>([]);
+  const [isStartingAnalysis, setIsStartingAnalysis] = useState(false);
+  const [isLoadingAssets, setIsLoadingAssets] = useState(false);
 
   // AI Analysis data from Amplify backend
   const [faces, setFaces] = useState<DetectedFace[]>([]);
@@ -655,6 +682,123 @@ export default function AIEnhancements({
       onNavigateToAsset(assetId, timestamp);
     }
   }, [onNavigateToAsset]);
+
+  // Load available assets for analysis
+  const loadAvailableAssets = useCallback(async () => {
+    setIsLoadingAssets(true);
+    try {
+      // Build filter - match ArchiveDAM's approach exactly
+      const filter: Record<string, unknown> = {};
+      if (projectId) {
+        filter.projectId = { eq: projectId };
+      }
+
+      console.log('[AI Analysis] Loading assets with projectId:', projectId);
+      console.log('[AI Analysis] Filter:', JSON.stringify(filter));
+
+      // Use same approach as ArchiveDAM - always pass filter object
+      const result = await client.models.Asset.list({ filter });
+
+      console.log('[AI Analysis] Raw result:', result);
+      console.log('[AI Analysis] Assets loaded:', result.data?.length || 0, 'assets found');
+
+      const assetsData = result.data || [];
+
+      if (assetsData.length > 0) {
+        // Log all assets for debugging
+        assetsData.forEach((asset, i) => {
+          if (asset) {
+            console.log(`[AI Analysis] Asset ${i}:`, asset.id, asset.s3Key, asset.mimeType);
+          }
+        });
+
+        // Filter for media assets - be more lenient, include all assets with s3Key
+        const mediaAssets = assetsData
+          .filter((asset): asset is NonNullable<typeof asset> => {
+            if (!asset) return false;
+            // Include any asset that has an s3Key (was uploaded)
+            return !!asset.s3Key;
+          })
+          .map(asset => {
+            // Extract filename from s3Key for display name
+            const fileName = asset.s3Key?.split('/').pop() || 'Unknown Asset';
+            return {
+              id: asset.id,
+              name: fileName,
+              type: asset.mimeType || getFileTypeFromKey(asset.s3Key || ''),
+              s3Key: asset.s3Key || '',
+            };
+          });
+
+        console.log('[AI Analysis] Media assets after filter:', mediaAssets.length);
+        setAvailableAssets(mediaAssets);
+      } else {
+        console.log('[AI Analysis] No assets returned from query');
+        setAvailableAssets([]);
+      }
+    } catch (error) {
+      console.error('[AI Analysis] Error loading assets:', error);
+      setAvailableAssets([]);
+    } finally {
+      setIsLoadingAssets(false);
+    }
+  }, [projectId]);
+
+  // Open analysis modal
+  const openAnalysisModal = useCallback(() => {
+    loadAvailableAssets();
+    setSelectedAssetIds([]);
+    setShowAnalysisModal(true);
+  }, [loadAvailableAssets]);
+
+  // Start AI analysis for selected assets
+  const startAnalysis = useCallback(async () => {
+    if (selectedAssetIds.length === 0) return;
+
+    setIsStartingAnalysis(true);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const models = client.models as any;
+
+      for (const assetId of selectedAssetIds) {
+        const asset = availableAssets.find(a => a.id === assetId);
+        if (!asset) continue;
+
+        // Create an AIAnalysisJob record
+        if (models.AIAnalysisJob) {
+          await models.AIAnalysisJob.create({
+            organizationId,
+            projectId,
+            assetId,
+            assetName: asset.name,
+            analysisType: 'FULL_ANALYSIS',
+            status: 'QUEUED',
+            progress: 0,
+          });
+        }
+
+        // Create a local job for immediate UI feedback
+        const newJob: AIAnalysisJob = {
+          id: `local-${Date.now()}-${assetId}`,
+          assetId,
+          assetName: asset.name,
+          type: 'full_analysis',
+          status: 'queued',
+          progress: 0,
+          startedAt: new Date().toISOString(),
+        };
+
+        setJobs(prev => [newJob, ...prev]);
+      }
+
+      setShowAnalysisModal(false);
+      setActiveTab('jobs');
+    } catch (error) {
+      console.error('Error starting analysis:', error);
+    } finally {
+      setIsStartingAnalysis(false);
+    }
+  }, [selectedAssetIds, availableAssets, organizationId, projectId]);
 
   // Get emotion display
   const getTopEmotion = (emotions?: DetectedFace['emotions']): string => {
@@ -1404,6 +1548,42 @@ export default function AIEnhancements({
         {/* Jobs Tab */}
         {activeTab === 'jobs' && (
           <div>
+            {/* Jobs Header with Start Analysis Button */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '16px',
+              paddingBottom: '16px',
+              borderBottom: '1px solid var(--border)',
+            }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>Analysis Jobs</h3>
+                <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                  {jobs.length} job{jobs.length !== 1 ? 's' : ''} • {jobs.filter(j => j.status === 'processing' || j.status === 'queued').length} active
+                </p>
+              </div>
+              <button
+                onClick={openAnalysisModal}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 16px',
+                  backgroundColor: 'var(--primary)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                }}
+              >
+                <SparklesIcon />
+                Start Analysis
+              </button>
+            </div>
+
             <div style={{
               display: 'flex',
               flexDirection: 'column',
@@ -1543,13 +1723,236 @@ export default function AIEnhancements({
                 color: 'var(--text-secondary)',
               }}>
                 <SparklesIcon />
-                <p style={{ marginTop: '12px' }}>No AI analysis jobs</p>
-                <p style={{ fontSize: '13px', opacity: 0.7 }}>Upload media files to automatically start AI analysis</p>
+                <p style={{ marginTop: '12px', fontWeight: 500 }}>No AI analysis jobs yet</p>
+                <p style={{ fontSize: '13px', opacity: 0.7, marginBottom: '16px' }}>
+                  Click &quot;Start Analysis&quot; above to analyze your media files
+                </p>
+                <button
+                  onClick={openAnalysisModal}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 20px',
+                    backgroundColor: 'var(--primary)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                  }}
+                >
+                  <SparklesIcon />
+                  Start Analysis
+                </button>
               </div>
             )}
           </div>
         )}
       </div>
+
+      {/* Analysis Modal */}
+      {showAnalysisModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+        }}>
+          <div style={{
+            backgroundColor: 'var(--bg-0)',
+            borderRadius: '12px',
+            width: '90%',
+            maxWidth: '600px',
+            maxHeight: '80vh',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }}>
+            {/* Modal Header */}
+            <div style={{
+              padding: '20px',
+              borderBottom: '1px solid var(--border)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>Start AI Analysis</h2>
+                <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                  Select media files to analyze with AI
+                </p>
+              </div>
+              <button
+                onClick={() => setShowAnalysisModal(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '8px',
+                  color: 'var(--text-secondary)',
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ flex: 1, overflow: 'auto', padding: '20px' }}>
+              {isLoadingAssets ? (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '40px 20px',
+                  color: 'var(--text-secondary)',
+                }}>
+                  <RefreshIcon />
+                  <p style={{ marginTop: '12px' }}>Loading assets...</p>
+                </div>
+              ) : availableAssets.length === 0 ? (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '40px 20px',
+                  color: 'var(--text-secondary)',
+                }}>
+                  <p>No media files found in this project.</p>
+                  <p style={{ fontSize: '13px', opacity: 0.7 }}>Upload images, videos, or audio files first.</p>
+                  <p style={{ fontSize: '12px', opacity: 0.5, marginTop: '8px' }}>Project ID: {projectId || 'none'}</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '12px',
+                  }}>
+                    <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                      {selectedAssetIds.length} of {availableAssets.length} selected
+                    </span>
+                    <button
+                      onClick={() => {
+                        if (selectedAssetIds.length === availableAssets.length) {
+                          setSelectedAssetIds([]);
+                        } else {
+                          setSelectedAssetIds(availableAssets.map(a => a.id));
+                        }
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--primary)',
+                        cursor: 'pointer',
+                        fontSize: '13px',
+                      }}
+                    >
+                      {selectedAssetIds.length === availableAssets.length ? 'Deselect All' : 'Select All'}
+                    </button>
+                  </div>
+                  {availableAssets.map(asset => (
+                    <label
+                      key={asset.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '12px',
+                        backgroundColor: selectedAssetIds.includes(asset.id) ? 'var(--primary-muted)' : 'var(--bg-1)',
+                        borderRadius: '8px',
+                        border: `1px solid ${selectedAssetIds.includes(asset.id) ? 'var(--primary)' : 'var(--border)'}`,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedAssetIds.includes(asset.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedAssetIds(prev => [...prev, asset.id]);
+                          } else {
+                            setSelectedAssetIds(prev => prev.filter(id => id !== asset.id));
+                          }
+                        }}
+                        style={{ width: '18px', height: '18px' }}
+                      />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          fontSize: '14px',
+                          fontWeight: 500,
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}>
+                          {asset.name}
+                        </div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'capitalize' }}>
+                          {asset.type.replace('/', ' • ')}
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{
+              padding: '16px 20px',
+              borderTop: '1px solid var(--border)',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '12px',
+            }}>
+              <button
+                onClick={() => setShowAnalysisModal(false)}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: 'var(--bg-2)',
+                  color: 'var(--text)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={startAnalysis}
+                disabled={selectedAssetIds.length === 0 || isStartingAnalysis}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: selectedAssetIds.length === 0 ? 'var(--bg-2)' : 'var(--primary)',
+                  color: selectedAssetIds.length === 0 ? 'var(--text-secondary)' : 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: selectedAssetIds.length === 0 ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                {isStartingAnalysis ? (
+                  <>
+                    <RefreshIcon />
+                    Starting...
+                  </>
+                ) : (
+                  <>
+                    <SparklesIcon />
+                    Start Analysis ({selectedAssetIds.length})
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

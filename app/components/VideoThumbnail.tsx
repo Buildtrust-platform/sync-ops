@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { getUrl } from "aws-amplify/storage";
 
 interface VideoThumbnailProps {
@@ -8,6 +8,7 @@ interface VideoThumbnailProps {
   alt?: string;
   className?: string;
   thumbnailTime?: number; // Time in seconds to capture thumbnail (default: 1)
+  enableHoverPlay?: boolean; // Enable video preview on hover (default: true)
 }
 
 export default function VideoThumbnail({
@@ -15,10 +16,17 @@ export default function VideoThumbnail({
   alt = "Video thumbnail",
   className = "",
   thumbnailTime = 1,
+  enableHoverPlay = true,
 }: VideoThumbnailProps) {
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check if file is a video
   const isVideoFile = (filename: string): boolean => {
@@ -55,6 +63,8 @@ export default function VideoThumbnail({
   // Store waveform bars for audio files (generated once)
   const [waveformBars] = useState(() => generateWaveformBars());
 
+  const isVideo = isVideoFile(s3Key);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -67,7 +77,6 @@ export default function VideoThumbnail({
         if (isAudioFile(s3Key)) {
           if (isMounted) {
             setIsLoading(false);
-            // No thumbnailUrl needed - we'll render waveform directly
           }
           return;
         }
@@ -80,6 +89,11 @@ export default function VideoThumbnail({
 
         const urlString = url.toString();
 
+        // Store video URL for playback
+        if (isVideoFile(s3Key) && isMounted) {
+          setVideoUrl(urlString);
+        }
+
         // If it's an image, use it directly
         if (isImageFile(s3Key)) {
           if (isMounted) {
@@ -91,30 +105,26 @@ export default function VideoThumbnail({
 
         // If it's a video, extract a frame
         if (isVideoFile(s3Key)) {
-          // Create a hidden video element to extract frame
           const video = document.createElement('video');
           video.crossOrigin = 'anonymous';
           video.muted = true;
           video.preload = 'metadata';
 
-          // Set a timeout in case video loading hangs
           const timeout = setTimeout(() => {
             if (isMounted) {
               setError(true);
               setIsLoading(false);
             }
             video.remove();
-          }, 10000); // 10 second timeout
+          }, 10000);
 
           video.onloadedmetadata = () => {
-            // Seek to the specified time (or 10% into video if time exceeds duration)
             const seekTime = Math.min(thumbnailTime, video.duration * 0.1);
             video.currentTime = seekTime;
           };
 
           video.onseeked = () => {
             clearTimeout(timeout);
-            // Create canvas and draw the video frame
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth || 320;
             canvas.height = video.videoHeight || 180;
@@ -122,8 +132,6 @@ export default function VideoThumbnail({
             const ctx = canvas.getContext('2d');
             if (ctx) {
               ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-              // Convert to data URL
               const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
 
               if (isMounted) {
@@ -131,8 +139,6 @@ export default function VideoThumbnail({
                 setIsLoading(false);
               }
             }
-
-            // Clean up
             video.remove();
           };
 
@@ -148,7 +154,6 @@ export default function VideoThumbnail({
           video.src = urlString;
           video.load();
         } else {
-          // Not a video, image, or audio - show placeholder
           if (isMounted) {
             setError(true);
             setIsLoading(false);
@@ -169,6 +174,83 @@ export default function VideoThumbnail({
       isMounted = false;
     };
   }, [s3Key, thumbnailTime]);
+
+  // Play video function
+  const playVideo = useCallback(() => {
+    if (!videoRef.current || !videoUrl) return;
+
+    const video = videoRef.current;
+
+    // Ensure video source is set
+    if (!video.src) {
+      video.src = videoUrl;
+    }
+
+    setIsHovering(true);
+
+    const attemptPlay = () => {
+      video.play().then(() => {
+        setIsPlaying(true);
+      }).catch((err) => {
+        console.warn('Video play failed:', err.message);
+        setIsPlaying(false);
+      });
+    };
+
+    if (video.readyState >= 2) {
+      attemptPlay();
+    } else {
+      video.addEventListener('canplay', attemptPlay, { once: true });
+      video.load();
+    }
+  }, [videoUrl]);
+
+  // Stop video function
+  const stopVideo = useCallback(() => {
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+    setIsPlaying(false);
+    setIsHovering(false);
+  }, []);
+
+  // Handle mouse enter
+  const handleMouseEnter = useCallback(() => {
+    if (!enableHoverPlay || !isVideo || !videoUrl) return;
+
+    // Preload video
+    if (videoRef.current && !videoRef.current.src) {
+      videoRef.current.src = videoUrl;
+      videoRef.current.load();
+    }
+
+    // Delay before playing
+    hoverTimeoutRef.current = setTimeout(() => {
+      playVideo();
+    }, 300);
+  }, [enableHoverPlay, isVideo, videoUrl, playVideo]);
+
+  // Handle mouse leave
+  const handleMouseLeave = useCallback(() => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+    stopVideo();
+  }, [stopVideo]);
+
+  // Handle click on play button
+  const handlePlayClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (isPlaying) {
+      stopVideo();
+    } else {
+      playVideo();
+    }
+  }, [isPlaying, playVideo, stopVideo]);
 
   // Loading state
   if (isLoading) {
@@ -233,21 +315,53 @@ export default function VideoThumbnail({
     );
   }
 
-  // Success - show thumbnail
+  // Success - show thumbnail with video hover preview
   return (
-    <div className={`relative overflow-hidden ${className}`}>
+    <div
+      className={`relative overflow-hidden group ${className}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* Static thumbnail */}
       <img
         src={thumbnailUrl || undefined}
         alt={alt}
-        className="w-full h-full object-cover"
+        className={`w-full h-full object-cover transition-opacity duration-300 ${(isHovering || isPlaying) && isVideo ? 'opacity-0' : 'opacity-100'}`}
       />
-      {/* Video indicator overlay */}
-      {isVideoFile(s3Key) && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity">
-          <div className="w-12 h-12 rounded-full bg-black/60 flex items-center justify-center">
-            <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
-            </svg>
+
+      {/* Video element for hover preview */}
+      {isVideo && videoUrl && (
+        <video
+          ref={videoRef}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${(isHovering || isPlaying) ? 'opacity-100' : 'opacity-0'}`}
+          muted
+          loop
+          playsInline
+          preload="none"
+        />
+      )}
+
+      {/* Play/Pause button overlay for video - ALWAYS CLICKABLE */}
+      {isVideo && (
+        <div
+          className="absolute inset-0 flex items-center justify-center cursor-pointer"
+          onClick={handlePlayClick}
+        >
+          <div
+            className={`w-12 h-12 rounded-full bg-black/60 flex items-center justify-center backdrop-blur-sm transition-all hover:bg-black/80 hover:scale-110 ${
+              isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            }`}
+          >
+            {isPlaying ? (
+              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <rect x="6" y="4" width="4" height="16" />
+                <rect x="14" y="4" width="4" height="16" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            )}
           </div>
         </div>
       )}

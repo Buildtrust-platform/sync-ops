@@ -1,10 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Amplify } from 'aws-amplify';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
 import { Authenticator } from '@aws-amplify/ui-react';
 import GlobalNav from '../components/GlobalNav';
+import outputs from '@/amplify_outputs.json';
+
+// Ensure Amplify is configured before using services
+try {
+  Amplify.configure(outputs, { ssr: true });
+} catch {
+  // Already configured
+}
 
 /**
  * REPORTS PAGE
@@ -41,9 +50,9 @@ export default function ReportsPage() {
           client.models.Asset.list(),
           client.models.Task.list(),
         ]);
-        setProjects(projectsRes.data || []);
-        setAssets(assetsRes.data || []);
-        setTasks(tasksRes.data || []);
+        setProjects((projectsRes.data || []).filter(Boolean));
+        setAssets((assetsRes.data || []).filter(Boolean));
+        setTasks((tasksRes.data || []).filter(Boolean));
       } catch (err) {
         console.error('Error fetching data:', err);
       } finally {

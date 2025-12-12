@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { generateClient } from "aws-amplify/data";
 import { fetchUserAttributes } from "aws-amplify/auth";
 import type { Schema } from "@/amplify/data/resource";
@@ -34,11 +35,13 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const router = useRouter();
   const [projects, setProjects] = useState<Array<Schema["Project"]["type"]>>([]);
   const [showIntakeWizard, setShowIntakeWizard] = useState(false);
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [isCheckingOrg, setIsCheckingOrg] = useState(true);
 
   // Initialize Amplify client after mount to avoid SSR issues
   useEffect(() => {
@@ -50,10 +53,10 @@ export default function App() {
     async function fetchOrganization() {
       if (!isAuthenticated || !client) return;
 
+      setIsCheckingOrg(true);
       try {
         const attributes = await fetchUserAttributes();
         const email = attributes.email || '';
-        const userId = attributes.sub || '';
 
         // Find user's organization membership
         const { data: memberships } = await client.models.OrganizationMember.list({
@@ -62,40 +65,28 @@ export default function App() {
 
         if (memberships && memberships.length > 0) {
           setOrganizationId(memberships[0].organizationId);
+          setIsCheckingOrg(false);
         } else {
-          // Try to get existing organization
+          // Try to get existing organization (for legacy data)
           const { data: orgs } = await client.models.Organization.list();
           if (orgs && orgs.length > 0) {
             setOrganizationId(orgs[0].id);
+            setIsCheckingOrg(false);
           } else {
-            // Create a default organization
-            const { data: newOrg } = await client.models.Organization.create({
-              name: 'My Organization',
-              slug: `org-${Date.now()}`,
-              email: email,
-              subscriptionTier: 'FREE',
-              subscriptionStatus: 'TRIALING',
-              createdBy: userId,
-            });
-            if (newOrg) {
-              setOrganizationId(newOrg.id);
-              await client.models.OrganizationMember.create({
-                organizationId: newOrg.id,
-                userId: userId,
-                email: email,
-                role: 'OWNER',
-                status: 'ACTIVE',
-              });
-            }
+            // No organization exists - redirect to onboarding flow
+            // This replaces the auto-creation with proper onboarding
+            router.push('/onboarding');
+            return;
           }
         }
       } catch (err) {
         console.error('Error fetching organization:', err);
+        setIsCheckingOrg(false);
       }
     }
 
     fetchOrganization();
-  }, [client, isAuthenticated]);
+  }, [client, isAuthenticated, router]);
 
   // Fetch projects for the organization with real-time updates
   const listProjects = useCallback(() => {
@@ -153,6 +144,7 @@ export default function App() {
             signOut={signOut}
             isAuthenticated={isAuthenticated}
             setIsAuthenticated={setIsAuthenticated}
+            isCheckingOrg={isCheckingOrg}
             projects={projects}
             showIntakeWizard={showIntakeWizard}
             openIntakeWizard={openIntakeWizard}
@@ -171,6 +163,7 @@ function AuthenticatedApp({
   signOut,
   isAuthenticated,
   setIsAuthenticated,
+  isCheckingOrg,
   projects,
   showIntakeWizard,
   openIntakeWizard,
@@ -181,6 +174,7 @@ function AuthenticatedApp({
   signOut: (() => void) | undefined;
   isAuthenticated: boolean;
   setIsAuthenticated: (value: boolean) => void;
+  isCheckingOrg: boolean;
   projects: any[];
   showIntakeWizard: boolean;
   openIntakeWizard: () => void;
@@ -193,6 +187,18 @@ function AuthenticatedApp({
       setIsAuthenticated(true);
     }
   }, [user, isAuthenticated, setIsAuthenticated]);
+
+  // Show loading while checking for organization
+  if (isCheckingOrg) {
+    return (
+      <div className="min-h-screen bg-[var(--bg-0)] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-[var(--text-secondary)]">Setting up your workspace...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[var(--bg-0)]">
