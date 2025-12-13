@@ -139,23 +139,24 @@ export default function ShotLogger({
 
     try {
       // Calculate duration from timecodes
-      const duration = calculateDuration(currentShot.timecodeIn, currentShot.timecodeOut);
+      const durationStr = calculateDuration(currentShot.timecodeIn, currentShot.timecodeOut);
+      const duration = durationStr ? parseFloat(durationStr) : undefined;
 
       await client.models.ShotLog.create({
         organizationId,
         projectId,
         scene: currentShot.scene,
         shot: currentShot.shot,
-        take: currentShot.take,
+        take: Number(currentShot.take) || 0,
         status: currentShot.circled ? 'CIRCLE' : currentShot.status,
         timecodeIn: currentShot.timecodeIn || undefined,
         timecodeOut: currentShot.timecodeOut || undefined,
-        duration: duration || undefined,
+        duration: duration,
         camera: currentShot.camera,
         lens: currentShot.lens || undefined,
         fStop: currentShot.fStop || undefined,
         iso: currentShot.iso || undefined,
-        fps: currentShot.fps,
+        fps: Number(currentShot.fps) || 24,
         cardId: currentShot.cardId || undefined,
         notes: currentShot.notes || undefined,
         continuityNotes: currentShot.continuityNotes || undefined,

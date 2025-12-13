@@ -204,12 +204,12 @@ export default function AssetAnalytics({
         }
 
         // Fetch real assets from database
-        const { data: assets } = await client.models.Asset.list({ filter });
+        const { data: assets } = await client!.models.Asset.list({ filter });
         const assetList = assets || [];
 
         // Calculate real stats
         const totalAssetCount = assetList.length;
-        const totalStorageBytes = assetList.reduce((sum, a) => sum + (a.fileSize || 0), 0);
+        const totalStorageBytes = assetList.reduce((sum, a) => sum + (a.fileSize ?? 0), 0);
         const totalStorageMB = Math.round(totalStorageBytes / (1024 * 1024));
 
         setTotalAssets(totalAssetCount);
@@ -224,9 +224,9 @@ export default function AssetAnalytics({
         };
 
         assetList.forEach(asset => {
-          const type = asset.type || asset.mimeType || '';
+          const type = asset.type ?? asset.mimeType ?? '';
           const typeLower = type.toLowerCase();
-          const size = asset.fileSize || 0;
+          const size = asset.fileSize ?? 0;
 
           if (typeLower.includes('video') || typeLower.includes('mp4') || typeLower.includes('mov')) {
             typeCount.Video.count++;
@@ -269,8 +269,8 @@ export default function AssetAnalytics({
         assetList.forEach(asset => {
           if (asset.createdAt) {
             const dateStr = asset.createdAt.split('T')[0];
-            if (activityMap.has(dateStr)) {
-              const day = activityMap.get(dateStr)!;
+            const day = activityMap.get(dateStr);
+            if (day) {
               day.uploads++;
             }
           }
@@ -298,20 +298,20 @@ export default function AssetAnalytics({
           if (projectId) {
             reviewFilter.projectId = { eq: projectId };
           }
-          const { data: reviews } = await client.models.Review.list({ filter: reviewFilter });
+          const { data: reviews } = await client!.models.Review.list({ filter: reviewFilter });
           const reviewList = reviews || [];
 
-          const pendingReviews = reviewList.filter(r => r.status === 'PENDING' || r.status === 'IN_PROGRESS').length;
+          const pendingReviews = reviewList.filter(r => r.status === 'IN_PROGRESS').length;
           const completedReviews = reviewList.filter(r => {
-            if (!r.completedAt) return false;
-            const completed = new Date(r.completedAt);
+            if (!r.updatedAt) return false;
+            const updated = new Date(r.updatedAt);
             const monthAgo = new Date();
             monthAgo.setMonth(monthAgo.getMonth() - 1);
-            return completed > monthAgo;
+            return (r.status === 'COMPLETED' || r.status === 'APPROVED' || r.status === 'REJECTED') && updated > monthAgo;
           }).length;
 
           const approvedReviews = reviewList.filter(r => r.status === 'APPROVED').length;
-          const totalCompleted = reviewList.filter(r => r.status === 'APPROVED' || r.status === 'REJECTED').length;
+          const totalCompleted = reviewList.filter(r => r.status === 'APPROVED' || r.status === 'REJECTED' || r.status === 'COMPLETED').length;
 
           setActiveReviews(pendingReviews);
           setReviewMetrics({
@@ -333,12 +333,12 @@ export default function AssetAnalytics({
 
         // Generate top assets from real data
         const sortedAssets = [...assetList]
-          .sort((a, b) => (b.fileSize || 0) - (a.fileSize || 0))
+          .sort((a, b) => (b.fileSize ?? 0) - (a.fileSize ?? 0))
           .slice(0, 5);
 
         setTopAssets(sortedAssets.map(asset => ({
-          name: asset.s3Key?.split('/').pop() || 'Unknown',
-          views: asset.usageHeatmap || 0, // Use real heatmap data
+          name: asset.s3Key?.split('/').pop() ?? 'Unknown',
+          views: asset.usageHeatmap ?? 0, // Use real heatmap data
           downloads: 0, // Would need actual download tracking
         })));
 

@@ -117,7 +117,7 @@ export default function TeamPermissions({ projectId, organizationId }: TeamPermi
           projectRole: m.projectRole as ProjectRole | null,
           isExternal: m.isExternal || false,
           externalRole: m.externalRole as ExternalRole | null,
-          assignedPhases: m.assignedPhases,
+          assignedPhases: (m.assignedPhases?.filter((p): p is string => p !== null)) || null,
           status: (m.status as 'ACTIVE' | 'SUSPENDED' | 'REVOKED') || 'ACTIVE',
           accessExpiresAt: m.accessExpiresAt,
           invitedAt: m.invitedAt,
@@ -366,7 +366,7 @@ export default function TeamPermissions({ projectId, organizationId }: TeamPermi
                 {members.map(member => {
                   const status = getStatusBadge(member.status);
                   const roleColor = getRoleColor(
-                    member.isExternal ? member.externalRole : member.projectRole,
+                    (member.isExternal ? member.externalRole : member.projectRole) ?? null,
                     member.isExternal
                   );
 

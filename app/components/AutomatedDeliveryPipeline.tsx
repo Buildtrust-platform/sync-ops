@@ -1384,7 +1384,7 @@ export default function AutomatedDeliveryPipeline({
                 Cancel
               </button>
               <button
-                onClick={handleCreateJob}
+                onClick={() => handleCreateJob()}
                 style={{
                   padding: '10px 20px',
                   backgroundColor: 'var(--primary)',

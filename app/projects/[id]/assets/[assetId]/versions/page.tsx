@@ -33,9 +33,13 @@ export default function AssetVersionsPage({ params }: { params: Promise<{ id: st
     if (!client) return;
     async function fetchAsset() {
       try {
-        const { data } = await client.models.Asset.get({ id: assetId });
-        if (data) {
-          setAsset(data as Asset);
+        const result = await client?.models.Asset.get({ id: assetId });
+        if (result?.data) {
+          setAsset({
+            id: result.data.id,
+            filename: result.data.s3Key?.split('/').pop() || 'Unknown',
+            projectId: result.data.projectId
+          });
         }
       } catch (error) {
         console.error('Error fetching asset:', error);

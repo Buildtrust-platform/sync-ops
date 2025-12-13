@@ -57,9 +57,9 @@ export default function DailyProductionReport({
     lastShot: '',
     crewWrap: '',
     cameraWrap: '',
-    scheduledScenes: 0,
-    completedScenes: 0,
-    partialScenes: 0,
+    scheduledScenes: [] as string[],
+    completedScenes: [] as string[],
+    partialScenes: [] as string[],
     totalSetups: 0,
     totalTakes: 0,
     goodTakes: 0,
@@ -168,35 +168,35 @@ export default function DailyProductionReport({
 
   const loadFormData = (dpr: DPRType) => {
     setFormData({
-      shootDay: dpr.shootDay || 1,
-      unit: dpr.unit || 'Main Unit',
-      director: dpr.director || '',
-      firstAD: dpr.firstAD || '',
-      upm: dpr.upm || '',
-      crewCall: dpr.crewCall || '',
-      firstShot: dpr.firstShot || '',
-      lunchStart: dpr.lunchStart || '',
-      lunchEnd: dpr.lunchEnd || '',
-      lastShot: dpr.lastShot || '',
-      crewWrap: dpr.crewWrap || '',
-      cameraWrap: dpr.cameraWrap || '',
-      scheduledScenes: dpr.scheduledScenes || 0,
-      completedScenes: dpr.completedScenes || 0,
-      partialScenes: dpr.partialScenes || 0,
-      totalSetups: dpr.totalSetups || 0,
-      totalTakes: dpr.totalTakes || 0,
-      goodTakes: dpr.goodTakes || 0,
-      totalMinutesShot: dpr.totalMinutesShot || 0,
-      runningTotal: dpr.runningTotal || 0,
-      cardsUsed: dpr.cardsUsed || 0,
-      storageUsedGB: dpr.storageUsedGB || 0,
-      totalCrewMembers: dpr.totalCrewMembers || 0,
-      overtimeCrew: dpr.overtimeCrew || 0,
-      mealPenalties: dpr.mealPenalties || 0,
-      weatherConditions: dpr.weatherConditions || '',
-      temperature: dpr.temperature || '',
-      productionNotes: dpr.productionNotes || '',
-      tomorrowPrep: dpr.tomorrowPrep || '',
+      shootDay: dpr.shootDay ?? 1,
+      unit: dpr.unit ?? 'Main Unit',
+      director: dpr.director ?? '',
+      firstAD: dpr.firstAD ?? '',
+      upm: dpr.upm ?? '',
+      crewCall: dpr.crewCall ?? '',
+      firstShot: dpr.firstShot ?? '',
+      lunchStart: dpr.lunchStart ?? '',
+      lunchEnd: dpr.lunchEnd ?? '',
+      lastShot: dpr.lastShot ?? '',
+      crewWrap: dpr.crewWrap ?? '',
+      cameraWrap: dpr.cameraWrap ?? '',
+      scheduledScenes: (dpr.scheduledScenes ?? []).filter((s): s is string => s !== null),
+      completedScenes: (dpr.completedScenes ?? []).filter((s): s is string => s !== null),
+      partialScenes: (dpr.partialScenes ?? []).filter((s): s is string => s !== null),
+      totalSetups: dpr.totalSetups ?? 0,
+      totalTakes: dpr.totalTakes ?? 0,
+      goodTakes: dpr.goodTakes ?? 0,
+      totalMinutesShot: dpr.totalMinutesShot ?? 0,
+      runningTotal: dpr.runningTotal ?? 0,
+      cardsUsed: dpr.cardsUsed ?? 0,
+      storageUsedGB: dpr.storageUsedGB ?? 0,
+      totalCrewMembers: dpr.totalCrewMembers ?? 0,
+      overtimeCrew: dpr.overtimeCrew ?? 0,
+      mealPenalties: dpr.mealPenalties ?? 0,
+      weatherConditions: dpr.weatherConditions ?? '',
+      temperature: dpr.temperature ?? '',
+      productionNotes: dpr.productionNotes ?? '',
+      tomorrowPrep: dpr.tomorrowPrep ?? '',
     });
   };
 
@@ -227,6 +227,7 @@ export default function DailyProductionReport({
         crewWrap: formData.crewWrap,
         cameraWrap: formData.cameraWrap,
         scheduledScenes: formData.scheduledScenes,
+        createdBy: currentUserEmail,
         completedScenes: formData.completedScenes,
         partialScenes: formData.partialScenes,
         totalSetups: formData.totalSetups,
@@ -362,9 +363,12 @@ export default function DailyProductionReport({
   };
 
   const calculateProgress = () => {
-    if (!currentDPR || !currentDPR.scheduledScenes) return 0;
-    const completed = (currentDPR.completedScenes || 0) + ((currentDPR.partialScenes || 0) * 0.5);
-    return Math.round((completed / currentDPR.scheduledScenes) * 100);
+    const scheduledCount = currentDPR?.scheduledScenes?.length ?? 0;
+    if (!currentDPR || scheduledCount === 0) return 0;
+    const completedCount = currentDPR.completedScenes?.length ?? 0;
+    const partialCount = currentDPR.partialScenes?.length ?? 0;
+    const completed = completedCount + (partialCount * 0.5);
+    return Math.round((completed / scheduledCount) * 100);
   };
 
   // Show create new DPR form
@@ -445,11 +449,15 @@ export default function DailyProductionReport({
             <h3 className="text-[16px] font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Scheduled Work</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[12px] font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>Scheduled Scenes</label>
+                <label className="block text-[12px] font-medium mb-1" style={{ color: 'var(--text-tertiary)' }}>Scheduled Scenes (comma-separated)</label>
                 <input
-                  type="number"
-                  value={formData.scheduledScenes}
-                  onChange={(e) => updateFormField('scheduledScenes', parseInt(e.target.value))}
+                  type="text"
+                  placeholder="1, 2, 3A, 4B"
+                  value={formData.scheduledScenes.join(', ')}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    scheduledScenes: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                  }))}
                   className="w-full px-3 py-2 rounded-lg text-[14px]"
                   style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                 />
@@ -585,8 +593,8 @@ export default function DailyProductionReport({
           />
         </div>
         <div className="flex justify-between mt-2 text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
-          <span>{currentDPR.completedScenes || 0} complete + {currentDPR.partialScenes || 0} partial</span>
-          <span>{currentDPR.scheduledScenes || 0} scheduled scenes</span>
+          <span>{currentDPR.completedScenes?.length ?? 0} complete + {currentDPR.partialScenes?.length ?? 0} partial</span>
+          <span>{currentDPR.scheduledScenes?.length ?? 0} scheduled scenes</span>
         </div>
       </div>
 
@@ -715,8 +723,8 @@ export default function DailyProductionReport({
                   <span className="font-bold" style={{ color: 'var(--text-primary)' }}>{currentDPR.totalCrewMembers || 0}</span>
                 )}
               </div>
-              <div className="flex justify-between items-center p-3 rounded-lg" style={{ background: (currentDPR.overtimeCrew || 0) > 0 ? 'var(--warning-muted)' : 'var(--bg-2)' }}>
-                <span style={{ color: (currentDPR.overtimeCrew || 0) > 0 ? 'var(--warning)' : 'var(--text-secondary)' }}>Overtime</span>
+              <div className="flex justify-between items-center p-3 rounded-lg" style={{ background: (currentDPR.overtimeCrew ?? 0) > 0 ? 'var(--warning-muted)' : 'var(--bg-2)' }}>
+                <span style={{ color: (currentDPR.overtimeCrew ?? 0) > 0 ? 'var(--warning)' : 'var(--text-secondary)' }}>Overtime</span>
                 {isEditing ? (
                   <input
                     type="number"
@@ -726,11 +734,11 @@ export default function DailyProductionReport({
                     style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                   />
                 ) : (
-                  <span className="font-bold" style={{ color: (currentDPR.overtimeCrew || 0) > 0 ? 'var(--warning)' : 'var(--text-primary)' }}>{currentDPR.overtimeCrew || 0}</span>
+                  <span className="font-bold" style={{ color: (currentDPR.overtimeCrew ?? 0) > 0 ? 'var(--warning)' : 'var(--text-primary)' }}>{currentDPR.overtimeCrew ?? 0}</span>
                 )}
               </div>
-              <div className="flex justify-between items-center p-3 rounded-lg" style={{ background: (currentDPR.mealPenalties || 0) > 0 ? 'var(--error-muted)' : 'var(--bg-2)' }}>
-                <span style={{ color: (currentDPR.mealPenalties || 0) > 0 ? 'var(--error)' : 'var(--text-secondary)' }}>Meal Penalties</span>
+              <div className="flex justify-between items-center p-3 rounded-lg" style={{ background: (currentDPR.mealPenalties ?? 0) > 0 ? 'var(--error-muted)' : 'var(--bg-2)' }}>
+                <span style={{ color: (currentDPR.mealPenalties ?? 0) > 0 ? 'var(--error)' : 'var(--text-secondary)' }}>Meal Penalties</span>
                 {isEditing ? (
                   <input
                     type="number"
@@ -740,7 +748,7 @@ export default function DailyProductionReport({
                     style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                   />
                 ) : (
-                  <span className="font-bold" style={{ color: (currentDPR.mealPenalties || 0) > 0 ? 'var(--error)' : 'var(--text-primary)' }}>{currentDPR.mealPenalties || 0}</span>
+                  <span className="font-bold" style={{ color: (currentDPR.mealPenalties ?? 0) > 0 ? 'var(--error)' : 'var(--text-primary)' }}>{currentDPR.mealPenalties ?? 0}</span>
                 )}
               </div>
               <div className="flex justify-between items-center p-3 rounded-lg" style={{ background: 'var(--bg-2)' }}>
@@ -884,15 +892,15 @@ export default function DailyProductionReport({
                     <p className="text-[13px]" style={{ color: 'var(--text-tertiary)' }}>{dpr.date}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[14px]" style={{ color: 'var(--text-secondary)' }}>{dpr.completedScenes || 0}/{dpr.scheduledScenes || 0} scenes</p>
+                    <p className="text-[14px]" style={{ color: 'var(--text-secondary)' }}>{dpr.completedScenes?.length ?? 0}/{dpr.scheduledScenes?.length ?? 0} scenes</p>
                     <span
                       className="px-2 py-1 rounded text-[12px] font-semibold"
                       style={{
                         background: dpr.status === 'APPROVED' ? 'var(--success-muted)' : 'var(--bg-2)',
-                        color: getStatusColor(dpr.status || 'DRAFT')
+                        color: getStatusColor(dpr.status ?? 'DRAFT')
                       }}
                     >
-                      {dpr.status || 'DRAFT'}
+                      {dpr.status ?? 'DRAFT'}
                     </span>
                   </div>
                 </div>

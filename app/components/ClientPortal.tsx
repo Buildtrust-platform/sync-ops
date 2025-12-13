@@ -220,11 +220,18 @@ export default function ClientPortal({ project, onApprove, onRequestRevision }: 
   // Project phase display
   const getPhaseLabel = (phase: string) => {
     const phases: Record<string, string> = {
-      DEVELOPMENT: "Development",
+      INTAKE: "Development",
+      LEGAL_REVIEW: "Legal Review",
+      BUDGET_APPROVAL: "Budget Approval",
+      GREENLIT: "Greenlit",
       PRE_PRODUCTION: "Pre-Production",
       PRODUCTION: "Production",
       POST_PRODUCTION: "Post-Production",
-      DELIVERY: "Delivery"
+      INTERNAL_REVIEW: "Internal Review",
+      LEGAL_APPROVED: "Legal Approved",
+      DISTRIBUTION_READY: "Distribution Ready",
+      DISTRIBUTED: "Distributed",
+      ARCHIVED: "Archived"
     };
     return phases[phase] || phase;
   };
@@ -338,13 +345,13 @@ export default function ClientPortal({ project, onApprove, onRequestRevision }: 
                 className="font-semibold text-[15px]"
                 style={{ color: "var(--primary)" }}
               >
-                {getPhaseLabel(project.lifecyclePhase || "DEVELOPMENT")}
+                {getPhaseLabel(project.lifecycleState ?? "INTAKE")}
               </p>
             </div>
             <div>
               <p className="text-[11px] uppercase font-bold" style={{ color: "var(--text-tertiary)" }}>Target Date</p>
               <p className="font-semibold text-[15px]" style={{ color: "var(--text-primary)" }}>
-                {project.targetDate ? new Date(project.targetDate).toLocaleDateString() : "TBD"}
+                {project.deadline ? new Date(project.deadline).toLocaleDateString() : "TBD"}
               </p>
             </div>
           </div>
@@ -514,13 +521,13 @@ export default function ClientPortal({ project, onApprove, onRequestRevision }: 
                     </a>
                   </div>
                 )}
-                {project.directorEmail && (
+                {project.creativeDirectorEmail && (
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-[12px] font-medium" style={{ color: "var(--text-primary)" }}>Director</p>
-                      <p className="text-[11px]" style={{ color: "var(--text-tertiary)" }}>{project.directorEmail}</p>
+                      <p className="text-[12px] font-medium" style={{ color: "var(--text-primary)" }}>Creative Director</p>
+                      <p className="text-[11px]" style={{ color: "var(--text-tertiary)" }}>{project.creativeDirectorEmail}</p>
                     </div>
-                    <a href={`mailto:${project.directorEmail}`} style={{ color: "var(--primary)" }}>
+                    <a href={`mailto:${project.creativeDirectorEmail}`} style={{ color: "var(--primary)" }}>
                       <SendIcon />
                     </a>
                   </div>

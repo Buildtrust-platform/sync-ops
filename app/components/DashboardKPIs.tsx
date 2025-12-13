@@ -88,18 +88,18 @@ export default function DashboardKPIs({ projectId, project }: DashboardKPIsProps
 
     // Task metrics
     const totalTasks = tasks.length;
-    const completedTasks = tasks.filter(t => t.status === 'DONE' || t.status === 'COMPLETED').length;
+    const completedTasks = tasks.filter(t => t.status === 'COMPLETED').length;
     const inProgressTasks = tasks.filter(t => t.status === 'IN_PROGRESS').length;
     const blockedTasks = tasks.filter(t => t.status === 'BLOCKED').length;
     const overdueTasks = tasks.filter(t => {
       if (!t.dueDate) return false;
-      return new Date(t.dueDate) < new Date() && t.status !== 'DONE' && t.status !== 'COMPLETED';
+      return new Date(t.dueDate) < new Date() && t.status !== 'COMPLETED';
     }).length;
 
     // Asset metrics
     const totalAssets = assets.length;
-    const approvedAssets = assets.filter(a => a.approvalStatus === 'APPROVED').length;
-    const pendingAssets = assets.filter(a => a.approvalStatus === 'PENDING').length;
+    const approvedAssets = assets.filter(a => a.approvalState === 'APPROVED').length;
+    const pendingAssets = assets.filter(a => a.approvalState === 'PENDING_REVIEW' || a.approvalState === 'IN_REVIEW').length;
 
     // Activity metrics
     const now = new Date();
@@ -107,7 +107,7 @@ export default function DashboardKPIs({ projectId, project }: DashboardKPIsProps
     const recentActivity = activityLogs.filter(a => new Date(a.createdAt || 0) > weekAgo).length;
 
     // Timeline metrics
-    const startDate = project.startDate ? new Date(project.startDate) : null;
+    const startDate = project.kickoffDate ? new Date(project.kickoffDate) : null;
     const deadline = project.deadline ? new Date(project.deadline) : null;
     let daysRemaining = 0;
     let projectProgress = 0;
@@ -313,7 +313,7 @@ export default function DashboardKPIs({ projectId, project }: DashboardKPIsProps
           />
         </div>
         <div className="flex justify-between mt-2 text-xs text-slate-400">
-          <span>{project.startDate ? new Date(project.startDate).toLocaleDateString() : 'Start'}</span>
+          <span>{project.kickoffDate ? new Date(project.kickoffDate).toLocaleDateString() : 'Start'}</span>
           <span>{project.deadline ? new Date(project.deadline).toLocaleDateString() : 'Deadline'}</span>
         </div>
       </div>

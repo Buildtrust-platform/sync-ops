@@ -7,12 +7,13 @@ import { useToast } from '@/app/components/Toast';
 
 interface CallSheetFormProps {
   projectId: string;
+  organizationId: string;
   callSheetId?: string; // Optional - if provided, we're editing
   onSuccess?: (callSheetId?: string) => void;
   onCancel?: () => void;
 }
 
-export default function CallSheetForm({ projectId, callSheetId, onSuccess, onCancel }: CallSheetFormProps) {
+export default function CallSheetForm({ projectId, organizationId, callSheetId, onSuccess, onCancel }: CallSheetFormProps) {
   const toast = useToast();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [loading, setLoading] = useState(false);
@@ -154,6 +155,7 @@ export default function CallSheetForm({ projectId, callSheetId, onSuccess, onCan
         // Create new call sheet
         const result = await client.models.CallSheet.create({
           projectId,
+          organizationId,
           ...callSheetData,
         });
 

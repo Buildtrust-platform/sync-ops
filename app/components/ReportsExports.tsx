@@ -234,7 +234,7 @@ export default function ReportsExports({ project }: ReportsExportsProps) {
         case 'production-status':
           reportContent += `- **Current Status:** ${project.status}\n`;
           reportContent += `- **Lifecycle State:** ${project.lifecycleState}\n`;
-          reportContent += `- **Start Date:** ${project.startDate || 'Not set'}\n`;
+          reportContent += `- **Start Date:** ${project.preProductionStartDate || 'Not set'}\n`;
           reportContent += `- **Deadline:** ${project.deadline || 'Not set'}\n`;
           reportContent += `- **Priority:** ${project.priority || 'Normal'}\n\n`;
           break;

@@ -285,8 +285,8 @@ export default function AssetRelationshipGraph({
           filter.projectId = { eq: projectId };
         }
 
-        const { data: assets } = await client.models.Asset.list({ filter });
-        const assetList = assets || [];
+        const result = await client?.models.Asset.list({ filter });
+        const assetList = result?.data || [];
 
         // Convert assets to graph nodes
         const assetNodes: AssetNode[] = assetList.map(asset => {

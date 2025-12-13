@@ -45,6 +45,7 @@ const PLANS = [
     price: '$99/mo',
     features: ['10 projects', '5 users', '50 GB storage', 'Smart Brief AI'],
     recommended: false,
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_LINK_STARTER || 'https://buy.stripe.com/test_14A4gr5c68yTedabJo1wY00',
   },
   {
     id: 'professional',
@@ -52,6 +53,7 @@ const PLANS = [
     price: '$299/mo',
     features: ['50 projects', '25 users', '500 GB storage', 'All features'],
     recommended: true,
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_LINK_PRO || 'https://buy.stripe.com/test_dRm3cn1ZUbL52us9Bg1wY01',
   },
   {
     id: 'enterprise',
@@ -59,6 +61,7 @@ const PLANS = [
     price: '$799/mo',
     features: ['200 projects', '100 users', '2 TB storage', 'SSO + Priority support'],
     recommended: false,
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_LINK_ENTERPRISE || 'https://buy.stripe.com/test_7sY3cn8oi02n8SQbJo1wY02',
   },
 ];
 
@@ -233,7 +236,7 @@ export default function OnboardingFlow() {
       }
 
       // Success - redirect to dashboard
-      router.push('/');
+      router.push('/dashboard');
     } catch (err) {
       console.error('Onboarding error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred during setup');
@@ -413,6 +416,33 @@ export default function OnboardingFlow() {
           <h4 className="font-semibold text-slate-900">14-Day Free Trial</h4>
           <p className="text-sm text-slate-500">Try all features free. No credit card required.</p>
         </div>
+      </div>
+
+      {/* Subscribe Now button */}
+      <div className="mt-6 text-center">
+        <button
+          type="button"
+          onClick={() => {
+            const selectedPlan = PLANS.find(p => p.id === formData.selectedPlan);
+            if (selectedPlan?.stripeLink) {
+              // Open Stripe checkout in new tab with prefilled email
+              const checkoutUrl = new URL(selectedPlan.stripeLink);
+              if (userEmail) {
+                checkoutUrl.searchParams.set('prefilled_email', userEmail);
+              }
+              window.open(checkoutUrl.toString(), '_blank');
+            }
+          }}
+          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium rounded-xl hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg shadow-purple-500/25"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          </svg>
+          Subscribe Now with Stripe
+        </button>
+        <p className="text-xs text-slate-500 mt-2">
+          Or continue to start your free trial
+        </p>
       </div>
     </div>
   );

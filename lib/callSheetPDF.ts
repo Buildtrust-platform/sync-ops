@@ -264,7 +264,7 @@ export function generateCallSheetPDF(data: CallSheetPDFData) {
       ${scenes.map(scene => `
       <tr>
         <td>${scene.sceneNumber || ''}</td>
-        <td>${scene.intExt || ''}</td>
+        <td>${scene.location || ''}</td>
         <td>${scene.description || ''}</td>
         <td>${scene.scheduledTime || ''}</td>
         <td>${scene.pageCount || ''}</td>
@@ -327,7 +327,7 @@ export function generateCallSheetPDF(data: CallSheetPDFData) {
             <td>${member.role || ''}</td>
             <td>${member.callTime || '-'}</td>
             <td>${member.walkieChannel || '-'}</td>
-            <td>${member.contactPhone || member.contactEmail || '-'}</td>
+            <td>${member.phone || member.email || '-'}</td>
           </tr>
           `).join('')}
         </tbody>

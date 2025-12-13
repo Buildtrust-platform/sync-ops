@@ -46,13 +46,13 @@ export default function ReportsPage() {
     async function fetchData() {
       try {
         const [projectsRes, assetsRes, tasksRes] = await Promise.all([
-          client.models.Project.list(),
-          client.models.Asset.list(),
-          client.models.Task.list(),
+          client?.models.Project.list(),
+          client?.models.Asset.list(),
+          client?.models.Task.list(),
         ]);
-        setProjects((projectsRes.data || []).filter(Boolean));
-        setAssets((assetsRes.data || []).filter(Boolean));
-        setTasks((tasksRes.data || []).filter(Boolean));
+        setProjects((projectsRes?.data || []).filter(Boolean));
+        setAssets((assetsRes?.data || []).filter(Boolean));
+        setTasks((tasksRes?.data || []).filter(Boolean));
       } catch (err) {
         console.error('Error fetching data:', err);
       } finally {

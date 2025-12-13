@@ -76,7 +76,7 @@ interface Action {
   id: string;
   title: string;
   description: string;
-  IconComponent: () => JSX.Element;
+  IconComponent: () => React.ReactElement;
   color: "yellow" | "blue" | "green" | "red";
   priority: "critical" | "high" | "medium";
 }

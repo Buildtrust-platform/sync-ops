@@ -57,8 +57,6 @@ export default function ContactPage() {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
-
-    // Simulate form submission
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
       setIsSubmitted(true);
@@ -69,449 +67,200 @@ export default function ContactPage() {
     }
   };
 
-  const inputStyles = {
-    width: '100%',
-    padding: '0.875rem 1rem',
-    backgroundColor: 'var(--bg-1)',
-    border: '1px solid var(--border-primary)',
-    borderRadius: '8px',
-    color: 'var(--text-primary)',
-    fontSize: '1rem',
-    outline: 'none',
-    transition: 'border-color 0.2s ease'
-  };
-
-  const labelStyles = {
-    display: 'block',
-    marginBottom: '0.5rem',
-    fontWeight: 500,
-    fontSize: '0.95rem'
-  };
-
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: 'var(--bg-1)',
-      color: 'var(--text-primary)'
-    }}>
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '1rem 2rem',
-        borderBottom: '1px solid var(--border-primary)',
-        position: 'sticky',
-        top: 0,
-        backgroundColor: 'var(--bg-1)',
-        zIndex: 100
-      }}>
-        <div
-          onClick={() => router.push('/')}
-          style={{
-            fontWeight: 700,
-            fontSize: '1.5rem',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}
-        >
-          <span style={{ fontSize: '1.75rem' }}>🎬</span>
-          SyncOps
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <button
-            onClick={() => router.push('/features')}
-            style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
-          >
-            Features
-          </button>
-          <button
-            onClick={() => router.push('/pricing')}
-            style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
-          >
-            Pricing
-          </button>
-          <button
-            onClick={() => router.push('/about')}
-            style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
-          >
-            About
-          </button>
-          <button
-            onClick={() => router.push('/contact')}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--accent-primary)',
-              cursor: 'pointer',
-              fontWeight: 600
-            }}
-          >
-            Contact
-          </button>
-          <button
-            onClick={() => router.push('/onboarding')}
-            style={{
-              padding: '0.5rem 1.25rem',
-              backgroundColor: 'var(--accent-primary)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: 500
-            }}
-          >
-            Sign In
-          </button>
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div onClick={() => router.push('/')} className="text-xl font-semibold tracking-tight text-gray-900 cursor-pointer">SyncOps</div>
+          <div className="hidden md:flex items-center gap-6">
+            <button onClick={() => router.push('/features')} className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Features</button>
+            <button onClick={() => router.push('/pricing')} className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Pricing</button>
+            <button onClick={() => router.push('/about')} className="text-sm text-gray-600 hover:text-gray-900 transition-colors">About</button>
+            <button onClick={() => router.push('/contact')} className="text-sm text-gray-900 font-medium">Contact</button>
+          </div>
+          <div className="flex items-center gap-4">
+            <button onClick={() => router.push('/signin')} className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Sign In</button>
+            <button onClick={() => router.push('/onboarding')} className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">Sign Up Free</button>
+          </div>
         </div>
       </nav>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        maxWidth: '1200px',
-        margin: '0 auto',
-        minHeight: 'calc(100vh - 80px)'
-      }}>
-        {/* Left Column - Info */}
-        <div style={{
-          padding: '4rem 3rem',
-          backgroundColor: 'var(--bg-2)'
-        }}>
-          <h1 style={{
-            fontSize: '2.5rem',
-            fontWeight: 700,
-            marginBottom: '1.5rem',
-            lineHeight: 1.2
-          }}>
-            Let&apos;s Talk<br />
-            <span style={{ color: 'var(--accent-primary)' }}>Production</span>
-          </h1>
-          <p style={{
-            fontSize: '1.1rem',
-            color: 'var(--text-secondary)',
-            marginBottom: '3rem',
-            lineHeight: 1.7
-          }}>
-            Whether you&apos;re managing a single project or scaling a production
-            company, we&apos;d love to show you how SyncOps can help.
-          </p>
+      <div className="pt-24 pb-16">
+        <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12">
+          {/* Left Column - Info */}
+          <div className="pt-8">
+            <h1 className="text-4xl font-semibold text-gray-900 mb-4">
+              Let&apos;s Talk<br />
+              <span className="text-gray-400">Production</span>
+            </h1>
+            <p className="text-gray-600 mb-8 leading-relaxed">
+              Whether you&apos;re managing a single project or scaling a production company, we&apos;d love to show you how SyncOps can help.
+            </p>
 
-          {/* Contact Methods */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1.5rem',
-            marginBottom: '3rem'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '12px',
-                backgroundColor: 'var(--bg-3)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.5rem'
-              }}>
-                📧
+            {/* Contact Info */}
+            <div className="space-y-4 mb-8">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center text-xl">📧</div>
+                <div>
+                  <div className="font-medium text-gray-900">Email</div>
+                  <div className="text-gray-600">hello@syncops.io</div>
+                </div>
               </div>
-              <div>
-                <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Email</div>
-                <div style={{ color: 'var(--text-secondary)' }}>hello@syncops.io</div>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center text-xl">📍</div>
+                <div>
+                  <div className="font-medium text-gray-900">Office</div>
+                  <div className="text-gray-600">Los Angeles, CA</div>
+                </div>
               </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '12px',
-                backgroundColor: 'var(--bg-3)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.5rem'
-              }}>
-                📍
-              </div>
-              <div>
-                <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Office</div>
-                <div style={{ color: 'var(--text-secondary)' }}>Los Angeles, CA</div>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center text-xl">🕐</div>
+                <div>
+                  <div className="font-medium text-gray-900">Response Time</div>
+                  <div className="text-gray-600">Within 24 hours</div>
+                </div>
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '12px',
-                backgroundColor: 'var(--bg-3)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.5rem'
-              }}>
-                🕐
-              </div>
-              <div>
-                <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Response Time</div>
-                <div style={{ color: 'var(--text-secondary)' }}>Within 24 hours</div>
+
+            {/* Quick Links */}
+            <div className="bg-gray-50 rounded-xl p-6">
+              <h3 className="font-medium text-gray-900 mb-3">Quick Links</h3>
+              <div className="space-y-2">
+                <button onClick={() => router.push('/features')} className="block text-gray-900 hover:text-gray-600 text-sm">→ Explore Features</button>
+                <button onClick={() => router.push('/pricing')} className="block text-gray-900 hover:text-gray-600 text-sm">→ View Pricing</button>
+                <button onClick={() => window.open('https://docs.syncops.io', '_blank')} className="block text-gray-900 hover:text-gray-600 text-sm">→ Documentation</button>
               </div>
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div style={{
-            backgroundColor: 'var(--bg-3)',
-            borderRadius: '12px',
-            padding: '1.5rem'
-          }}>
-            <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>Quick Links</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <button
-                onClick={() => router.push('/features')}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--accent-primary)',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  padding: 0,
-                  fontSize: '0.95rem'
-                }}
-              >
-                → Explore Features
-              </button>
-              <button
-                onClick={() => router.push('/pricing')}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--accent-primary)',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  padding: 0,
-                  fontSize: '0.95rem'
-                }}
-              >
-                → View Pricing
-              </button>
-              <button
-                onClick={() => window.open('https://docs.syncops.io', '_blank')}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--accent-primary)',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  padding: 0,
-                  fontSize: '0.95rem'
-                }}
-              >
-                → Documentation
-              </button>
-            </div>
-          </div>
-        </div>
+          {/* Right Column - Form */}
+          <div className="bg-gray-50 rounded-2xl p-8">
+            {isSubmitted ? (
+              <div className="h-full flex flex-col items-center justify-center text-center py-12">
+                <div className="text-5xl mb-4">✅</div>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-2">Message Received!</h2>
+                <p className="text-gray-600 mb-6 max-w-sm">
+                  Thanks for reaching out. Our team will get back to you within 24 hours to discuss how SyncOps can help your productions.
+                </p>
+                <button onClick={() => router.push('/')} className="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors">
+                  Back to Home
+                </button>
+              </div>
+            ) : (
+              <>
+                <h2 className="text-xl font-semibold text-gray-900 mb-1">Send us a message</h2>
+                <p className="text-gray-600 mb-6 text-sm">Fill out the form and we&apos;ll be in touch shortly.</p>
 
-        {/* Right Column - Form */}
-        <div style={{ padding: '4rem 3rem' }}>
-          {isSubmitted ? (
-            <div style={{
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textAlign: 'center'
-            }}>
-              <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>✅</div>
-              <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '1rem' }}>
-                Message Received!
-              </h2>
-              <p style={{
-                color: 'var(--text-secondary)',
-                marginBottom: '2rem',
-                maxWidth: '400px'
-              }}>
-                Thanks for reaching out. Our team will get back to you within 24 hours
-                to discuss how SyncOps can help your productions.
-              </p>
-              <button
-                onClick={() => router.push('/')}
-                style={{
-                  padding: '0.875rem 1.5rem',
-                  backgroundColor: 'var(--accent-primary)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
-              >
-                Back to Home
-              </button>
-            </div>
-          ) : (
-            <>
-              <h2 style={{
-                fontSize: '1.5rem',
-                fontWeight: 700,
-                marginBottom: '0.5rem'
-              }}>
-                Send us a message
-              </h2>
-              <p style={{
-                color: 'var(--text-secondary)',
-                marginBottom: '2rem'
-              }}>
-                Fill out the form and we&apos;ll be in touch shortly.
-              </p>
-
-              {error && (
-                <div style={{
-                  padding: '1rem',
-                  backgroundColor: 'rgba(220, 38, 38, 0.1)',
-                  border: '1px solid rgba(220, 38, 38, 0.3)',
-                  borderRadius: '8px',
-                  color: '#dc2626',
-                  marginBottom: '1.5rem'
-                }}>
-                  {error}
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                  <div>
-                    <label style={labelStyles}>Name *</label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      placeholder="Your name"
-                      style={inputStyles}
-                    />
+                {error && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                    {error}
                   </div>
-                  <div>
-                    <label style={labelStyles}>Email *</label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      placeholder="you@company.com"
-                      style={inputStyles}
-                    />
-                  </div>
-                </div>
+                )}
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                  <div>
-                    <label style={labelStyles}>Company</label>
-                    <input
-                      type="text"
-                      name="company"
-                      value={formData.company}
-                      onChange={handleChange}
-                      placeholder="Your company"
-                      style={inputStyles}
-                    />
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
+                        placeholder="Your name"
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                        placeholder="you@company.com"
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                      />
+                    </div>
                   </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                      <input
+                        type="text"
+                        name="company"
+                        value={formData.company}
+                        onChange={handleChange}
+                        placeholder="Your company"
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                      <select
+                        name="role"
+                        value={formData.role}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                      >
+                        {roleOptions.map(option => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
                   <div>
-                    <label style={labelStyles}>Role</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">What are you interested in? *</label>
                     <select
-                      name="role"
-                      value={formData.role}
+                      name="interest"
+                      value={formData.interest}
                       onChange={handleChange}
-                      style={{ ...inputStyles, cursor: 'pointer' }}
+                      required
+                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
                     >
-                      {roleOptions.map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
+                      {interestOptions.map(option => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
                       ))}
                     </select>
                   </div>
-                </div>
 
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={labelStyles}>What are you interested in? *</label>
-                  <select
-                    name="interest"
-                    value={formData.interest}
-                    onChange={handleChange}
-                    required
-                    style={{ ...inputStyles, cursor: 'pointer' }}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Message *</label>
+                    <textarea
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      required
+                      placeholder="Tell us about your production needs..."
+                      rows={4}
+                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-none"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
-                    {interestOptions.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                    {isSubmitting ? 'Sending...' : 'Send Message'}
+                  </button>
 
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={labelStyles}>Message *</label>
-                  <textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    required
-                    placeholder="Tell us about your production needs..."
-                    rows={5}
-                    style={{ ...inputStyles, resize: 'vertical', minHeight: '120px' }}
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  style={{
-                    width: '100%',
-                    padding: '1rem',
-                    backgroundColor: isSubmitting ? 'var(--bg-3)' : 'var(--accent-primary)',
-                    color: isSubmitting ? 'var(--text-secondary)' : 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '1rem',
-                    fontWeight: 600,
-                    cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  {isSubmitting ? 'Sending...' : 'Send Message'}
-                </button>
-
-                <p style={{
-                  marginTop: '1rem',
-                  fontSize: '0.85rem',
-                  color: 'var(--text-tertiary)',
-                  textAlign: 'center'
-                }}>
-                  By submitting, you agree to our Privacy Policy and Terms of Service.
-                </p>
-              </form>
-            </>
-          )}
+                  <p className="text-xs text-gray-500 text-center">
+                    By submitting, you agree to our Privacy Policy and Terms of Service.
+                  </p>
+                </form>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Footer */}
-      <footer style={{
-        padding: '2rem',
-        textAlign: 'center',
-        borderTop: '1px solid var(--border-primary)',
-        color: 'var(--text-tertiary)',
-        fontSize: '0.9rem'
-      }}>
+      <footer className="py-8 px-6 border-t border-gray-200 text-center text-gray-500 text-sm">
         © 2024 SyncOps. All rights reserved.
       </footer>
     </div>

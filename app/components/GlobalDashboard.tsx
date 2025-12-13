@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Schema } from '@/amplify/data/resource';
 import DashboardStats from './DashboardStats';
 import ProjectCard from './ProjectCard';
 import {
-  Icons,
   Button,
   Card,
   Input,
@@ -13,6 +12,8 @@ import {
   Badge,
   EmptyState,
 } from './ui';
+import WelcomeSection from './WelcomeSection';
+import QuickActions from './QuickActions';
 
 /**
  * GLOBAL DASHBOARD - Design System v2.0
@@ -147,6 +148,17 @@ export default function GlobalDashboard({ projects, onCreateProject }: GlobalDas
     setFilterStatus('ALL');
   };
 
+  // Show welcome section for new users with no projects
+  if (projects.length === 0) {
+    return (
+      <div className="min-h-screen bg-[var(--bg-0)]">
+        <div className="max-w-5xl mx-auto px-6 py-8">
+          <WelcomeSection onCreateProject={onCreateProject} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[var(--bg-0)]">
       {/* Page Header */}
@@ -208,6 +220,9 @@ export default function GlobalDashboard({ projects, onCreateProject }: GlobalDas
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Quick Actions Row */}
+        <QuickActions projects={projects} onCreateProject={onCreateProject} />
+
         {/* Stats Overview */}
         <div className="mb-8">
           <DashboardStats projects={projects} />

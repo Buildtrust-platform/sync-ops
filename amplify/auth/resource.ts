@@ -8,4 +8,11 @@ export const auth = defineAuth({
   loginWith: {
     email: true,
   },
+  // Explicitly enable self-registration
+  userAttributes: {
+    email: {
+      required: true,
+      mutable: true,
+    },
+  },
 });

@@ -342,7 +342,7 @@ export default function TreatmentBuilder({ project, onSave }: TreatmentBuilderPr
     let content = `CREATIVE TREATMENT\n`;
     content += `${"=".repeat(50)}\n\n`;
     content += `Project: ${project.name}\n`;
-    content += `Client: ${project.client || "N/A"}\n`;
+    content += `Client: ${project.clientContactEmail || "N/A"}\n`;
     content += `Date: ${new Date().toLocaleDateString()}\n\n`;
     content += `${"=".repeat(50)}\n\n`;
 
@@ -665,7 +665,7 @@ export default function TreatmentBuilder({ project, onSave }: TreatmentBuilderPr
               {project.name || "Untitled Project"}
             </h2>
             <p className="text-[13px]" style={{ color: "var(--text-tertiary)" }}>
-              Creative Treatment • {project.client || "Client TBD"}
+              Creative Treatment • {project.clientContactEmail || "Client TBD"}
             </p>
           </div>
 

@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 interface Phase {
   id: string;
   name: string;
-  icon: string;
   description: string;
   features: string[];
   modules: string[];
@@ -16,7 +15,6 @@ const phases: Phase[] = [
   {
     id: 'intake',
     name: 'Intake & Discovery',
-    icon: '📥',
     description: 'Transform vague client requests into production-ready briefs with AI-powered analysis.',
     features: [
       'Smart Brief AI - Translates plain English to technical production language',
@@ -30,7 +28,6 @@ const phases: Phase[] = [
   {
     id: 'legal',
     name: 'Legal & Compliance',
-    icon: '⚖️',
     description: 'Streamline contracts, rights management, and compliance tracking.',
     features: [
       'Contract template library with version control',
@@ -44,7 +41,6 @@ const phases: Phase[] = [
   {
     id: 'budget',
     name: 'Budget & Finance',
-    icon: '💰',
     description: 'Real-time budget tracking with intelligent forecasting and approval workflows.',
     features: [
       'Multi-tier budget templates (ECONOMY to BLOCKBUSTER)',
@@ -58,7 +54,6 @@ const phases: Phase[] = [
   {
     id: 'preproduction',
     name: 'Pre-Production',
-    icon: '📋',
     description: 'Coordinate every detail before cameras roll.',
     features: [
       'Interactive scheduling with drag-and-drop',
@@ -72,7 +67,6 @@ const phases: Phase[] = [
   {
     id: 'production',
     name: 'Production',
-    icon: '🎬',
     description: 'Keep shoots on track with real-time coordination tools.',
     features: [
       'Live production dashboard',
@@ -86,7 +80,6 @@ const phases: Phase[] = [
   {
     id: 'postproduction',
     name: 'Post-Production',
-    icon: '🎞️',
     description: 'Manage the edit, VFX, color, and sound with precision.',
     features: [
       'Asset ingest and organization',
@@ -100,7 +93,6 @@ const phases: Phase[] = [
   {
     id: 'distribution',
     name: 'Distribution & Archive',
-    icon: '📦',
     description: 'Deliver, distribute, and preserve your content for the long term.',
     features: [
       'Multi-platform delivery automation',
@@ -114,427 +106,142 @@ const phases: Phase[] = [
 ];
 
 const additionalFeatures = [
-  {
-    icon: '🤖',
-    title: 'AI-Powered Intelligence',
-    description: 'Claude AI transforms client briefs into professional production documents, suggests creative approaches, and predicts potential risks.'
-  },
-  {
-    icon: '👥',
-    title: 'Team Collaboration',
-    description: 'Real-time collaboration with role-based permissions. Keep clients, crew, and stakeholders aligned throughout the project.'
-  },
-  {
-    icon: '📊',
-    title: 'Universal Search',
-    description: 'Find anything across all your projects instantly. Search by project, asset, person, date, or any metadata field.'
-  },
-  {
-    icon: '🔒',
-    title: 'Enterprise Security',
-    description: 'Bank-grade encryption, SOC 2 compliance, and granular access controls protect your valuable content.'
-  },
-  {
-    icon: '🔗',
-    title: 'Integrations',
-    description: 'Connect with Frame.io, Slack, Google Calendar, Dropbox, and dozens of other tools your team already uses.'
-  },
-  {
-    icon: '📱',
-    title: 'Mobile Ready',
-    description: 'Access your projects from anywhere. Review assets, approve budgets, and communicate with your team on the go.'
-  }
+  { title: 'AI-Powered Intelligence', description: 'Claude AI transforms client briefs into professional production documents, suggests creative approaches, and predicts potential risks.' },
+  { title: 'Team Collaboration', description: 'Real-time collaboration with role-based permissions. Keep clients, crew, and stakeholders aligned throughout the project.' },
+  { title: 'Universal Search', description: 'Find anything across all your projects instantly. Search by project, asset, person, date, or any metadata field.' },
+  { title: 'Enterprise Security', description: 'Bank-grade encryption, SOC 2 compliance, and granular access controls protect your valuable content.' },
+  { title: 'Integrations', description: 'Connect with Frame.io, Slack, Google Calendar, Dropbox, and dozens of other tools your team already uses.' },
+  { title: 'Mobile Ready', description: 'Access your projects from anywhere. Review assets, approve budgets, and communicate with your team on the go.' }
 ];
 
 export default function FeaturesPage() {
   const router = useRouter();
   const [activePhase, setActivePhase] = useState<string>('intake');
-
   const selectedPhase = phases.find(p => p.id === activePhase) || phases[0];
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: 'var(--bg-1)',
-      color: 'var(--text-primary)'
-    }}>
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '1rem 2rem',
-        borderBottom: '1px solid var(--border-primary)',
-        position: 'sticky',
-        top: 0,
-        backgroundColor: 'var(--bg-1)',
-        zIndex: 100
-      }}>
-        <div
-          onClick={() => router.push('/')}
-          style={{
-            fontWeight: 700,
-            fontSize: '1.5rem',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}
-        >
-          <span style={{ fontSize: '1.75rem' }}>🎬</span>
-          SyncOps
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <button
-            onClick={() => router.push('/features')}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--accent-primary)',
-              cursor: 'pointer',
-              fontWeight: 600
-            }}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div
+            onClick={() => router.push('/')}
+            className="text-xl font-semibold tracking-tight text-gray-900 cursor-pointer"
           >
-            Features
-          </button>
-          <button
-            onClick={() => router.push('/pricing')}
-            style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
-          >
-            Pricing
-          </button>
-          <button
-            onClick={() => router.push('/about')}
-            style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
-          >
-            About
-          </button>
-          <button
-            onClick={() => router.push('/contact')}
-            style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
-          >
-            Contact
-          </button>
-          <button
-            onClick={() => router.push('/onboarding')}
-            style={{
-              padding: '0.5rem 1.25rem',
-              backgroundColor: 'var(--accent-primary)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: 500
-            }}
-          >
-            Sign In
-          </button>
+            SyncOps
+          </div>
+          <div className="hidden md:flex items-center gap-6">
+            <button onClick={() => router.push('/features')} className="text-sm text-gray-900 font-medium">Features</button>
+            <button onClick={() => router.push('/pricing')} className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Pricing</button>
+            <button onClick={() => router.push('/about')} className="text-sm text-gray-600 hover:text-gray-900 transition-colors">About</button>
+            <button onClick={() => router.push('/contact')} className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Contact</button>
+          </div>
+          <div className="flex items-center gap-4">
+            <button onClick={() => router.push('/signin')} className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Sign In</button>
+            <button onClick={() => router.push('/onboarding')} className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">Sign Up Free</button>
+          </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section style={{
-        padding: '4rem 2rem',
-        textAlign: 'center',
-        maxWidth: '900px',
-        margin: '0 auto'
-      }}>
-        <h1 style={{
-          fontSize: '3rem',
-          fontWeight: 700,
-          marginBottom: '1.5rem',
-          lineHeight: 1.2
-        }}>
-          Everything You Need to<br />
-          <span style={{ color: 'var(--accent-primary)' }}>Produce at Scale</span>
-        </h1>
-        <p style={{
-          fontSize: '1.25rem',
-          color: 'var(--text-secondary)',
-          maxWidth: '700px',
-          margin: '0 auto'
-        }}>
-          From initial brief to final delivery, SyncOps provides purpose-built tools
-          for every phase of production. No more spreadsheets, email chains, or context switching.
-        </p>
+      {/* Hero */}
+      <section className="pt-32 pb-16 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-5xl font-semibold tracking-tight text-gray-900 leading-tight mb-6">
+            Everything You Need to<br />
+            <span className="text-gray-400">Produce at Scale</span>
+          </h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            From initial brief to final delivery, SyncOps provides purpose-built tools for every phase of production.
+          </p>
+        </div>
       </section>
 
       {/* Phase Navigator */}
-      <section style={{
-        padding: '2rem',
-        maxWidth: '1400px',
-        margin: '0 auto'
-      }}>
-        <h2 style={{
-          textAlign: 'center',
-          marginBottom: '2rem',
-          fontSize: '1.5rem',
-          fontWeight: 600
-        }}>
-          Production Lifecycle
-        </h2>
+      <section className="py-12 px-6">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-2xl font-semibold text-gray-900 text-center mb-8">Production Lifecycle</h2>
 
-        {/* Phase Tabs */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: '0.5rem',
-          flexWrap: 'wrap',
-          marginBottom: '3rem'
-        }}>
-          {phases.map((phase) => (
-            <button
-              key={phase.id}
-              onClick={() => setActivePhase(phase.id)}
-              style={{
-                padding: '0.75rem 1.25rem',
-                backgroundColor: activePhase === phase.id ? 'var(--accent-primary)' : 'var(--bg-2)',
-                color: activePhase === phase.id ? 'white' : 'var(--text-secondary)',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontWeight: 500,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <span>{phase.icon}</span>
-              {phase.name}
-            </button>
-          ))}
-        </div>
-
-        {/* Active Phase Detail */}
-        <div style={{
-          backgroundColor: 'var(--bg-2)',
-          borderRadius: '16px',
-          padding: '2.5rem',
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '3rem',
-          alignItems: 'start'
-        }}>
-          <div>
-            <div style={{
-              fontSize: '3rem',
-              marginBottom: '1rem'
-            }}>
-              {selectedPhase.icon}
-            </div>
-            <h3 style={{
-              fontSize: '1.75rem',
-              fontWeight: 700,
-              marginBottom: '1rem'
-            }}>
-              {selectedPhase.name}
-            </h3>
-            <p style={{
-              color: 'var(--text-secondary)',
-              fontSize: '1.1rem',
-              marginBottom: '2rem',
-              lineHeight: 1.6
-            }}>
-              {selectedPhase.description}
-            </p>
-
-            <h4 style={{
-              fontWeight: 600,
-              marginBottom: '1rem',
-              color: 'var(--text-secondary)',
-              textTransform: 'uppercase',
-              fontSize: '0.85rem',
-              letterSpacing: '0.05em'
-            }}>
-              Included Modules
-            </h4>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-              {selectedPhase.modules.map((module) => (
-                <span
-                  key={module}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    backgroundColor: 'var(--bg-3)',
-                    borderRadius: '20px',
-                    fontSize: '0.9rem',
-                    fontWeight: 500
-                  }}
-                >
-                  {module}
-                </span>
-              ))}
-            </div>
+          {/* Phase Tabs */}
+          <div className="flex justify-center gap-2 flex-wrap mb-10">
+            {phases.map((phase) => (
+              <button
+                key={phase.id}
+                onClick={() => setActivePhase(phase.id)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  activePhase === phase.id
+                    ? 'bg-gray-900 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {phase.name}
+              </button>
+            ))}
           </div>
 
-          <div>
-            <h4 style={{
-              fontWeight: 600,
-              marginBottom: '1.5rem',
-              color: 'var(--text-secondary)',
-              textTransform: 'uppercase',
-              fontSize: '0.85rem',
-              letterSpacing: '0.05em'
-            }}>
-              Key Features
-            </h4>
-            <ul style={{
-              listStyle: 'none',
-              padding: 0,
-              margin: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1rem'
-            }}>
-              {selectedPhase.features.map((feature, idx) => (
-                <li
-                  key={idx}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '0.75rem'
-                  }}
-                >
-                  <span style={{
-                    color: 'var(--accent-primary)',
-                    fontWeight: 700
-                  }}>✓</span>
-                  <span style={{ lineHeight: 1.5 }}>{feature}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* Additional Features Grid */}
-      <section style={{
-        padding: '4rem 2rem',
-        maxWidth: '1200px',
-        margin: '0 auto'
-      }}>
-        <h2 style={{
-          textAlign: 'center',
-          marginBottom: '1rem',
-          fontSize: '2rem',
-          fontWeight: 700
-        }}>
-          Platform Capabilities
-        </h2>
-        <p style={{
-          textAlign: 'center',
-          marginBottom: '3rem',
-          color: 'var(--text-secondary)',
-          maxWidth: '600px',
-          margin: '0 auto 3rem'
-        }}>
-          Beyond lifecycle management, SyncOps provides powerful cross-cutting capabilities.
-        </p>
-
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '1.5rem'
-        }}>
-          {additionalFeatures.map((feature, idx) => (
-            <div
-              key={idx}
-              style={{
-                backgroundColor: 'var(--bg-2)',
-                borderRadius: '12px',
-                padding: '1.75rem',
-                transition: 'transform 0.2s ease'
-              }}
-            >
-              <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>
-                {feature.icon}
+          {/* Active Phase Detail */}
+          <div className="bg-gray-50 rounded-2xl p-8 grid md:grid-cols-2 gap-8">
+            <div>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-3">{selectedPhase.name}</h3>
+              <p className="text-gray-600 mb-6">{selectedPhase.description}</p>
+              <div className="flex flex-wrap gap-2">
+                {selectedPhase.modules.map((module) => (
+                  <span key={module} className="px-3 py-1 bg-white rounded-full text-sm text-gray-700 border border-gray-200">
+                    {module}
+                  </span>
+                ))}
               </div>
-              <h3 style={{
-                fontWeight: 600,
-                marginBottom: '0.75rem',
-                fontSize: '1.1rem'
-              }}>
-                {feature.title}
-              </h3>
-              <p style={{
-                color: 'var(--text-secondary)',
-                fontSize: '0.95rem',
-                lineHeight: 1.6
-              }}>
-                {feature.description}
-              </p>
             </div>
-          ))}
+            <div>
+              <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">Key Features</h4>
+              <ul className="space-y-3">
+                {selectedPhase.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <span className="text-gray-900 font-bold">✓</span>
+                    <span className="text-gray-700">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section style={{
-        padding: '4rem 2rem',
-        textAlign: 'center',
-        backgroundColor: 'var(--bg-2)',
-        margin: '2rem',
-        borderRadius: '24px',
-        maxWidth: '1200px',
-        marginLeft: 'auto',
-        marginRight: 'auto'
-      }}>
-        <h2 style={{
-          fontSize: '2rem',
-          fontWeight: 700,
-          marginBottom: '1rem'
-        }}>
-          Ready to Transform Your Productions?
-        </h2>
-        <p style={{
-          color: 'var(--text-secondary)',
-          marginBottom: '2rem',
-          fontSize: '1.1rem'
-        }}>
-          Join leading production companies already using SyncOps.
-        </p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
-          <button
-            onClick={() => router.push('/onboarding')}
-            style={{
-              padding: '1rem 2rem',
-              backgroundColor: 'var(--accent-primary)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '1rem',
-              fontWeight: 600,
-              cursor: 'pointer'
-            }}
-          >
-            Start Free Trial
-          </button>
-          <button
-            onClick={() => router.push('/contact')}
-            style={{
-              padding: '1rem 2rem',
-              backgroundColor: 'transparent',
-              color: 'var(--text-primary)',
-              border: '1px solid var(--border-primary)',
-              borderRadius: '8px',
-              fontSize: '1rem',
-              fontWeight: 600,
-              cursor: 'pointer'
-            }}
-          >
-            Request Demo
-          </button>
+      {/* Additional Features */}
+      <section className="py-16 px-6 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-2xl font-semibold text-gray-900 text-center mb-4">Platform Capabilities</h2>
+          <p className="text-center text-gray-600 mb-12 max-w-xl mx-auto">
+            Beyond lifecycle management, SyncOps provides powerful cross-cutting capabilities.
+          </p>
+          <div className="grid md:grid-cols-3 gap-6">
+            {additionalFeatures.map((feature, idx) => (
+              <div key={idx} className="bg-white p-6 rounded-xl border border-gray-200">
+                <h3 className="font-semibold text-gray-900 mb-2">{feature.title}</h3>
+                <p className="text-gray-600 text-sm">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20 px-6">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl font-semibold text-gray-900 mb-4">Ready to Transform Your Productions?</h2>
+          <p className="text-gray-600 mb-8">Join leading production companies already using SyncOps.</p>
+          <div className="flex justify-center gap-4">
+            <button onClick={() => router.push('/onboarding')} className="px-8 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors">
+              Start Free Trial
+            </button>
+            <button onClick={() => router.push('/contact')} className="px-8 py-3 bg-white text-gray-900 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+              Request Demo
+            </button>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer style={{
-        padding: '2rem',
-        textAlign: 'center',
-        borderTop: '1px solid var(--border-primary)',
-        color: 'var(--text-tertiary)',
-        fontSize: '0.9rem'
-      }}>
+      <footer className="py-8 px-6 border-t border-gray-200 text-center text-gray-500 text-sm">
         © 2024 SyncOps. All rights reserved.
       </footer>
     </div>

@@ -62,6 +62,7 @@ async function migrateProjectStatuses() {
 
           // Log the migration
           await client.models.ActivityLog.create({
+            organizationId: project.organizationId,
             projectId: project.id,
             userId: 'SYSTEM_MIGRATION',
             userEmail: 'system@syncops.app',

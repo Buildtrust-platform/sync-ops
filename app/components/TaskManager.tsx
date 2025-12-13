@@ -231,9 +231,9 @@ export default function TaskManager({
     const subscription = client.models.Task.observeQuery({
       filter: { projectId: { eq: projectId } },
     }).subscribe({
-      next: (data: { items: Task[] }) => {
+      next: (data) => {
         if (data?.items) {
-          setTasks(data.items.map((item: Task) => item as unknown as Task));
+          setTasks(data.items as unknown as Task[]);
         }
       },
       error: (error: Error) => console.error('Error loading tasks:', error),

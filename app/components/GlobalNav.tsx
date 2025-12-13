@@ -36,9 +36,10 @@ export default function GlobalNav({ userEmail, onSignOut }: GlobalNavProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const navItems: NavItem[] = [
-    { href: '/', label: 'Projects', icon: 'Folder' },
+    { href: '/dashboard', label: 'Projects', icon: 'Folder' },
     { href: '/library', label: 'Library', icon: 'Library' },
     { href: '/reports', label: 'Reports', icon: 'BarChart' },
+    { href: '/settings', label: 'Settings', icon: 'Settings' },
   ];
 
   // Initialize client on mount only (avoids SSR hydration issues)
@@ -75,7 +76,7 @@ export default function GlobalNav({ userEmail, onSignOut }: GlobalNavProps) {
   }, [showUserMenu]);
 
   const isActiveRoute = (href: string) => {
-    if (href === '/') return pathname === '/';
+    if (href === '/dashboard') return pathname === '/dashboard' || pathname === '/';
     return pathname?.startsWith(href);
   };
 
@@ -87,7 +88,7 @@ export default function GlobalNav({ userEmail, onSignOut }: GlobalNavProps) {
           <div className="flex items-center gap-8">
             {/* Logo */}
             <Link
-              href="/"
+              href="/dashboard"
               className="flex items-center gap-2 text-xl font-bold tracking-tight text-[var(--primary)] hover:opacity-90 transition-opacity"
             >
               SyncOps

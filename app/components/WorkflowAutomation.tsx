@@ -253,9 +253,9 @@ export default function WorkflowAutomation({
           filter.projectId = { eq: projectId };
         }
 
-        const { data } = await client.models.WorkflowRule.list({ filter });
+        const result = await client?.models.WorkflowRule.list({ filter });
 
-        const loadedWorkflows: WorkflowRule[] = (data || []).map((rule) => ({
+        const loadedWorkflows: WorkflowRule[] = (result?.data || []).map((rule: Schema['WorkflowRule']['type']) => ({
           id: rule.id,
           name: rule.name,
           description: rule.description || '',
@@ -460,7 +460,7 @@ export default function WorkflowAutomation({
 
       if (editingWorkflow && !isDemoWorkflow) {
         // Update existing workflow in Amplify
-        const { data } = await client.models.WorkflowRule.update({
+        const { data } = await client?.models.WorkflowRule.update({
           id: editingWorkflow.id,
           name: formName,
           description: formDescription,
@@ -477,7 +477,7 @@ export default function WorkflowAutomation({
         setWorkflows(workflows.map(w => w.id === editingWorkflow.id ? localWorkflow : w));
       } else {
         // Create new workflow in Amplify
-        const { data } = await client.models.WorkflowRule.create({
+        const { data } = await client?.models.WorkflowRule.create({
           organizationId,
           name: formName,
           description: formDescription,
@@ -527,7 +527,7 @@ export default function WorkflowAutomation({
     // Persist to Amplify (skip for demo workflows)
     if (client && !id.startsWith('demo-') && !id.startsWith('temp-')) {
       try {
-        await client.models.WorkflowRule.update({
+        await client?.models.WorkflowRule.update({
           id,
           isActive: !workflow.isActive,
           lastModifiedBy: currentUserEmail,
@@ -551,7 +551,7 @@ export default function WorkflowAutomation({
     // Delete from Amplify (skip for demo workflows)
     if (client && !id.startsWith('demo-') && !id.startsWith('temp-')) {
       try {
-        await client.models.WorkflowRule.delete({ id });
+        await client?.models.WorkflowRule.delete({ id });
       } catch (error) {
         console.error('Error deleting workflow:', error);
         // Revert on error

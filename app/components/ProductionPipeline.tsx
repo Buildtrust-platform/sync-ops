@@ -152,7 +152,7 @@ interface PipelineStage {
   description: string;
   modules: string[];
   colorVar: string;
-  IconComponent: () => JSX.Element;
+  IconComponent: () => React.ReactElement;
   requirements?: string[];
 }
 
@@ -715,7 +715,7 @@ export default function ProductionPipeline({
 interface TimelineMilestoneProps {
   label: string;
   date: string;
-  IconComponent: () => JSX.Element;
+  IconComponent: () => React.ReactElement;
   isPast: boolean;
   isCritical?: boolean;
 }

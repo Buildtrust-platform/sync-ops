@@ -139,18 +139,18 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
         const userId = attributes.sub || '';
         setUserEmail(email);
 
-        const { data: memberships } = await client.models.OrganizationMember.list({
+        const membershipResult = await client?.models.OrganizationMember.list({
           filter: { email: { eq: email } }
         });
 
-        if (memberships && memberships.length > 0) {
-          setOrganizationId(memberships[0].organizationId);
+        if (membershipResult?.data && membershipResult.data.length > 0) {
+          setOrganizationId(membershipResult.data[0].organizationId);
         } else {
-          const { data: orgs } = await client.models.Organization.list();
-          if (orgs && orgs.length > 0) {
-            setOrganizationId(orgs[0].id);
+          const orgResult = await client?.models.Organization.list();
+          if (orgResult?.data && orgResult.data.length > 0) {
+            setOrganizationId(orgResult.data[0].id);
           } else {
-            const { data: newOrg } = await client.models.Organization.create({
+            const newOrgResult = await client?.models.Organization.create({
               name: 'My Organization',
               slug: `org-${Date.now()}`,
               email: email,
@@ -158,10 +158,10 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
               subscriptionStatus: 'TRIALING',
               createdBy: userId,
             });
-            if (newOrg) {
-              setOrganizationId(newOrg.id);
-              await client.models.OrganizationMember.create({
-                organizationId: newOrg.id,
+            if (newOrgResult?.data) {
+              setOrganizationId(newOrgResult.data.id);
+              await client?.models.OrganizationMember.create({
+                organizationId: newOrgResult.data.id,
                 userId: userId,
                 email: email,
                 role: 'OWNER',
@@ -222,7 +222,7 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
     setError(null);
 
     try {
-      const { data, errors } = await client.queries.analyzeProjectBrief({
+      const { data, errors } = await client?.queries.analyzeProjectBrief({
         projectDescription: intakeData.projectDescription,
         scriptOrNotes: intakeData.scriptOrNotes || undefined,
       });
@@ -260,7 +260,7 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
         (intakeData.budgetDistribution || 0) +
         (intakeData.budgetContingency || 0);
 
-      const newProject = await client.models.Project.create({
+      const newProject = await client?.models.Project.create({
         organizationId: organizationId,
         name: intakeData.projectName || aiResults?.projectName || 'Untitled Project',
         description: intakeData.projectDescription,
@@ -304,7 +304,7 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
         throw new Error('Failed to create project - no data returned');
       }
 
-      await client.models.Brief.create({
+      await client?.models.Brief.create({
         organizationId: organizationId,
         projectId: newProject.data.id,
         projectDescription: intakeData.projectDescription,
@@ -341,7 +341,7 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
         approvedByFinance: false,
       });
 
-      await client.models.ActivityLog.create({
+      await client?.models.ActivityLog.create({
         organizationId: organizationId,
         projectId: newProject.data.id,
         userId: 'USER',

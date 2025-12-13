@@ -285,8 +285,8 @@ export default function SmartAssetHub({
           filter.projectId = { eq: projectId };
         }
 
-        const { data: assets } = await client.models.Asset.list({ filter });
-        const assetList = assets || [];
+        const result = await client?.models.Asset.list({ filter });
+        const assetList = result?.data || [];
 
         // Calculate real stats
         setTotalAssets(assetList.length);

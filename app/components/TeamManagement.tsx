@@ -645,7 +645,7 @@ export default function TeamManagement({
           title: member.title || undefined,
         }));
 
-        setInvitedMembers(invited);
+        setInvitedMembers(invited as TeamMember[]);
       }
     } catch (error) {
       console.warn('TeamMember model not available yet - using stakeholders only');

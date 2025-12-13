@@ -105,11 +105,11 @@ export default function CalendarSync({ projectId, project, currentUserEmail }: C
     }
 
     // Project start date
-    if (project.startDate) {
+    if (project.kickoffDate) {
       events.push({
         id: 'project-start',
         title: `${project.name} - Project Start`,
-        startDate: project.startDate,
+        startDate: project.kickoffDate,
         type: 'milestone',
         color: '#22c55e',
         isAllDay: true,
@@ -118,12 +118,12 @@ export default function CalendarSync({ projectId, project, currentUserEmail }: C
     }
 
     // Shoot dates
-    if (project.primaryShootStartDate) {
+    if (project.productionStartDate) {
       events.push({
         id: 'shoot-start',
-        title: `${project.name} - Primary Shoot Start`,
-        startDate: project.primaryShootStartDate,
-        endDate: project.primaryShootEndDate || undefined,
+        title: `${project.name} - Production Period`,
+        startDate: project.productionStartDate,
+        endDate: project.productionEndDate ?? undefined,
         type: 'shoot',
         color: '#f59e0b',
         isAllDay: true,

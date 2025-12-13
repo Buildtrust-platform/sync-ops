@@ -8,8 +8,10 @@ export default function NewCallSheetPage() {
   const params = useParams();
   const projectId = params.id as string;
 
-  const handleSuccess = (callSheetId: string) => {
-    router.push(`/projects/${projectId}/call-sheets/${callSheetId}`);
+  const handleSuccess = (callSheetId?: string) => {
+    if (callSheetId) {
+      router.push(`/projects/${projectId}/call-sheets/${callSheetId}`);
+    }
   };
 
   const handleCancel = () => {
@@ -26,6 +28,7 @@ export default function NewCallSheetPage() {
       </div>
 
       <CallSheetForm
+        organizationId="default-org"
         projectId={projectId}
         onSuccess={handleSuccess}
         onCancel={handleCancel}

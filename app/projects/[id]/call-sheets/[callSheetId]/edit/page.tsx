@@ -40,6 +40,7 @@ export default function EditCallSheetPage() {
         </div>
 
         <CallSheetForm
+          organizationId="default-org"
           projectId={projectId}
           callSheetId={callSheetId}
           onSuccess={handleSuccess}

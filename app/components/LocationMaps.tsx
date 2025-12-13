@@ -245,7 +245,7 @@ export default function LocationMaps({ projectId, project, currentUserEmail }: L
     if (!mapInstanceRef.current || !mapLoaded) return;
 
     // Clear existing markers
-    markersRef.current.forEach(marker => marker.setMap(null));
+    markersRef.current.forEach(marker => marker.setMap(null as any));
     markersRef.current = [];
 
     // Add markers for each location
@@ -254,7 +254,7 @@ export default function LocationMaps({ projectId, project, currentUserEmail }: L
 
       const marker = new google.maps.Marker({
         position: { lat: location.latitude, lng: location.longitude },
-        map: mapInstanceRef.current,
+        map: mapInstanceRef.current || undefined,
         title: location.name,
         label: {
           text: typeConfig.icon,
@@ -277,7 +277,7 @@ export default function LocationMaps({ projectId, project, currentUserEmail }: L
       });
 
       marker.addListener('click', () => {
-        infoWindow.open(mapInstanceRef.current, marker);
+        infoWindow.open(mapInstanceRef.current || undefined, marker);
         setSelectedLocation(location);
       });
 

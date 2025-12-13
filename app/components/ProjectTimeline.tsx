@@ -95,7 +95,7 @@ interface Milestone {
   label: string;
   date: string | null | undefined;
   phase: string;
-  IconComponent: () => JSX.Element;
+  IconComponent: () => React.ReactElement;
   colorVar: string;
   status: "upcoming" | "today" | "overdue" | "none";
 }
@@ -202,9 +202,9 @@ export default function ProjectTimeline({ project }: ProjectTimelineProps) {
   }
 
   // Calculate project duration
-  const firstDate = sortedMilestones[0]?.date ? new Date(sortedMilestones[0].date) : null;
+  const firstDate = sortedMilestones[0]?.date ? new Date(sortedMilestones[0].date!) : null;
   const lastDate = sortedMilestones[sortedMilestones.length - 1]?.date
-    ? new Date(sortedMilestones[sortedMilestones.length - 1].date)
+    ? new Date(sortedMilestones[sortedMilestones.length - 1].date!)
     : null;
 
   const durationDays = firstDate && lastDate

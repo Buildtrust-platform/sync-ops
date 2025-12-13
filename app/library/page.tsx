@@ -83,9 +83,9 @@ export default function LibraryPage() {
     if (!client) return;
     async function fetchAssets() {
       try {
-        const { data } = await client.models.Asset.list();
-        if (data) {
-          setAssets(data);
+        const result = await client?.models.Asset.list();
+        if (result?.data) {
+          setAssets(result.data);
         }
       } catch (err) {
         console.error('Error fetching assets:', err);
@@ -97,9 +97,9 @@ export default function LibraryPage() {
   }, [client]);
 
   const filteredAssets = assets.filter(asset => {
+    const assetName = asset.s3Key?.split('/').pop() || '';
     const matchesSearch = !searchQuery ||
-      asset.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      asset.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      assetName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = filterType === 'ALL' || asset.type === filterType;
     return matchesSearch && matchesType;
   });
@@ -266,13 +266,13 @@ export default function LibraryPage() {
                         className="font-medium truncate text-sm"
                         style={{ color: 'var(--text-primary)' }}
                       >
-                        {asset.name || 'Untitled'}
+                        {asset.s3Key?.split('/').pop() || 'Untitled'}
                       </h4>
                       <p
                         className="text-[12px] mt-1"
                         style={{ color: 'var(--text-tertiary)' }}
                       >
-                        {asset.type || 'Unknown'} • v{asset.currentVersion || 1}
+                        {asset.type || 'Unknown'} • v{asset.version || 1}
                       </p>
                     </div>
                   </div>
@@ -284,8 +284,8 @@ export default function LibraryPage() {
             <div className="mt-8 grid grid-cols-4 gap-4">
               {[
                 { label: 'Total Assets', value: assets.length },
-                { label: 'Videos', value: assets.filter(a => a.type === 'VIDEO').length },
-                { label: 'Images', value: assets.filter(a => a.type === 'IMAGE').length },
+                { label: 'Videos', value: assets.filter(a => a.mimeType?.includes('video')).length },
+                { label: 'Images', value: assets.filter(a => a.mimeType?.includes('image')).length },
                 { label: 'Documents', value: assets.filter(a => a.type === 'DOCUMENT').length },
               ].map((stat, idx) => (
                 <div

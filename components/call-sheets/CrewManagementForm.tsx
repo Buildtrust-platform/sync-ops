@@ -13,20 +13,18 @@ interface CrewManagementFormProps {
 }
 
 const DEPARTMENTS = [
-  'Production',
-  'Direction',
-  'Camera',
-  'Sound',
-  'Lighting',
-  'Grip',
-  'Art Department',
-  'Wardrobe',
-  'Hair & Makeup',
-  'Transportation',
-  'Catering',
-  'Post-Production',
-  'Other',
-];
+  'CAMERA',
+  'SOUND',
+  'LIGHTING',
+  'GRIP',
+  'ELECTRIC',
+  'PRODUCTION',
+  'ART',
+  'MAKEUP',
+  'WARDROBE',
+  'VFX',
+  'OTHER',
+] as const;
 
 export default function CrewManagementForm({
   callSheetId,
@@ -42,11 +40,11 @@ export default function CrewManagementForm({
   const [formData, setFormData] = useState({
     name: '',
     role: '',
-    department: 'Production',
+    department: 'PRODUCTION' as 'CAMERA' | 'SOUND' | 'LIGHTING' | 'GRIP' | 'ELECTRIC' | 'PRODUCTION' | 'ART' | 'MAKEUP' | 'WARDROBE' | 'VFX' | 'OTHER',
     callTime: '',
     walkieChannel: '',
-    contactPhone: '',
-    contactEmail: '',
+    phone: '',
+    email: '',
     notes: '',
     sortOrder: 0,
   });
@@ -83,11 +81,11 @@ export default function CrewManagementForm({
     setFormData({
       name: '',
       role: '',
-      department: 'Production',
+      department: 'PRODUCTION' as 'CAMERA' | 'SOUND' | 'LIGHTING' | 'GRIP' | 'ELECTRIC' | 'PRODUCTION' | 'ART' | 'MAKEUP' | 'WARDROBE' | 'VFX' | 'OTHER',
       callTime: '',
       walkieChannel: '',
-      contactPhone: '',
-      contactEmail: '',
+      phone: '',
+      email: '',
       notes: '',
       sortOrder: crew.length,
     });
@@ -99,11 +97,11 @@ export default function CrewManagementForm({
     setFormData({
       name: member.name || '',
       role: member.role || '',
-      department: member.department || 'Production',
+      department: member.department || 'PRODUCTION',
       callTime: member.callTime || '',
       walkieChannel: member.walkieChannel || '',
-      contactPhone: member.contactPhone || '',
-      contactEmail: member.contactEmail || '',
+      phone: member.phone || '',
+      email: member.email || '',
       notes: member.notes || '',
       sortOrder: member.sortOrder || 0,
     });
@@ -120,13 +118,29 @@ export default function CrewManagementForm({
         // Update existing crew member
         await client.models.CallSheetCrew.update({
           id: editingCrewId,
-          ...formData,
+          name: formData.name,
+          role: formData.role,
+          department: formData.department as 'CAMERA' | 'SOUND' | 'LIGHTING' | 'GRIP' | 'ELECTRIC' | 'PRODUCTION' | 'ART' | 'MAKEUP' | 'WARDROBE' | 'VFX' | 'OTHER',
+          callTime: formData.callTime,
+          walkieChannel: formData.walkieChannel,
+          phone: formData.phone,
+          email: formData.email,
+          notes: formData.notes,
+          sortOrder: formData.sortOrder,
         });
       } else {
         // Create new crew member
         await client.models.CallSheetCrew.create({
           callSheetId,
-          ...formData,
+          name: formData.name,
+          role: formData.role,
+          department: formData.department as 'CAMERA' | 'SOUND' | 'LIGHTING' | 'GRIP' | 'ELECTRIC' | 'PRODUCTION' | 'ART' | 'MAKEUP' | 'WARDROBE' | 'VFX' | 'OTHER',
+          callTime: formData.callTime,
+          walkieChannel: formData.walkieChannel,
+          phone: formData.phone,
+          email: formData.email,
+          notes: formData.notes,
+          sortOrder: formData.sortOrder,
         });
       }
 
@@ -162,6 +176,7 @@ export default function CrewManagementForm({
   };
 
   const moveCrew = async (crewId: string, direction: 'up' | 'down') => {
+    if (!client) return;
     const currentIndex = crew.findIndex((c) => c.id === crewId);
     if (currentIndex === -1) return;
 
@@ -269,7 +284,7 @@ export default function CrewManagementForm({
               </label>
               <select
                 value={formData.department}
-                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, department: e.target.value as "PRODUCTION" | "CAMERA" | "SOUND" | "LIGHTING" | "GRIP" | "ELECTRIC" | "ART" | "MAKEUP" | "WARDROBE" | "VFX" | "OTHER" })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                 required
               >
@@ -312,8 +327,8 @@ export default function CrewManagementForm({
               </label>
               <input
                 type="tel"
-                value={formData.contactPhone}
-                onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="(555) 123-4567"
               />
@@ -325,8 +340,8 @@ export default function CrewManagementForm({
               </label>
               <input
                 type="email"
-                value={formData.contactEmail}
-                onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="crew@example.com"
               />
@@ -413,11 +428,11 @@ export default function CrewManagementForm({
                             {member.walkieChannel || '-'}
                           </td>
                           <td className="px-4 py-3 text-sm text-gray-500">
-                            {member.contactPhone && <div>{member.contactPhone}</div>}
-                            {member.contactEmail && (
-                              <div className="text-xs">{member.contactEmail}</div>
+                            {member.phone && <div>{member.phone}</div>}
+                            {member.email && (
+                              <div className="text-xs">{member.email}</div>
                             )}
-                            {!member.contactPhone && !member.contactEmail && '-'}
+                            {!member.phone && !member.email && '-'}
                           </td>
                           <td className="px-4 py-3 text-sm text-right space-x-2">
                             <button

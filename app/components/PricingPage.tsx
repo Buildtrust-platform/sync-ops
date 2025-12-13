@@ -19,6 +19,7 @@ interface PricingPlan {
   };
   highlighted: boolean;
   ctaText: string;
+  stripeLink?: string;
 }
 
 const PRICING_PLANS: PricingPlan[] = [
@@ -26,7 +27,7 @@ const PRICING_PLANS: PricingPlan[] = [
     id: 'free',
     name: 'Free',
     tier: 'FREE',
-    description: 'Perfect for freelancers and small projects',
+    description: 'Test the system on your next small project',
     monthlyPrice: 0,
     annualPrice: 0,
     features: [
@@ -39,97 +40,100 @@ const PRICING_PLANS: PricingPlan[] = [
     ],
     limits: { projects: 3, users: 2, storageGB: 5, aiCredits: 50 },
     highlighted: false,
-    ctaText: 'Get Started Free',
+    ctaText: 'Start Free—No Card Required',
   },
   {
     id: 'starter',
     name: 'Starter',
     tier: 'STARTER',
-    description: 'For growing teams and regular productions',
+    description: 'Stop losing time to version confusion and scattered feedback',
     monthlyPrice: 99,
     annualPrice: 990,
     features: [
-      'Up to 10 projects',
-      '5 team members',
-      '50 GB storage',
-      'Full Smart Brief AI',
-      'Call sheet management',
-      'Basic review & approval',
-      'Email support',
-      'API access',
+      'Run 10 projects simultaneously',
+      'Collaborate with 5 team members',
+      '50 GB—enough for a full campaign',
+      'AI briefs save 4+ hours per project',
+      'Call sheets that actually get confirmed',
+      'Review workflows that eliminate email chaos',
+      'Priority email support',
+      'API for your existing tools',
     ],
     limits: { projects: 10, users: 5, storageGB: 50, aiCredits: 500 },
     highlighted: false,
-    ctaText: 'Start Starter',
+    ctaText: 'Start 14-Day Free Trial',
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_LINK_STARTER || 'https://buy.stripe.com/test_14A4gr5c68yTedabJo1wY00',
   },
   {
     id: 'professional',
     name: 'Professional',
     tier: 'PROFESSIONAL',
-    description: 'For production companies and agencies',
+    description: 'For teams tired of heroics to hit deadlines',
     monthlyPrice: 299,
     annualPrice: 2990,
     features: [
-      'Up to 50 projects',
-      '25 team members',
-      '500 GB storage',
-      'All AI features',
-      'Advanced review & approval',
-      'Equipment management',
-      'Budget tracking',
-      'Distribution engine',
-      'Priority support',
-      'Custom integrations',
+      'Run 50 productions without extra PMs',
+      '25 team members—whole department access',
+      '500 GB—3 feature films worth of storage',
+      'Full AI suite: briefs, transcripts, tagging',
+      'Budget tracking that prevents overruns',
+      'Equipment OS eliminates gear conflicts',
+      'Distribution engine with spec validation',
+      'Priority support—response in hours, not days',
+      'Integrations with Frame.io, Slack, more',
+      'Compliance tracking for zero legal risk',
     ],
     limits: { projects: 50, users: 25, storageGB: 500, aiCredits: 2000 },
     highlighted: true,
-    ctaText: 'Start Professional',
+    ctaText: 'Start 14-Day Free Trial',
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_LINK_PRO || 'https://buy.stripe.com/test_dRm3cn1ZUbL52us9Bg1wY01',
   },
   {
     id: 'enterprise',
     name: 'Enterprise',
     tier: 'ENTERPRISE',
-    description: 'For large studios and broadcasters',
+    description: 'For operations that can\'t afford a single compliance gap',
     monthlyPrice: 799,
     annualPrice: 7990,
     features: [
-      'Up to 200 projects',
-      '100 team members',
-      '2 TB storage',
-      'Unlimited AI processing',
-      'Full archive & intelligence',
-      'Advanced analytics',
-      'SSO / SAML',
-      'Dedicated account manager',
-      'SLA guarantee',
-      'Custom training',
+      '200 concurrent productions at scale',
+      '100 users—your entire organization',
+      '2 TB storage with intelligent archiving',
+      'Unlimited AI—process everything instantly',
+      'Archive intelligence finds any asset in seconds',
+      'Advanced analytics for exec reporting',
+      'SSO/SAML for enterprise security',
+      'Dedicated account manager knows your business',
+      '99.9% uptime SLA—no excuses',
+      'Custom onboarding and team training',
     ],
     limits: { projects: 200, users: 100, storageGB: 2000, aiCredits: 10000 },
     highlighted: false,
-    ctaText: 'Contact Sales',
+    ctaText: 'Talk to Sales',
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_LINK_ENTERPRISE || 'https://buy.stripe.com/test_7sY3cn8oi02n8SQbJo1wY02',
   },
   {
     id: 'studio',
     name: 'Studio',
     tier: 'STUDIO',
-    description: 'Custom solutions for global operations',
+    description: 'Your infrastructure, your rules, our expertise',
     monthlyPrice: -1, // Custom pricing
     annualPrice: -1,
     features: [
-      'Unlimited projects',
-      'Unlimited team members',
-      'Unlimited storage',
-      'White-label options',
-      'Custom domain',
-      'On-premise deployment',
-      'Custom AI training',
-      'Dedicated infrastructure',
-      '24/7 premium support',
-      'Custom contracts',
+      'Unlimited everything—no caps, no surprises',
+      'White-label for client-facing deployments',
+      'Custom domain for brand consistency',
+      'On-premise option for security requirements',
+      'Custom AI models trained on your content',
+      'Dedicated infrastructure—no shared resources',
+      '24/7 premium support with named engineers',
+      'Custom contracts and billing',
+      'Quarterly business reviews',
+      'Early access to new features',
     ],
     limits: { projects: null, users: null, storageGB: null, aiCredits: null },
     highlighted: false,
-    ctaText: 'Contact Sales',
+    ctaText: 'Talk to Sales',
   },
 ];
 
@@ -216,13 +220,26 @@ export default function PricingPage({
       return;
     }
 
-    // Studio and Enterprise - contact sales
-    if (tier === 'STUDIO' || tier === 'ENTERPRISE') {
-      window.location.href = 'mailto:sales@syncops.com?subject=Enterprise%20Inquiry';
+    // Studio - contact sales
+    if (tier === 'STUDIO') {
+      window.location.href = 'mailto:sales@syncops.com?subject=Studio%20Plan%20Inquiry';
       return;
     }
 
-    // Check if Stripe is configured
+    // Find the plan with the matching tier
+    const plan = PRICING_PLANS.find(p => p.tier === tier);
+
+    // If plan has a Stripe Payment Link, use it directly
+    if (plan?.stripeLink) {
+      const checkoutUrl = new URL(plan.stripeLink);
+      if (email) {
+        checkoutUrl.searchParams.set('prefilled_email', email);
+      }
+      window.open(checkoutUrl.toString(), '_blank');
+      return;
+    }
+
+    // Fallback to API-based checkout if Stripe is configured
     if (!isStripeConfigured) {
       setCheckoutError('Billing is not configured. Please set up Stripe API keys.');
       return;
@@ -270,31 +287,56 @@ export default function PricingPage({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
+    <div className="min-h-screen bg-white">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div
+            onClick={() => window.location.href = '/'}
+            className="text-xl font-semibold tracking-tight text-gray-900 cursor-pointer"
+          >
+            SyncOps
+          </div>
+          <div className="hidden md:flex items-center gap-6">
+            <button onClick={() => window.location.href = '/features'} className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Features</button>
+            <button onClick={() => window.location.href = '/pricing'} className="text-sm text-gray-900 font-medium">Pricing</button>
+            <button onClick={() => window.location.href = '/about'} className="text-sm text-gray-600 hover:text-gray-900 transition-colors">About</button>
+            <button onClick={() => window.location.href = '/contact'} className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Contact</button>
+          </div>
+          <div className="flex items-center gap-4">
+            <button onClick={() => window.location.href = '/signin'} className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Sign In</button>
+            <button onClick={() => window.location.href = '/onboarding'} className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">Sign Up Free</button>
+          </div>
+        </div>
+      </nav>
+
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-          Simple, Transparent Pricing
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16 text-center">
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          Stop Paying for Chaos
         </h1>
-        <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-8">
-          Choose the plan that fits your production needs. Scale up or down anytime.
+        <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-4">
+          The average production loses $15K–$50K per project to rework, miscommunication, and compliance gaps.
+        </p>
+        <p className="text-lg text-gray-900 font-medium max-w-2xl mx-auto mb-8">
+          SyncOps pays for itself on your first project.
         </p>
 
         {/* Error Message */}
         {checkoutError && (
-          <div className="mb-8 max-w-lg mx-auto bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-red-400">
+          <div className="mb-8 max-w-lg mx-auto bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-red-600">
             {checkoutError}
           </div>
         )}
 
         {/* Billing Toggle */}
-        <div className="inline-flex items-center bg-slate-800/50 rounded-xl p-1 border border-slate-700">
+        <div className="inline-flex items-center bg-gray-100 rounded-xl p-1">
           <button
             onClick={() => setBillingCycle('monthly')}
             className={`px-6 py-2 rounded-lg font-medium transition-all ${
               billingCycle === 'monthly'
-                ? 'bg-white text-slate-900'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
             }`}
           >
             Monthly
@@ -303,8 +345,8 @@ export default function PricingPage({
             onClick={() => setBillingCycle('annual')}
             className={`px-6 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
               billingCycle === 'annual'
-                ? 'bg-white text-slate-900'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
             }`}
           >
             Annual
@@ -427,7 +469,7 @@ export default function PricingPage({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 text-center">
         <button
           onClick={() => setShowComparison(!showComparison)}
-          className="inline-flex items-center gap-2 text-white hover:text-blue-300 font-medium transition-colors"
+          className="inline-flex items-center gap-2 text-gray-900 hover:text-gray-600 font-medium transition-colors"
         >
           {showComparison ? 'Hide' : 'Show'} Full Feature Comparison
           <svg
@@ -485,9 +527,9 @@ export default function PricingPage({
       )}
 
       {/* FAQ Section */}
-      <div className="bg-slate-900 py-20">
+      <div className="bg-gray-50 py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-white text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
             Frequently Asked Questions
           </h2>
           <div className="space-y-4">
@@ -513,11 +555,11 @@ export default function PricingPage({
                 a: 'Yes! Our Studio tier offers fully customizable solutions for large-scale operations. Contact our sales team to discuss your specific requirements.',
               },
             ].map((faq, idx) => (
-              <details key={idx} className="group bg-slate-800/50 rounded-xl border border-slate-700">
-                <summary className="flex items-center justify-between px-6 py-4 cursor-pointer text-white font-medium">
+              <details key={idx} className="group bg-white rounded-xl border border-gray-200">
+                <summary className="flex items-center justify-between px-6 py-4 cursor-pointer text-gray-900 font-medium">
                   {faq.q}
                   <svg
-                    className="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"
+                    className="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -525,7 +567,7 @@ export default function PricingPage({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </summary>
-                <div className="px-6 pb-4 text-slate-400">
+                <div className="px-6 pb-4 text-gray-600">
                   {faq.a}
                 </div>
               </details>
@@ -535,31 +577,39 @@ export default function PricingPage({
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 py-16">
+      <div className="bg-gray-900 py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to transform your production workflow?
+            Your next project doesn't have to be chaotic
           </h2>
-          <p className="text-blue-100 text-lg mb-8">
-            Start your 14-day free trial today. No credit card required.
+          <p className="text-gray-400 text-lg mb-4">
+            14-day free trial. No credit card. Cancel anytime.
+          </p>
+          <p className="text-gray-300 text-sm mb-8">
+            Most teams see ROI within the first week.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={() => handleSelectPlan('PROFESSIONAL')}
               disabled={loading}
-              className="px-8 py-4 bg-white text-blue-600 font-bold rounded-xl hover:bg-blue-50 transition-colors disabled:opacity-50"
+              className="px-8 py-4 bg-white text-gray-900 font-bold rounded-xl hover:bg-gray-100 transition-colors disabled:opacity-50"
             >
               {loading ? 'Loading...' : 'Start Free Trial'}
             </button>
             <button
               onClick={() => handleSelectPlan('ENTERPRISE')}
-              className="px-8 py-4 bg-blue-500 text-white font-bold rounded-xl hover:bg-blue-400 transition-colors"
+              className="px-8 py-4 bg-transparent text-white border border-gray-600 font-bold rounded-xl hover:bg-gray-800 transition-colors"
             >
               Talk to Sales
             </button>
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="py-8 px-6 border-t border-gray-200 text-center text-gray-500 text-sm">
+        © 2024 SyncOps. All rights reserved.
+      </footer>
     </div>
   );
 }

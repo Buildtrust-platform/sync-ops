@@ -26,11 +26,11 @@ export default function SceneManagementForm({
   const [formData, setFormData] = useState({
     sceneNumber: '',
     sceneHeading: '',
-    sceneDescription: '',
-    sceneLocation: '',
+    description: '',
+    location: '',
     scheduledTime: '',
-    estimatedDuration: '',
-    status: 'SCHEDULED' as 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'DELAYED',
+    estimatedDuration: 0,
+    status: 'SCHEDULED' as 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'MOVED',
     sortOrder: 0,
   });
 
@@ -66,11 +66,11 @@ export default function SceneManagementForm({
     setFormData({
       sceneNumber: '',
       sceneHeading: '',
-      sceneDescription: '',
-      sceneLocation: '',
+      description: '',
+      location: '',
       scheduledTime: '',
-      estimatedDuration: '',
-      status: 'SCHEDULED',
+      estimatedDuration: 0,
+      status: 'SCHEDULED' as 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'MOVED',
       sortOrder: scenes.length,
     });
     setEditingSceneId(null);
@@ -81,10 +81,10 @@ export default function SceneManagementForm({
     setFormData({
       sceneNumber: scene.sceneNumber || '',
       sceneHeading: scene.sceneHeading || '',
-      sceneDescription: scene.sceneDescription || '',
-      sceneLocation: scene.sceneLocation || '',
+      description: scene.description || '',
+      location: scene.location || '',
       scheduledTime: scene.scheduledTime || '',
-      estimatedDuration: scene.estimatedDuration || '',
+      estimatedDuration: scene.estimatedDuration || 0,
       status: scene.status || 'SCHEDULED',
       sortOrder: scene.sortOrder || 0,
     });
@@ -143,6 +143,7 @@ export default function SceneManagementForm({
   };
 
   const moveScene = async (sceneId: string, direction: 'up' | 'down') => {
+    if (!client) return;
     const currentIndex = scenes.findIndex((s) => s.id === sceneId);
     if (currentIndex === -1) return;
 
@@ -180,12 +181,12 @@ export default function SceneManagementForm({
     switch (status) {
       case 'SCHEDULED':
         return 'bg-blue-100 text-blue-800';
-      case 'IN_PROGRESS':
-        return 'bg-yellow-100 text-yellow-800';
       case 'COMPLETED':
         return 'bg-green-100 text-green-800';
-      case 'DELAYED':
+      case 'CANCELLED':
         return 'bg-red-100 text-red-800';
+      case 'MOVED':
+        return 'bg-yellow-100 text-yellow-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -265,8 +266,8 @@ export default function SceneManagementForm({
                 Description
               </label>
               <textarea
-                value={formData.sceneDescription}
-                onChange={(e) => setFormData({ ...formData, sceneDescription: e.target.value })}
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={2}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Brief description of what happens in this scene"
@@ -279,8 +280,8 @@ export default function SceneManagementForm({
               </label>
               <input
                 type="text"
-                value={formData.sceneLocation}
-                onChange={(e) => setFormData({ ...formData, sceneLocation: e.target.value })}
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Specific location within primary location"
               />
@@ -291,9 +292,9 @@ export default function SceneManagementForm({
                 Estimated Duration (minutes)
               </label>
               <input
-                type="text"
+                type="number"
                 value={formData.estimatedDuration}
-                onChange={(e) => setFormData({ ...formData, estimatedDuration: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, estimatedDuration: parseInt(e.target.value) || 0 })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="e.g., 30, 45, 60"
               />
@@ -308,15 +309,15 @@ export default function SceneManagementForm({
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    status: e.target.value as 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'DELAYED',
+                    status: e.target.value as 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'MOVED',
                   })
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="SCHEDULED">Scheduled</option>
-                <option value="IN_PROGRESS">In Progress</option>
                 <option value="COMPLETED">Completed</option>
-                <option value="DELAYED">Delayed</option>
+                <option value="CANCELLED">Cancelled</option>
+                <option value="MOVED">Moved</option>
               </select>
             </div>
           </div>
@@ -380,12 +381,12 @@ export default function SceneManagementForm({
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900">
                     <div className="font-medium">{scene.sceneHeading}</div>
-                    {scene.sceneDescription && (
-                      <div className="text-gray-500 text-xs mt-1">{scene.sceneDescription}</div>
+                    {scene.description && (
+                      <div className="text-gray-500 text-xs mt-1">{scene.description}</div>
                     )}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-500">
-                    {scene.sceneLocation || '-'}
+                    {scene.location || '-'}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-500">
                     {scene.scheduledTime || '-'}

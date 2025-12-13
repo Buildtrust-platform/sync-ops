@@ -142,7 +142,8 @@ export default function FeedbackSummary({ comments }: FeedbackSummaryProps) {
       setError(null);
 
       try {
-        const result = await client.queries.summarizeFeedback({
+        // @ts-expect-error - summarizeFeedback is a custom query that may not be generated yet
+        const result = await client?.queries?.summarizeFeedback?.({
           comments: comments.map(c => ({
             id: c.id,
             commentText: c.commentText,
@@ -154,7 +155,7 @@ export default function FeedbackSummary({ comments }: FeedbackSummaryProps) {
           })),
         });
 
-        if (result.data) {
+        if (result?.data) {
           setSummary(result.data as FeedbackSummaryData);
         }
       } catch (err) {

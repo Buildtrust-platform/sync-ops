@@ -29,8 +29,8 @@ export default function CastManagementForm({
     makeupCall: '',
     wardrobeCall: '',
     callToSet: '',
-    contactPhone: '',
-    contactEmail: '',
+    phone: '',
+    email: '',
     pickupLocation: '',
     pickupTime: '',
     notes: '',
@@ -72,8 +72,8 @@ export default function CastManagementForm({
       makeupCall: '',
       wardrobeCall: '',
       callToSet: '',
-      contactPhone: '',
-      contactEmail: '',
+      phone: '',
+      email: '',
       pickupLocation: '',
       pickupTime: '',
       notes: '',
@@ -90,8 +90,8 @@ export default function CastManagementForm({
       makeupCall: member.makeupCall || '',
       wardrobeCall: member.wardrobeCall || '',
       callToSet: member.callToSet || '',
-      contactPhone: member.contactPhone || '',
-      contactEmail: member.contactEmail || '',
+      phone: member.phone || '',
+      email: member.email || '',
       pickupLocation: member.pickupLocation || '',
       pickupTime: member.pickupTime || '',
       notes: member.notes || '',
@@ -152,6 +152,7 @@ export default function CastManagementForm({
   };
 
   const moveCast = async (castId: string, direction: 'up' | 'down') => {
+    if (!client) return;
     const currentIndex = cast.findIndex((c) => c.id === castId);
     if (currentIndex === -1) return;
 
@@ -285,8 +286,8 @@ export default function CastManagementForm({
               </label>
               <input
                 type="tel"
-                value={formData.contactPhone}
-                onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="(555) 123-4567"
               />
@@ -298,8 +299,8 @@ export default function CastManagementForm({
               </label>
               <input
                 type="email"
-                value={formData.contactEmail}
-                onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="actor@example.com"
               />
@@ -409,9 +410,9 @@ export default function CastManagementForm({
                     {member.callToSet || '-'}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-500">
-                    {member.contactPhone && <div>{member.contactPhone}</div>}
-                    {member.contactEmail && <div className="text-xs">{member.contactEmail}</div>}
-                    {!member.contactPhone && !member.contactEmail && '-'}
+                    {member.phone && <div>{member.phone}</div>}
+                    {member.email && <div className="text-xs">{member.email}</div>}
+                    {!member.phone && !member.email && '-'}
                   </td>
                   <td className="px-4 py-3 text-sm text-right space-x-2">
                     <button
