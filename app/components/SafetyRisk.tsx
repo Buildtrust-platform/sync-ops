@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
+import { useToast } from './Toast';
 
 /**
  * SAFETY & RISK ASSESSMENT MODULE (Pre-Production)
@@ -171,6 +172,7 @@ export default function SafetyRisk({
   organizationId,
   currentUserEmail,
 }: SafetyRiskProps) {
+  const toast = useToast();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [risks, setRisks] = useState<RiskAssessment[]>([]);
   const [incidents, setIncidents] = useState<SafetyIncident[]>([]);
@@ -357,7 +359,7 @@ export default function SafetyRisk({
   // Add risk handler
   const handleAddRisk = () => {
     if (!riskForm.title || !riskForm.description) {
-      alert("Please fill in required fields");
+      toast.warning("Missing Information", "Please fill in required fields");
       return;
     }
 
@@ -400,7 +402,7 @@ export default function SafetyRisk({
   // Add incident handler
   const handleAddIncident = () => {
     if (!incidentForm.title || !incidentForm.description || !incidentForm.incidentDate) {
-      alert("Please fill in required fields");
+      toast.warning("Missing Information", "Please fill in required fields");
       return;
     }
 
@@ -443,7 +445,7 @@ export default function SafetyRisk({
   // Add checklist handler
   const handleAddChecklist = () => {
     if (!checklistForm.name) {
-      alert("Please enter a checklist name");
+      toast.warning("Missing Name", "Please enter a checklist name");
       return;
     }
 
@@ -480,7 +482,7 @@ export default function SafetyRisk({
   // Add contact handler
   const handleAddContact = () => {
     if (!contactForm.name || !contactForm.phone || !contactForm.role) {
-      alert("Please fill in required fields");
+      toast.warning("Missing Information", "Please fill in required fields");
       return;
     }
 

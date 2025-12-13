@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
+import { useToast } from './Toast';
 
 type Project = Schema['Project']['type'];
 
@@ -68,6 +69,7 @@ const PERMIT_STATUS_CONFIG = {
 };
 
 export default function LocationMaps({ projectId, project, currentUserEmail }: LocationMapsProps) {
+  const toast = useToast();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [locations, setLocations] = useState<ProductionLocation[]>([]);
 
@@ -296,7 +298,7 @@ export default function LocationMaps({ projectId, project, currentUserEmail }: L
   // Get user's current location
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser');
+      toast.error('Location Not Supported', 'Geolocation is not supported by your browser');
       return;
     }
 
@@ -327,7 +329,7 @@ export default function LocationMaps({ projectId, project, currentUserEmail }: L
       },
       (error) => {
         console.error('Error getting location:', error);
-        alert('Unable to get your location. Please check your permissions.');
+        toast.error('Location Error', 'Unable to get your location. Please check your permissions.');
       }
     );
   };
@@ -378,7 +380,7 @@ export default function LocationMaps({ projectId, project, currentUserEmail }: L
       setDistances(results);
     } catch (error) {
       console.error('Error calculating distances:', error);
-      alert('Failed to calculate distances. Please try again.');
+      toast.error('Calculation Failed', 'Failed to calculate distances. Please try again.');
     } finally {
       setCalculatingDistances(false);
     }
@@ -431,7 +433,7 @@ export default function LocationMaps({ projectId, project, currentUserEmail }: L
       });
     } catch (error) {
       console.error('Error calculating route:', error);
-      alert('Failed to calculate route. Please try again.');
+      toast.error('Route Calculation Failed', 'Failed to calculate route. Please try again.');
     }
   };
 
@@ -447,7 +449,7 @@ export default function LocationMaps({ projectId, project, currentUserEmail }: L
   // Add new location
   const handleAddLocation = async () => {
     if (!newLocation.name || !newLocation.address || !newLocation.latitude) {
-      alert('Please fill in required fields and select a location from the map');
+      toast.warning('Missing Information', 'Please fill in required fields and select a location from the map');
       return;
     }
 

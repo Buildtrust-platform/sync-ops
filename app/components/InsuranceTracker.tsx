@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
+import { useToast } from './Toast';
 
 /**
  * INSURANCE TRACKER MODULE (Pre-Production)
@@ -112,6 +113,7 @@ export default function InsuranceTracker({
   organizationId,
   currentUserEmail,
 }: InsuranceTrackerProps) {
+  const toast = useToast();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [policies, setPolicies] = useState<InsurancePolicy[]>([]);
   const [requirements, setRequirements] = useState<InsuranceRequirement[]>([]);
@@ -320,7 +322,7 @@ export default function InsuranceTracker({
   // Add policy handler
   const handleAddPolicy = () => {
     if (!policyForm.policyNumber || !policyForm.carrier || !policyForm.coverageAmount || !policyForm.expirationDate) {
-      alert("Please fill in required fields");
+      toast.warning("Missing Information", "Please fill in required fields");
       return;
     }
 
@@ -385,7 +387,7 @@ export default function InsuranceTracker({
   // Add requirement handler
   const handleAddRequirement = () => {
     if (!requirementForm.minimumCoverage || !requirementForm.description) {
-      alert("Please fill in required fields");
+      toast.warning("Missing Information", "Please fill in required fields");
       return;
     }
 

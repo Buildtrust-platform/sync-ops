@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
+import { useToast } from './Toast';
 
 type Project = Schema['Project']['type'];
 
@@ -119,6 +120,7 @@ const REPORT_TYPES: ReportConfig[] = [
 ];
 
 export default function ReportsExports({ project }: ReportsExportsProps) {
+  const toast = useToast();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [activeTab, setActiveTab] = useState<'reports' | 'exports' | 'scheduled'>('reports');
 
@@ -185,7 +187,7 @@ export default function ReportsExports({ project }: ReportsExportsProps) {
 
   const generateReport = async () => {
     if (selectedReports.length === 0) {
-      alert('Please select at least one report to generate');
+      toast.warning('No Reports Selected', 'Please select at least one report to generate');
       return;
     }
 
@@ -524,7 +526,7 @@ export default function ReportsExports({ project }: ReportsExportsProps) {
               key={index}
               className="bg-slate-800 rounded-xl border border-slate-700 p-4 hover:border-teal-500/50 transition-colors cursor-pointer"
               onClick={() => {
-                alert(`Exporting ${item.name} as ${item.format}...`);
+                toast.info('Exporting', `Exporting ${item.name} as ${item.format}...`);
               }}
             >
               <div className="flex items-start gap-3">

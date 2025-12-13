@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
+import { useToast } from './Toast';
 
 /**
  * DAILY PRODUCTION REPORT (DPR) COMPONENT
@@ -32,6 +33,7 @@ export default function DailyProductionReport({
   organizationId,
   currentUserEmail,
 }: DailyProductionReportProps) {
+  const toast = useToast();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'scenes' | 'cast' | 'incidents' | 'history'>('overview');
   const [currentDPR, setCurrentDPR] = useState<DPRType | null>(null);
@@ -250,7 +252,7 @@ export default function DailyProductionReport({
       }
     } catch (error) {
       console.error('Error creating DPR:', error);
-      alert('Failed to create Daily Production Report');
+      toast.error('Failed to Create DPR', 'An error occurred while creating the Daily Production Report. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -300,7 +302,7 @@ export default function DailyProductionReport({
       }
     } catch (error) {
       console.error('Error saving DPR:', error);
-      alert('Failed to save Daily Production Report');
+      toast.error('Failed to Save DPR', 'An error occurred while saving the Daily Production Report. Please try again.');
     } finally {
       setIsSaving(false);
     }

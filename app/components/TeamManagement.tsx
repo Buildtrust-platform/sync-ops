@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
+import { useToast } from "./Toast";
 
 /**
  * TEAM MANAGEMENT COMPONENT
@@ -567,6 +568,7 @@ export default function TeamManagement({
   project,
   currentUserEmail,
 }: TeamManagementProps) {
+  const toast = useToast();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [activeView, setActiveView] = useState<'directory' | 'permissions' | 'activity'>('directory');
 
@@ -705,11 +707,11 @@ export default function TeamManagement({
           });
         }
       } else {
-        alert(`Invitation sent to ${email} as ${role}!\n\nNote: For full team management, deploy the schema with: npx ampx sandbox --once`);
+        toast.info('Invitation sent', `${email} invited as ${role}. Note: For full team management, deploy the schema.`);
       }
     } catch (error) {
       console.error('Error inviting team member:', error);
-      alert('Failed to send invitation. Please try again.');
+      toast.error('Failed to send invitation', 'Please try again.');
     }
   };
 
@@ -718,7 +720,7 @@ export default function TeamManagement({
     if (!member) return;
 
     if (member.roleType === 'stakeholder') {
-      alert('Core stakeholders cannot be removed here. Use Project Settings to clear stakeholder assignments.');
+      toast.warning('Cannot remove stakeholder', 'Core stakeholders cannot be removed here. Use Project Settings to clear stakeholder assignments.');
       return;
     }
 
@@ -747,7 +749,7 @@ export default function TeamManagement({
 
     if (currentPermissions.includes(permission)) {
       if (permission === 'view') {
-        alert('View permission cannot be removed - it is required for all team members.');
+        toast.warning('Cannot remove permission', 'View permission is required for all team members.');
         return;
       }
       newPermissions = currentPermissions.filter(p => p !== permission);

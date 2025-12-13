@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
+import { useToast } from '@/app/components/Toast';
 
 type CallSheetCast = Schema['CallSheetCast']['type'];
 
@@ -15,6 +16,7 @@ export default function CastManagementForm({
   callSheetId,
   onCastUpdated,
 }: CastManagementFormProps) {
+  const toast = useToast();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [cast, setCast] = useState<CallSheetCast[]>([]);
   const [loading, setLoading] = useState(true);
@@ -126,7 +128,7 @@ export default function CastManagementForm({
       }
     } catch (error) {
       console.error('Error saving cast member:', error);
-      alert('Failed to save cast member. Please try again.');
+      toast.error('Save Failed', 'Failed to save cast member. Please try again.');
     }
   };
 
@@ -145,7 +147,7 @@ export default function CastManagementForm({
       }
     } catch (error) {
       console.error('Error deleting cast member:', error);
-      alert('Failed to delete cast member. Please try again.');
+      toast.error('Delete Failed', 'Failed to delete cast member. Please try again.');
     }
   };
 
@@ -179,7 +181,7 @@ export default function CastManagementForm({
       }
     } catch (error) {
       console.error('Error reordering cast:', error);
-      alert('Failed to reorder cast. Please try again.');
+      toast.error('Reorder Failed', 'Failed to reorder cast. Please try again.');
     }
   };
 

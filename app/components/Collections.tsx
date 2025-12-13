@@ -13,6 +13,7 @@ import {
   EmptyState,
   Dropdown,
 } from "./ui";
+import { useToast } from "./Toast";
 
 /**
  * COLLECTIONS / LIGHTBOXES COMPONENT
@@ -78,6 +79,7 @@ export default function Collections({
   selectedAssetIds = [],
   mode = 'browse',
 }: CollectionsProps) {
+  const toast = useToast();
   // State
   const [collections, setCollections] = useState<Schema["Collection"]["type"][]>([]);
   const [selectedCollection, setSelectedCollection] = useState<CollectionWithAssets | null>(null);
@@ -364,7 +366,7 @@ export default function Collections({
       });
 
       loadCollectionDetails(selectedCollection.collection.id);
-      alert(`Share link created! Token: ${token}`);
+      toast.success('Share Link Created', `Token: ${token}`);
     } catch (error) {
       console.error('Error generating share link:', error);
     }

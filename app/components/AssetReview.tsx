@@ -15,6 +15,7 @@ import {
   TimecodeToolbar,
   type FrameRateKey,
 } from "./SMPTETimecode";
+import { useToast } from "./Toast";
 
 /**
  * ASSET REVIEW COMPONENT
@@ -83,6 +84,7 @@ export default function AssetReview({
   userId,
   onClose
 }: AssetReviewProps) {
+  const toast = useToast();
   const orgId = organizationId || 'default-org';
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [asset, setAsset] = useState<Schema["Asset"]["type"] | null>(null);
@@ -372,12 +374,12 @@ export default function AssetReview({
         },
       });
 
-      alert("Asset legally approved and locked. This asset is now immutable.");
+      toast.success("Legal Approval Complete", "Asset legally approved and locked. This asset is now immutable.");
       setShowLegalApproval(false);
       setCurrentReviewId(null);
     } catch (error) {
       console.error('Error approving legal review:', error);
-      alert("Error: Failed to approve asset. Please try again.");
+      toast.error("Approval Failed", "Failed to approve asset. Please try again.");
     }
   }
 

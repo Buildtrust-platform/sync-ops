@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
+import { useToast } from '@/app/components/Toast';
 
 interface CallSheetFormProps {
   projectId: string;
@@ -12,6 +13,7 @@ interface CallSheetFormProps {
 }
 
 export default function CallSheetForm({ projectId, callSheetId, onSuccess, onCancel }: CallSheetFormProps) {
+  const toast = useToast();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(!!callSheetId);
@@ -118,7 +120,7 @@ export default function CallSheetForm({ projectId, callSheetId, onSuccess, onCan
       }
     } catch (error) {
       console.error('Error loading call sheet:', error);
-      alert('Failed to load call sheet data.');
+      toast.error('Load Failed', 'Failed to load call sheet data.');
     } finally {
       setLoadingData(false);
     }
@@ -161,7 +163,7 @@ export default function CallSheetForm({ projectId, callSheetId, onSuccess, onCan
       }
     } catch (error) {
       console.error(`Error ${callSheetId ? 'updating' : 'creating'} call sheet:`, error);
-      alert(`Failed to ${callSheetId ? 'update' : 'create'} call sheet. Please try again.`);
+      toast.error(`${callSheetId ? 'Update' : 'Create'} Failed`, `Failed to ${callSheetId ? 'update' : 'create'} call sheet. Please try again.`);
     } finally {
       setLoading(false);
     }

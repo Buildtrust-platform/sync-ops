@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
+import { useToast } from './Toast';
 
 /**
  * TASK MANAGER COMPONENT
@@ -197,6 +198,7 @@ export default function TaskManager({
   linkedTimecode,
   onTaskCreated,
 }: TaskManagerProps) {
+  const toast = useToast();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const orgId = organizationId || 'default-org';
 
@@ -284,7 +286,7 @@ export default function TaskManager({
       if (errors) {
         console.error('Error creating task:', errors);
         console.error('Error details:', JSON.stringify(errors, null, 2));
-        alert(`Failed to create task: ${errors.map((e: any) => e.message).join(', ')}`);
+        toast.error('Failed to create task', errors.map((e: any) => e.message).join(', '));
       } else if (data) {
         setShowCreateModal(false);
         setNewTask({ title: '', description: '', priority: 'NORMAL', assignedToEmail: '', dueDate: '' });

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
+import { useToast } from "./Toast";
 
 /**
  * BUDGET TRACKER COMPONENT - Enhanced with Granular Expense Tracking
@@ -49,6 +50,7 @@ const PHASES = {
 };
 
 export default function BudgetTracker({ project }: BudgetTrackerProps) {
+  const toast = useToast();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [activeTab, setActiveTab] = useState<"overview" | "expenses" | "crew" | "equipment" | "locations" | "daily">("overview");
   const [isLoading, setIsLoading] = useState(true);
@@ -248,7 +250,7 @@ export default function BudgetTracker({ project }: BudgetTrackerProps) {
   async function handleAddExpense() {
     if (!client) return;
     if (!client.models.Expense) {
-      alert("Schema not deployed yet. Run: npx ampx sandbox --once");
+      toast.warning("Schema not deployed", "Run: npx ampx sandbox --once");
       return;
     }
     try {
@@ -288,14 +290,14 @@ export default function BudgetTracker({ project }: BudgetTrackerProps) {
       loadData();
     } catch (error) {
       console.error("Error adding expense:", error);
-      alert("Failed to add expense. Check console for details.");
+      toast.error("Failed to add expense", "Check console for details.");
     }
   }
 
   async function handleAddCrewCost() {
     if (!client) return;
     if (!client.models.CrewCost) {
-      alert("Schema not deployed yet. Run: npx ampx sandbox --once");
+      toast.warning("Schema not deployed", "Run: npx ampx sandbox --once");
       return;
     }
     try {
@@ -355,14 +357,14 @@ export default function BudgetTracker({ project }: BudgetTrackerProps) {
       loadData();
     } catch (error) {
       console.error("Error adding crew cost:", error);
-      alert("Failed to add crew cost. Check console for details.");
+      toast.error("Failed to add crew cost", "Check console for details.");
     }
   }
 
   async function handleAddEquipmentRental() {
     if (!client) return;
     if (!client.models.EquipmentRental) {
-      alert("Schema not deployed yet. Run: npx ampx sandbox --once");
+      toast.warning("Schema not deployed", "Run: npx ampx sandbox --once");
       return;
     }
     try {
@@ -413,14 +415,14 @@ export default function BudgetTracker({ project }: BudgetTrackerProps) {
       loadData();
     } catch (error) {
       console.error("Error adding equipment rental:", error);
-      alert("Failed to add equipment rental. Check console for details.");
+      toast.error("Failed to add equipment rental", "Check console for details.");
     }
   }
 
   async function handleAddLocationCost() {
     if (!client) return;
     if (!client.models.LocationCost) {
-      alert("Schema not deployed yet. Run: npx ampx sandbox --once");
+      toast.warning("Schema not deployed", "Run: npx ampx sandbox --once");
       return;
     }
     try {
@@ -474,7 +476,7 @@ export default function BudgetTracker({ project }: BudgetTrackerProps) {
       loadData();
     } catch (error) {
       console.error("Error adding location cost:", error);
-      alert("Failed to add location cost. Check console for details.");
+      toast.error("Failed to add location cost", "Check console for details.");
     }
   }
 

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
+import { useToast } from './Toast';
 
 // Client is initialized inside component to avoid SSR issues
 
@@ -286,6 +287,7 @@ const COUNTRIES = [
 ];
 
 export default function DistributionEngine({ projectId, organizationId, currentUserEmail, currentUserName }: Props) {
+  const toast = useToast();
   const orgId = organizationId || 'default-org';
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
 
@@ -539,7 +541,7 @@ export default function DistributionEngine({ projectId, organizationId, currentU
   async function handleCopyLink(link: DistributionLink) {
     const shareUrl = `${window.location.origin}/share/${link.accessToken}`;
     await navigator.clipboard.writeText(shareUrl);
-    alert('Link copied to clipboard!');
+    toast.success('Copied!', 'Link copied to clipboard');
   }
 
   // Reset forms

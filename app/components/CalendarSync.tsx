@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
+import { useToast } from './Toast';
 
 type Project = Schema['Project']['type'];
 
@@ -43,6 +44,7 @@ const CALENDAR_PROVIDERS: CalendarProvider[] = [
 ];
 
 export default function CalendarSync({ projectId, project, currentUserEmail }: CalendarSyncProps) {
+  const toast = useToast();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [activeTab, setActiveTab] = useState<'events' | 'sync' | 'settings'>('events');
 
@@ -658,7 +660,7 @@ END:VEVENT
                 <button
                   onClick={() => {
                     // Would save event to database
-                    alert('Event created successfully!');
+                    toast.success('Event Created', 'Event created successfully!');
                     setShowAddEvent(false);
                   }}
                   className="flex-1 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium"

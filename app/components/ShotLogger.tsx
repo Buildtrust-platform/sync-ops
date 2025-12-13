@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
+import { useToast } from './Toast';
 
 /**
  * SHOT LOGGER COMPONENT
@@ -32,6 +33,7 @@ export default function ShotLogger({
   organizationId,
   currentUserEmail,
 }: ShotLoggerProps) {
+  const toast = useToast();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [shots, setShots] = useState<ShotLogType[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -180,7 +182,7 @@ export default function ShotLogger({
       });
     } catch (error) {
       console.error('Error adding shot:', error);
-      alert('Failed to log shot');
+      toast.error('Failed to Log Shot', 'An error occurred while logging the shot. Please try again.');
     } finally {
       setIsSaving(false);
     }

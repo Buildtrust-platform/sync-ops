@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
+import { useToast } from "./Toast";
 
 /**
  * WORKFLOW AUTOMATION / RULES ENGINE
@@ -217,6 +218,7 @@ export default function WorkflowAutomation({
   projectId,
   currentUserEmail,
 }: WorkflowAutomationProps) {
+  const toast = useToast();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [workflows, setWorkflows] = useState<WorkflowRule[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -509,7 +511,7 @@ export default function WorkflowAutomation({
       resetForm();
     } catch (error) {
       console.error('Error saving workflow:', error);
-      alert('Failed to save workflow. Please try again.');
+      toast.error('Failed to Save Workflow', 'An error occurred while saving the workflow. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -554,7 +556,7 @@ export default function WorkflowAutomation({
         console.error('Error deleting workflow:', error);
         // Revert on error
         setWorkflows(previousWorkflows);
-        alert('Failed to delete workflow. Please try again.');
+        toast.error('Failed to Delete Workflow', 'An error occurred while deleting the workflow. Please try again.');
       }
     }
   };

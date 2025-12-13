@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
+import { useToast } from '@/app/components/Toast';
 
 const client = generateClient<Schema>();
 
@@ -33,6 +34,7 @@ export default function CrewManagementForm({
   callSheetId,
   onCrewUpdated,
 }: CrewManagementFormProps) {
+  const toast = useToast();
   const [crew, setCrew] = useState<CallSheetCrew[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -130,7 +132,7 @@ export default function CrewManagementForm({
       }
     } catch (error) {
       console.error('Error saving crew member:', error);
-      alert('Failed to save crew member. Please try again.');
+      toast.error('Error', 'Failed to save crew member. Please try again.');
     }
   };
 
@@ -148,7 +150,7 @@ export default function CrewManagementForm({
       }
     } catch (error) {
       console.error('Error deleting crew member:', error);
-      alert('Failed to delete crew member. Please try again.');
+      toast.error('Error', 'Failed to delete crew member. Please try again.');
     }
   };
 
@@ -182,7 +184,7 @@ export default function CrewManagementForm({
       }
     } catch (error) {
       console.error('Error reordering crew:', error);
-      alert('Failed to reorder crew. Please try again.');
+      toast.error('Error', 'Failed to reorder crew. Please try again.');
     }
   };
 

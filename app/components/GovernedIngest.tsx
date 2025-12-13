@@ -56,6 +56,8 @@ const FileIcon = () => (
 interface GovernedIngestProps {
   projectId: string;
   organizationId?: string;
+  userId: string;
+  userEmail: string;
   onUploadComplete: () => void;
   onCancel: () => void;
 }
@@ -77,7 +79,7 @@ const ALL_ALLOWED_TYPES = [
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 * 1024; // 10GB
 
-export default function GovernedIngest({ projectId, organizationId, onUploadComplete, onCancel }: GovernedIngestProps) {
+export default function GovernedIngest({ projectId, organizationId, userId, userEmail, onUploadComplete, onCancel }: GovernedIngestProps) {
   const orgId = organizationId || 'default-org';
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
 
@@ -186,8 +188,8 @@ export default function GovernedIngest({ projectId, organizationId, onUploadComp
         await client.models.ActivityLog.create({
           organizationId: orgId,
           projectId: projectId,
-          userId: 'USER',
-          userEmail: 'user@syncops.app',
+          userId: userId,
+          userEmail: userEmail,
           userRole: 'Editor',
           action: 'ASSET_UPLOADED',
           targetType: 'Asset',

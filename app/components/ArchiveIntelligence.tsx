@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
+import { useToast } from './Toast';
 
 /**
  * STORAGE INSIGHTS - Simplified Admin Dashboard
@@ -127,6 +128,7 @@ interface Props {
 }
 
 export default function ArchiveIntelligence({ projectId, organizationId, currentUserEmail }: Props) {
+  const toast = useToast();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const orgId = organizationId || 'default-org';
 
@@ -228,7 +230,7 @@ export default function ArchiveIntelligence({ projectId, organizationId, current
   // Request restore
   async function handleRequestRestore(assetId: string, speed: 'fast' | 'standard' | 'economy') {
     if (!client || !client.models.RestoreRequest) {
-      alert('Feature not available yet');
+      toast.info('Not Available', 'Feature not available yet');
       return;
     }
 

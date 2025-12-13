@@ -10,6 +10,7 @@ import {
   Badge,
   Input,
 } from "./ui";
+import { useToast } from "./Toast";
 
 /**
  * BULK OPERATIONS COMPONENT
@@ -72,6 +73,7 @@ export default function BulkOperations({
   userId,
   userEmail,
 }: BulkOperationsProps) {
+  const toast = useToast();
   // Modal states
   const [showCollectionModal, setShowCollectionModal] = useState(false);
   const [showTagsModal, setShowTagsModal] = useState(false);
@@ -236,7 +238,7 @@ export default function BulkOperations({
         requestedByEmail: userEmail,
       });
 
-      alert(`Download request created for ${selectedAssetIds.length} assets. You will be notified when ready.`);
+      toast.success('Download Request Created', `Download request created for ${selectedAssetIds.length} assets. You will be notified when ready.`);
 
       setShowDownloadModal(false);
       setDownloadFormat('original');

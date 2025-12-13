@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
+import { useToast } from './Toast';
 
 /**
  * PROJECT CHAT COMPONENT
@@ -96,6 +97,7 @@ export default function ProjectChat({
   currentUserName = 'Current User',
   currentUserRole = 'Team Member',
 }: ProjectChatProps) {
+  const toast = useToast();
   const orgId = organizationId || 'default-org';
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -198,7 +200,7 @@ export default function ProjectChat({
       setReplyingTo(null);
     } catch (error) {
       console.error('Error sending message:', error);
-      alert('Failed to send message. Please try again.');
+      toast.error('Failed to send message', 'Please try again.');
     } finally {
       setIsSending(false);
     }
@@ -220,7 +222,7 @@ export default function ProjectChat({
       setEditText('');
     } catch (error) {
       console.error('Error editing message:', error);
-      alert('Failed to edit message. Please try again.');
+      toast.error('Failed to edit message', 'Please try again.');
     }
   };
 
@@ -236,7 +238,7 @@ export default function ProjectChat({
       });
     } catch (error) {
       console.error('Error deleting message:', error);
-      alert('Failed to delete message. Please try again.');
+      toast.error('Failed to delete message', 'Please try again.');
     }
   };
 
@@ -256,10 +258,10 @@ export default function ProjectChat({
         taskDeadline: new Date(deadlineStr).toISOString(),
       });
 
-      alert('Message converted to task successfully!');
+      toast.success('Task created', 'Message converted to task successfully!');
     } catch (error) {
       console.error('Error converting to task:', error);
-      alert('Failed to convert message to task. Please try again.');
+      toast.error('Failed to convert to task', 'Please try again.');
     }
   };
 

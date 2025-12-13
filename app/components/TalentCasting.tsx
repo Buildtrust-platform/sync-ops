@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
+import { useToast } from './Toast';
 
 /**
  * TALENT & CASTING MODULE (Pre-Production)
@@ -141,6 +142,7 @@ export default function TalentCasting({
   organizationId,
   currentUserEmail,
 }: TalentCastingProps) {
+  const toast = useToast();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [talents, setTalents] = useState<TalentProfile[]>([]);
   const [roles, setRoles] = useState<ProjectRole[]>([]);
@@ -314,7 +316,7 @@ export default function TalentCasting({
   // Add talent handler
   const handleAddTalent = () => {
     if (!talentForm.firstName || !talentForm.lastName) {
-      alert("Please fill in required fields");
+      toast.warning("Missing Information", "Please fill in required fields");
       return;
     }
 
@@ -369,7 +371,7 @@ export default function TalentCasting({
   // Add role handler
   const handleAddRole = () => {
     if (!roleForm.roleName) {
-      alert("Please enter a role name");
+      toast.warning("Missing Role Name", "Please enter a role name");
       return;
     }
 
@@ -411,7 +413,7 @@ export default function TalentCasting({
   // Schedule audition handler
   const handleScheduleAudition = () => {
     if (!auditionForm.roleId || !auditionForm.talentId || !auditionForm.auditionDate) {
-      alert("Please fill in required fields");
+      toast.warning("Missing Information", "Please fill in required fields");
       return;
     }
 

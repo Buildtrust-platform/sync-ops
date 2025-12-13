@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
+import { useToast } from '@/app/components/Toast';
 
 type CallSheetScene = Schema['CallSheetScene']['type'];
 
@@ -15,6 +16,7 @@ export default function SceneManagementForm({
   callSheetId,
   onScenesUpdated,
 }: SceneManagementFormProps) {
+  const toast = useToast();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [scenes, setScenes] = useState<CallSheetScene[]>([]);
   const [loading, setLoading] = useState(true);
@@ -117,7 +119,7 @@ export default function SceneManagementForm({
       }
     } catch (error) {
       console.error('Error saving scene:', error);
-      alert('Failed to save scene. Please try again.');
+      toast.error('Save Failed', 'Failed to save scene. Please try again.');
     }
   };
 
@@ -136,7 +138,7 @@ export default function SceneManagementForm({
       }
     } catch (error) {
       console.error('Error deleting scene:', error);
-      alert('Failed to delete scene. Please try again.');
+      toast.error('Delete Failed', 'Failed to delete scene. Please try again.');
     }
   };
 
@@ -170,7 +172,7 @@ export default function SceneManagementForm({
       }
     } catch (error) {
       console.error('Error reordering scenes:', error);
-      alert('Failed to reorder scenes. Please try again.');
+      toast.error('Reorder Failed', 'Failed to reorder scenes. Please try again.');
     }
   };
 

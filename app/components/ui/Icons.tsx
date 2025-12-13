@@ -14,6 +14,8 @@ import React from 'react';
 export interface IconProps {
   className?: string;
   strokeWidth?: number;
+  'aria-hidden'?: boolean;
+  'aria-label'?: string;
 }
 
 const defaultProps: IconProps = {
@@ -27,6 +29,8 @@ const IconBase = ({
   className = defaultProps.className,
   strokeWidth = defaultProps.strokeWidth,
   viewBox = '0 0 24 24',
+  'aria-hidden': ariaHidden = true,
+  'aria-label': ariaLabel,
   ...props
 }: IconProps & { children: React.ReactNode; viewBox?: string }) => (
   <svg
@@ -37,6 +41,9 @@ const IconBase = ({
     strokeWidth={strokeWidth}
     strokeLinecap="round"
     strokeLinejoin="round"
+    aria-hidden={ariaLabel ? undefined : ariaHidden}
+    aria-label={ariaLabel}
+    role={ariaLabel ? 'img' : undefined}
     {...props}
   >
     {children}

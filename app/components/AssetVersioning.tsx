@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import { uploadData } from "aws-amplify/storage";
 import type { Schema } from "@/amplify/data/resource";
+import { useToast } from './Toast';
 
 /**
  * ASSET VERSIONING COMPONENT
@@ -77,6 +78,7 @@ export default function AssetVersioning({
   assetName,
   onClose,
 }: AssetVersioningProps) {
+  const toast = useToast();
   const orgId = organizationId || 'default-org';
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
 
@@ -127,12 +129,12 @@ export default function AssetVersioning({
 
   async function handleUploadVersion() {
     if (!selectedFile || !client) {
-      if (!selectedFile) alert("Please select a file");
+      if (!selectedFile) toast.warning("No File Selected", "Please select a file");
       return;
     }
 
     if (!versionLabel.trim()) {
-      alert("Please enter a version label");
+      toast.warning("Missing Label", "Please enter a version label");
       return;
     }
 

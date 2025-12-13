@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
+import { useToast } from '@/app/components/Toast';
 
 const client = generateClient<Schema>();
 
@@ -13,6 +14,7 @@ interface CallSheetFormProps {
 }
 
 export default function CallSheetForm({ projectId, onSuccess, onCancel }: CallSheetFormProps) {
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     // Production Information
@@ -80,7 +82,7 @@ export default function CallSheetForm({ projectId, onSuccess, onCancel }: CallSh
       }
     } catch (error) {
       console.error('Error creating call sheet:', error);
-      alert('Failed to create call sheet. Please try again.');
+      toast.error('Error', 'Failed to create call sheet. Please try again.');
     } finally {
       setLoading(false);
     }

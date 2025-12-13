@@ -33,13 +33,15 @@ export function EmptyState({
 
   return (
     <div
+      role="status"
+      aria-label={title}
       className={`
         flex flex-col items-center justify-center
         text-center py-12 px-6
         ${className}
       `.trim().replace(/\s+/g, ' ')}
     >
-      <div className="w-16 h-16 rounded-full bg-[var(--bg-2)] flex items-center justify-center mb-4">
+      <div className="w-16 h-16 rounded-full bg-[var(--bg-2)] flex items-center justify-center mb-4" aria-hidden="true">
         <IconComponent className="w-8 h-8 text-[var(--text-tertiary)]" />
       </div>
 
@@ -113,21 +115,23 @@ export function ErrorState({
   onRetry,
 }: ErrorStateProps) {
   return (
-    <EmptyState
-      icon="AlertCircle"
-      title={title}
-      description={message}
-      action={
-        onRetry
-          ? {
-              label: 'Try again',
-              onClick: onRetry,
-              variant: 'primary',
-              icon: 'Refresh',
-            }
-          : undefined
-      }
-    />
+    <div role="alert" aria-live="assertive">
+      <EmptyState
+        icon="AlertCircle"
+        title={title}
+        description={message}
+        action={
+          onRetry
+            ? {
+                label: 'Try again',
+                onClick: onRetry,
+                variant: 'primary',
+                icon: 'Refresh',
+              }
+            : undefined
+        }
+      />
+    </div>
   );
 }
 

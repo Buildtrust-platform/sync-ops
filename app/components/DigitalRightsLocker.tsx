@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { generateClient } from "aws-amplify/data";
 import { uploadData, getUrl } from "aws-amplify/storage";
 import type { Schema } from "@/amplify/data/resource";
+import { useToast } from "./Toast";
 
 /**
  * DIGITAL RIGHTS LOCKER MODULE (Module 6 - Legal Document Management)
@@ -305,6 +306,7 @@ export default function DigitalRightsLocker({
   currentUserEmail,
   currentUserName,
 }: DigitalRightsLockerProps) {
+  const toast = useToast();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [documents, setDocuments] = useState<RightsDocument[]>([]);
 
@@ -557,7 +559,7 @@ export default function DigitalRightsLocker({
       if (selectedFile) {
         fileData = await uploadFile(selectedFile);
         if (!fileData) {
-          alert("Failed to upload file. Please try again.");
+          toast.error("Upload failed", "Failed to upload file. Please try again.");
           return;
         }
       }
@@ -600,7 +602,7 @@ export default function DigitalRightsLocker({
       resetForm();
     } catch (error) {
       console.error("Error adding document:", error);
-      alert("Failed to add document. Please try again.");
+      toast.error("Failed to add document", "Please try again.");
     }
   };
 
@@ -625,7 +627,7 @@ export default function DigitalRightsLocker({
       setShowDetailModal(null);
     } catch (error) {
       console.error("Error updating document:", error);
-      alert("Failed to update document status.");
+      toast.error("Update failed", "Failed to update document status.");
     }
   };
 
@@ -637,7 +639,7 @@ export default function DigitalRightsLocker({
     if (url) {
       window.open(url, "_blank");
     } else {
-      alert("Failed to get download link.");
+      toast.error("Download failed", "Failed to get download link.");
     }
   };
 

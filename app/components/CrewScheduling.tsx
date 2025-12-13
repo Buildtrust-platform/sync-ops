@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
+import { useToast } from './Toast';
 
 /**
  * CREW SCHEDULING MODULE (Pre-Production)
@@ -121,6 +122,7 @@ export default function CrewScheduling({
   organizationId,
   currentUserEmail,
 }: CrewSchedulingProps) {
+  const toast = useToast();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [crewMembers, setCrewMembers] = useState<CrewMember[]>([]);
   const [shootDays, setShootDays] = useState<ShootDay[]>([]);
@@ -386,7 +388,7 @@ export default function CrewScheduling({
   // Add crew member handler
   const handleAddCrew = () => {
     if (!crewForm.firstName || !crewForm.lastName || !crewForm.email || !crewForm.role) {
-      alert("Please fill in required fields");
+      toast.warning("Missing Information", "Please fill in required fields");
       return;
     }
 
@@ -438,7 +440,7 @@ export default function CrewScheduling({
   // Add shoot day handler
   const handleAddShootDay = () => {
     if (!shootDayForm.date || !shootDayForm.dayNumber) {
-      alert("Please fill in required fields");
+      toast.warning("Missing Information", "Please fill in required fields");
       return;
     }
 
@@ -489,7 +491,7 @@ export default function CrewScheduling({
     );
 
     if (existingBooking) {
-      alert("Crew member already booked for this day");
+      toast.warning("Booking Conflict", "Crew member already booked for this day");
       return;
     }
 

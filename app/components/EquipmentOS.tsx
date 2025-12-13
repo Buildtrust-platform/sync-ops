@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
+import { useToast } from './Toast';
 
 /**
  * EQUIPMENT OS MODULE (Section 4 - Pre-Production Logistics)
@@ -145,6 +146,7 @@ export default function EquipmentOS({
   currentUserEmail,
   currentUserName,
 }: EquipmentOSProps) {
+  const toast = useToast();
   const orgId = organizationId || 'default-org';
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
@@ -363,7 +365,7 @@ export default function EquipmentOS({
       });
     } catch (error) {
       console.error("Error adding equipment:", error);
-      alert("Failed to add equipment. Please try again.");
+      toast.error("Add Failed", "Failed to add equipment. Please try again.");
     }
   };
 
@@ -402,7 +404,7 @@ export default function EquipmentOS({
       });
     } catch (error) {
       console.error("Error checking out equipment:", error);
-      alert("Failed to check out equipment. Please try again.");
+      toast.error("Checkout Failed", "Failed to check out equipment. Please try again.");
     }
   };
 
@@ -442,7 +444,7 @@ export default function EquipmentOS({
       });
     } catch (error) {
       console.error("Error checking in equipment:", error);
-      alert("Failed to check in equipment. Please try again.");
+      toast.error("Checkin Failed", "Failed to check in equipment. Please try again.");
     }
   };
 
@@ -450,12 +452,12 @@ export default function EquipmentOS({
   const handleAddRental = async () => {
     if (!client) return;
     if (!rentalForm.equipmentName || !rentalForm.vendorName || !rentalForm.dailyRate || !projectId) {
-      alert("Please fill in all required fields");
+      toast.warning("Missing Information", "Please fill in all required fields");
       return;
     }
 
     if (!client.models.EquipmentRental) {
-      alert("Schema not deployed yet. Run: npx ampx sandbox --once");
+      toast.error("Schema Error", "Schema not deployed yet. Run: npx ampx sandbox --once");
       return;
     }
 
@@ -510,7 +512,7 @@ export default function EquipmentOS({
       });
     } catch (error) {
       console.error("Error adding rental:", error);
-      alert("Failed to add rental. Check console for details.");
+      toast.error("Rental Failed", "Failed to add rental. Check console for details.");
     }
   };
 

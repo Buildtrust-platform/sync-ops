@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
+import { fetchUserAttributes, getCurrentUser } from "aws-amplify/auth";
 import type { Schema } from "@/amplify/data/resource";
 import "@aws-amplify/ui-react/styles.css";
 import { useParams, useRouter } from "next/navigation";
@@ -10,6 +11,7 @@ import { useParams, useRouter } from "next/navigation";
 import GlobalNav from "@/app/components/GlobalNav";
 import LifecycleNavigation from "@/app/components/LifecycleNavigation";
 import Breadcrumb from "@/app/components/Breadcrumb";
+import { useToast } from "@/app/components/Toast";
 
 // Development Phase
 import ProjectOverview from "@/app/components/ProjectOverview";
@@ -92,6 +94,7 @@ import LockedModule from "@/app/components/LockedModule";
 import { canAccessModule, LifecycleState, STATE_TO_PHASE } from "@/lib/lifecycle";
 
 export default function ProjectDetail() {
+  const toast = useToast();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const params = useParams();
   const router = useRouter();
@@ -116,9 +119,29 @@ export default function ProjectDetail() {
   } | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // USER STATE
-  const [userEmail] = useState("user@syncops.app");
-  const [userId] = useState("USER");
+  // USER STATE - fetched from Amplify Auth
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [userId, setUserId] = useState<string>("");
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+
+  // Fetch current user on mount
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const user = await getCurrentUser();
+        const attributes = await fetchUserAttributes();
+        setUserId(user.userId);
+        setUserEmail(attributes.email || user.signInDetails?.loginId || "");
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        // Redirect to home if not authenticated
+        router.push("/");
+      } finally {
+        setIsAuthLoading(false);
+      }
+    }
+    loadUser();
+  }, [router]);
 
   // Helper function to get human-readable module names
   const getModuleName = (moduleId: string): string => {
@@ -283,7 +306,7 @@ export default function ProjectDetail() {
       await refreshProjectData();
     } catch (error) {
       console.error('Error updating lifecycle state:', error);
-      alert('Failed to update project state. Please try again.');
+      toast.error('Update Failed', 'Failed to update project state. Please try again.');
     }
   };
 
@@ -1203,6 +1226,8 @@ export default function ProjectDetail() {
       {showGovernedIngest && (
         <GovernedIngest
           projectId={projectId}
+          userId={userId}
+          userEmail={userEmail}
           onUploadComplete={() => setShowGovernedIngest(false)}
           onCancel={() => setShowGovernedIngest(false)}
         />
