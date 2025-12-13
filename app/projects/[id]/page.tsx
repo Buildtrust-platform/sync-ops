@@ -85,6 +85,9 @@ import SmartArchiveIntelligence from "@/app/components/SmartArchiveIntelligence"
 import MasterOpsArchive from "@/app/components/MasterOpsArchive";
 import ReportsExports from "@/app/components/ReportsExports";
 import DashboardKPIs from "@/app/components/DashboardKPIs";
+import LifecyclePolicyManager from "@/app/components/LifecyclePolicyManager";
+import ProjectResurrection from "@/app/components/ProjectResurrection";
+import RightsEnforcement from "@/app/components/RightsEnforcement";
 
 // Settings
 import ProjectSettings from "@/app/components/ProjectSettings";
@@ -199,6 +202,9 @@ export default function ProjectDetail() {
       // Delivery
       'distribution': 'Distribution',
       'master-archive': 'MasterOps Archive',
+      'lifecycle-policies': 'Lifecycle Policies',
+      'project-resurrection': 'Resurrect Projects',
+      'rights-enforcement': 'Rights Enforcement',
       'archive': 'Legacy Archive',
       'reports': 'Reports',
       'kpis': 'Analytics',
@@ -1046,6 +1052,29 @@ export default function ProjectDetail() {
               <MasterOpsArchive
                 projectId={projectId}
                 project={project}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'lifecycle-policies' && (
+              <LifecyclePolicyManager
+                organizationId={project.organizationId}
+                projectId={projectId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'project-resurrection' && (
+              <ProjectResurrection
+                organizationId={project.organizationId}
+                currentUserEmail={userEmail}
+              />
+            )}
+
+            {activeModule === 'rights-enforcement' && (
+              <RightsEnforcement
+                organizationId={project.organizationId}
+                projectId={projectId}
                 currentUserEmail={userEmail}
               />
             )}
