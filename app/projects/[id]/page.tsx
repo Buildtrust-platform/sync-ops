@@ -317,6 +317,7 @@ export default function ProjectDetail() {
   };
 
   const filteredAssets = assets.filter((asset) => {
+    if (!asset || !asset.s3Key) return false;
     const matchesSearch = searchQuery === "" ||
       asset.s3Key.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (asset.aiTags && asset.aiTags.some(tag => tag?.toLowerCase().includes(searchQuery.toLowerCase())));
