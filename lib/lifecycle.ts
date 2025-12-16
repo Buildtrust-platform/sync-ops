@@ -711,9 +711,9 @@ export function evaluateStorageCondition(
     case 'contains':
       return typeof fieldValue === 'string' && fieldValue.includes(targetValue as string);
     case 'in':
-      return Array.isArray(targetValue) && targetValue.includes(fieldValue);
+      return Array.isArray(targetValue) && (targetValue as unknown[]).includes(fieldValue);
     case 'notIn':
-      return Array.isArray(targetValue) && !targetValue.includes(fieldValue);
+      return Array.isArray(targetValue) && !(targetValue as unknown[]).includes(fieldValue);
     default:
       return false;
   }

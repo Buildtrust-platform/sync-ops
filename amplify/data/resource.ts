@@ -138,7 +138,6 @@ const schema = a.schema({
     projects: a.hasMany('Project', 'organizationId'),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.owner(),
     allow.authenticated().to(['read']),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
@@ -190,7 +189,6 @@ const schema = a.schema({
     apiKeyLastUsed: a.datetime(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.owner(),
     allow.authenticated().to(['read']),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
@@ -221,7 +219,6 @@ const schema = a.schema({
     lastReminderAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -265,7 +262,6 @@ const schema = a.schema({
     description: a.string(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read']),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -308,7 +304,6 @@ const schema = a.schema({
     notes: a.string(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read']),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -348,7 +343,6 @@ const schema = a.schema({
     isActive: a.boolean().default(true),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read']),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -543,7 +537,6 @@ const schema = a.schema({
     teamMembers: a.hasMany('ProjectMember', 'projectId'),
   })
   .authorization(allow => [
-    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.owner(), // Creator can do anything
     allow.authenticated().to(['read']), // Logged in users can view projects
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
@@ -618,7 +611,6 @@ const schema = a.schema({
     slackUserId: a.string(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.owner(),
     allow.authenticated().to(['read']),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
@@ -662,7 +654,6 @@ const schema = a.schema({
     denialReason: a.string(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.owner(),
     allow.authenticated().to(['read']),
     allow.groups(['Admin', 'Legal']).to(['create', 'read', 'update', 'delete']),
@@ -718,7 +709,6 @@ const schema = a.schema({
     geoLocation: a.string(), // Country/region for compliance
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     // Audit logs are append-only - no updates or deletes
     allow.authenticated().to(['create', 'read']),
     allow.groups(['Admin', 'Legal', 'Finance']).to(['read']),
@@ -809,7 +799,6 @@ const schema = a.schema({
     aiAnalysisJobs: a.hasMany('AIAnalysisJob', 'assetId'),
   })
   .authorization(allow => [
-    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.owner(),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
     allow.groups(['Editor']).to(['create', 'read', 'update']), // Editors can upload, view, and edit
@@ -906,7 +895,6 @@ const schema = a.schema({
     approvedByFinance: a.boolean(),
   })
   .authorization(allow => [
-    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.authenticated(),
   ]),
 
@@ -970,7 +958,6 @@ const schema = a.schema({
     dpApprovedAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'Director']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -1039,7 +1026,6 @@ const schema = a.schema({
     crewMembers: a.hasMany('CallSheetCrew', 'callSheetId'),
   })
   .authorization(allow => [
-    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.authenticated(),
   ]),
 
@@ -1059,7 +1045,6 @@ const schema = a.schema({
     sortOrder: a.integer(),
   })
   .authorization(allow => [
-    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.authenticated(),
   ]),
 
@@ -1085,7 +1070,6 @@ const schema = a.schema({
     sortOrder: a.integer(),
   })
   .authorization(allow => [
-    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.authenticated(),
   ]),
 
@@ -1105,7 +1089,6 @@ const schema = a.schema({
     sortOrder: a.integer(),
   })
   .authorization(allow => [
-    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.authenticated(),
   ]),
 
@@ -1136,7 +1119,6 @@ const schema = a.schema({
     comments: a.hasMany('ReviewComment', 'reviewId'),
   })
   .authorization(allow => [
-    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.owner(), // Reviewer owns their review
     allow.authenticated().to(['read']), // All authenticated users can view reviews
     allow.groups(['Admin', 'Legal']).to(['create', 'read', 'update', 'delete']),
@@ -1188,7 +1170,6 @@ const schema = a.schema({
     replies: a.hasMany('ReviewCommentReply', 'parentCommentId'),
   })
   .authorization(allow => [
-    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.owner(),
     allow.authenticated().to(['read', 'create']),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
@@ -1206,7 +1187,6 @@ const schema = a.schema({
     replyText: a.string().required(),
   })
   .authorization(allow => [
-    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.owner(),
     allow.authenticated().to(['read', 'create']),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
@@ -1241,7 +1221,6 @@ const schema = a.schema({
     createdByEmail: a.string(),
   })
   .authorization(allow => [
-    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.authenticated().to(['read']),
     allow.groups(['Admin', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -1292,7 +1271,6 @@ const schema = a.schema({
     ipAddress: a.string(), // Security tracking
   })
   .authorization(allow => [
-    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.authenticated().to(['read']),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -1339,7 +1317,6 @@ const schema = a.schema({
     processingJobId: a.string(), // Links to AIAnalysisJob
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'update']), // Users can update personName
     allow.groups(['Admin', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -1375,7 +1352,6 @@ const schema = a.schema({
     processingJobId: a.string(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read']),
     allow.groups(['Admin', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -1410,7 +1386,6 @@ const schema = a.schema({
     processingJobId: a.string(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'update']), // Users can update speakerName
     allow.groups(['Admin', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -1472,7 +1447,6 @@ const schema = a.schema({
     triggeredBy: a.string(), // 'SYSTEM' for auto, or user email
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read']),
     allow.groups(['Admin', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -1527,7 +1501,6 @@ const schema = a.schema({
     mentionedUsers: a.string().array(), // Array of user IDs mentioned with @
   })
   .authorization(allow => [
-    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.owner(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
@@ -1598,7 +1571,6 @@ const schema = a.schema({
     expiresAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.owner(), // User can only see their own notifications
     allow.authenticated().to(['read', 'update']), // Can mark as read
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
@@ -1695,7 +1667,6 @@ const schema = a.schema({
     attachmentKeys: a.string().array(), // S3 keys for files
   })
   .authorization(allow => [
-    allow.publicApiKey(), // TEMPORARY: Allow public access for development
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'ProjectManager']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -1774,7 +1745,6 @@ const schema = a.schema({
     kitItems: a.hasMany('EquipmentKitItem', 'equipmentId'),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read']),
     allow.groups(['Admin', 'Producer', 'EquipmentManager']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -1818,7 +1788,6 @@ const schema = a.schema({
     returnSignature: a.string(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'EquipmentManager']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -1856,7 +1825,6 @@ const schema = a.schema({
     itemCount: a.integer(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read']),
     allow.groups(['Admin', 'Producer', 'EquipmentManager']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -1874,7 +1842,6 @@ const schema = a.schema({
     sortOrder: a.integer(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read']),
     allow.groups(['Admin', 'Producer', 'EquipmentManager']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -1981,7 +1948,6 @@ const schema = a.schema({
     lastReminderSent: a.datetime(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'Legal', 'ProjectManager']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -2079,7 +2045,6 @@ const schema = a.schema({
     viewLogs: a.hasMany('DistributionViewLog', 'distributionLinkId'),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'Marketing']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -2126,7 +2091,6 @@ const schema = a.schema({
     geoBlockReason: a.string(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create']),
     allow.groups(['Admin', 'Producer', 'Marketing']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -2251,7 +2215,6 @@ const schema = a.schema({
     createdByEmail: a.string(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'Marketing', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -2303,7 +2266,6 @@ const schema = a.schema({
     createdByEmail: a.string(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -2367,7 +2329,6 @@ const schema = a.schema({
     dataIntegrity: a.enum(['COMPLETE', 'PARTIAL', 'STALE']),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'Marketing']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -2434,7 +2395,6 @@ const schema = a.schema({
     corruptionDetails: a.string(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -2498,7 +2458,6 @@ const schema = a.schema({
     lastChecked: a.datetime(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -2547,7 +2506,6 @@ const schema = a.schema({
     notificationSent: a.boolean().default(false),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -2611,7 +2569,6 @@ const schema = a.schema({
     title: a.string(), // Job title
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -2689,7 +2646,6 @@ const schema = a.schema({
     createdByEmail: a.string(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'Finance']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -2780,7 +2736,6 @@ const schema = a.schema({
     createdByEmail: a.string(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'Finance']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -2853,7 +2808,6 @@ const schema = a.schema({
     createdBy: a.string().required(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'Finance']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -2950,7 +2904,6 @@ const schema = a.schema({
     createdByEmail: a.string(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'EquipmentManager']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -3039,7 +2992,6 @@ const schema = a.schema({
     createdByEmail: a.string(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'LocationManager']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -3107,7 +3059,6 @@ const schema = a.schema({
     createdBy: a.string().required(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'Finance']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -3181,7 +3132,6 @@ const schema = a.schema({
     aiLessonsLearned: a.json(), // AI-extracted lessons
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -3283,7 +3233,6 @@ const schema = a.schema({
     fullTextIndex: a.string(), // Combined searchable text
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -3343,7 +3292,6 @@ const schema = a.schema({
     overriddenMetadata: a.json(), // What metadata is specific to this derivation
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -3410,7 +3358,6 @@ const schema = a.schema({
     dataQuality: a.enum(['HIGH', 'MEDIUM', 'LOW', 'INSUFFICIENT']),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'Marketing']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -3489,7 +3436,6 @@ const schema = a.schema({
     createdByEmail: a.string(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'ProjectManager']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -3535,7 +3481,6 @@ const schema = a.schema({
     loggedByEmail: a.string(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -3601,7 +3546,6 @@ const schema = a.schema({
     createdAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'VFX']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -3659,7 +3603,6 @@ const schema = a.schema({
     createdAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -3719,7 +3662,6 @@ const schema = a.schema({
     createdAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'Colorist']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -3776,7 +3718,6 @@ const schema = a.schema({
     createdAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'Sound']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -3836,7 +3777,6 @@ const schema = a.schema({
     createdAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
     allow.groups(['Admin', 'Producer', 'QC']).to(['create', 'read', 'update', 'delete']),
   ]),
@@ -3899,7 +3839,6 @@ const schema = a.schema({
     lastModifiedAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update', 'delete']),
   ]),
 
@@ -3929,7 +3868,6 @@ const schema = a.schema({
     addedAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update', 'delete']),
   ]),
 
@@ -3992,7 +3930,6 @@ const schema = a.schema({
     completedAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update', 'delete']),
   ]),
 
@@ -4054,7 +3991,6 @@ const schema = a.schema({
     createdAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update', 'delete']),
   ]),
 
@@ -4102,7 +4038,6 @@ const schema = a.schema({
     lastModifiedAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read']),
     allow.groups(['Admin']).to(['create', 'update', 'delete']),
   ]),
@@ -4128,7 +4063,6 @@ const schema = a.schema({
     changeHistory: a.json(), // [{ fieldId, oldValue, newValue, changedBy, changedAt }]
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update', 'delete']),
   ]),
 
@@ -4193,7 +4127,6 @@ const schema = a.schema({
     lastModifiedAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update', 'delete']),
   ]),
 
@@ -4264,7 +4197,6 @@ const schema = a.schema({
     lastModifiedAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read']),
     allow.groups(['Admin', 'Producer']).to(['create', 'update', 'delete']),
   ]),
@@ -4307,7 +4239,6 @@ const schema = a.schema({
     executionLog: a.json(), // Detailed step-by-step log
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read']),
     allow.groups(['Admin']).to(['delete']),
   ]),
@@ -4374,7 +4305,6 @@ const schema = a.schema({
     requestedAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update']),
   ]),
 
@@ -4433,7 +4363,6 @@ const schema = a.schema({
     createdAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.publicApiKey(),
     allow.authenticated().to(['read', 'create', 'update', 'delete']),
   ]),
 
@@ -4447,8 +4376,7 @@ const schema = a.schema({
     .returns(a.json())
     .handler(a.handler.function(smartBriefAI))
     .authorization(allow => [
-      allow.publicApiKey(), // TEMPORARY: Allow public access for development
-      allow.authenticated(),
+        allow.authenticated(),
     ]),
 
   // Universal Search - searches across projects, assets, comments, messages, tasks
@@ -4461,8 +4389,7 @@ const schema = a.schema({
     .returns(a.json().array())
     .handler(a.handler.function(universalSearch))
     .authorization(allow => [
-      allow.publicApiKey(), // TEMPORARY: Allow public access for development
-      allow.authenticated(),
+        allow.authenticated(),
     ]),
 
 })

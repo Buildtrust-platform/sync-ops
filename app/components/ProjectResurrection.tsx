@@ -112,7 +112,12 @@ const mockPendingRequests: ProjectResurrectionRequest[] = [
   },
 ];
 
-export default function ProjectResurrection() {
+interface Props {
+  organizationId: string;
+  currentUserEmail: string;
+}
+
+export default function ProjectResurrection({ organizationId, currentUserEmail }: Props) {
   const [projects] = useState<ArchivedProject[]>(mockArchivedProjects);
   const [pendingRequests, setPendingRequests] = useState<ProjectResurrectionRequest[]>(mockPendingRequests);
   const [selectedProject, setSelectedProject] = useState<ArchivedProject | null>(null);

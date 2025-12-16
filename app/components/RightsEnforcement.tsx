@@ -110,7 +110,13 @@ interface DownloadModalState {
   validationResult: DownloadValidationResult | null;
 }
 
-export default function RightsEnforcement() {
+interface Props {
+  organizationId: string;
+  projectId: string;
+  currentUserEmail: string;
+}
+
+export default function RightsEnforcement({ organizationId, projectId, currentUserEmail }: Props) {
   const [rights] = useState<AssetRights[]>(mockAssetRights);
   const [downloadLogs] = useState<DownloadAuditLog[]>(mockDownloadLogs);
   const [activeTab, setActiveTab] = useState<'overview' | 'validate' | 'audit' | 'reports'>('overview');

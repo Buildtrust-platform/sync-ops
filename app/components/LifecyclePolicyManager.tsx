@@ -162,7 +162,13 @@ const mockLogs: PolicyExecutionLog[] = [
   },
 ];
 
-export default function LifecyclePolicyManager() {
+interface Props {
+  organizationId: string;
+  projectId: string;
+  currentUserEmail: string;
+}
+
+export default function LifecyclePolicyManager({ organizationId, projectId, currentUserEmail }: Props) {
   const [policies, setPolicies] = useState<StorageLifecyclePolicy[]>(mockPolicies);
   const [logs] = useState<PolicyExecutionLog[]>(mockLogs);
   const [showTemplates, setShowTemplates] = useState(false);
