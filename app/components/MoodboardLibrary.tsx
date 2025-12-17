@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
+import { uploadData, getUrl } from "aws-amplify/storage";
 import type { Schema } from "@/amplify/data/resource";
 
 /**
@@ -619,6 +620,7 @@ export default function MoodboardLibrary({ project, onSave }: MoodboardLibraryPr
             removeTag={removeTag}
             onAdd={addItem}
             onClose={() => setShowAddModal(false)}
+            projectId={project?.id}
           />
         )}
 
@@ -1023,7 +1025,8 @@ function AddReferenceModal({
   addTag,
   removeTag,
   onAdd,
-  onClose
+  onClose,
+  projectId
 }: {
   newItem: Partial<MoodboardItem>;
   setNewItem: (item: Partial<MoodboardItem>) => void;
@@ -1033,7 +1036,136 @@ function AddReferenceModal({
   removeTag: (tag: string) => void;
   onAdd: () => void;
   onClose: () => void;
+  projectId?: string;
 }) {
+  const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Handle file upload to S3
+  const handleFileUpload = useCallback(async (file: File) => {
+    if (!file) return;
+
+    // Validate file type
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+    const validVideoTypes = ['video/mp4', 'video/webm', 'video/quicktime'];
+    const isImage = validImageTypes.includes(file.type);
+    const isVideo = validVideoTypes.includes(file.type);
+
+    if (!isImage && !isVideo) {
+      setUploadError('Please upload an image (JPEG, PNG, GIF, WebP, SVG) or video (MP4, WebM, MOV)');
+      return;
+    }
+
+    // Validate file size (max 50MB)
+    const maxSize = 50 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setUploadError('File is too large. Maximum size is 50MB.');
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadError(null);
+    setUploadProgress(0);
+
+    // Create local preview
+    const localPreviewUrl = URL.createObjectURL(file);
+    setPreviewUrl(localPreviewUrl);
+
+    try {
+      // Generate unique file path
+      const timestamp = Date.now();
+      const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const filePath = `moodboard/${projectId || 'general'}/${timestamp}-${sanitizedFileName}`;
+
+      // Upload to S3
+      const result = await uploadData({
+        path: filePath,
+        data: file,
+        options: {
+          contentType: file.type,
+          onProgress: ({ transferredBytes, totalBytes }) => {
+            if (totalBytes) {
+              setUploadProgress(Math.round((transferredBytes / totalBytes) * 100));
+            }
+          },
+        },
+      }).result;
+
+      // Get the public URL
+      const urlResult = await getUrl({ path: result.path });
+      const publicUrl = urlResult.url.toString();
+
+      // Update newItem with the uploaded file URL
+      setNewItem({
+        ...newItem,
+        type: isImage ? 'image' : 'video',
+        url: publicUrl,
+        thumbnailUrl: publicUrl,
+        title: newItem.title || file.name.replace(/\.[^/.]+$/, ''), // Use filename as default title
+      });
+
+      setUploadProgress(100);
+    } catch (error) {
+      console.error('Upload failed:', error);
+      setUploadError('Failed to upload file. Please try again.');
+      setPreviewUrl(null);
+    } finally {
+      setIsUploading(false);
+    }
+  }, [newItem, setNewItem, projectId]);
+
+  // Handle drag and drop
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      handleFileUpload(files[0]);
+    }
+  };
+
+  // Handle file input change
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleFileUpload(files[0]);
+    }
+  };
+
+  // Clear uploaded file
+  const clearUpload = () => {
+    setPreviewUrl(null);
+    setUploadProgress(0);
+    setUploadError(null);
+    setNewItem({ ...newItem, url: '', thumbnailUrl: '' });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)" }}>
       <div
@@ -1063,7 +1195,12 @@ function AddReferenceModal({
                 return (
                   <button
                     key={type}
-                    onClick={() => setNewItem({ ...newItem, type: type as MoodboardItem["type"] })}
+                    onClick={() => {
+                      setNewItem({ ...newItem, type: type as MoodboardItem["type"] });
+                      if (type !== 'image' && type !== 'video') {
+                        clearUpload();
+                      }
+                    }}
                     className="flex flex-col items-center gap-2 p-3 rounded-xl border transition-all"
                     style={{
                       background: newItem.type === type ? "linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)" : "rgba(255,255,255,0.05)",
@@ -1079,6 +1216,117 @@ function AddReferenceModal({
             </div>
           </div>
 
+          {/* File Upload Area (for image/video) */}
+          {(newItem.type === "image" || newItem.type === "video") && (
+            <div>
+              <label className="block text-sm font-medium text-white/60 mb-2">Upload File</label>
+
+              {/* Upload Error */}
+              {uploadError && (
+                <div className="mb-3 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                  {uploadError}
+                </div>
+              )}
+
+              {/* Preview or Drop Zone */}
+              {previewUrl || newItem.url ? (
+                <div className="relative rounded-xl overflow-hidden border border-white/10 bg-white/5">
+                  {newItem.type === "image" ? (
+                    <img
+                      src={previewUrl || newItem.url}
+                      alt="Preview"
+                      className="w-full h-48 object-cover"
+                    />
+                  ) : (
+                    <video
+                      src={previewUrl || newItem.url}
+                      className="w-full h-48 object-cover"
+                      controls
+                    />
+                  )}
+                  {isUploading && (
+                    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+                      <div className="w-3/4 h-2 bg-white/20 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-violet-500 to-pink-500 transition-all duration-300"
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                      </div>
+                      <p className="mt-2 text-white/60 text-sm">{uploadProgress}% uploaded</p>
+                    </div>
+                  )}
+                  {!isUploading && (
+                    <button
+                      onClick={clearUpload}
+                      className="absolute top-2 right-2 p-2 rounded-lg bg-red-500/80 hover:bg-red-500 text-white transition-colors"
+                    >
+                      <Icons.Trash />
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div
+                  className={`relative rounded-xl border-2 border-dashed p-8 text-center transition-all cursor-pointer ${
+                    isDragging
+                      ? 'border-violet-500 bg-violet-500/10'
+                      : 'border-white/20 hover:border-white/40 hover:bg-white/5'
+                  }`}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept={newItem.type === "video" ? "video/*" : "image/*"}
+                    onChange={handleFileInputChange}
+                    className="hidden"
+                  />
+                  <div className="flex flex-col items-center gap-3">
+                    <div
+                      className="w-14 h-14 rounded-xl flex items-center justify-center"
+                      style={{ background: isDragging ? "linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)" : "rgba(255,255,255,0.1)" }}
+                    >
+                      <Icons.Upload />
+                    </div>
+                    <div>
+                      <p className="text-white/80 font-medium">
+                        {isDragging ? 'Drop your file here' : 'Drag & drop or click to upload'}
+                      </p>
+                      <p className="text-white/40 text-sm mt-1">
+                        {newItem.type === "video"
+                          ? 'MP4, WebM, MOV up to 50MB'
+                          : 'JPEG, PNG, GIF, WebP, SVG up to 50MB'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* OR divider */}
+              <div className="flex items-center gap-4 my-4">
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-white/30 text-xs uppercase tracking-wider">or paste URL</span>
+                <div className="flex-1 h-px bg-white/10" />
+              </div>
+
+              {/* URL Input */}
+              <input
+                type="url"
+                value={newItem.url || ""}
+                onChange={(e) => {
+                  setNewItem({ ...newItem, url: e.target.value, thumbnailUrl: e.target.value });
+                  setPreviewUrl(null);
+                }}
+                placeholder="https://..."
+                className="w-full px-4 py-3 rounded-xl text-sm bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-violet-500 transition-colors"
+                disabled={isUploading}
+              />
+            </div>
+          )}
+
           {/* Title */}
           <div>
             <label className="block text-sm font-medium text-white/60 mb-2">Title *</label>
@@ -1091,37 +1339,39 @@ function AddReferenceModal({
             />
           </div>
 
-          {/* URL (for image/video/link/color) */}
-          {newItem.type !== "note" && (
+          {/* URL (for link type only) */}
+          {newItem.type === "link" && (
             <div>
-              <label className="block text-sm font-medium text-white/60 mb-2">
-                {newItem.type === "color" ? "Color (hex)" : "URL"}
-              </label>
-              {newItem.type === "color" ? (
-                <div className="flex gap-3">
-                  <input
-                    type="color"
-                    value={newItem.url || "#667EEA"}
-                    onChange={(e) => setNewItem({ ...newItem, url: e.target.value })}
-                    className="w-14 h-14 rounded-xl cursor-pointer border-0"
-                  />
-                  <input
-                    type="text"
-                    value={newItem.url || ""}
-                    onChange={(e) => setNewItem({ ...newItem, url: e.target.value })}
-                    placeholder="#667EEA"
-                    className="flex-1 px-4 py-3 rounded-xl text-sm bg-white/5 border border-white/10 text-white font-mono placeholder-white/30 focus:outline-none focus:border-violet-500 transition-colors"
-                  />
-                </div>
-              ) : (
+              <label className="block text-sm font-medium text-white/60 mb-2">URL</label>
+              <input
+                type="url"
+                value={newItem.url || ""}
+                onChange={(e) => setNewItem({ ...newItem, url: e.target.value })}
+                placeholder="https://..."
+                className="w-full px-4 py-3 rounded-xl text-sm bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-violet-500 transition-colors"
+              />
+            </div>
+          )}
+
+          {/* Color picker (for color type) */}
+          {newItem.type === "color" && (
+            <div>
+              <label className="block text-sm font-medium text-white/60 mb-2">Color (hex)</label>
+              <div className="flex gap-3">
                 <input
-                  type="url"
+                  type="color"
+                  value={newItem.url || "#667EEA"}
+                  onChange={(e) => setNewItem({ ...newItem, url: e.target.value })}
+                  className="w-14 h-14 rounded-xl cursor-pointer border-0"
+                />
+                <input
+                  type="text"
                   value={newItem.url || ""}
                   onChange={(e) => setNewItem({ ...newItem, url: e.target.value })}
-                  placeholder="https://..."
-                  className="w-full px-4 py-3 rounded-xl text-sm bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-violet-500 transition-colors"
+                  placeholder="#667EEA"
+                  className="flex-1 px-4 py-3 rounded-xl text-sm bg-white/5 border border-white/10 text-white font-mono placeholder-white/30 focus:outline-none focus:border-violet-500 transition-colors"
                 />
-              )}
+              </div>
             </div>
           )}
 
@@ -1201,14 +1451,14 @@ function AddReferenceModal({
           </button>
           <button
             onClick={onAdd}
-            disabled={!newItem.title}
+            disabled={!newItem.title || isUploading}
             className="px-6 py-2.5 rounded-xl font-semibold text-sm transition-all"
             style={{
-              background: newItem.title ? "linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)" : "rgba(255,255,255,0.1)",
-              color: newItem.title ? "white" : "rgba(255,255,255,0.3)"
+              background: (newItem.title && !isUploading) ? "linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)" : "rgba(255,255,255,0.1)",
+              color: (newItem.title && !isUploading) ? "white" : "rgba(255,255,255,0.3)"
             }}
           >
-            Add Reference
+            {isUploading ? 'Uploading...' : 'Add Reference'}
           </button>
         </div>
       </div>
