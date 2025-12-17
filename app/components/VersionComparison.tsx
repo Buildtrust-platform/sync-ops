@@ -45,7 +45,7 @@ export default function VersionComparison({ assetId, projectId }: VersionCompari
   const [versions, setVersions] = useState<AssetVersion[]>([]);
 
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
   const [leftVersion, setLeftVersion] = useState<AssetVersion | null>(null);
   const [rightVersion, setRightVersion] = useState<AssetVersion | null>(null);
@@ -56,11 +56,11 @@ export default function VersionComparison({ assetId, projectId }: VersionCompari
   // Fetch all versions for this asset
   useEffect(() => {
     if (!client) return;
-    const subscription = client.models.AssetVersion.observeQuery({
+    client.models.AssetVersion.list({
       filter: { assetId: { eq: assetId } }
-    }).subscribe({
-      next: ({ items }: { items: AssetVersion[] }) => {
-        const sortedVersions = [...items].sort((a, b) => b.versionNumber - a.versionNumber);
+    }).then((data) => {
+      if (data.data) {
+        const sortedVersions = [...data.data].sort((a, b) => b.versionNumber - a.versionNumber);
         setVersions(sortedVersions as AssetVersion[]);
 
         // Auto-select latest two versions for comparison
@@ -72,14 +72,11 @@ export default function VersionComparison({ assetId, projectId }: VersionCompari
         }
 
         setLoading(false);
-      },
-      error: (error: Error) => {
-        console.error('Error fetching versions:', error);
-        setLoading(false);
       }
+    }).catch((error: Error) => {
+      console.error('Error fetching versions:', error);
+      setLoading(false);
     });
-
-    return () => subscription.unsubscribe();
   }, [assetId, client]);
 
   // Generate signed URL for left version

@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { generateClient } from "aws-amplify/data";
 import { getUrl } from "aws-amplify/storage";
 import type { Schema } from "@/amplify/data/resource";
 import FeedbackSummary from "./FeedbackSummary";
 import ReviewHeatmap from "./ReviewHeatmap";
-import VideoPlayer from "./VideoPlayer";
+import VideoPlayer, { type VideoPlayerRef } from "./VideoPlayer";
 import AudioWaveform from "./AudioWaveform";
 import {
   FRAME_RATES,
@@ -16,6 +16,16 @@ import {
   type FrameRateKey,
 } from "./SMPTETimecode";
 import { useToast } from "./Toast";
+import AnnotationToolbar, { type AnnotationTool, type AnnotationStyle } from "./AnnotationToolbar";
+import VideoAnnotationCanvas, { type VideoAnnotationCanvasRef, type AnnotationShape } from "./VideoAnnotationCanvas";
+import TranscriptViewer from "./TranscriptViewer";
+import VersionSwitcher from "./VersionSwitcher";
+import CaptionEditor from "./CaptionEditor";
+import type { CaptionCue } from "./CaptionOverlay";
+import EncodingStatus from "./EncodingStatus";
+import PresentationMode, { PresentationModeButton } from "./PresentationMode";
+import ViewAnalytics from "./ViewAnalytics";
+import DeliveryPresets from "./DeliveryPresets";
 
 /**
  * ASSET REVIEW COMPONENT
@@ -91,7 +101,7 @@ export default function AssetReview({
 
   // Initialize client on mount only (avoids SSR hydration issues)
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
   const [reviews, setReviews] = useState<Array<Schema["Review"]["type"]>>([]);
   const [comments, setComments] = useState<Array<Schema["ReviewComment"]["type"]>>([]);
@@ -125,6 +135,47 @@ export default function AssetReview({
   const [audioDuration, setAudioDuration] = useState<number>(0);
   const [currentAudioTime, setCurrentAudioTime] = useState<number>(0);
 
+  // Annotation system state
+  const videoPlayerRef = useRef<VideoPlayerRef>(null);
+  const annotationCanvasRef = useRef<VideoAnnotationCanvasRef>(null);
+  const [annotationMode, setAnnotationMode] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [selectedAnnotationTool, setSelectedAnnotationTool] = useState<AnnotationTool>("freehand");
+  const [annotationStyle, setAnnotationStyle] = useState<AnnotationStyle>({
+    strokeColor: "#FF3B30",
+    strokeWidth: 3,
+    fillColor: null,
+    opacity: 1,
+    fontSize: 16,
+  });
+  const [pendingAnnotations, setPendingAnnotations] = useState<AnnotationShape[]>([]);
+  const [videoWidth, setVideoWidth] = useState(0);
+  const [videoHeight, setVideoHeight] = useState(0);
+
+  // Transcript viewer state
+  const [showTranscript, setShowTranscript] = useState(false);
+
+  // Version switcher state
+  const [showVersionSwitcher, setShowVersionSwitcher] = useState(false);
+  const [currentVersionS3Key, setCurrentVersionS3Key] = useState<string | null>(null);
+
+  // Caption state
+  const [showCaptionEditor, setShowCaptionEditor] = useState(false);
+  const [captions, setCaptions] = useState<CaptionCue[]>([]);
+  const [captionsEnabled, setCaptionsEnabled] = useState(false);
+
+  // Encoding status state
+  const [showEncodingStatus, setShowEncodingStatus] = useState(false);
+
+  // Presentation mode state
+  const [showPresentationMode, setShowPresentationMode] = useState(false);
+
+  // View analytics state
+  const [showViewAnalytics, setShowViewAnalytics] = useState(false);
+
+  // Delivery presets state
+  const [showDeliveryPresets, setShowDeliveryPresets] = useState(false);
+
   // Load asset and reviews
   useEffect(() => {
     if (!client) return;
@@ -137,25 +188,22 @@ export default function AssetReview({
       });
 
       // Load reviews for this asset
-      const reviewSub = client.models.Review.observeQuery({
+      client.models.Review.list({
         filter: { assetId: { eq: assetId } }
-      }).subscribe({
-        next: (data) => setReviews([...data.items]),
-      });
+      }).then((data) => {
+        if (data.data) setReviews([...data.data]);
+      }).catch(console.error);
 
       // Load all comments for this asset
-      const commentSub = client.models.ReviewComment.observeQuery({
+      client.models.ReviewComment.list({
         filter: { assetId: { eq: assetId } }
-      }).subscribe({
-        next: (data) => setComments([...data.items].sort((a, b) =>
-          (a.timecode || 0) - (b.timecode || 0)
-        )),
-      });
-
-      return () => {
-        reviewSub.unsubscribe();
-        commentSub.unsubscribe();
-      };
+      }).then((data) => {
+        if (data.data) {
+          setComments([...data.data].sort((a, b) =>
+            (a.timecode || 0) - (b.timecode || 0)
+          ));
+        }
+      }).catch(console.error);
     }
   }, [assetId, client]);
 
@@ -201,6 +249,150 @@ export default function AssetReview({
     setTimecode(tc);
     setTimeout(() => setSeekToTime(undefined), 100);
   }
+
+  // Annotation handlers
+  const handleToggleAnnotationMode = useCallback(() => {
+    if (!annotationMode) {
+      // Entering annotation mode - pause video
+      videoPlayerRef.current?.pause();
+    }
+    setAnnotationMode(!annotationMode);
+  }, [annotationMode]);
+
+  const handleAnnotationComplete = useCallback((shape: AnnotationShape) => {
+    setPendingAnnotations(prev => [...prev, shape]);
+  }, []);
+
+  const handleAnnotationUndo = useCallback(() => {
+    annotationCanvasRef.current?.undo();
+  }, []);
+
+  const handleAnnotationClear = useCallback(() => {
+    annotationCanvasRef.current?.clear();
+    setPendingAnnotations([]);
+  }, []);
+
+  const handleSaveAnnotations = useCallback(async () => {
+    if (!client || !currentReviewId || pendingAnnotations.length === 0) {
+      toast.warning("No Annotations", "Draw some annotations before saving.");
+      return;
+    }
+
+    try {
+      // Create a comment with the annotations
+      const annotationTimecode = pendingAnnotations[0]?.timecode || currentVideoTime;
+      const newComment = await client.models.ReviewComment.create({
+        organizationId: orgId,
+        reviewId: currentReviewId,
+        assetId,
+        projectId,
+        commenterId: userId,
+        commenterEmail: userEmail,
+        commenterRole: selectedRole,
+        timecode: annotationTimecode,
+        timecodeFormatted: formatTimecode(annotationTimecode),
+        commentText: `[Visual Annotation] ${pendingAnnotations.length} drawing(s) at ${formatTimecode(annotationTimecode)}`,
+        commentType: 'NOTE',
+        priority: 'MEDIUM',
+        isResolved: false,
+      });
+
+      if (newComment.data) {
+        // Save each annotation linked to the comment
+        // Try to use ReviewAnnotation model if available, otherwise store in comment metadata
+        const annotationData = pendingAnnotations.map(annotation => ({
+          timecode: annotation.timecode,
+          type: annotation.type.toUpperCase(),
+          pathData: annotation.points,
+          strokeColor: annotation.style.strokeColor,
+          strokeWidth: annotation.style.strokeWidth,
+          fillColor: annotation.style.fillColor,
+          opacity: annotation.style.opacity,
+          textContent: annotation.textContent,
+          fontSize: annotation.style.fontSize,
+          canvasWidth: videoWidth,
+          canvasHeight: videoHeight,
+        }));
+
+        // Try to save to ReviewAnnotation model if it exists
+        if (client.models.ReviewAnnotation) {
+          try {
+            for (const annotation of pendingAnnotations) {
+              await client.models.ReviewAnnotation.create({
+                organizationId: orgId,
+                reviewCommentId: newComment.data.id,
+                assetId,
+                timecode: annotation.timecode,
+                annotationType: annotation.type.toUpperCase() as any,
+                pathData: JSON.stringify(annotation.points),
+                strokeColor: annotation.style.strokeColor,
+                strokeWidth: annotation.style.strokeWidth,
+                fillColor: annotation.style.fillColor,
+                opacity: annotation.style.opacity,
+                textContent: annotation.textContent,
+                fontSize: annotation.style.fontSize,
+                canvasWidth: videoWidth,
+                canvasHeight: videoHeight,
+                createdBy: userId,
+                createdByEmail: userEmail,
+              });
+            }
+          } catch (annotationError) {
+            // Fallback: store annotation data in attachmentKeys (JSON stringified)
+            console.log('ReviewAnnotation model not available, storing in attachmentKeys');
+            await client.models.ReviewComment.update({
+              id: newComment.data.id,
+              attachmentKeys: [JSON.stringify({ annotations: annotationData })],
+            });
+          }
+        } else {
+          // Fallback: store annotation data in attachmentKeys (JSON stringified)
+          await client.models.ReviewComment.update({
+            id: newComment.data.id,
+            attachmentKeys: [JSON.stringify({ annotations: annotationData })],
+          });
+        }
+
+        await client.models.ActivityLog.create({
+          organizationId: orgId,
+          projectId,
+          userId,
+          userEmail,
+          userRole: selectedRole,
+          action: 'COMMENT_ADDED',
+          targetType: 'Comment',
+          targetId: newComment.data.id,
+          targetName: `${pendingAnnotations.length} annotation(s)`,
+          metadata: JSON.stringify({ assetId, timecode: annotationTimecode, annotationCount: pendingAnnotations.length, type: 'annotation' }),
+        });
+
+        // Clear and exit annotation mode
+        handleAnnotationClear();
+        setAnnotationMode(false);
+        toast.success("Annotations Saved", `${pendingAnnotations.length} annotation(s) saved successfully.`);
+
+        // Refresh comments
+        const { data: refreshedComments } = await client.models.ReviewComment.list({
+          filter: { assetId: { eq: assetId } }
+        });
+        if (refreshedComments) {
+          setComments([...refreshedComments].sort((a, b) => (a.timecode || 0) - (b.timecode || 0)));
+        }
+      }
+    } catch (error) {
+      console.error('Error saving annotations:', error);
+      toast.error("Save Failed", "Failed to save annotations. Please try again.");
+    }
+  }, [client, currentReviewId, pendingAnnotations, currentVideoTime, orgId, assetId, projectId, userId, userEmail, selectedRole, videoWidth, videoHeight, formatTimecode, handleAnnotationClear, toast]);
+
+  // Update video dimensions when video loads
+  const handleVideoMetadataLoad = useCallback(() => {
+    const video = videoPlayerRef.current?.getVideoElement();
+    if (video) {
+      setVideoWidth(video.videoWidth || video.clientWidth);
+      setVideoHeight(video.videoHeight || video.clientHeight);
+    }
+  }, []);
 
   async function startReview() {
     if (!client) return;
@@ -452,6 +644,36 @@ export default function AssetReview({
                   </span>
                 </div>
               )}
+              {/* Version Switcher */}
+              <div className="mt-3">
+                <VersionSwitcher
+                  assetId={assetId}
+                  organizationId={orgId}
+                  compact={true}
+                  onVersionChange={async (version) => {
+                    // Load the video URL for the selected version
+                    try {
+                      const { url } = await getUrl({
+                        path: version.s3Key,
+                        options: { expiresIn: 3600 },
+                      });
+                      setVideoUrl(url.toString());
+                      setCurrentVersionS3Key(version.s3Key);
+                    } catch (err) {
+                      console.error("Error loading version:", err);
+                    }
+                  }}
+                />
+              </div>
+              {/* Presentation Mode Button */}
+              {videoUrl && (
+                <div className="mt-3">
+                  <PresentationModeButton
+                    onClick={() => setShowPresentationMode(true)}
+                    disabled={!videoUrl}
+                  />
+                </div>
+              )}
             </div>
             <button
               onClick={onClose}
@@ -467,18 +689,99 @@ export default function AssetReview({
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* Video Player */}
+          {/* Video Player with Annotation Support */}
           {videoUrl && (
-            <div
-              className="rounded-[12px] overflow-hidden"
-              style={{ background: 'var(--bg-0)', border: '1px solid var(--border)' }}
-            >
-              <VideoPlayer
-                src={videoUrl}
-                onTimeUpdate={(time) => setCurrentVideoTime(time)}
-                onDurationChange={(dur) => setVideoDuration(dur)}
-                seekTo={seekToTime}
-              />
+            <div className="space-y-3">
+              {/* Annotation Toolbar - shows when in annotation mode or when review is active */}
+              {currentReviewId && (
+                <div className="space-y-2">
+                  {/* Toggle Annotation Mode Button */}
+                  <button
+                    onClick={handleToggleAnnotationMode}
+                    className={`w-full py-2 px-4 rounded-[8px] font-semibold text-[13px] flex items-center justify-center gap-2 transition-all ${
+                      annotationMode
+                        ? 'bg-red-500 text-white'
+                        : 'bg-[var(--bg-1)] border border-[var(--border)] text-[var(--text-primary)] hover:border-[var(--primary)] hover:text-[var(--primary)]'
+                    }`}
+                  >
+                    {annotationMode ? (
+                      <>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M18 6L6 18M6 6l12 12"/>
+                        </svg>
+                        Exit Annotation Mode
+                      </>
+                    ) : (
+                      <>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                        </svg>
+                        Draw on Frame
+                      </>
+                    )}
+                  </button>
+
+                  {/* Annotation Toolbar - only shows in annotation mode */}
+                  {annotationMode && (
+                    <AnnotationToolbar
+                      selectedTool={selectedAnnotationTool}
+                      onToolChange={setSelectedAnnotationTool}
+                      style={annotationStyle}
+                      onStyleChange={setAnnotationStyle}
+                      onUndo={handleAnnotationUndo}
+                      onClear={handleAnnotationClear}
+                      onSave={handleSaveAnnotations}
+                      isDrawing={annotationMode}
+                      canUndo={pendingAnnotations.length > 0}
+                      canSave={pendingAnnotations.length > 0}
+                    />
+                  )}
+                </div>
+              )}
+
+              <div
+                className="rounded-[12px] overflow-hidden relative"
+                style={{ background: 'var(--bg-0)', border: annotationMode ? '2px solid var(--primary)' : '1px solid var(--border)' }}
+              >
+                <VideoPlayer
+                  ref={videoPlayerRef}
+                  src={videoUrl}
+                  onTimeUpdate={(time) => setCurrentVideoTime(time)}
+                  onDurationChange={(dur) => {
+                    setVideoDuration(dur);
+                    handleVideoMetadataLoad();
+                  }}
+                  onPlayingChange={setIsVideoPlaying}
+                  seekTo={seekToTime}
+                  annotationMode={annotationMode}
+                  annotationOverlay={
+                    annotationMode && videoWidth > 0 && videoHeight > 0 ? (
+                      <VideoAnnotationCanvas
+                        ref={annotationCanvasRef}
+                        width={videoWidth}
+                        height={videoHeight}
+                        currentTime={currentVideoTime}
+                        isPlaying={isVideoPlaying}
+                        selectedTool={selectedAnnotationTool}
+                        style={annotationStyle}
+                        existingAnnotations={pendingAnnotations}
+                        onAnnotationComplete={handleAnnotationComplete}
+                        onAnnotationsChange={setPendingAnnotations}
+                      />
+                    ) : undefined
+                  }
+                  captions={captions}
+                  captionsEnabled={captionsEnabled}
+                />
+
+                {/* Annotation Mode Indicator */}
+                {annotationMode && (
+                  <div className="absolute top-3 left-3 px-3 py-1.5 rounded-full bg-red-500/90 text-white text-xs font-bold flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                    ANNOTATION MODE
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -878,6 +1181,283 @@ export default function AssetReview({
             )}
           </div>
 
+          {/* Transcript Section (for video/audio assets) */}
+          {(videoUrl || audioUrl) && (
+            <div
+              className="rounded-[12px] overflow-hidden"
+              style={{ background: 'var(--bg-0)', border: '1px solid var(--border)' }}
+            >
+              <button
+                onClick={() => setShowTranscript(!showTranscript)}
+                className="w-full p-4 flex items-center justify-between hover:bg-[var(--bg-1)] transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14,2 14,8 20,8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                  </svg>
+                  <span className="font-bold text-[16px]" style={{ color: 'var(--text-primary)' }}>
+                    Transcript
+                  </span>
+                </div>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  style={{
+                    transform: showTranscript ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 200ms',
+                    color: 'var(--text-tertiary)',
+                  }}
+                >
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+              {showTranscript && (
+                <div className="border-t border-[var(--border)]">
+                  <TranscriptViewer
+                    assetId={assetId}
+                    organizationId={orgId}
+                    currentTime={videoUrl ? currentVideoTime : currentAudioTime}
+                    onTimecodeClick={(time) => {
+                      if (videoUrl && videoPlayerRef.current) {
+                        videoPlayerRef.current.pause();
+                        setSeekToTime(time);
+                      }
+                    }}
+                    isEditable={!hasLegalApproval}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Caption Editor Section (for video/audio assets) */}
+          {(videoUrl || audioUrl) && (
+            <div
+              className="rounded-[12px] overflow-hidden"
+              style={{ background: 'var(--bg-0)', border: '1px solid var(--border)' }}
+            >
+              <button
+                onClick={() => setShowCaptionEditor(!showCaptionEditor)}
+                className="w-full p-4 flex items-center justify-between hover:bg-[var(--bg-1)] transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="2" y="4" width="20" height="16" rx="2" />
+                    <path d="M7 12h2m2 0h6M7 16h10" />
+                  </svg>
+                  <span className="font-bold text-[16px]" style={{ color: 'var(--text-primary)' }}>
+                    Captions
+                  </span>
+                  {captions.length > 0 && (
+                    <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'var(--bg-2)', color: 'var(--text-tertiary)' }}>
+                      {captions.length} segments
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  {captions.length > 0 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCaptionsEnabled(!captionsEnabled);
+                      }}
+                      className="text-xs px-3 py-1 rounded-lg transition-all"
+                      style={{
+                        background: captionsEnabled ? 'var(--primary)' : 'var(--bg-2)',
+                        color: captionsEnabled ? 'white' : 'var(--text-secondary)',
+                      }}
+                    >
+                      {captionsEnabled ? 'On' : 'Off'}
+                    </button>
+                  )}
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    style={{
+                      transform: showCaptionEditor ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 200ms',
+                      color: 'var(--text-tertiary)',
+                    }}
+                  >
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </div>
+              </button>
+              {showCaptionEditor && (
+                <div className="border-t border-[var(--border)] max-h-[400px] overflow-y-auto">
+                  <CaptionEditor
+                    assetId={assetId}
+                    organizationId={orgId}
+                    currentTime={videoUrl ? currentVideoTime : currentAudioTime}
+                    onTimecodeClick={(time) => {
+                      if (videoUrl && videoPlayerRef.current) {
+                        videoPlayerRef.current.pause();
+                        setSeekToTime(time);
+                      }
+                    }}
+                    onCaptionsUpdate={setCaptions}
+                    isReadOnly={hasLegalApproval}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Encoding Status Section (for video assets) */}
+          {videoUrl && (
+            <div
+              className="rounded-[12px] overflow-hidden"
+              style={{ background: 'var(--bg-0)', border: '1px solid var(--border)' }}
+            >
+              <button
+                onClick={() => setShowEncodingStatus(!showEncodingStatus)}
+                className="w-full p-4 flex items-center justify-between hover:bg-[var(--bg-1)] transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="2" y="4" width="20" height="16" rx="2" />
+                    <path d="m10 9 5 3-5 3V9z" />
+                  </svg>
+                  <span className="font-bold text-[16px]" style={{ color: 'var(--text-primary)' }}>
+                    Video Quality
+                  </span>
+                </div>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  style={{
+                    transform: showEncodingStatus ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 200ms',
+                    color: 'var(--text-tertiary)',
+                  }}
+                >
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+              {showEncodingStatus && (
+                <div className="border-t border-[var(--border)]">
+                  <EncodingStatus
+                    assetId={assetId}
+                    organizationId={orgId}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* View Analytics Section (for video assets) */}
+          {videoUrl && (
+            <div
+              className="rounded-[12px] overflow-hidden"
+              style={{ background: 'var(--bg-0)', border: '1px solid var(--border)' }}
+            >
+              <button
+                onClick={() => setShowViewAnalytics(!showViewAnalytics)}
+                className="w-full p-4 flex items-center justify-between hover:bg-[var(--bg-1)] transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  <span className="font-bold text-[16px]" style={{ color: 'var(--text-primary)' }}>
+                    View Analytics
+                  </span>
+                </div>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  style={{
+                    transform: showViewAnalytics ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 200ms',
+                    color: 'var(--text-tertiary)',
+                  }}
+                >
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+              {showViewAnalytics && (
+                <div className="border-t border-[var(--border)]">
+                  <ViewAnalytics
+                    assetId={assetId}
+                    organizationId={orgId}
+                    videoDuration={videoDuration}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Delivery Presets Section (for video assets) */}
+          {videoUrl && (
+            <div
+              className="rounded-[12px] overflow-hidden"
+              style={{ background: 'var(--bg-0)', border: '1px solid var(--border)' }}
+            >
+              <button
+                onClick={() => setShowDeliveryPresets(!showDeliveryPresets)}
+                className="w-full p-4 flex items-center justify-between hover:bg-[var(--bg-1)] transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  <span className="font-bold text-[16px]" style={{ color: 'var(--text-primary)' }}>
+                    Export Presets
+                  </span>
+                </div>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  style={{
+                    transform: showDeliveryPresets ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 200ms',
+                    color: 'var(--text-tertiary)',
+                  }}
+                >
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+              {showDeliveryPresets && (
+                <div className="border-t border-[var(--border)]">
+                  <DeliveryPresets
+                    assetId={assetId}
+                    organizationId={orgId}
+                    videoDuration={videoDuration}
+                    onExport={(preset) => {
+                      toast.success("Export Started", `Exporting for ${preset.name}...`);
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Review History */}
           <div
             className="rounded-[12px] p-6"
@@ -933,6 +1513,27 @@ export default function AssetReview({
             )}
           </div>
         </div>
+
+        {/* Presentation Mode */}
+        {showPresentationMode && asset?.s3Key && (
+          <PresentationMode
+            assetName={asset.s3Key.split('/').pop() || 'Video'}
+            assetS3Key={currentVersionS3Key || asset.s3Key}
+            projectName={projectId}
+            organizationName="Sync Ops"
+            brandColor="var(--primary)"
+            onExit={() => setShowPresentationMode(false)}
+            onComment={(comment, time) => {
+              // If review is active, add comment at the timecode
+              if (currentReviewId) {
+                setTimecode(time);
+                setCommentText(comment);
+                setShowCommentForm(true);
+              }
+            }}
+            allowComments={!!currentReviewId}
+          />
+        )}
 
         {/* Legal Approval Confirmation Modal */}
         {showLegalApproval && (

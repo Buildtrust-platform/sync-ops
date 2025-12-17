@@ -16,6 +16,11 @@ import {
   StartTranscriptionJobCommand,
 } from '@aws-sdk/client-transcribe';
 import { S3Client, HeadObjectCommand } from '@aws-sdk/client-s3';
+import {
+  MediaConvertClient,
+  CreateJobCommand,
+  type CreateJobCommandInput,
+} from '@aws-sdk/client-mediaconvert';
 
 const { resourceConfig, libraryOptions } = await getAmplifyDataClientConfig(process.env as any);
 Amplify.configure(resourceConfig, libraryOptions);
@@ -25,9 +30,16 @@ const rekognitionClient = new RekognitionClient({ region: process.env.AWS_REGION
 const transcribeClient = new TranscribeClient({ region: process.env.AWS_REGION });
 const s3Client = new S3Client({ region: process.env.AWS_REGION });
 
+// MediaConvert client - requires endpoint discovery
+const MEDIACONVERT_ENDPOINT = process.env.MEDIACONVERT_ENDPOINT;
+const mediaConvertClient = MEDIACONVERT_ENDPOINT
+  ? new MediaConvertClient({ region: process.env.AWS_REGION, endpoint: MEDIACONVERT_ENDPOINT })
+  : null;
+
 // SNS topic ARN for Rekognition async notifications (set via environment variable)
 const REKOGNITION_SNS_TOPIC = process.env.REKOGNITION_SNS_TOPIC_ARN;
 const REKOGNITION_ROLE_ARN = process.env.REKOGNITION_ROLE_ARN;
+const MEDIACONVERT_ROLE_ARN = process.env.MEDIACONVERT_ROLE_ARN;
 
 
 export const handler = async (event: any) => {
@@ -105,6 +117,9 @@ export const handler = async (event: any) => {
       } else if (isVideo) {
         // === VIDEO PROCESSING: Start async jobs ===
         await processVideoAsync(bucketName, key, assetToUpdate);
+
+        // Start multi-resolution encoding
+        await startVideoEncoding(bucketName, key, assetToUpdate);
       } else if (isAudio) {
         // === AUDIO PROCESSING: Start transcription job ===
         await processAudioAsync(bucketName, key, assetToUpdate);
@@ -460,5 +475,200 @@ function getMediaFormat(key: string): 'mp3' | 'mp4' | 'wav' | 'flac' | 'ogg' | '
     case 'amr': return 'amr';
     case 'webm': return 'webm';
     default: return 'mp4'; // Default to mp4
+  }
+}
+
+
+/**
+ * Start multi-resolution video encoding with AWS MediaConvert
+ * Creates proxy files at different quality levels for streaming
+ */
+async function startVideoEncoding(bucketName: string, key: string, asset: any) {
+  if (!mediaConvertClient || !MEDIACONVERT_ROLE_ARN) {
+    console.log('MediaConvert not configured, skipping video encoding');
+    return;
+  }
+
+  console.log(`Starting multi-resolution encoding for ${key}...`);
+
+  const inputS3Uri = `s3://${bucketName}/${key}`;
+  const outputPrefix = `proxies/${asset.id}/`;
+
+  // Encoding presets configuration
+  const encodingPresets = [
+    {
+      name: 'STREAMING_HD',
+      resolution: '1920x1080',
+      bitrate: 5000000, // 5 Mbps
+      suffix: '_1080p',
+    },
+    {
+      name: 'STREAMING_SD',
+      resolution: '1280x720',
+      bitrate: 2500000, // 2.5 Mbps
+      suffix: '_720p',
+    },
+  ];
+
+  try {
+    // Create ProxyFile records for each encoding preset
+    for (const preset of encodingPresets) {
+      const outputKey = `${outputPrefix}${asset.id}${preset.suffix}.mp4`;
+
+      // Create ProxyFile record to track encoding status
+      const proxyFileResult = await client.models.ProxyFile.create({
+        organizationId: asset.organizationId,
+        assetId: asset.id,
+        proxyType: preset.name,
+        resolution: preset.resolution,
+        bitrate: Math.round(preset.bitrate / 1000), // Store in kbps
+        codec: 'H.264',
+        audioCodec: 'AAC',
+        status: 'PENDING',
+        progress: 0,
+        processor: 'AWS_MEDIACONVERT',
+        s3Key: outputKey,
+        s3Bucket: bucketName,
+      });
+
+      console.log(`Created ProxyFile record: ${proxyFileResult.data?.id} for ${preset.name}`);
+    }
+
+    // Create MediaConvert job with multiple outputs
+    const jobSettings: CreateJobCommandInput = {
+      Role: MEDIACONVERT_ROLE_ARN,
+      Settings: {
+        Inputs: [
+          {
+            FileInput: inputS3Uri,
+            AudioSelectors: {
+              'Audio Selector 1': {
+                DefaultSelection: 'DEFAULT',
+              },
+            },
+            VideoSelector: {},
+          },
+        ],
+        OutputGroups: [
+          {
+            Name: 'MP4 Group',
+            OutputGroupSettings: {
+              Type: 'FILE_GROUP_SETTINGS',
+              FileGroupSettings: {
+                Destination: `s3://${bucketName}/${outputPrefix}`,
+              },
+            },
+            Outputs: encodingPresets.map((preset) => {
+              const [width, height] = preset.resolution.split('x').map(Number);
+              return {
+                NameModifier: preset.suffix,
+                ContainerSettings: {
+                  Container: 'MP4',
+                  Mp4Settings: {
+                    CslgAtom: 'INCLUDE',
+                    FreeSpaceBox: 'EXCLUDE',
+                    MoovPlacement: 'PROGRESSIVE_DOWNLOAD',
+                  },
+                },
+                VideoDescription: {
+                  Width: width,
+                  Height: height,
+                  CodecSettings: {
+                    Codec: 'H_264',
+                    H264Settings: {
+                      RateControlMode: 'VBR',
+                      Bitrate: preset.bitrate,
+                      MaxBitrate: Math.round(preset.bitrate * 1.5),
+                      QualityTuningLevel: 'SINGLE_PASS_HQ',
+                      CodecProfile: 'HIGH',
+                      CodecLevel: 'AUTO',
+                      GopSize: 2,
+                      GopSizeUnits: 'SECONDS',
+                    },
+                  },
+                  ScalingBehavior: 'DEFAULT',
+                  AntiAlias: 'ENABLED',
+                },
+                AudioDescriptions: [
+                  {
+                    AudioTypeControl: 'FOLLOW_INPUT',
+                    CodecSettings: {
+                      Codec: 'AAC',
+                      AacSettings: {
+                        Bitrate: 128000,
+                        CodingMode: 'CODING_MODE_2_0',
+                        SampleRate: 48000,
+                      },
+                    },
+                  },
+                ],
+              };
+            }),
+          },
+        ],
+      },
+      UserMetadata: {
+        assetId: asset.id,
+        organizationId: asset.organizationId,
+      },
+    };
+
+    const createJobCommand = new CreateJobCommand(jobSettings);
+    const jobResponse = await mediaConvertClient.send(createJobCommand);
+
+    console.log(`MediaConvert job created: ${jobResponse.Job?.Id}`);
+
+    // Update ProxyFile records with job ID
+    const proxyFilesResult = await client.models.ProxyFile.list({
+      filter: {
+        assetId: { eq: asset.id },
+        status: { eq: 'PENDING' },
+      },
+    });
+
+    for (const proxyFile of proxyFilesResult.data || []) {
+      await client.models.ProxyFile.update({
+        id: proxyFile.id,
+        status: 'PROCESSING',
+        jobId: jobResponse.Job?.Id,
+        processingStarted: new Date().toISOString(),
+      });
+    }
+
+    // Log activity
+    await client.models.ActivityLog.create({
+      organizationId: asset.organizationId,
+      projectId: asset.projectId,
+      userId: 'SYSTEM',
+      userEmail: 'encoder@syncops.system',
+      userRole: 'System',
+      action: 'VIDEO_ENCODING_STARTED',
+      targetType: 'Asset',
+      targetId: asset.id,
+      targetName: key.split('/').pop() || key,
+      metadata: {
+        mediaConvertJobId: jobResponse.Job?.Id,
+        presets: encodingPresets.map(p => p.name),
+      },
+    });
+
+  } catch (encodingError: any) {
+    console.error(`Video encoding failed for ${key}:`, encodingError.message);
+
+    // Mark proxy files as failed
+    const proxyFilesResult = await client.models.ProxyFile.list({
+      filter: {
+        assetId: { eq: asset.id },
+        status: { eq: 'PENDING' },
+      },
+    });
+
+    for (const proxyFile of proxyFilesResult.data || []) {
+      await client.models.ProxyFile.update({
+        id: proxyFile.id,
+        status: 'FAILED',
+        errorMessage: encodingError.message,
+      });
+    }
   }
 }

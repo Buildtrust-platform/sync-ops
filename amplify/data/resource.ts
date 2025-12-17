@@ -139,8 +139,8 @@ const schema = a.schema({
   })
   .authorization(allow => [
     allow.owner(),
-    allow.authenticated().to(['read']),
-    allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+    allow.authenticated(),
+    allow.groups(['Admin']),
   ]),
 
   // ORGANIZATION MEMBER - Users belonging to an organization
@@ -190,8 +190,8 @@ const schema = a.schema({
   })
   .authorization(allow => [
     allow.owner(),
-    allow.authenticated().to(['read']),
-    allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+    allow.authenticated(),
+    allow.groups(['Admin']),
   ]),
 
   // ORGANIZATION INVITATION - Pending invitations
@@ -219,7 +219,7 @@ const schema = a.schema({
     lastReminderAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -262,7 +262,7 @@ const schema = a.schema({
     description: a.string(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
+    allow.authenticated(),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -304,7 +304,7 @@ const schema = a.schema({
     notes: a.string(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
+    allow.authenticated(),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -343,7 +343,7 @@ const schema = a.schema({
     isActive: a.boolean().default(true),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
+    allow.authenticated(),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -538,8 +538,8 @@ const schema = a.schema({
   })
   .authorization(allow => [
     allow.owner(), // Creator can do anything
-    allow.authenticated().to(['read']), // Logged in users can view projects
-    allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+    allow.authenticated(), // Logged in users have full access
+    allow.groups(['Admin']),
   ]),
 
   // ============================================
@@ -612,7 +612,7 @@ const schema = a.schema({
   })
   .authorization(allow => [
     allow.owner(),
-    allow.authenticated().to(['read']),
+    allow.authenticated(),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -655,7 +655,7 @@ const schema = a.schema({
   })
   .authorization(allow => [
     allow.owner(),
-    allow.authenticated().to(['read']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Legal']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -710,7 +710,7 @@ const schema = a.schema({
   })
   .authorization(allow => [
     // Audit logs are append-only - no updates or deletes
-    allow.authenticated().to(['create', 'read']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Legal', 'Finance']).to(['read']),
   ]),
 
@@ -958,7 +958,7 @@ const schema = a.schema({
     dpApprovedAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'Director']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -1120,7 +1120,7 @@ const schema = a.schema({
   })
   .authorization(allow => [
     allow.owner(), // Reviewer owns their review
-    allow.authenticated().to(['read']), // All authenticated users can view reviews
+    allow.authenticated(), // All authenticated users can view reviews
     allow.groups(['Admin', 'Legal']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -1168,10 +1168,11 @@ const schema = a.schema({
 
     // Relationships
     replies: a.hasMany('ReviewCommentReply', 'parentCommentId'),
+    annotations: a.hasMany('ReviewAnnotation', 'reviewCommentId'), // Frame.io-style drawings
   })
   .authorization(allow => [
     allow.owner(),
-    allow.authenticated().to(['read', 'create']),
+    allow.authenticated(),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -1188,7 +1189,208 @@ const schema = a.schema({
   })
   .authorization(allow => [
     allow.owner(),
-    allow.authenticated().to(['read', 'create']),
+    allow.authenticated(),
+    allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // ============================================
+  // REVIEW ANNOTATIONS (Frame.io-style Drawing on Video)
+  // Visual annotations linked to review comments
+  // ============================================
+  ReviewAnnotation: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
+    // Links to review comment (annotations are attached to comments)
+    reviewCommentId: a.id().required(),
+    reviewComment: a.belongsTo('ReviewComment', 'reviewCommentId'),
+    assetId: a.id().required(),
+    assetVersionId: a.id(), // Which version the annotation was made on
+
+    // Frame position (precise timecode)
+    timecode: a.float().required(), // Position in seconds
+    frameNumber: a.integer(), // Exact frame for precision (fps * timecode)
+
+    // Drawing data
+    annotationType: a.enum([
+      'FREEHAND',   // Freehand drawing/pencil
+      'ARROW',      // Arrow pointing to something
+      'CIRCLE',     // Circle/ellipse highlight
+      'RECTANGLE',  // Rectangle/box highlight
+      'TEXT',       // Text label on frame
+      'BLUR',       // Blur region (for sensitive content)
+      'SPOTLIGHT',  // Spotlight/focus area (dims rest of frame)
+    ]),
+
+    // SVG/JSON path data for the drawing
+    pathData: a.string().required(), // JSON serialized drawing data
+
+    // Styling
+    strokeColor: a.string().default('#FF3B30'), // Default red
+    strokeWidth: a.float().default(3),
+    fillColor: a.string(), // Optional fill for shapes
+    opacity: a.float().default(1),
+
+    // Text annotation specific
+    textContent: a.string(), // For TEXT type
+    fontSize: a.integer().default(16),
+    fontFamily: a.string().default('Inter'),
+
+    // Canvas metadata (for scaling annotations correctly)
+    canvasWidth: a.integer().required(), // Reference canvas width when created
+    canvasHeight: a.integer().required(), // Reference canvas height when created
+
+    // Creator
+    createdBy: a.string().required(),
+    createdByEmail: a.string(),
+  })
+  .authorization(allow => [
+    allow.owner(),
+    allow.authenticated(),
+    allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // SHARE LINK - External Review Links for Clients (Frame.io-style screening rooms)
+  ShareLink: a.model({
+    // SAAS: Organization linkage
+    organizationId: a.id().required(),
+
+    // Link scope - can share a project, single asset, or collection
+    projectId: a.id(),
+    assetId: a.id(),
+    collectionId: a.id(),
+
+    // Link identity
+    token: a.string().required(), // UUID for URL (/share/[token])
+    name: a.string(), // "Q4 Campaign Review", "Final Cut Preview"
+    description: a.string(),
+    type: a.enum(['REVIEW', 'DOWNLOAD', 'PRESENTATION', 'APPROVAL']),
+
+    // Security
+    password: a.string(), // Bcrypt hashed password (optional)
+    expiresAt: a.datetime(),
+    maxViews: a.integer(),
+    currentViews: a.integer().default(0),
+
+    // Permissions
+    allowDownload: a.boolean().default(false),
+    allowComments: a.boolean().default(true),
+    allowAnnotations: a.boolean().default(false), // Drawing annotations
+    requireApproval: a.boolean().default(false), // Require explicit approval
+
+    // Branding customization (overrides org defaults)
+    brandingEnabled: a.boolean().default(true),
+    customLogo: a.string(), // S3 key for custom logo
+    customPrimaryColor: a.string(), // Hex color override
+    customBackgroundColor: a.string(),
+    welcomeMessage: a.string(), // Message shown to viewers
+    footerText: a.string(),
+
+    // Watermark settings
+    watermarkEnabled: a.boolean().default(false),
+    watermarkText: a.string(), // e.g., "{viewer_email} - {date}"
+    watermarkPosition: a.enum(['TOP_LEFT', 'TOP_RIGHT', 'BOTTOM_LEFT', 'BOTTOM_RIGHT', 'CENTER']),
+    watermarkOpacity: a.float().default(0.5),
+
+    // Notification settings
+    notifyOnView: a.boolean().default(true),
+    notifyOnComment: a.boolean().default(true),
+    notifyOnApproval: a.boolean().default(true),
+    notificationEmails: a.string().array(), // Additional emails to notify
+
+    // Status
+    status: a.enum(['ACTIVE', 'EXPIRED', 'REVOKED', 'DRAFT']),
+    revokedAt: a.datetime(),
+    revokedBy: a.string(),
+    revokedReason: a.string(),
+
+    // Creator
+    createdBy: a.string().required(),
+    createdByEmail: a.string(),
+  })
+  .authorization(allow => [
+    allow.authenticated(),
+    allow.publicApiKey().to(['read']), // Allow public read for the share page
+    allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // SHARE LINK VIEW - Track who viewed a share link
+  ShareLinkView: a.model({
+    shareLinkId: a.id().required(),
+    shareLink: a.belongsTo('ShareLink', 'shareLinkId'),
+
+    // Viewer info
+    viewerEmail: a.string(), // If they provided email
+    viewerName: a.string(),
+    viewerIp: a.string(),
+    viewerUserAgent: a.string(),
+
+    // Session tracking
+    sessionId: a.string().required(), // Unique session ID
+    startedAt: a.datetime().required(),
+    endedAt: a.datetime(),
+    totalDurationSeconds: a.integer(),
+
+    // Engagement metrics
+    totalPlayTime: a.float(), // Total seconds of video watched
+    completedViewing: a.boolean().default(false), // Watched entire video
+    downloadedAssets: a.boolean().default(false),
+    leftComment: a.boolean().default(false),
+    gaveApproval: a.boolean(),
+    approvalStatus: a.enum(['APPROVED', 'REJECTED', 'NEEDS_CHANGES']),
+    approvalNote: a.string(),
+  })
+  .authorization(allow => [
+    allow.authenticated(),
+    allow.publicApiKey().to(['create', 'read', 'update']), // Allow public to create views
+    allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+  ]),
+
+  // WATERMARK POLICY - Forensic watermarking configuration
+  WatermarkPolicy: a.model({
+    organizationId: a.id().required(),
+    organization: a.belongsTo('Organization', 'organizationId'),
+
+    // Scope (one of these should be set)
+    projectId: a.id(),
+    project: a.belongsTo('Project', 'projectId'),
+    assetId: a.id(),
+
+    // Policy settings
+    name: a.string(), // "Client Preview Watermark"
+    description: a.string(),
+
+    // Watermark configuration
+    enabled: a.boolean().default(true),
+    text: a.string(), // Custom text like "CONFIDENTIAL"
+    position: a.enum([
+      'TOP_LEFT', 'TOP_RIGHT', 'BOTTOM_LEFT', 'BOTTOM_RIGHT', 'CENTER', 'DIAGONAL'
+    ]),
+    opacity: a.float().default(0.5),
+    fontSize: a.integer().default(14),
+
+    // Dynamic content options
+    includeViewerEmail: a.boolean().default(true),
+    includeTimestamp: a.boolean().default(true),
+    includeIpAddress: a.boolean().default(false),
+    includeAssetId: a.boolean().default(false),
+
+    // Styling
+    fontColor: a.string().default('#FFFFFF'),
+    backgroundColor: a.string().default('transparent'),
+
+    // When to apply
+    applyToDownloads: a.boolean().default(true),
+    applyToStreaming: a.boolean().default(true),
+    applyToShareLinks: a.boolean().default(true),
+
+    // Audit
+    createdBy: a.string(),
+    lastModifiedBy: a.string(),
+  })
+  .authorization(allow => [
+    allow.authenticated(),
+    allow.publicApiKey().to(['read']),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -1221,7 +1423,7 @@ const schema = a.schema({
     createdByEmail: a.string(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -1271,8 +1473,8 @@ const schema = a.schema({
     ipAddress: a.string(), // Security tracking
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
-    allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
+    allow.authenticated(),
+    allow.groups(['Admin']),
   ]),
 
   // ============================================
@@ -1317,7 +1519,7 @@ const schema = a.schema({
     processingJobId: a.string(), // Links to AIAnalysisJob
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'update']), // Users can update personName
+    allow.authenticated(), // Users can update personName
     allow.groups(['Admin', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -1352,7 +1554,7 @@ const schema = a.schema({
     processingJobId: a.string(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -1386,7 +1588,7 @@ const schema = a.schema({
     processingJobId: a.string(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'update']), // Users can update speakerName
+    allow.authenticated(), // Users can update speakerName
     allow.groups(['Admin', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -1447,7 +1649,7 @@ const schema = a.schema({
     triggeredBy: a.string(), // 'SYSTEM' for auto, or user email
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -1502,7 +1704,7 @@ const schema = a.schema({
   })
   .authorization(allow => [
     allow.owner(),
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -1572,7 +1774,7 @@ const schema = a.schema({
   })
   .authorization(allow => [
     allow.owner(), // User can only see their own notifications
-    allow.authenticated().to(['read', 'update']), // Can mark as read
+    allow.authenticated(), // Can mark as read
     allow.groups(['Admin']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -1667,7 +1869,7 @@ const schema = a.schema({
     attachmentKeys: a.string().array(), // S3 keys for files
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'ProjectManager']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -1745,7 +1947,7 @@ const schema = a.schema({
     kitItems: a.hasMany('EquipmentKitItem', 'equipmentId'),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'EquipmentManager']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -1788,7 +1990,7 @@ const schema = a.schema({
     returnSignature: a.string(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'EquipmentManager']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -1825,7 +2027,7 @@ const schema = a.schema({
     itemCount: a.integer(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'EquipmentManager']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -1842,7 +2044,7 @@ const schema = a.schema({
     sortOrder: a.integer(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'EquipmentManager']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -1948,7 +2150,7 @@ const schema = a.schema({
     lastReminderSent: a.datetime(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'Legal', 'ProjectManager']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -2045,7 +2247,7 @@ const schema = a.schema({
     viewLogs: a.hasMany('DistributionViewLog', 'distributionLinkId'),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'Marketing']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -2091,7 +2293,7 @@ const schema = a.schema({
     geoBlockReason: a.string(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'Marketing']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -2215,7 +2417,7 @@ const schema = a.schema({
     createdByEmail: a.string(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'Marketing', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -2266,7 +2468,7 @@ const schema = a.schema({
     createdByEmail: a.string(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -2329,7 +2531,7 @@ const schema = a.schema({
     dataIntegrity: a.enum(['COMPLETE', 'PARTIAL', 'STALE']),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'Marketing']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -2395,7 +2597,7 @@ const schema = a.schema({
     corruptionDetails: a.string(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -2458,7 +2660,7 @@ const schema = a.schema({
     lastChecked: a.datetime(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -2506,7 +2708,7 @@ const schema = a.schema({
     notificationSent: a.boolean().default(false),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -2569,7 +2771,7 @@ const schema = a.schema({
     title: a.string(), // Job title
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -2646,7 +2848,7 @@ const schema = a.schema({
     createdByEmail: a.string(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'Finance']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -2736,7 +2938,7 @@ const schema = a.schema({
     createdByEmail: a.string(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'Finance']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -2808,7 +3010,7 @@ const schema = a.schema({
     createdBy: a.string().required(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'Finance']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -2904,7 +3106,7 @@ const schema = a.schema({
     createdByEmail: a.string(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'EquipmentManager']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -2992,7 +3194,7 @@ const schema = a.schema({
     createdByEmail: a.string(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'LocationManager']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -3059,7 +3261,7 @@ const schema = a.schema({
     createdBy: a.string().required(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'Finance']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -3132,7 +3334,7 @@ const schema = a.schema({
     aiLessonsLearned: a.json(), // AI-extracted lessons
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -3233,7 +3435,7 @@ const schema = a.schema({
     fullTextIndex: a.string(), // Combined searchable text
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -3292,7 +3494,7 @@ const schema = a.schema({
     overriddenMetadata: a.json(), // What metadata is specific to this derivation
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -3358,7 +3560,7 @@ const schema = a.schema({
     dataQuality: a.enum(['HIGH', 'MEDIUM', 'LOW', 'INSUFFICIENT']),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'Marketing']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -3436,7 +3638,7 @@ const schema = a.schema({
     createdByEmail: a.string(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'ProjectManager']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -3481,7 +3683,7 @@ const schema = a.schema({
     loggedByEmail: a.string(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -3546,7 +3748,7 @@ const schema = a.schema({
     createdAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'VFX']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -3603,7 +3805,7 @@ const schema = a.schema({
     createdAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'Editor']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -3662,7 +3864,7 @@ const schema = a.schema({
     createdAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'Colorist']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -3718,7 +3920,7 @@ const schema = a.schema({
     createdAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'Sound']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -3777,7 +3979,7 @@ const schema = a.schema({
     createdAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer', 'QC']).to(['create', 'read', 'update', 'delete']),
   ]),
 
@@ -3839,7 +4041,7 @@ const schema = a.schema({
     lastModifiedAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update', 'delete']),
+    allow.authenticated(),
   ]),
 
   // COLLECTION ASSET - Junction table for collection-asset relationships
@@ -3868,7 +4070,7 @@ const schema = a.schema({
     addedAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update', 'delete']),
+    allow.authenticated(),
   ]),
 
   // TRANSCRIPTION - Speech-to-text transcripts with timecodes
@@ -3930,7 +4132,7 @@ const schema = a.schema({
     completedAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update', 'delete']),
+    allow.authenticated(),
   ]),
 
   // PROXY FILE - Auto-generated proxy versions for streaming and preview
@@ -3991,7 +4193,7 @@ const schema = a.schema({
     createdAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update', 'delete']),
+    allow.authenticated(),
   ]),
 
   // CUSTOM METADATA SCHEMA - Organization-defined metadata fields
@@ -4038,7 +4240,7 @@ const schema = a.schema({
     lastModifiedAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
+    allow.authenticated(),
     allow.groups(['Admin']).to(['create', 'update', 'delete']),
   ]),
 
@@ -4063,7 +4265,7 @@ const schema = a.schema({
     changeHistory: a.json(), // [{ fieldId, oldValue, newValue, changedBy, changedAt }]
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update', 'delete']),
+    allow.authenticated(),
   ]),
 
   // SAVED SEARCH - Persistent search queries for quick access
@@ -4127,7 +4329,7 @@ const schema = a.schema({
     lastModifiedAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update', 'delete']),
+    allow.authenticated(),
   ]),
 
   // WORKFLOW RULE - Automation rules engine for DAM operations
@@ -4197,7 +4399,7 @@ const schema = a.schema({
     lastModifiedAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
+    allow.authenticated(),
     allow.groups(['Admin', 'Producer']).to(['create', 'update', 'delete']),
   ]),
 
@@ -4239,7 +4441,7 @@ const schema = a.schema({
     executionLog: a.json(), // Detailed step-by-step log
   })
   .authorization(allow => [
-    allow.authenticated().to(['read']),
+    allow.authenticated(),
     allow.groups(['Admin']).to(['delete']),
   ]),
 
@@ -4305,65 +4507,7 @@ const schema = a.schema({
     requestedAt: a.datetime(),
   })
   .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update']),
-  ]),
-
-  // SHARE LINK - Secure sharing links for assets and collections
-  ShareLink: a.model({
-    // SAAS: Organization linkage
-    organizationId: a.id().required(),
-
-    // Link Info
-    token: a.string().required(), // Unique token for URL
-    name: a.string(),
-
-    // What's being shared
-    shareType: a.enum(['ASSET', 'COLLECTION', 'PROJECT', 'SELECTION']),
-    targetIds: a.string().array().required(), // IDs of shared items
-
-    // Access Control
-    password: a.string(), // Optional password (hashed)
-    requiresPassword: a.boolean().default(false),
-    allowedEmails: a.string().array(), // If restricted to specific emails
-    allowedDomains: a.string().array(), // e.g., ["@company.com"]
-
-    // Permissions
-    allowPreview: a.boolean().default(true),
-    allowDownload: a.boolean().default(false),
-    allowComment: a.boolean().default(false),
-    downloadQuality: a.enum(['ORIGINAL', 'HIGH', 'MEDIUM', 'LOW', 'PROXY_ONLY']),
-
-    // Expiration
-    expiresAt: a.datetime(),
-    maxViews: a.integer(), // Max number of views (null = unlimited)
-    maxDownloads: a.integer(), // Max number of downloads
-
-    // Usage Tracking
-    viewCount: a.integer().default(0),
-    downloadCount: a.integer().default(0),
-    lastAccessedAt: a.datetime(),
-    lastAccessedBy: a.string(),
-
-    // Access Log (recent accesses)
-    accessLog: a.json(), // [{ email, ip, userAgent, timestamp, action }]
-
-    // Status
-    isActive: a.boolean().default(true),
-    deactivatedAt: a.datetime(),
-    deactivatedBy: a.string(),
-    deactivationReason: a.string(),
-
-    // Notification
-    notifyOnAccess: a.boolean().default(false),
-    notifyEmail: a.string(),
-
-    // Creator
-    createdBy: a.string().required(),
-    createdByEmail: a.string(),
-    createdAt: a.datetime(),
-  })
-  .authorization(allow => [
-    allow.authenticated().to(['read', 'create', 'update', 'delete']),
+    allow.authenticated(),
   ]),
 
   // 19. CUSTOM QUERIES

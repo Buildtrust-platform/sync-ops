@@ -1,24 +1,72 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from "react";
+import CaptionOverlay, { type CaptionCue, type CaptionStyle } from "./CaptionOverlay";
 
 interface VideoPlayerProps {
   src: string;
   poster?: string;
   onTimeUpdate?: (currentTime: number) => void;
   onDurationChange?: (duration: number) => void;
+  onPlayingChange?: (isPlaying: boolean) => void; // Notify parent of play state changes
   seekTo?: number; // External control to seek to a specific time
+  annotationMode?: boolean; // Enable annotation overlay mode
+  annotationOverlay?: React.ReactNode; // Annotation canvas overlay
+  // Caption support
+  captions?: CaptionCue[];
+  captionsEnabled?: boolean;
+  captionStyle?: CaptionStyle;
+  onCaptionStyleChange?: (style: CaptionStyle) => void;
 }
 
-export default function VideoPlayer({
+export interface VideoPlayerRef {
+  pause: () => void;
+  play: () => void;
+  getCurrentTime: () => number;
+  getDuration: () => number;
+  getVideoElement: () => HTMLVideoElement | null;
+  captureFrame: () => string | null;
+}
+
+const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
   src,
   poster,
   onTimeUpdate,
   onDurationChange,
+  onPlayingChange,
   seekTo,
-}: VideoPlayerProps) {
+  annotationMode = false,
+  annotationOverlay,
+  captions = [],
+  captionsEnabled = false,
+  captionStyle,
+  onCaptionStyleChange,
+}, ref) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Expose video methods to parent
+  useImperativeHandle(ref, () => ({
+    pause: () => videoRef.current?.pause(),
+    play: () => videoRef.current?.play(),
+    getCurrentTime: () => videoRef.current?.currentTime || 0,
+    getDuration: () => videoRef.current?.duration || 0,
+    getVideoElement: () => videoRef.current,
+    captureFrame: () => {
+      const video = videoRef.current;
+      if (!video) return null;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return null;
+
+      ctx.drawImage(video, 0, 0);
+      return canvas.toDataURL('image/png');
+    },
+  }));
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -29,6 +77,7 @@ export default function VideoPlayer({
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showControls, setShowControls] = useState(true);
   const [isBuffering, setIsBuffering] = useState(false);
+  const [showCaptions, setShowCaptions] = useState(captionsEnabled);
 
   // Hide controls after inactivity
   useEffect(() => {
@@ -55,8 +104,10 @@ export default function VideoPlayer({
     } else {
       videoRef.current.play();
     }
-    setIsPlaying(!isPlaying);
-  }, [isPlaying]);
+    const newState = !isPlaying;
+    setIsPlaying(newState);
+    onPlayingChange?.(newState);
+  }, [isPlaying, onPlayingChange]);
 
   // Handle time update
   const handleTimeUpdate = () => {
@@ -195,12 +246,18 @@ export default function VideoPlayer({
           e.preventDefault();
           toggleFullscreen();
           break;
+        case 'c':
+          e.preventDefault();
+          if (captions.length > 0) {
+            setShowCaptions(prev => !prev);
+          }
+          break;
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [togglePlay, skip, toggleMute, toggleFullscreen]);
+  }, [togglePlay, skip, toggleMute, toggleFullscreen, captions.length]);
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
@@ -218,8 +275,14 @@ export default function VideoPlayer({
         className="w-full aspect-video"
         onTimeUpdate={handleTimeUpdate}
         onDurationChange={handleDurationChange}
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
+        onPlay={() => {
+          setIsPlaying(true);
+          onPlayingChange?.(true);
+        }}
+        onPause={() => {
+          setIsPlaying(false);
+          onPlayingChange?.(false);
+        }}
         onWaiting={() => setIsBuffering(true)}
         onPlaying={() => setIsBuffering(false)}
         onClick={togglePlay}
@@ -231,6 +294,16 @@ export default function VideoPlayer({
         <div className="absolute inset-0 flex items-center justify-center bg-black/30">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-teal-500 border-t-transparent"></div>
         </div>
+      )}
+
+      {/* Caption Overlay */}
+      {captions.length > 0 && (
+        <CaptionOverlay
+          captions={captions}
+          currentTime={currentTime}
+          isEnabled={showCaptions}
+          style={captionStyle}
+        />
       )}
 
       {/* Play/Pause Overlay (shown when paused) */}
@@ -371,6 +444,21 @@ export default function VideoPlayer({
 
           {/* Right Controls */}
           <div className="flex items-center gap-3">
+            {/* Captions Toggle */}
+            {captions.length > 0 && (
+              <button
+                onClick={() => setShowCaptions(!showCaptions)}
+                className={`transition-colors ${showCaptions ? 'text-teal-400' : 'text-white hover:text-teal-400'}`}
+                title={showCaptions ? 'Hide captions (C)' : 'Show captions (C)'}
+                aria-label={showCaptions ? 'Hide captions' : 'Show captions'}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="2" y="4" width="20" height="16" rx="2" strokeWidth={2} />
+                  <path strokeLinecap="round" strokeWidth={2} d="M7 12h2m2 0h6M7 16h10" />
+                </svg>
+              </button>
+            )}
+
             {/* Playback Speed */}
             <button
               onClick={changePlaybackRate}
@@ -404,8 +492,22 @@ export default function VideoPlayer({
 
       {/* Keyboard Shortcuts Hint (shown briefly) */}
       <div className="absolute top-4 right-4 text-white/50 text-xs">
-        <span className="bg-black/50 px-2 py-1 rounded">Space: Play/Pause | J/L: Skip | M: Mute | F: Fullscreen</span>
+        <span className="bg-black/50 px-2 py-1 rounded">Space: Play/Pause | J/L: Skip | M: Mute | F: Fullscreen | C: Captions</span>
       </div>
+
+      {/* Annotation Canvas Overlay */}
+      {annotationMode && annotationOverlay && (
+        <div className="absolute inset-0 pointer-events-auto">
+          {annotationOverlay}
+        </div>
+      )}
     </div>
   );
-}
+});
+
+VideoPlayer.displayName = "VideoPlayer";
+
+export default VideoPlayer;
+
+// Re-export caption types for convenience
+export type { CaptionCue, CaptionStyle };
