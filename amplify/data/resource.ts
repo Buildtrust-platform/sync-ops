@@ -1307,6 +1307,9 @@ const schema = a.schema({
     // Creator
     createdBy: a.string().required(),
     createdByEmail: a.string(),
+
+    // Relationship to views
+    views: a.hasMany('ShareLinkView', 'shareLinkId'),
   })
   .authorization(allow => [
     allow.authenticated(),
