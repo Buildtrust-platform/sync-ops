@@ -125,6 +125,10 @@ export default function ProjectDetail() {
   // UI STATE
   const [activeModule, setActiveModule] = useState("overview");
   const [showGovernedIngest, setShowGovernedIngest] = useState(false);
+  const [showBriefEditor, setShowBriefEditor] = useState(false);
+  const [showDeleteBriefConfirm, setShowDeleteBriefConfirm] = useState(false);
+  const [showTeamInvite, setShowTeamInvite] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<string>("ALL");
   const [selectedAssetForReview, setSelectedAssetForReview] = useState<string | null>(null);
@@ -240,7 +244,7 @@ export default function ProjectDetail() {
 
   // Initialize Amplify client after mount to avoid SSR issues
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
 
   // INITIAL LOAD
@@ -262,31 +266,28 @@ export default function ProjectDetail() {
         }
       }).catch(console.error);
 
-      const assetSub = client.models.Asset.observeQuery({
+      // Use list queries instead of observeQuery to avoid subscription errors
+      client.models.Asset.list({
         filter: { projectId: { eq: projectId } }
-      }).subscribe({
-        next: (data) => setAssets([...data.items]),
-      });
+      }).then((data) => {
+        if (data.data) setAssets([...data.data]);
+      }).catch(console.error);
 
-      const activitySub = client.models.ActivityLog.observeQuery({
+      client.models.ActivityLog.list({
         filter: { projectId: { eq: projectId } }
-      }).subscribe({
-        next: (data) => setActivityLogs([...data.items].sort((a, b) =>
-          new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
-        )),
-      });
+      }).then((data) => {
+        if (data.data) {
+          setActivityLogs([...data.data].sort((a, b) =>
+            new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+          ));
+        }
+      }).catch(console.error);
 
-      const taskSub = client.models.Task.observeQuery({
+      client.models.Task.list({
         filter: { projectId: { eq: projectId } }
-      }).subscribe({
-        next: (data) => setTasks([...data.items]),
-      });
-
-      return () => {
-        assetSub.unsubscribe();
-        activitySub.unsubscribe();
-        taskSub.unsubscribe();
-      };
+      }).then((data) => {
+        if (data.data) setTasks([...data.data]);
+      }).catch(console.error);
     }
   }, [projectId, client]);
 
@@ -295,6 +296,34 @@ export default function ProjectDetail() {
     if (!client) return;
     const updated = await client.models.Project.get({ id: projectId });
     setProject(updated.data);
+  };
+
+  const refreshBriefData = async () => {
+    if (!client) return;
+    const { data } = await client.models.Brief.list({
+      filter: { projectId: { eq: projectId } }
+    });
+    if (data && data.length > 0) {
+      setBrief(data[0]);
+    } else {
+      setBrief(null);
+    }
+  };
+
+  const handleDeleteBrief = async () => {
+    if (!client || !brief) return;
+    setIsDeleting(true);
+    try {
+      await client.models.Brief.delete({ id: brief.id });
+      setBrief(null);
+      setShowDeleteBriefConfirm(false);
+      toast.success('Brief deleted successfully');
+    } catch (error) {
+      console.error('Error deleting brief:', error);
+      toast.error('Failed to delete brief');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleLifecycleStateChange = async (newState: string) => {
@@ -492,6 +521,43 @@ export default function ProjectDetail() {
                     <h2 className="text-2xl font-bold text-white">Creative Brief</h2>
                     <p className="text-slate-400 mt-1">AI-powered brief analysis and project planning</p>
                   </div>
+                  {brief && (
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setShowTeamInvite(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                          <circle cx="9" cy="7" r="4"/>
+                          <line x1="19" y1="8" x2="19" y2="14"/>
+                          <line x1="22" y1="11" x2="16" y2="11"/>
+                        </svg>
+                        Invite Team
+                      </button>
+                      <button
+                        onClick={() => setShowBriefEditor(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                        Edit Brief
+                      </button>
+                      <button
+                        onClick={() => setShowDeleteBriefConfirm(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg transition-colors"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M3 6h18"/>
+                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                        </svg>
+                        Delete
+                      </button>
+                    </div>
+                  )}
                 </div>
                 {brief ? (
                   <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
@@ -504,11 +570,35 @@ export default function ProjectDetail() {
                             <p className="text-slate-300 mt-1">{brief.projectDescription || 'No description'}</p>
                           </div>
                           <div>
+                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Target Audience</label>
+                            <p className="text-slate-300 mt-1">{brief.targetAudience || 'Not specified'}</p>
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Tone</label>
+                            <p className="text-slate-300 mt-1">{brief.tone || 'Not specified'}</p>
+                          </div>
+                          <div>
                             <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Deliverables</label>
                             <div className="flex flex-wrap gap-2 mt-1">
-                              {brief.deliverables?.map((d, i) => (
+                              {brief.deliverables?.length ? brief.deliverables.map((d, i) => (
                                 <span key={i} className="px-3 py-1 bg-slate-800 rounded-full text-sm text-slate-300">{d}</span>
-                              ))}
+                              )) : <span className="text-slate-500">No deliverables specified</span>}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Distribution Channels</label>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {brief.distributionChannels?.length ? brief.distributionChannels.map((c, i) => (
+                                <span key={i} className="px-3 py-1 bg-blue-900/50 rounded-full text-sm text-blue-300">{c}</span>
+                              )) : <span className="text-slate-500">No channels specified</span>}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Crew Roles</label>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {brief.crewRoles?.length ? brief.crewRoles.map((r, i) => (
+                                <span key={i} className="px-3 py-1 bg-purple-900/50 rounded-full text-sm text-purple-300">{r}</span>
+                              )) : <span className="text-slate-500">No roles specified</span>}
                             </div>
                           </div>
                         </div>
@@ -540,6 +630,35 @@ export default function ProjectDetail() {
                               <p className="text-2xl font-bold text-emerald-400 mt-1">
                                 {brief.budgetRange}
                               </p>
+                            </div>
+                          )}
+                          {brief.estimatedDuration && (
+                            <div>
+                              <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Estimated Duration</label>
+                              <p className="text-lg font-semibold text-white mt-1">{brief.estimatedDuration}</p>
+                            </div>
+                          )}
+                          <div className="p-4 bg-slate-800/50 rounded-lg">
+                            <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Risk Factors</label>
+                            <div className="mt-2 space-y-2">
+                              {brief.hasDroneRisk && <span className="block text-sm text-amber-400">• Drone/Aerial Photography</span>}
+                              {brief.hasMinorRisk && <span className="block text-sm text-amber-400">• Minors Involved</span>}
+                              {brief.hasPublicSpaceRisk && <span className="block text-sm text-amber-400">• Public Spaces</span>}
+                              {brief.hasStuntRisk && <span className="block text-sm text-red-400">• Stunts/Action</span>}
+                              {brief.hasHazardousLocationRisk && <span className="block text-sm text-red-400">• Hazardous Locations</span>}
+                              {!brief.hasDroneRisk && !brief.hasMinorRisk && !brief.hasPublicSpaceRisk && !brief.hasStuntRisk && !brief.hasHazardousLocationRisk && (
+                                <span className="block text-sm text-emerald-400">• No significant risk factors identified</span>
+                              )}
+                            </div>
+                          </div>
+                          {brief.requiredPermits && brief.requiredPermits.length > 0 && (
+                            <div>
+                              <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Required Permits</label>
+                              <div className="flex flex-wrap gap-2 mt-1">
+                                {brief.requiredPermits.map((p, i) => (
+                                  <span key={i} className="px-3 py-1 bg-amber-900/50 rounded-full text-sm text-amber-300">{p}</span>
+                                ))}
+                              </div>
                             </div>
                           )}
                         </div>
@@ -1297,6 +1416,459 @@ export default function ProjectDetail() {
           onUploadComplete={() => setShowGovernedIngest(false)}
           onCancel={() => setShowGovernedIngest(false)}
         />
+      )}
+
+      {/* Delete Brief Confirmation Modal */}
+      {showDeleteBriefConfirm && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 rounded-2xl border border-slate-800 max-w-md w-full p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 bg-red-600/20 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-400">
+                  <path d="M3 6h18"/>
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                  <line x1="10" y1="11" x2="10" y2="17"/>
+                  <line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white">Delete Brief?</h3>
+                <p className="text-slate-400 text-sm">This action cannot be undone</p>
+              </div>
+            </div>
+            <p className="text-slate-300 mb-6">
+              Are you sure you want to delete this creative brief? All associated data including AI analysis, risk assessments, and recommendations will be permanently removed.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteBriefConfirm(false)}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteBrief}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isDeleting ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                    </svg>
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete Brief'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Brief Editor Modal */}
+      {showBriefEditor && brief && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-slate-900 rounded-2xl border border-slate-800 max-w-4xl w-full my-8">
+            <BriefEditor
+              brief={brief}
+              projectId={projectId}
+              client={client}
+              onSave={async (updatedBrief) => {
+                setBrief(updatedBrief);
+                setShowBriefEditor(false);
+                toast.success('Brief updated successfully');
+              }}
+              onClose={() => setShowBriefEditor(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Team Invite Modal */}
+      {showTeamInvite && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <TeamInviteModal
+            projectId={projectId}
+            projectName={project?.name || 'Project'}
+            organizationId={project?.organizationId || ''}
+            client={client}
+            userEmail={userEmail}
+            onClose={() => setShowTeamInvite(false)}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Brief Editor Component
+function BriefEditor({
+  brief,
+  projectId,
+  client,
+  onSave,
+  onClose
+}: {
+  brief: Schema["Brief"]["type"];
+  projectId: string;
+  client: ReturnType<typeof generateClient<Schema>> | null;
+  onSave: (brief: Schema["Brief"]["type"]) => void;
+  onClose: () => void;
+}) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    projectDescription: brief.projectDescription || '',
+    targetAudience: brief.targetAudience || '',
+    tone: brief.tone || '',
+    budgetRange: brief.budgetRange || '',
+    estimatedDuration: brief.estimatedDuration || '',
+    deliverables: brief.deliverables?.join(', ') || '',
+    distributionChannels: brief.distributionChannels?.join(', ') || '',
+    crewRoles: brief.crewRoles?.join(', ') || '',
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!client) return;
+
+    setIsLoading(true);
+    try {
+      const { data } = await client.models.Brief.update({
+        id: brief.id,
+        projectDescription: formData.projectDescription,
+        targetAudience: formData.targetAudience,
+        tone: formData.tone,
+        budgetRange: formData.budgetRange,
+        estimatedDuration: formData.estimatedDuration,
+        deliverables: formData.deliverables.split(',').map(s => s.trim()).filter(Boolean),
+        distributionChannels: formData.distributionChannels.split(',').map(s => s.trim()).filter(Boolean),
+        crewRoles: formData.crewRoles.split(',').map(s => s.trim()).filter(Boolean),
+      });
+
+      if (data) {
+        onSave(data);
+      }
+    } catch (error) {
+      console.error('Error updating brief:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Edit Brief</h2>
+          <p className="text-slate-400 mt-1">Update your project brief details</p>
+        </div>
+        <button
+          onClick={onClose}
+          className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-2">Project Description</label>
+          <textarea
+            value={formData.projectDescription}
+            onChange={(e) => setFormData({ ...formData, projectDescription: e.target.value })}
+            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
+            placeholder="Describe your project..."
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Target Audience</label>
+            <input
+              type="text"
+              value={formData.targetAudience}
+              onChange={(e) => setFormData({ ...formData, targetAudience: e.target.value })}
+              className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g., Young professionals 25-35"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Tone</label>
+            <input
+              type="text"
+              value={formData.tone}
+              onChange={(e) => setFormData({ ...formData, tone: e.target.value })}
+              className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g., Professional, Energetic"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Budget Range</label>
+            <input
+              type="text"
+              value={formData.budgetRange}
+              onChange={(e) => setFormData({ ...formData, budgetRange: e.target.value })}
+              className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g., $10,000 - $25,000"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Estimated Duration</label>
+            <input
+              type="text"
+              value={formData.estimatedDuration}
+              onChange={(e) => setFormData({ ...formData, estimatedDuration: e.target.value })}
+              className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g., 4-6 weeks"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-2">Deliverables (comma-separated)</label>
+          <input
+            type="text"
+            value={formData.deliverables}
+            onChange={(e) => setFormData({ ...formData, deliverables: e.target.value })}
+            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="e.g., Main Video, Social Cuts, Behind the Scenes"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-2">Distribution Channels (comma-separated)</label>
+          <input
+            type="text"
+            value={formData.distributionChannels}
+            onChange={(e) => setFormData({ ...formData, distributionChannels: e.target.value })}
+            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="e.g., YouTube, Instagram, Website"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-2">Crew Roles (comma-separated)</label>
+          <input
+            type="text"
+            value={formData.crewRoles}
+            onChange={(e) => setFormData({ ...formData, crewRoles: e.target.value })}
+            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="e.g., Director, DP, Editor"
+          />
+        </div>
+
+        <div className="flex gap-3 pt-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {isLoading ? (
+              <>
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                </svg>
+                Saving...
+              </>
+            ) : (
+              'Save Changes'
+            )}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+// Team Invite Modal Component
+function TeamInviteModal({
+  projectId,
+  projectName,
+  organizationId,
+  client,
+  userEmail,
+  onClose
+}: {
+  projectId: string;
+  projectName: string;
+  organizationId: string;
+  client: ReturnType<typeof generateClient<Schema>> | null;
+  userEmail: string;
+  onClose: () => void;
+}) {
+  const toast = useToast();
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('PROJECT_VIEWER');
+  const [isInviting, setIsInviting] = useState(false);
+  const [invitedMembers, setInvitedMembers] = useState<Array<{ email: string; role: string; status: string }>>([]);
+
+  const handleInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!client || !inviteEmail.trim()) return;
+
+    // Basic email validation
+    if (!inviteEmail.includes('@')) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    setIsInviting(true);
+    try {
+      // Create a project member invitation (status will be ACTIVE once they accept)
+      await client.models.ProjectMember.create({
+        organizationId: organizationId,
+        projectId: projectId,
+        userId: inviteEmail, // Using email as placeholder until they accept
+        email: inviteEmail,
+        projectRole: inviteRole as any,
+        status: 'SUSPENDED', // Suspended until they accept the invitation
+        invitedBy: userEmail,
+        invitedAt: new Date().toISOString(),
+      });
+
+      // Log the activity
+      await client.models.ActivityLog.create({
+        organizationId: organizationId,
+        projectId: projectId,
+        userId: userEmail,
+        userEmail: userEmail,
+        userRole: 'User',
+        action: 'USER_ADDED',
+        targetType: 'ProjectMember',
+        targetId: inviteEmail,
+        targetName: inviteEmail,
+        metadata: JSON.stringify({
+          invitedEmail: inviteEmail,
+          role: inviteRole,
+          inviteStatus: 'PENDING',
+        }),
+      });
+
+      setInvitedMembers([...invitedMembers, { email: inviteEmail, role: inviteRole, status: 'PENDING' }]);
+      setInviteEmail('');
+      toast.success(`Invitation sent to ${inviteEmail}`);
+    } catch (error) {
+      console.error('Error inviting team member:', error);
+      toast.error('Failed to send invitation');
+    } finally {
+      setIsInviting(false);
+    }
+  };
+
+  return (
+    <div className="bg-slate-900 rounded-2xl border border-slate-800 max-w-lg w-full p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-xl font-bold text-white">Invite Team Members</h2>
+          <p className="text-slate-400 text-sm mt-1">Add collaborators to {projectName}</p>
+        </div>
+        <button
+          onClick={onClose}
+          className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <form onSubmit={handleInvite} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
+          <input
+            type="email"
+            value={inviteEmail}
+            onChange={(e) => setInviteEmail(e.target.value)}
+            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="colleague@example.com"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-300 mb-2">Role</label>
+          <select
+            value={inviteRole}
+            onChange={(e) => setInviteRole(e.target.value)}
+            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="PROJECT_VIEWER">Viewer - Can view only</option>
+            <option value="PROJECT_REVIEWER">Reviewer - Can view and leave feedback</option>
+            <option value="PROJECT_EDITOR">Editor - Can edit assigned assets</option>
+            <option value="PROJECT_MANAGER">Manager - Manage schedules and team</option>
+            <option value="PROJECT_OWNER">Owner - Full project access</option>
+          </select>
+        </div>
+
+        <button
+          type="submit"
+          disabled={isInviting || !inviteEmail.trim()}
+          className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          {isInviting ? (
+            <>
+              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+              </svg>
+              Sending Invitation...
+            </>
+          ) : (
+            <>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 2L11 13"/>
+                <path d="M22 2L15 22l-4-9-9-4 20-7z"/>
+              </svg>
+              Send Invitation
+            </>
+          )}
+        </button>
+      </form>
+
+      {invitedMembers.length > 0 && (
+        <div className="mt-6 pt-6 border-t border-slate-800">
+          <h3 className="text-sm font-medium text-slate-400 mb-3">Recently Invited</h3>
+          <div className="space-y-2">
+            {invitedMembers.map((member, i) => (
+              <div key={i} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-600/20 rounded-full flex items-center justify-center">
+                    <span className="text-sm text-blue-400">{member.email.charAt(0).toUpperCase()}</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-white">{member.email}</p>
+                    <p className="text-xs text-slate-500">{member.role}</p>
+                  </div>
+                </div>
+                <span className="px-2 py-1 bg-amber-900/30 text-amber-400 text-xs rounded-full">
+                  Pending
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

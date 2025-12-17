@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Schema } from '@/amplify/data/resource';
-import { Icons, Badge, PhaseBadge, Progress, Avatar, Card } from './ui';
+import { Icons, Badge, PhaseBadge, Progress, Avatar, Card, Button } from './ui';
 
 /**
  * PROJECT CARD - Design System v2.0
@@ -22,6 +22,9 @@ type Project = Schema['Project']['type'];
 interface ProjectCardProps {
   project: Project;
   compact?: boolean;
+  onEdit?: (project: Project) => void;
+  onDelete?: (project: Project) => void;
+  onInviteTeam?: (project: Project) => void;
 }
 
 // Map lifecycle states to phase types for badge
@@ -47,7 +50,7 @@ const priorityVariants: Record<string, 'danger' | 'warning' | 'primary' | 'defau
   'LOW': 'default',
 };
 
-export default function ProjectCard({ project, compact = false }: ProjectCardProps) {
+export default function ProjectCard({ project, compact = false, onEdit, onDelete, onInviteTeam }: ProjectCardProps) {
   // Calculate timeline progress
   const getTimelineProgress = () => {
     if (!project.kickoffDate || !project.deadline) return null;
@@ -101,35 +104,37 @@ export default function ProjectCard({ project, compact = false }: ProjectCardPro
     project.lifecycleState === 'LEGAL_REVIEW' ||
     project.lifecycleState === 'INTAKE';
 
+  const hasActions = onEdit || onDelete || onInviteTeam;
+
   return (
-    <Link href={`/projects/${project.id}`} className="block group">
-      <Card
-        variant="interactive"
-        padding="none"
-        className="overflow-hidden"
-      >
-        {/* Primary Content - Always Visible */}
-        <div className="p-4">
-          {/* Header: Title + Badges */}
-          <div className="flex items-start justify-between gap-3 mb-3">
-            <div className="min-w-0 flex-1">
-              <h3 className="text-[var(--font-base)] font-semibold text-[var(--text-primary)] truncate group-hover:text-[var(--primary)] transition-colors">
-                {project.name}
-              </h3>
-              {!compact && project.description && (
-                <p className="text-[var(--font-sm)] text-[var(--text-secondary)] line-clamp-2 mt-1">
-                  {project.description}
-                </p>
+    <Card
+      variant="interactive"
+      padding="none"
+      className="overflow-hidden"
+    >
+      <Link href={`/projects/${project.id}`} className="block">
+          {/* Primary Content - Always Visible */}
+          <div className="p-4">
+            {/* Header: Title + Badges */}
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="min-w-0 flex-1">
+                <h3 className="text-[var(--font-base)] font-semibold text-[var(--text-primary)] truncate group-hover:text-[var(--primary)] transition-colors">
+                  {project.name}
+                </h3>
+                {!compact && project.description && (
+                  <p className="text-[var(--font-sm)] text-[var(--text-secondary)] line-clamp-2 mt-1">
+                    {project.description}
+                  </p>
+                )}
+              </div>
+
+              {/* Priority indicator - subtle */}
+              {project.priority === 'URGENT' && (
+                <div className="flex-shrink-0">
+                  <Badge variant="danger" size="sm">Urgent</Badge>
+                </div>
               )}
             </div>
-
-            {/* Priority indicator - subtle */}
-            {project.priority === 'URGENT' && (
-              <div className="flex-shrink-0">
-                <Badge variant="danger" size="sm">Urgent</Badge>
-              </div>
-            )}
-          </div>
 
           {/* Phase + Department badges */}
           <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -248,8 +253,63 @@ export default function ProjectCard({ project, compact = false }: ProjectCardPro
             </div>
           </div>
         </div>
-      </Card>
-    </Link>
+      </Link>
+
+      {/* Action Buttons - Always visible in footer */}
+      {hasActions && (
+        <div className="px-4 py-3 bg-[var(--bg-1)] border-t border-[var(--border-subtle)]">
+          <div className="flex items-center justify-end gap-2">
+            {onEdit && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onEdit(project);
+                }}
+                className="flex items-center gap-1.5"
+              >
+                <Icons.Edit className="w-3.5 h-3.5" />
+                Edit
+              </Button>
+            )}
+
+            {onInviteTeam && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onInviteTeam(project);
+                }}
+                className="flex items-center gap-1.5"
+              >
+                <Icons.UserPlus className="w-3.5 h-3.5" />
+                Invite
+              </Button>
+            )}
+
+            {onDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onDelete(project);
+                }}
+                className="flex items-center gap-1.5 text-[var(--danger)] hover:text-[var(--danger)] hover:bg-red-500/10"
+              >
+                <Icons.Trash className="w-3.5 h-3.5" />
+                Delete
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+    </Card>
   );
 }
 

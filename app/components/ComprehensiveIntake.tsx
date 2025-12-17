@@ -2,9 +2,18 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { fetchUserAttributes } from "aws-amplify/auth";
 import type { Schema } from "@/amplify/data/resource";
+import outputs from "@/amplify_outputs.json";
+
+// Ensure Amplify is configured before using services
+try {
+  Amplify.configure(outputs, { ssr: true });
+} catch {
+  // Already configured
+}
 
 /**
  * COMPREHENSIVE PROJECT INTAKE WIZARD
@@ -32,6 +41,13 @@ const SpinnerIcon = () => (
   <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+  </svg>
+);
+
+const CheckCircleIcon = () => (
+  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+    <polyline points="22 4 12 14.01 9 11.01"/>
   </svg>
 );
 
@@ -123,12 +139,16 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
   const [currentStep, setCurrentStep] = useState(1);
 
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    // Use userPool auth for authenticated operations
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>('');
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
+  const [createdProjectName, setCreatedProjectName] = useState<string>('');
 
   useEffect(() => {
     if (!client) return;
@@ -235,18 +255,41 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
       setCurrentStep(3);
     } catch (err) {
       console.error('AI analysis error:', err);
-      setError('Failed to analyze project. Please try again.');
+      // Continue without AI analysis - allow manual project creation
+      updateData('aiResults', null);
+      setCurrentStep(3);
     } finally {
       setIsProcessing(false);
     }
   }
 
+  function skipAIAnalysis() {
+    if (!intakeData.projectDescription?.trim()) {
+      setError("Please enter a project description");
+      return;
+    }
+    updateData('aiResults', null);
+    setCurrentStep(3);
+  }
+
   async function createProject() {
-    if (!client) return;
+    // Immediate feedback that button was clicked
+    console.log('=== createProject STARTED ===');
+    console.log('createProject: client exists:', !!client);
+    console.log('createProject: organizationId:', organizationId);
+    console.log('createProject: intakeData:', JSON.stringify(intakeData, null, 2));
+
+    if (!client) {
+      console.error('createProject: Client not initialized');
+      setError('Client not initialized. Please refresh and try again.');
+      return;
+    }
     setIsProcessing(true);
     setError(null);
+    console.log('createProject: isProcessing set to true, starting API call...');
 
     if (!organizationId) {
+      console.error('createProject: Organization ID not found');
       setError('Organization not found. Please refresh and try again.');
       setIsProcessing(false);
       return;
@@ -260,11 +303,12 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
         (intakeData.budgetDistribution || 0) +
         (intakeData.budgetContingency || 0);
 
-      const newProject = await client?.models.Project.create({
+      const projectData = {
         organizationId: organizationId,
         name: intakeData.projectName || aiResults?.projectName || 'Untitled Project',
         description: intakeData.projectDescription,
-        status: 'DEVELOPMENT',
+        status: 'DEVELOPMENT' as const,
+        lifecycleState: 'INTAKE' as const,
         department: intakeData.department,
         projectType: intakeData.projectType,
         priority: intakeData.priority,
@@ -294,17 +338,27 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
         greenlightFinanceApproved: false,
         greenlightExecutiveApproved: false,
         greenlightClientApproved: false,
-      });
+      };
+
+      console.log('createProject: Creating project with data:', JSON.stringify(projectData, null, 2));
+
+      const newProject = await client.models.Project.create(projectData);
+
+      console.log('createProject: Project creation response:', JSON.stringify(newProject, null, 2));
 
       if (newProject.errors && newProject.errors.length > 0) {
+        console.error('createProject: Project creation errors:', newProject.errors);
         throw new Error(`Failed to create project: ${newProject.errors.map(e => e.message).join(', ')}`);
       }
 
       if (!newProject.data) {
+        console.error('createProject: No data returned from project creation');
         throw new Error('Failed to create project - no data returned');
       }
 
-      await client?.models.Brief.create({
+      console.log('createProject: Creating Brief for project:', newProject.data.id);
+
+      const briefResult = await client.models.Brief.create({
         organizationId: organizationId,
         projectId: newProject.data.id,
         projectDescription: intakeData.projectDescription,
@@ -341,7 +395,11 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
         approvedByFinance: false,
       });
 
-      await client?.models.ActivityLog.create({
+      console.log('createProject: Brief creation response:', JSON.stringify(briefResult, null, 2));
+
+      console.log('createProject: Creating ActivityLog');
+
+      await client.models.ActivityLog.create({
         organizationId: organizationId,
         projectId: newProject.data.id,
         userId: 'USER',
@@ -359,12 +417,31 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
         },
       });
 
-      onComplete();
-      await new Promise(resolve => setTimeout(resolve, 500));
-      router.push(`/projects/${newProject.data.id}`);
-    } catch (err) {
-      console.error('Project creation error:', err);
-      setError('Failed to create project. Please try again.');
+      // Show success popup
+      const projectName = intakeData.projectName || aiResults?.projectName || 'Untitled Project';
+      console.log('=== PROJECT CREATED SUCCESSFULLY ===');
+      console.log('createProject: Project ID:', newProject.data.id);
+      console.log('createProject: Project Name:', projectName);
+      setCreatedProjectId(newProject.data.id);
+      setCreatedProjectName(projectName);
+      setShowSuccess(true);
+      setIsProcessing(false);
+      console.log('createProject: showSuccess set to true');
+    } catch (err: any) {
+      console.error('createProject: Error during project creation:', err);
+      console.error('createProject: Error details:', JSON.stringify(err, null, 2));
+
+      // Extract meaningful error message
+      let errorMessage = 'Failed to create project. ';
+      if (err?.message) {
+        errorMessage += err.message;
+      } else if (err?.errors) {
+        errorMessage += err.errors.map((e: any) => e.message).join(', ');
+      } else {
+        errorMessage += 'Please check the console for details.';
+      }
+
+      setError(errorMessage);
     } finally {
       setIsProcessing(false);
     }
@@ -383,6 +460,90 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
     (intakeData.budgetPostProduction || 0) +
     (intakeData.budgetDistribution || 0) +
     (intakeData.budgetContingency || 0);
+
+  // Handle navigation to project after success
+  function goToProject() {
+    if (createdProjectId) {
+      onComplete();
+      router.push(`/projects/${createdProjectId}`);
+    }
+  }
+
+  function goToDashboard() {
+    onComplete();
+    router.push('/dashboard');
+  }
+
+  // Success Modal
+  if (showSuccess) {
+    return (
+      <div
+        className="fixed inset-0 flex items-center justify-center z-50 p-4"
+        style={{ background: 'rgba(0, 0, 0, 0.8)', backdropFilter: 'blur(4px)' }}
+      >
+        <div
+          className="w-full max-w-md rounded-[16px] p-8 text-center"
+          style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}
+        >
+          {/* Success Icon */}
+          <div
+            className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center"
+            style={{ background: 'var(--success-muted, rgba(16, 185, 129, 0.1))' }}
+          >
+            <div style={{ color: 'var(--success, #10B981)' }}>
+              <CheckCircleIcon />
+            </div>
+          </div>
+
+          {/* Success Message */}
+          <h2
+            className="text-[24px] font-bold mb-2"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            Project Created!
+          </h2>
+          <p
+            className="text-[15px] mb-2"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            Your project brief has been successfully created.
+          </p>
+          <p
+            className="text-[16px] font-semibold mb-6 px-4 py-2 rounded-lg inline-block"
+            style={{ background: 'var(--bg-2)', color: 'var(--primary)' }}
+          >
+            {createdProjectName}
+          </p>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={goToProject}
+              className="w-full px-6 py-3 rounded-[8px] text-[15px] font-semibold transition-all duration-[80ms] active:scale-[0.98]"
+              style={{ background: 'var(--primary)', color: 'white' }}
+            >
+              View Project
+            </button>
+            <button
+              onClick={goToDashboard}
+              className="w-full px-6 py-3 rounded-[8px] text-[15px] font-medium transition-all duration-[80ms]"
+              style={{ background: 'var(--bg-2)', color: 'var(--text-primary)' }}
+            >
+              Go to Dashboard
+            </button>
+          </div>
+
+          {/* Additional Info */}
+          <p
+            className="text-[12px] mt-6"
+            style={{ color: 'var(--text-tertiary)' }}
+          >
+            Stakeholders will be notified for Greenlight approval.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -672,26 +833,40 @@ export default function ComprehensiveIntake({ onComplete, onCancel }: Comprehens
                 >
                   Back
                 </button>
-                <button
-                  onClick={analyzeWithAI}
-                  disabled={isProcessing || !intakeData.projectDescription?.trim()}
-                  className="flex items-center gap-3 px-6 py-3 rounded-[6px] text-sm font-medium transition-all duration-[80ms] active:scale-[0.98]"
-                  style={{
-                    background: (isProcessing || !intakeData.projectDescription?.trim())
-                      ? 'var(--bg-2)' : 'var(--primary)',
-                    color: (isProcessing || !intakeData.projectDescription?.trim())
-                      ? 'var(--text-tertiary)' : 'white',
-                  }}
-                >
-                  {isProcessing ? (
-                    <>
-                      <SpinnerIcon />
-                      Analyzing with AI...
-                    </>
-                  ) : (
-                    'Analyze with AI & Continue'
-                  )}
-                </button>
+                <div className="flex gap-3">
+                  <button
+                    onClick={skipAIAnalysis}
+                    disabled={isProcessing || !intakeData.projectDescription?.trim()}
+                    className="px-6 py-3 rounded-[6px] text-sm font-medium transition-all duration-[80ms]"
+                    style={{
+                      background: 'var(--bg-2)',
+                      color: (!intakeData.projectDescription?.trim())
+                        ? 'var(--text-tertiary)' : 'var(--text-primary)',
+                    }}
+                  >
+                    Skip AI & Continue
+                  </button>
+                  <button
+                    onClick={analyzeWithAI}
+                    disabled={isProcessing || !intakeData.projectDescription?.trim()}
+                    className="flex items-center gap-3 px-6 py-3 rounded-[6px] text-sm font-medium transition-all duration-[80ms] active:scale-[0.98]"
+                    style={{
+                      background: (isProcessing || !intakeData.projectDescription?.trim())
+                        ? 'var(--bg-2)' : 'var(--primary)',
+                      color: (isProcessing || !intakeData.projectDescription?.trim())
+                        ? 'var(--text-tertiary)' : 'white',
+                    }}
+                  >
+                    {isProcessing ? (
+                      <>
+                        <SpinnerIcon />
+                        Analyzing...
+                      </>
+                    ) : (
+                      'Analyze with AI & Continue'
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           )}

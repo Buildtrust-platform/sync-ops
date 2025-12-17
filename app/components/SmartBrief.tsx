@@ -1,8 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
+import outputs from "@/amplify_outputs.json";
+
+// Ensure Amplify is configured before using services
+try {
+  Amplify.configure(outputs, { ssr: true });
+} catch {
+  // Already configured
+}
 
 /**
  * PROJECT BRIEF - Professional Production Brief Creator
@@ -112,9 +121,18 @@ interface Scene {
 
 interface SmartBriefProps {
   organizationId: string;
+  projectId?: string; // If provided, we're editing an existing project's brief
   onComplete: () => void;
   onCancel: () => void;
 }
+
+// Success Check Icon
+const CheckCircleIcon = () => (
+  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+    <polyline points="22 4 12 14.01 9 11.01"/>
+  </svg>
+);
 
 // Collapsible Section Component
 function Section({
@@ -234,8 +252,13 @@ export default function SmartBrief({ organizationId, onComplete, onCancel }: Sma
   const [error, setError] = useState<string | null>(null);
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
 
+  // Success popup state
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
+  const [createdProjectName, setCreatedProjectName] = useState<string>('');
+
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
 
   // Helpers
@@ -304,7 +327,17 @@ export default function SmartBrief({ organizationId, onComplete, onCancel }: Sma
 
   // Create Project
   async function createProject() {
-    if (!client) return;
+    console.log('=== SmartBrief createProject STARTED ===');
+    console.log('SmartBrief: client exists:', !!client);
+    console.log('SmartBrief: organizationId:', organizationId);
+
+    if (!client) {
+      const errorMsg = 'Client not initialized. Please refresh and try again.';
+      console.error('SmartBrief:', errorMsg);
+      setError(errorMsg);
+      alert(errorMsg);
+      return;
+    }
 
     // Validation
     if (!projectName.trim()) {
@@ -318,6 +351,7 @@ export default function SmartBrief({ organizationId, onComplete, onCancel }: Sma
 
     setIsCreating(true);
     setError(null);
+    console.log('SmartBrief: Starting project creation...');
 
     try {
       // Calculate budget based on tier
@@ -402,6 +436,8 @@ export default function SmartBrief({ organizationId, onComplete, onCancel }: Sma
         throw new Error('Failed to create brief - no ID returned');
       }
 
+      console.log('SmartBrief: Brief created successfully:', briefData.data.id);
+
       // Log activity
       await client.models.ActivityLog.create({
         organizationId,
@@ -418,9 +454,15 @@ export default function SmartBrief({ organizationId, onComplete, onCancel }: Sma
         }),
       });
 
-      onComplete();
+      console.log('=== SmartBrief PROJECT CREATED SUCCESSFULLY ===');
+
+      // Show success popup instead of alert
+      setCreatedProjectId(newProject.data.id);
+      setCreatedProjectName(projectName);
+      setShowSuccess(true);
+      setIsCreating(false);
     } catch (err: unknown) {
-      console.error('Error creating project:', err);
+      console.error('SmartBrief: Error creating project:', err);
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       setError(`Failed to create project: ${errorMessage}`);
     } finally {
@@ -462,6 +504,147 @@ export default function SmartBrief({ organizationId, onComplete, onCancel }: Sma
     fontSize: '13px',
     transition: 'all 0.15s',
   };
+
+  // Handle navigation after success
+  function goToProject() {
+    if (createdProjectId) {
+      onComplete();
+      window.location.href = `/projects/${createdProjectId}`;
+    }
+  }
+
+  function stayOnPage() {
+    onComplete();
+  }
+
+  // Success Modal
+  if (showSuccess) {
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.85)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '20px',
+        }}
+      >
+        <div
+          style={{
+            background: 'var(--bg-1)',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '420px',
+            padding: '40px',
+            textAlign: 'center',
+            border: '1px solid var(--border)',
+          }}
+        >
+          {/* Success Icon */}
+          <div
+            style={{
+              width: '80px',
+              height: '80px',
+              margin: '0 auto 24px',
+              borderRadius: '50%',
+              background: 'rgba(16, 185, 129, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#10B981',
+            }}
+          >
+            <CheckCircleIcon />
+          </div>
+
+          {/* Success Message */}
+          <h2
+            style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              color: 'var(--text-primary)',
+              marginBottom: '8px',
+            }}
+          >
+            Project Created!
+          </h2>
+          <p
+            style={{
+              fontSize: '15px',
+              color: 'var(--text-secondary)',
+              marginBottom: '8px',
+            }}
+          >
+            Your project brief has been successfully created.
+          </p>
+          <p
+            style={{
+              fontSize: '16px',
+              fontWeight: '600',
+              color: 'var(--primary)',
+              background: 'var(--bg-2)',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              display: 'inline-block',
+              marginBottom: '32px',
+            }}
+          >
+            {createdProjectName}
+          </p>
+
+          {/* Action Buttons */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <button
+              onClick={goToProject}
+              style={{
+                width: '100%',
+                padding: '14px 24px',
+                borderRadius: '8px',
+                border: 'none',
+                background: 'var(--primary)',
+                color: 'white',
+                fontSize: '15px',
+                fontWeight: '600',
+                cursor: 'pointer',
+              }}
+            >
+              View Project
+            </button>
+            <button
+              onClick={stayOnPage}
+              style={{
+                width: '100%',
+                padding: '14px 24px',
+                borderRadius: '8px',
+                border: 'none',
+                background: 'var(--bg-2)',
+                color: 'var(--text-primary)',
+                fontSize: '15px',
+                fontWeight: '500',
+                cursor: 'pointer',
+              }}
+            >
+              Close
+            </button>
+          </div>
+
+          {/* Additional Info */}
+          <p
+            style={{
+              fontSize: '12px',
+              color: 'var(--text-tertiary)',
+              marginTop: '24px',
+            }}
+          >
+            Stakeholders will be notified for Greenlight approval.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

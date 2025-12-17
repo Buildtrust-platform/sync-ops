@@ -43,7 +43,8 @@ export default function DashboardPage() {
   const [isCheckingOrg, setIsCheckingOrg] = useState(true);
 
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    // Use userPool auth for authenticated operations
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
 
   useEffect(() => {
@@ -63,17 +64,21 @@ export default function DashboardPage() {
           setOrganizationId(memberships[0].organizationId);
           setIsCheckingOrg(false);
         } else {
+          // Check if any organization exists
           const { data: orgs } = await client.models.Organization.list();
           if (orgs && orgs.length > 0) {
             setOrganizationId(orgs[0].id);
             setIsCheckingOrg(false);
           } else {
-            router.push('/onboarding');
+            // No organization found - redirect to onboarding
+            console.log('No organization found, redirecting to onboarding...');
+            router.replace('/onboarding');
             return;
           }
         }
       } catch (err) {
         console.error('Error fetching organization:', err);
+        // On error, still allow dashboard to load (might be a temporary issue)
         setIsCheckingOrg(false);
       }
     }
@@ -81,36 +86,28 @@ export default function DashboardPage() {
     fetchOrganization();
   }, [client, isAuthenticated, router]);
 
-  const listProjects = useCallback(() => {
+  const listProjects = useCallback(async () => {
     if (!isAuthenticated || !organizationId || !client) return;
 
     try {
-      const subscription = client.models.Project.observeQuery({
+      const { data, errors } = await client.models.Project.list({
         filter: { organizationId: { eq: organizationId } }
-      }).subscribe({
-        next: (data) => {
-          if (data?.items) {
-            setProjects([...data.items]);
-          }
-        },
-        error: (error) => {
-          console.error('Error fetching projects:', error);
-          setProjects([]);
-        },
       });
 
-      return () => subscription.unsubscribe();
+      if (errors) {
+        console.error('Error fetching projects:', errors);
+        setProjects([]);
+      } else if (data) {
+        setProjects([...data]);
+      }
     } catch (error) {
-      console.error('Error setting up project subscription:', error);
+      console.error('Error fetching projects:', error);
       setProjects([]);
     }
   }, [client, isAuthenticated, organizationId]);
 
   useEffect(() => {
-    const cleanup = listProjects();
-    return () => {
-      if (cleanup) cleanup();
-    };
+    listProjects();
   }, [listProjects]);
 
   function openIntakeWizard() {
@@ -141,6 +138,8 @@ export default function DashboardPage() {
             openIntakeWizard={openIntakeWizard}
             handleIntakeComplete={handleIntakeComplete}
             closeIntakeWizard={closeIntakeWizard}
+            onRefreshProjects={listProjects}
+            organizationId={organizationId}
           />
         )}
       </AuthWrapper>
@@ -159,6 +158,8 @@ function AuthenticatedApp({
   openIntakeWizard,
   handleIntakeComplete,
   closeIntakeWizard,
+  onRefreshProjects,
+  organizationId,
 }: {
   user: any;
   signOut: (() => void) | undefined;
@@ -170,6 +171,8 @@ function AuthenticatedApp({
   openIntakeWizard: () => void;
   handleIntakeComplete: () => void;
   closeIntakeWizard: () => void;
+  onRefreshProjects: () => void;
+  organizationId: string | null;
 }) {
   useEffect(() => {
     if (user && !isAuthenticated) {
@@ -197,6 +200,9 @@ function AuthenticatedApp({
       <GlobalDashboard
         projects={projects}
         onCreateProject={openIntakeWizard}
+        onRefreshProjects={onRefreshProjects}
+        organizationId={organizationId || undefined}
+        userEmail={user?.signInDetails?.loginId}
       />
       {showIntakeWizard && (
         <ComprehensiveIntake
