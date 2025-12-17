@@ -78,7 +78,7 @@ export default function DailyProductionReport({
 
   // Initialize client
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
 
   // Load DPRs for this project
@@ -120,12 +120,12 @@ export default function DailyProductionReport({
 
     loadDPRs();
 
-    // Subscribe to real-time updates
-    const subscription = client.models.DailyProductionReport.observeQuery({
+    // Load DPRs with list query
+    client.models.DailyProductionReport.list({
       filter: { projectId: { eq: projectId } }
-    }).subscribe({
-      next: ({ items }) => {
-        const sorted = [...items].sort((a, b) =>
+    }).then((data) => {
+      if (data.data) {
+        const sorted = [...data.data].sort((a, b) =>
           new Date(b.date || '').getTime() - new Date(a.date || '').getTime()
         );
         if (sorted.length > 0 && !currentDPR) {
@@ -134,9 +134,7 @@ export default function DailyProductionReport({
         }
         setDprHistory(sorted.slice(1));
       }
-    });
-
-    return () => subscription.unsubscribe();
+    }).catch(console.error);
   }, [client, projectId]);
 
   // Load shot logs for current DPR
@@ -156,14 +154,12 @@ export default function DailyProductionReport({
 
     loadShotLogs();
 
-    // Subscribe to real-time updates
-    const subscription = client.models.ShotLog.observeQuery({
+    // Load shot logs with list query
+    client.models.ShotLog.list({
       filter: { dprId: { eq: currentDPR.id } }
-    }).subscribe({
-      next: ({ items }) => setShotLogs([...items])
-    });
-
-    return () => subscription.unsubscribe();
+    }).then((data) => {
+      if (data.data) setShotLogs([...data.data]);
+    }).catch(console.error);
   }, [client, currentDPR?.id]);
 
   const loadFormData = (dpr: DPRType) => {

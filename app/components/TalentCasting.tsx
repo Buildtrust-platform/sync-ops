@@ -160,7 +160,7 @@ export default function TalentCasting({
 
   // Initialize client
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
 
   // Form states

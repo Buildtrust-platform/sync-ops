@@ -204,7 +204,7 @@ export default function TaskManager({
 
   // Initialize client on mount only (avoids SSR hydration issues)
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
@@ -227,19 +227,14 @@ export default function TaskManager({
     if (!client) return;
     loadTasks();
 
-    // Subscribe to real-time updates
-    const subscription = client.models.Task.observeQuery({
+    // Load tasks with list query
+    client.models.Task.list({
       filter: { projectId: { eq: projectId } },
-    }).subscribe({
-      next: (data) => {
-        if (data?.items) {
-          setTasks(data.items as unknown as Task[]);
-        }
-      },
-      error: (error: Error) => console.error('Error loading tasks:', error),
-    });
-
-    return () => subscription.unsubscribe();
+    }).then((data) => {
+      if (data.data) {
+        setTasks(data.data as unknown as Task[]);
+      }
+    }).catch(console.error);
   }, [projectId, client]);
 
   const loadTasks = async () => {

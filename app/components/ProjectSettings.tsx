@@ -26,7 +26,7 @@ export default function ProjectSettings({ project, onUpdate }: ProjectSettingsPr
 
   // Initialize client on mount only (avoids SSR hydration issues)
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 

@@ -27,7 +27,7 @@ import { useToast } from "./Toast";
  * - Multiple view modes (grid, list, masonry)
  */
 
-const client = generateClient<Schema>();
+const client = generateClient<Schema>({ authMode: 'userPool' });
 
 // Collection type colors
 const COLLECTION_TYPE_COLORS: Record<string, string> = {
@@ -344,18 +344,18 @@ export default function Collections({
         organizationId,
         token,
         name: `Share: ${selectedCollection.collection.name}`,
-        shareType: 'COLLECTION',
-        targetIds: [selectedCollection.collection.id],
-        allowPreview: true,
+        collectionId: selectedCollection.collection.id,
+        type: 'REVIEW',
         allowDownload: false,
-        allowComment: false,
-        downloadQuality: 'PROXY_ONLY',
-        isActive: true,
-        viewCount: 0,
-        downloadCount: 0,
+        allowComments: true,
+        allowAnnotations: false,
+        requireApproval: false,
+        brandingEnabled: true,
+        watermarkEnabled: false,
+        status: 'ACTIVE',
+        currentViews: 0,
         createdBy: userId,
         createdByEmail: userEmail,
-        createdAt: new Date().toISOString(),
       });
 
       // Update collection with share link

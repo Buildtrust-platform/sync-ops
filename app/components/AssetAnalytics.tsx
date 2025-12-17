@@ -181,7 +181,7 @@ export default function AssetAnalytics({
   });
 
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
 
   // Load real data from Amplify backend

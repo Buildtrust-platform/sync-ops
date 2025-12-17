@@ -623,7 +623,7 @@ export default function PolicyEngine({
 
   // Initialize client on mount only (avoids SSR hydration issues)
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
 
   // Available countries from database

@@ -269,7 +269,7 @@ export default function AssetRelationshipGraph({
 
   // Initialize client
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
 
   // Load nodes from Asset model and relationships from localStorage

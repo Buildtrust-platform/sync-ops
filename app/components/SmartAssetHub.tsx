@@ -270,7 +270,7 @@ export default function SmartAssetHub({
 
   // Initialize Amplify client
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
 
   // Load real data from Amplify

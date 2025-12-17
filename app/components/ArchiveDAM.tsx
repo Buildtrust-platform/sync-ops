@@ -17,7 +17,7 @@ import AssetCard from "./AssetCard";
  * - Batch operations
  */
 
-const client = generateClient<Schema>();
+const client = generateClient<Schema>({ authMode: 'userPool' });
 
 // Storage tiers
 const STORAGE_TIERS = {

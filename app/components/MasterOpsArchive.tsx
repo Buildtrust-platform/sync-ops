@@ -72,7 +72,7 @@ export default function MasterOpsArchive({ projectId, project, organizationId, c
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
 
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
 
   // State

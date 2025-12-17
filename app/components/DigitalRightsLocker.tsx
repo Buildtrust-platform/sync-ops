@@ -311,7 +311,7 @@ export default function DigitalRightsLocker({
   const [documents, setDocuments] = useState<RightsDocument[]>([]);
 
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -367,22 +367,17 @@ export default function DigitalRightsLocker({
       return;
     }
 
-    const subscription = client.models.RightsDocument.observeQuery({
+    client.models.RightsDocument.list({
       filter: { projectId: { eq: projectId } },
-    }).subscribe({
-      next: (data) => {
-        if (data?.items) {
-          setDocuments(data.items as unknown as RightsDocument[]);
-        }
-        setIsLoading(false);
-      },
-      error: (error) => {
-        console.error("Error loading documents:", error);
-        setIsLoading(false);
-      },
+    }).then((data) => {
+      if (data.data) {
+        setDocuments(data.data as unknown as RightsDocument[]);
+      }
+      setIsLoading(false);
+    }).catch((error) => {
+      console.error("Error loading documents:", error);
+      setIsLoading(false);
     });
-
-    return () => subscription.unsubscribe();
   }, [client, projectId]);
 
   // Statistics

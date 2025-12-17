@@ -573,7 +573,7 @@ export default function TeamManagement({
   const [activeView, setActiveView] = useState<'directory' | 'permissions' | 'activity'>('directory');
 
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);

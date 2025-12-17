@@ -164,7 +164,7 @@ export default function GreenlightStatus({ project, currentUserEmail, onApproval
   const [expandedRole, setExpandedRole] = useState<string | null>(null);
 
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
   const [comment, setComment] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);

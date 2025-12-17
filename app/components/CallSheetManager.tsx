@@ -6,7 +6,7 @@ import { fetchUserAttributes } from 'aws-amplify/auth';
 import type { Schema } from '@/amplify/data/resource';
 import { Icons, Button, Badge } from './ui';
 
-const client = generateClient<Schema>();
+const client = generateClient<Schema>({ authMode: 'userPool' });
 
 interface CallSheetManagerProps {
   projectId: string;

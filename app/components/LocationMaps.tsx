@@ -75,7 +75,7 @@ export default function LocationMaps({ projectId, project, currentUserEmail }: L
 
   // Initialize client on mount only (avoids SSR hydration issues)
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'map' | 'list' | 'distances' | 'route'>('map');

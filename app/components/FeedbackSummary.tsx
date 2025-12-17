@@ -123,7 +123,7 @@ export default function FeedbackSummary({ comments }: FeedbackSummaryProps) {
   const [summary, setSummary] = useState<FeedbackSummaryData | null>(null);
 
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

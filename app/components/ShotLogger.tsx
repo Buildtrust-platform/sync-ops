@@ -64,7 +64,7 @@ export default function ShotLogger({
 
   // Initialize client
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
 
   // Load shots for this project
@@ -91,19 +91,17 @@ export default function ShotLogger({
 
     loadShots();
 
-    // Subscribe to real-time updates
-    const subscription = client.models.ShotLog.observeQuery({
+    // Load shots with list query
+    client.models.ShotLog.list({
       filter: { projectId: { eq: projectId } }
-    }).subscribe({
-      next: ({ items }) => {
-        const sorted = [...items].sort((a, b) =>
+    }).then((data) => {
+      if (data.data) {
+        const sorted = [...data.data].sort((a, b) =>
           new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime()
         );
         setShots(sorted);
       }
-    });
-
-    return () => subscription.unsubscribe();
+    }).catch(console.error);
   }, [client, projectId]);
 
   const getStatusColor = (status: string | null | undefined) => {

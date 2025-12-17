@@ -190,7 +190,7 @@ export default function SafetyRisk({
 
   // Initialize client
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
 
   // Form states

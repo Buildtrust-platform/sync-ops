@@ -84,7 +84,7 @@ export default function GovernedIngest({ projectId, organizationId, userId, user
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
 
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
 
   // File state

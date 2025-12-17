@@ -153,7 +153,7 @@ export default function EquipmentOS({
 
   // Initialize client on mount only (avoids SSR hydration issues)
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
   const [checkouts, setCheckouts] = useState<EquipmentCheckoutRecord[]>([]);
   const [rentals, setRentals] = useState<EquipmentRental[]>([]);
@@ -224,50 +224,34 @@ export default function EquipmentOS({
       return;
     }
 
-    const equipmentSub = client.models.Equipment.observeQuery().subscribe({
-      next: (data) => {
-        if (data?.items) {
-          setEquipment(data.items as unknown as Equipment[]);
-        }
-        setIsLoading(false);
-      },
-      error: (error) => {
-        console.error("Error loading equipment:", error);
-        setIsLoading(false);
-      },
+    client.models.Equipment.list().then((data) => {
+      if (data.data) {
+        setEquipment(data.data as unknown as Equipment[]);
+      }
+      setIsLoading(false);
+    }).catch((error) => {
+      console.error("Error loading equipment:", error);
+      setIsLoading(false);
     });
 
-    const checkoutSub = client.models.EquipmentCheckout.observeQuery({
+    client.models.EquipmentCheckout.list({
       filter: { status: { eq: "CHECKED_OUT" } },
-    }).subscribe({
-      next: (data) => {
-        if (data?.items) {
-          setCheckouts(data.items as unknown as EquipmentCheckoutRecord[]);
-        }
-      },
-      error: (error) => console.error("Error loading checkouts:", error),
-    });
+    }).then((data) => {
+      if (data.data) {
+        setCheckouts(data.data as unknown as EquipmentCheckoutRecord[]);
+      }
+    }).catch(console.error);
 
     // Load equipment rentals for this project
-    let rentalSub: { unsubscribe: () => void } | null = null;
     if (projectId && client.models.EquipmentRental) {
-      rentalSub = client.models.EquipmentRental.observeQuery({
+      client.models.EquipmentRental.list({
         filter: { projectId: { eq: projectId } },
-      }).subscribe({
-        next: (data) => {
-          if (data?.items) {
-            setRentals(data.items as unknown as EquipmentRental[]);
-          }
-        },
-        error: (error) => console.error("Error loading rentals:", error),
-      });
+      }).then((data) => {
+        if (data.data) {
+          setRentals(data.data as unknown as EquipmentRental[]);
+        }
+      }).catch(console.error);
     }
-
-    return () => {
-      equipmentSub.unsubscribe();
-      checkoutSub.unsubscribe();
-      rentalSub?.unsubscribe();
-    };
   }, [client, projectId]);
 
   // Filter equipment

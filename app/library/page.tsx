@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
 import { Authenticator } from '@aws-amplify/ui-react';
+import { fetchUserAttributes } from 'aws-amplify/auth';
 import GlobalNav from '../components/GlobalNav';
+import TranscriptSearch from '../components/TranscriptSearch';
 
 /**
  * LIBRARY PAGE
@@ -68,16 +70,60 @@ const PackageIcon = () => (
   </svg>
 );
 
+const MicIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+    <line x1="12" y1="19" x2="12" y2="23"/>
+    <line x1="8" y1="23" x2="16" y2="23"/>
+  </svg>
+);
+
+const FileTextSmallIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <polyline points="14,2 14,8 20,8"/>
+    <line x1="16" y1="13" x2="8" y2="13"/>
+    <line x1="16" y1="17" x2="8" y2="17"/>
+  </svg>
+);
+
 export default function LibraryPage() {
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [assets, setAssets] = useState<Schema['Asset']['type'][]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('ALL');
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'assets' | 'transcripts'>('assets');
 
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
+
+  // Fetch user's organization
+  useEffect(() => {
+    if (!client) return;
+    const currentClient = client; // Capture for closure
+    async function fetchOrganization() {
+      try {
+        const userAttributes = await fetchUserAttributes();
+        const userSub = userAttributes.sub;
+        if (!userSub) return;
+
+        const { data: memberships } = await currentClient.models.OrganizationMember.list({
+          filter: { userId: { eq: userSub } }
+        });
+
+        if (memberships && memberships.length > 0) {
+          setOrganizationId(memberships[0].organizationId);
+        }
+      } catch (err) {
+        console.error('Error fetching organization:', err);
+      }
+    }
+    fetchOrganization();
+  }, [client]);
 
   useEffect(() => {
     if (!client) return;
@@ -154,160 +200,226 @@ export default function LibraryPage() {
               </div>
             </div>
 
-            {/* Search and Filters */}
+            {/* View Mode Tabs */}
             <div
-              className="rounded-[12px] p-4 mb-6"
+              className="flex gap-1 p-1 rounded-[10px] mb-6 w-fit"
               style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}
             >
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 relative">
-                  <div
-                    className="absolute left-3 top-1/2 -translate-y-1/2"
-                    style={{ color: 'var(--text-tertiary)' }}
-                  >
-                    <SearchIcon />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search assets by name, description, or tags..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-[10px] transition-all duration-[80ms]"
-                    style={{
-                      background: 'var(--bg-2)',
-                      border: '1px solid var(--border)',
-                      color: 'var(--text-primary)',
-                    }}
-                  />
-                </div>
-                <div
-                  className="flex gap-1 p-1 rounded-[10px]"
-                  style={{ background: 'var(--bg-2)' }}
-                >
-                  {assetTypes.map(type => (
-                    <button
-                      key={type}
-                      onClick={() => setFilterType(type)}
-                      className="px-4 py-2 rounded-[6px] text-sm font-medium transition-all duration-[80ms]"
-                      style={{
-                        background: filterType === type ? 'var(--primary)' : 'transparent',
-                        color: filterType === type ? 'white' : 'var(--text-secondary)',
-                      }}
-                    >
-                      {type}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <button
+                onClick={() => setViewMode('assets')}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-[8px] text-sm font-medium transition-all duration-[80ms]"
+                style={{
+                  background: viewMode === 'assets' ? 'var(--primary)' : 'transparent',
+                  color: viewMode === 'assets' ? 'white' : 'var(--text-secondary)',
+                }}
+              >
+                <FileTextSmallIcon />
+                Browse Assets
+              </button>
+              <button
+                onClick={() => setViewMode('transcripts')}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-[8px] text-sm font-medium transition-all duration-[80ms]"
+                style={{
+                  background: viewMode === 'transcripts' ? 'var(--primary)' : 'transparent',
+                  color: viewMode === 'transcripts' ? 'white' : 'var(--text-secondary)',
+                }}
+              >
+                <MicIcon />
+                Search Transcripts
+              </button>
             </div>
 
-            {/* Assets Grid */}
-            {isLoading ? (
-              <div className="flex items-center justify-center h-64">
+            {viewMode === 'assets' ? (
+              <>
+                {/* Search and Filters */}
                 <div
-                  className="animate-spin rounded-full h-8 w-8 border-b-2"
-                  style={{ borderColor: 'var(--primary)' }}
-                />
-              </div>
-            ) : filteredAssets.length === 0 ? (
-              <div
-                className="rounded-[12px] p-12 text-center"
-                style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}
-              >
-                <div
-                  className="mb-4 inline-block"
-                  style={{ color: 'var(--text-tertiary)' }}
-                >
-                  <PackageIcon />
-                </div>
-                <h3
-                  className="text-lg font-semibold mb-2"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  No assets found
-                </h3>
-                <p
-                  className="text-sm"
-                  style={{ color: 'var(--text-secondary)' }}
-                >
-                  {searchQuery || filterType !== 'ALL'
-                    ? 'Try adjusting your search or filters'
-                    : 'Upload assets to your projects to see them here'}
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {filteredAssets.map(asset => (
-                  <div
-                    key={asset.id}
-                    className="rounded-[12px] overflow-hidden transition-all duration-[80ms] cursor-pointer hover:translate-y-[-2px]"
-                    style={{
-                      background: 'var(--bg-1)',
-                      border: '1px solid var(--border)',
-                      boxShadow: 'var(--shadow-sm)',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-                      e.currentTarget.style.borderColor = 'var(--border-hover)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
-                      e.currentTarget.style.borderColor = 'var(--border)';
-                    }}
-                  >
-                    <div
-                      className="aspect-video flex items-center justify-center"
-                      style={{ background: 'var(--bg-2)', color: getAssetIconColor(asset.type) }}
-                    >
-                      {getAssetIcon(asset.type)}
-                    </div>
-                    <div className="p-3">
-                      <h4
-                        className="font-medium truncate text-sm"
-                        style={{ color: 'var(--text-primary)' }}
-                      >
-                        {asset.s3Key?.split('/').pop() || 'Untitled'}
-                      </h4>
-                      <p
-                        className="text-[12px] mt-1"
-                        style={{ color: 'var(--text-tertiary)' }}
-                      >
-                        {asset.type || 'Unknown'} • v{asset.version || 1}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Stats */}
-            <div className="mt-8 grid grid-cols-4 gap-4">
-              {[
-                { label: 'Total Assets', value: assets.length },
-                { label: 'Videos', value: assets.filter(a => a.mimeType?.includes('video')).length },
-                { label: 'Images', value: assets.filter(a => a.mimeType?.includes('image')).length },
-                { label: 'Documents', value: assets.filter(a => a.type === 'DOCUMENT').length },
-              ].map((stat, idx) => (
-                <div
-                  key={idx}
-                  className="rounded-[12px] p-4 text-center"
+                  className="rounded-[12px] p-4 mb-6"
                   style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}
                 >
-                  <p
-                    className="text-2xl font-bold"
-                    style={{ color: 'var(--text-primary)' }}
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <div className="flex-1 relative">
+                      <div
+                        className="absolute left-3 top-1/2 -translate-y-1/2"
+                        style={{ color: 'var(--text-tertiary)' }}
+                      >
+                        <SearchIcon />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Search assets by name, description, or tags..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2.5 text-sm rounded-[10px] transition-all duration-[80ms]"
+                        style={{
+                          background: 'var(--bg-2)',
+                          border: '1px solid var(--border)',
+                          color: 'var(--text-primary)',
+                        }}
+                      />
+                    </div>
+                    <div
+                      className="flex gap-1 p-1 rounded-[10px]"
+                      style={{ background: 'var(--bg-2)' }}
+                    >
+                      {assetTypes.map(type => (
+                        <button
+                          key={type}
+                          onClick={() => setFilterType(type)}
+                          className="px-4 py-2 rounded-[6px] text-sm font-medium transition-all duration-[80ms]"
+                          style={{
+                            background: filterType === type ? 'var(--primary)' : 'transparent',
+                            color: filterType === type ? 'white' : 'var(--text-secondary)',
+                          }}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Assets Grid */}
+                {isLoading ? (
+                  <div className="flex items-center justify-center h-64">
+                    <div
+                      className="animate-spin rounded-full h-8 w-8 border-b-2"
+                      style={{ borderColor: 'var(--primary)' }}
+                    />
+                  </div>
+                ) : filteredAssets.length === 0 ? (
+                  <div
+                    className="rounded-[12px] p-12 text-center"
+                    style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}
                   >
-                    {stat.value}
-                  </p>
+                    <div
+                      className="mb-4 inline-block"
+                      style={{ color: 'var(--text-tertiary)' }}
+                    >
+                      <PackageIcon />
+                    </div>
+                    <h3
+                      className="text-lg font-semibold mb-2"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      No assets found
+                    </h3>
+                    <p
+                      className="text-sm"
+                      style={{ color: 'var(--text-secondary)' }}
+                    >
+                      {searchQuery || filterType !== 'ALL'
+                        ? 'Try adjusting your search or filters'
+                        : 'Upload assets to your projects to see them here'}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    {filteredAssets.map(asset => (
+                      <div
+                        key={asset.id}
+                        className="rounded-[12px] overflow-hidden transition-all duration-[80ms] cursor-pointer hover:translate-y-[-2px]"
+                        style={{
+                          background: 'var(--bg-1)',
+                          border: '1px solid var(--border)',
+                          boxShadow: 'var(--shadow-sm)',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                          e.currentTarget.style.borderColor = 'var(--border-hover)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+                          e.currentTarget.style.borderColor = 'var(--border)';
+                        }}
+                      >
+                        <div
+                          className="aspect-video flex items-center justify-center"
+                          style={{ background: 'var(--bg-2)', color: getAssetIconColor(asset.type) }}
+                        >
+                          {getAssetIcon(asset.type)}
+                        </div>
+                        <div className="p-3">
+                          <h4
+                            className="font-medium truncate text-sm"
+                            style={{ color: 'var(--text-primary)' }}
+                          >
+                            {asset.s3Key?.split('/').pop() || 'Untitled'}
+                          </h4>
+                          <p
+                            className="text-[12px] mt-1"
+                            style={{ color: 'var(--text-tertiary)' }}
+                          >
+                            {asset.type || 'Unknown'} • v{asset.version || 1}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Stats */}
+                <div className="mt-8 grid grid-cols-4 gap-4">
+                  {[
+                    { label: 'Total Assets', value: assets.length },
+                    { label: 'Videos', value: assets.filter(a => a.mimeType?.includes('video')).length },
+                    { label: 'Images', value: assets.filter(a => a.mimeType?.includes('image')).length },
+                    { label: 'Documents', value: assets.filter(a => a.type === 'DOCUMENT').length },
+                  ].map((stat, idx) => (
+                    <div
+                      key={idx}
+                      className="rounded-[12px] p-4 text-center"
+                      style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}
+                    >
+                      <p
+                        className="text-2xl font-bold"
+                        style={{ color: 'var(--text-primary)' }}
+                      >
+                        {stat.value}
+                      </p>
+                      <p
+                        className="text-sm"
+                        style={{ color: 'var(--text-secondary)' }}
+                      >
+                        {stat.label}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              /* Transcript Search View */
+              organizationId ? (
+                <TranscriptSearch
+                  organizationId={organizationId}
+                  onResultClick={(assetId, timecode) => {
+                    // Navigate to the asset with the timecode
+                    // Find the project for this asset
+                    const asset = assets.find(a => a.id === assetId);
+                    if (asset?.projectId) {
+                      window.location.href = `/projects/${asset.projectId}?asset=${assetId}&t=${timecode}`;
+                    }
+                  }}
+                />
+              ) : (
+                <div
+                  className="rounded-[12px] p-12 text-center"
+                  style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}
+                >
+                  <div
+                    className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"
+                    style={{ background: 'var(--bg-2)', color: 'var(--text-tertiary)' }}
+                  >
+                    <MicIcon />
+                  </div>
                   <p
                     className="text-sm"
                     style={{ color: 'var(--text-secondary)' }}
                   >
-                    {stat.label}
+                    Loading organization...
                   </p>
                 </div>
-              ))}
-            </div>
+              )
+            )}
           </main>
         </div>
       )}

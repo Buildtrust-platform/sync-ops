@@ -25,7 +25,7 @@ import {
  * - Field grouping for organized display
  */
 
-const client = generateClient<Schema>();
+const client = generateClient<Schema>({ authMode: 'userPool' });
 
 // Field type definitions
 const FIELD_TYPES = [

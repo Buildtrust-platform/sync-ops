@@ -15,7 +15,7 @@ try {
   // Already configured
 }
 
-const client = generateClient<Schema>();
+const client = generateClient<Schema>({ authMode: 'userPool' });
 
 /**
  * SMART ARCHIVE INTELLIGENCE

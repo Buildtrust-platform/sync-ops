@@ -237,7 +237,7 @@ export default function FieldIntelligence({ project, onUpdate }: FieldIntelligen
       const riskAlerts = generateRiskAlerts(data);
       const healthAlerts = generateHealthAlerts(data);
 
-      const client = generateClient<Schema>();
+      const client = generateClient<Schema>({ authMode: 'userPool' });
 
       await client.models.Project.update({
         id: project.id,

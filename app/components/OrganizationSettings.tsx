@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import WatermarkConfig from './WatermarkConfig';
 
 interface Organization {
   id: string;
@@ -888,6 +889,14 @@ export default function OrganizationSettings() {
         <div className="text-sm text-slate-500">
           Last activity: John Smith logged in from Los Angeles, CA - 2 hours ago
         </div>
+      </div>
+
+      {/* Forensic Watermarking */}
+      <div className="bg-white border border-slate-200 rounded-xl p-6">
+        <WatermarkConfig
+          organizationId={organization.id}
+          previewMode={false}
+        />
       </div>
     </div>
   );

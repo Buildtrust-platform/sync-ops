@@ -50,7 +50,7 @@ export default function CalendarSync({ projectId, project, currentUserEmail }: C
 
   // Initialize client on mount only (avoids SSR hydration issues)
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
   const [tasks, setTasks] = useState<Schema['Task']['type'][]>([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
@@ -78,13 +78,11 @@ export default function CalendarSync({ projectId, project, currentUserEmail }: C
   useEffect(() => {
     if (!projectId || !client) return;
 
-    const taskSub = client.models.Task.observeQuery({
+    client.models.Task.list({
       filter: { projectId: { eq: projectId } }
-    }).subscribe({
-      next: (data) => setTasks([...data.items]),
-    });
-
-    return () => taskSub.unsubscribe();
+    }).then((data) => {
+      if (data.data) setTasks([...data.data]);
+    }).catch(console.error);
   }, [projectId, client]);
 
   // Generate calendar events from project data

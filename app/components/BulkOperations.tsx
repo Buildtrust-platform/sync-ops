@@ -26,7 +26,7 @@ import { useToast } from "./Toast";
  * - Archive/unarchive multiple assets
  */
 
-const client = generateClient<Schema>();
+const client = generateClient<Schema>({ authMode: 'userPool' });
 
 // Available bulk operations
 const BULK_OPERATIONS = [

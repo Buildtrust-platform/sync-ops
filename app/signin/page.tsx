@@ -3,21 +3,63 @@
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { generateClient } from 'aws-amplify/data';
+import { fetchUserAttributes } from 'aws-amplify/auth';
+import type { Schema } from '@/amplify/data/resource';
 
-// Authenticated user redirect component
+// Authenticated user redirect component - checks for org before redirecting
 function AuthenticatedRedirect() {
   const router = useRouter();
+  const [status, setStatus] = useState('Checking your account...');
 
   useEffect(() => {
-    router.push('/dashboard');
+    async function checkOrgAndRedirect() {
+      try {
+        // Use userPool auth for authenticated operations
+        const client = generateClient<Schema>({ authMode: 'userPool' });
+        const attributes = await fetchUserAttributes();
+        const email = attributes.email || '';
+
+        setStatus('Finding your organization...');
+
+        // Check if user has an organization
+        const { data: memberships } = await client.models.OrganizationMember.list({
+          filter: { email: { eq: email } }
+        });
+
+        if (memberships && memberships.length > 0) {
+          // User has an organization - go to dashboard
+          setStatus('Welcome back! Loading dashboard...');
+          router.push('/dashboard');
+        } else {
+          // Check if any organization exists (for demo/dev purposes)
+          const { data: orgs } = await client.models.Organization.list();
+          if (orgs && orgs.length > 0) {
+            setStatus('Welcome back! Loading dashboard...');
+            router.push('/dashboard');
+          } else {
+            // No organization - go to onboarding
+            setStatus('Setting up your workspace...');
+            router.push('/onboarding');
+          }
+        }
+      } catch (err) {
+        console.error('Error checking organization:', err);
+        // On error, try onboarding (they might need to set up)
+        setStatus('Setting up your workspace...');
+        router.push('/onboarding');
+      }
+    }
+
+    checkOrgAndRedirect();
   }, [router]);
 
   return (
     <div className="flex items-center justify-center py-12">
       <div className="text-center">
         <div className="w-8 h-8 border-2 border-gray-900 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-        <p className="text-gray-600 text-sm">Redirecting...</p>
+        <p className="text-gray-600 text-sm">{status}</p>
       </div>
     </div>
   );

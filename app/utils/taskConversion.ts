@@ -6,7 +6,7 @@ let _client: ReturnType<typeof generateClient<Schema>> | null = null;
 
 function getClient() {
   if (!_client) {
-    _client = generateClient<Schema>();
+    _client = generateClient<Schema>({ authMode: 'userPool' });
   }
   return _client;
 }

@@ -280,7 +280,7 @@ export default function AutomatedDeliveryPipeline({
   const processingJobsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
 
   // Toast helper

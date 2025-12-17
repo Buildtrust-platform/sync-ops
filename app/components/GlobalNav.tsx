@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
@@ -30,6 +30,7 @@ interface NavItem {
 
 export default function GlobalNav({ userEmail, onSignOut }: GlobalNavProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -44,26 +45,31 @@ export default function GlobalNav({ userEmail, onSignOut }: GlobalNavProps) {
 
   // Initialize client on mount only (avoids SSR hydration issues)
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    // Use userPool auth for authenticated operations
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
 
   useEffect(() => {
     if (!userEmail || !client) return;
     if (!client.models.Notification) return;
+    const notificationClient = client; // Capture for closure
 
-    const subscription = client.models.Notification.observeQuery({
-      filter: {
-        userId: { eq: userEmail },
-        isRead: { ne: true },
-      },
-    }).subscribe({
-      next: (data) => {
-        if (data?.items) setUnreadCount(data.items.length);
-      },
-      error: (error) => console.error('Error loading unread count:', error),
-    });
+    // Use list query instead of observeQuery to avoid subscription errors
+    async function fetchUnreadCount() {
+      try {
+        const { data } = await notificationClient.models.Notification.list({
+          filter: {
+            userId: { eq: userEmail },
+            isRead: { ne: true },
+          },
+        });
+        if (data) setUnreadCount(data.length);
+      } catch (error) {
+        console.error('Error loading unread count:', error);
+      }
+    }
 
-    return () => subscription.unsubscribe();
+    fetchUnreadCount();
   }, [userEmail, client]);
 
   // Close user menu on outside click
@@ -199,7 +205,11 @@ export default function GlobalNav({ userEmail, onSignOut }: GlobalNavProps) {
                       <>
                         <div className="border-t border-[var(--border-subtle)] my-1" />
                         <button
-                          onClick={onSignOut}
+                          onClick={() => {
+                            onSignOut();
+                            // Redirect to landing page after sign out
+                            router.push('/');
+                          }}
                           className="w-full flex items-center gap-3 px-4 py-2 text-[var(--font-sm)] text-[var(--danger)] hover:bg-[var(--danger)]/10 transition-colors"
                         >
                           <Icons.LogOut className="w-4 h-4" />

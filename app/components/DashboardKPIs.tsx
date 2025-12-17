@@ -38,39 +38,34 @@ export default function DashboardKPIs({ projectId, project }: DashboardKPIsProps
 
   // Initialize client on mount only (avoids SSR hydration issues)
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
   const [tasks, setTasks] = useState<Schema['Task']['type'][]>([]);
   const [activityLogs, setActivityLogs] = useState<Schema['ActivityLog']['type'][]>([]);
   const [timeframe, setTimeframe] = useState<'7d' | '30d' | '90d' | 'all'>('30d');
 
-  // Load related data
+  // Load related data using list queries instead of subscriptions
   useEffect(() => {
     if (!projectId || !client) return;
+    const dataClient = client; // Capture for closure
 
-    const assetSub = client.models.Asset.observeQuery({
-      filter: { projectId: { eq: projectId } }
-    }).subscribe({
-      next: (data) => setAssets([...data.items]),
-    });
+    async function loadData() {
+      try {
+        const [assetResult, taskResult, activityResult] = await Promise.all([
+          dataClient.models.Asset.list({ filter: { projectId: { eq: projectId } } }),
+          dataClient.models.Task.list({ filter: { projectId: { eq: projectId } } }),
+          dataClient.models.ActivityLog.list({ filter: { projectId: { eq: projectId } } }),
+        ]);
 
-    const taskSub = client.models.Task.observeQuery({
-      filter: { projectId: { eq: projectId } }
-    }).subscribe({
-      next: (data) => setTasks([...data.items]),
-    });
+        if (assetResult.data) setAssets([...assetResult.data]);
+        if (taskResult.data) setTasks([...taskResult.data]);
+        if (activityResult.data) setActivityLogs([...activityResult.data]);
+      } catch (error) {
+        console.error('Error loading KPI data:', error);
+      }
+    }
 
-    const activitySub = client.models.ActivityLog.observeQuery({
-      filter: { projectId: { eq: projectId } }
-    }).subscribe({
-      next: (data) => setActivityLogs([...data.items]),
-    });
-
-    return () => {
-      assetSub.unsubscribe();
-      taskSub.unsubscribe();
-      activitySub.unsubscribe();
-    };
+    loadData();
   }, [projectId, client]);
 
   // Calculate KPIs

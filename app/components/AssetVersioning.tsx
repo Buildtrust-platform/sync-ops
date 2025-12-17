@@ -83,7 +83,7 @@ export default function AssetVersioning({
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
 
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
   const [versions, setVersions] = useState<Array<Schema["AssetVersion"]["type"]>>([]);
   const [uploadStatus, setUploadStatus] = useState("");

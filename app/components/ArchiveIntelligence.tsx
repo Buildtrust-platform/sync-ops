@@ -133,7 +133,7 @@ export default function ArchiveIntelligence({ projectId, organizationId, current
   const orgId = organizationId || 'default-org';
 
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
 
   // State

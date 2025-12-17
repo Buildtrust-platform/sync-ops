@@ -227,7 +227,7 @@ export default function DownloadManager({
   const [processingJobIds, setProcessingJobIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
 
   // Load persisted download queue from localStorage

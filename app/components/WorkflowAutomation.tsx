@@ -238,7 +238,7 @@ export default function WorkflowAutomation({
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
 
   // Load workflows from Amplify backend

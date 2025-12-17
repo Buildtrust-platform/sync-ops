@@ -103,7 +103,7 @@ export default function ProjectChat({
   const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
   const [newMessageText, setNewMessageText] = useState('');
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
@@ -121,23 +121,18 @@ export default function ProjectChat({
       return;
     }
 
-    const subscription = client.models.Message.observeQuery({
+    client.models.Message.list({
       filter: {
         projectId: { eq: projectId },
         isDeleted: { ne: true },
       },
-    }).subscribe({
-      next: (data) => {
-        if (data?.items) {
-          setMessages([...data.items].sort((a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          ));
-        }
-      },
-      error: (error) => console.error('Error loading messages:', error),
-    });
-
-    return () => subscription.unsubscribe();
+    }).then((data) => {
+      if (data.data) {
+        setMessages([...data.data].sort((a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        ));
+      }
+    }).catch(console.error);
   }, [projectId, client]);
 
   useEffect(() => {

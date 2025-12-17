@@ -292,7 +292,7 @@ export default function DistributionEngine({ projectId, organizationId, currentU
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
 
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
 
   // State

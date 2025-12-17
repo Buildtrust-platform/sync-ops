@@ -108,7 +108,8 @@ export default function OnboardingFlow() {
 
   // Initialize Amplify client and fetch user info
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    // Use userPool auth for authenticated operations (create org, members, projects)
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
 
     async function fetchUser() {
       try {

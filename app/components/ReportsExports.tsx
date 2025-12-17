@@ -125,7 +125,7 @@ export default function ReportsExports({ project }: ReportsExportsProps) {
   const [activeTab, setActiveTab] = useState<'reports' | 'exports' | 'scheduled'>('reports');
 
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
   const [selectedReports, setSelectedReports] = useState<string[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<string>('all');

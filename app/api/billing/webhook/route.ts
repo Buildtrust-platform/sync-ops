@@ -53,7 +53,7 @@ Amplify.configure(outputs, { ssr: true });
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 // Create client for server-side operations
-const client = generateClient<Schema>();
+const client = generateClient<Schema>({ authMode: 'userPool' });
 
 // Generate unique invoice number
 function generateInvoiceNumber(): string {

@@ -31,7 +31,7 @@ export default function VersionTimeline({ assetId, onVersionSelect, onCompare, c
   const [versions, setVersions] = useState<AssetVersion[]>([]);
 
   useEffect(() => {
-    setClient(generateClient<Schema>());
+    setClient(generateClient<Schema>({ authMode: 'userPool' }));
   }, []);
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null);
   const [compareMode, setCompareMode] = useState(false);
@@ -40,21 +40,18 @@ export default function VersionTimeline({ assetId, onVersionSelect, onCompare, c
 
   useEffect(() => {
     if (!client) return;
-    const subscription = client.models.AssetVersion.observeQuery({
+    client.models.AssetVersion.list({
       filter: { assetId: { eq: assetId } }
-    }).subscribe({
-      next: ({ items }: { items: AssetVersion[] }) => {
-        const sortedVersions = [...items].sort((a, b) => b.versionNumber - a.versionNumber);
+    }).then((data) => {
+      if (data.data) {
+        const sortedVersions = [...data.data].sort((a, b) => b.versionNumber - a.versionNumber);
         setVersions(sortedVersions as AssetVersion[]);
         setLoading(false);
-      },
-      error: (error: Error) => {
-        console.error('Error fetching versions:', error);
-        setLoading(false);
       }
+    }).catch((error: Error) => {
+      console.error('Error fetching versions:', error);
+      setLoading(false);
     });
-
-    return () => subscription.unsubscribe();
   }, [assetId, client]);
 
   function formatDate(dateString: string): string {
