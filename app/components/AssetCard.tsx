@@ -93,12 +93,6 @@ const formatDate = (dateStr?: string): string => {
 };
 
 // Icons
-const PlayIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M8 5v14l11-7z" />
-  </svg>
-);
-
 const VideoIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
     <polygon points="23 7 16 12 23 17 23 7" />
@@ -477,6 +471,9 @@ export default function AssetCard({
   if (viewMode === 'grid') {
     return (
       <div
+        role="button"
+        tabIndex={0}
+        aria-label={`${name}, ${extension} file, ${formatFileSize(fileSize)}${isSelected ? ', selected' : ''}`}
         className={`
           group relative rounded-lg border overflow-hidden cursor-pointer transition-all
           ${isSelected
@@ -487,6 +484,12 @@ export default function AssetCard({
         `}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onSelect?.(id, e.shiftKey || e.ctrlKey || e.metaKey);
+          }
+        }}
         onContextMenu={handleContextMenuEvent}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -571,10 +574,18 @@ export default function AssetCard({
 
               {/* Play/Pause button overlay for video - CLICKABLE */}
               {isVideo && (
-                <div
-                  className="absolute inset-0 z-30 flex items-center justify-center cursor-pointer"
+                <button
+                  type="button"
+                  className="absolute inset-0 z-30 flex items-center justify-center cursor-pointer bg-transparent border-none"
                   onClick={handlePlayClick}
-                  style={{ pointerEvents: 'auto' }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handlePlayClick(e as unknown as React.MouseEvent);
+                    }
+                  }}
+                  aria-label={isPlaying ? `Pause ${name}` : `Play ${name}`}
                 >
                   <div
                     className={`w-14 h-14 rounded-full bg-black/70 flex items-center justify-center backdrop-blur-sm hover:bg-black/90 hover:scale-110 transition-all text-white shadow-lg ${
@@ -582,17 +593,17 @@ export default function AssetCard({
                     }`}
                   >
                     {isPlaying ? (
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <rect x="6" y="4" width="4" height="16" />
                         <rect x="14" y="4" width="4" height="16" />
                       </svg>
                     ) : (
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M8 5v14l11-7z" />
                       </svg>
                     )}
                   </div>
-                </div>
+                </button>
               )}
             </>
           )}
@@ -683,6 +694,9 @@ export default function AssetCard({
   // Render list view
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label={`${name}, ${extension} file, ${formatFileSize(fileSize)}${isSelected ? ', selected' : ''}`}
       className={`
         group flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors
         ${isSelected ? 'bg-[var(--primary)]/10' : 'hover:bg-[var(--bg-2)]'}
@@ -690,6 +704,12 @@ export default function AssetCard({
       `}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect?.(id, e.shiftKey || e.ctrlKey || e.metaKey);
+        }
+      }}
       onContextMenu={handleContextMenuEvent}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -717,7 +737,7 @@ export default function AssetCard({
           </div>
         ) : thumbnailUrl ? (
           <>
-            <img src={thumbnailUrl} alt="" className={`w-full h-full object-cover transition-opacity ${(isHovering || isPlaying) && isVideo ? 'opacity-0' : ''}`} />
+            <img src={thumbnailUrl} alt={`Thumbnail for ${name}`} className={`w-full h-full object-cover transition-opacity ${(isHovering || isPlaying) && isVideo ? 'opacity-0' : ''}`} />
             {isVideo && videoUrl && (
               <video
                 ref={videoRef}
@@ -735,21 +755,23 @@ export default function AssetCard({
           </div>
         )}
         {isVideo && (
-          <div
-            className={`absolute inset-0 z-20 flex items-center justify-center cursor-pointer ${isPlaying ? 'bg-black/10' : 'bg-black/30'} opacity-0 group-hover:opacity-100`}
+          <button
+            type="button"
+            className={`absolute inset-0 z-20 flex items-center justify-center cursor-pointer border-none ${isPlaying ? 'bg-black/10' : 'bg-black/30'} opacity-0 group-hover:opacity-100`}
             onClick={handlePlayClick}
+            aria-label={isPlaying ? `Pause ${name}` : `Play ${name}`}
           >
             {isPlaying ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-white">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-white" aria-hidden="true">
                 <rect x="6" y="4" width="4" height="16" />
                 <rect x="14" y="4" width="4" height="16" />
               </svg>
             ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-white">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-white" aria-hidden="true">
                 <path d="M8 5v14l11-7z" />
               </svg>
             )}
-          </div>
+          </button>
         )}
       </div>
 

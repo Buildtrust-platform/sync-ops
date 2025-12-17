@@ -431,8 +431,9 @@ export default function BulkOperations({
             onClick={onClearSelection}
             className="p-2 rounded-lg hover:bg-[var(--bg-3)] transition-colors ml-2"
             title="Clear selection"
+            aria-label="Clear selection"
           >
-            <Icons.X className="w-4 h-4 text-[var(--text-tertiary)]" />
+            <Icons.X className="w-4 h-4 text-[var(--text-tertiary)]" aria-hidden={true} />
           </button>
         </div>
 
@@ -546,8 +547,9 @@ export default function BulkOperations({
                   <button
                     onClick={() => removeTag(tag)}
                     className="ml-1 hover:text-red-500"
+                    aria-label={`Remove tag ${tag}`}
                   >
-                    <Icons.X className="w-3 h-3" />
+                    <Icons.X className="w-3 h-3" aria-hidden={true} />
                   </button>
                 </Badge>
               ))}

@@ -209,6 +209,10 @@ export default function NotificationCenter({
       <div
         className="fixed inset-0 bg-black bg-opacity-25 z-40"
         onClick={onClose}
+        onKeyDown={(e) => e.key === 'Escape' && onClose()}
+        role="button"
+        tabIndex={0}
+        aria-label="Close notification panel"
       />
 
       {/* Panel */}
@@ -227,6 +231,7 @@ export default function NotificationCenter({
             <button
               onClick={onClose}
               className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
+              aria-label="Close notifications"
             >
               ×
             </button>
@@ -296,10 +301,19 @@ export default function NotificationCenter({
               {filteredNotifications.map(notification => (
                 <div
                   key={notification.id}
+                  role="button"
+                  tabIndex={0}
                   className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
                     !notification.isRead ? 'bg-blue-50' : ''
                   } ${getPriorityColor(notification.priority || 'NORMAL')}`}
                   onClick={() => handleNotificationClick(notification)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleNotificationClick(notification);
+                    }
+                  }}
+                  aria-label={`${notification.isRead ? '' : 'Unread: '}${notification.title}. ${notification.message}`}
                 >
                   <div className="flex items-start gap-3">
                     {/* Icon */}
@@ -321,6 +335,7 @@ export default function NotificationCenter({
                             deleteNotification(notification);
                           }}
                           className="text-gray-400 hover:text-red-600 text-sm"
+                          aria-label={`Delete notification: ${notification.title}`}
                         >
                           ×
                         </button>
