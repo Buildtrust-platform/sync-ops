@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense, lazy } from "react";
 import { generateClient } from "aws-amplify/data";
 import { fetchUserAttributes, getCurrentUser } from "aws-amplify/auth";
 import type { Schema } from "@/amplify/data/resource";
@@ -12,11 +12,11 @@ import GlobalNav from "@/app/components/GlobalNav";
 import LifecycleNavigation from "@/app/components/LifecycleNavigation";
 import Breadcrumb from "@/app/components/Breadcrumb";
 import { useToast } from "@/app/components/Toast";
+import { LoadingFallback } from "@/app/components/lazy";
 
 // Development Phase
 import ProjectOverview from "@/app/components/ProjectOverview";
 import SmartBrief from "@/app/components/SmartBrief";
-import BudgetTracker from "@/app/components/BudgetTracker";
 import GreenlightGate from "@/app/components/GreenlightGate";
 import GreenlightStatus from "@/app/components/GreenlightStatus";
 import TreatmentBuilder from "@/app/components/TreatmentBuilder";
@@ -33,13 +33,10 @@ import ClientPortal from "@/app/components/ClientPortal";
 // Pre-Production Phase
 import TeamManagement from "@/app/components/TeamManagement";
 import LocationMaps from "@/app/components/LocationMaps";
-import EquipmentOS from "@/app/components/EquipmentOS";
 import CallSheetManager from "@/app/components/CallSheetManager";
 import CalendarSync from "@/app/components/CalendarSync";
-import DigitalRightsLocker from "@/app/components/DigitalRightsLocker";
 import PolicyEngine from "@/app/components/PolicyEngine";
 import TalentCasting from "@/app/components/TalentCasting";
-import SafetyRisk from "@/app/components/SafetyRisk";
 import InsuranceTracker from "@/app/components/InsuranceTracker";
 import CrewScheduling from "@/app/components/CrewScheduling";
 
@@ -66,22 +63,14 @@ import AudioPostTracker from "@/app/components/AudioPostTracker";
 import DeliverableMatrix from "@/app/components/DeliverableMatrix";
 import QCChecklist from "@/app/components/QCChecklist";
 
-// DAM Components
-import WorkflowAutomation from "@/app/components/WorkflowAutomation";
+// DAM Components - Smaller ones loaded directly
 import DownloadManager from "@/app/components/DownloadManager";
 import AssetAnalytics from "@/app/components/AssetAnalytics";
 import ArchiveDAM from "@/app/components/ArchiveDAM";
-import AIEnhancements from "@/app/components/AIEnhancements";
-import SmartAssetHub from "@/app/components/SmartAssetHub";
-import StakeholderPortal from "@/app/components/StakeholderPortal";
 import AssetRelationshipGraph from "@/app/components/AssetRelationshipGraph";
-import AutomatedDeliveryPipeline from "@/app/components/AutomatedDeliveryPipeline";
-import Collections from "@/app/components/Collections";
 
-// Delivery Phase
-import DistributionEngine from "@/app/components/DistributionEngine";
+// Delivery Phase - Smaller ones loaded directly
 import ArchiveIntelligence from "@/app/components/ArchiveIntelligence";
-import SmartArchiveIntelligence from "@/app/components/SmartArchiveIntelligence";
 import MasterOpsArchive from "@/app/components/MasterOpsArchive";
 import ReportsExports from "@/app/components/ReportsExports";
 import DashboardKPIs from "@/app/components/DashboardKPIs";
@@ -95,6 +84,29 @@ import ProjectSettings from "@/app/components/ProjectSettings";
 // Lifecycle Enforcement
 import LockedModule from "@/app/components/LockedModule";
 import { canAccessModule, LifecycleState, STATE_TO_PHASE } from "@/lib/lifecycle";
+
+// ===========================================
+// LAZY LOADED HEAVY COMPONENTS
+// These components are loaded on-demand to improve initial page load
+// ===========================================
+
+// Tier 1 - Critical (AI/Analytics heavy)
+const AIEnhancements = lazy(() => import("@/app/components/AIEnhancements"));
+const SmartAssetHub = lazy(() => import("@/app/components/SmartAssetHub"));
+const DistributionEngine = lazy(() => import("@/app/components/DistributionEngine"));
+
+// Tier 2 - High Priority (Complex multi-tab)
+const BudgetTracker = lazy(() => import("@/app/components/BudgetTracker"));
+const EquipmentOS = lazy(() => import("@/app/components/EquipmentOS"));
+const AutomatedDeliveryPipeline = lazy(() => import("@/app/components/AutomatedDeliveryPipeline"));
+
+// Tier 3 - Medium Priority (Feature-gated)
+const StakeholderPortal = lazy(() => import("@/app/components/StakeholderPortal"));
+const DigitalRightsLocker = lazy(() => import("@/app/components/DigitalRightsLocker"));
+const WorkflowAutomation = lazy(() => import("@/app/components/WorkflowAutomation"));
+const SafetyRisk = lazy(() => import("@/app/components/SafetyRisk"));
+const SmartArchiveIntelligence = lazy(() => import("@/app/components/SmartArchiveIntelligence"));
+const Collections = lazy(() => import("@/app/components/Collections"));
 
 export default function ProjectDetail() {
   const toast = useToast();
@@ -554,7 +566,9 @@ export default function ProjectDetail() {
             )}
 
             {activeModule === 'budget' && (
-              <BudgetTracker project={project} />
+              <Suspense fallback={<LoadingFallback message="Loading budget tracker..." />}>
+                <BudgetTracker project={project} />
+              </Suspense>
             )}
 
             {activeModule === 'greenlight' && (
@@ -643,11 +657,13 @@ export default function ProjectDetail() {
             )}
 
             {activeModule === 'equipment' && (
-              <EquipmentOS
-                projectId={projectId}
-                currentUserEmail={userEmail}
-                currentUserName={userEmail.split('@')[0]}
-              />
+              <Suspense fallback={<LoadingFallback message="Loading equipment..." />}>
+                <EquipmentOS
+                  projectId={projectId}
+                  currentUserEmail={userEmail}
+                  currentUserName={userEmail.split('@')[0]}
+                />
+              </Suspense>
             )}
 
             {activeModule === 'call-sheets' && (
@@ -666,12 +682,14 @@ export default function ProjectDetail() {
             )}
 
             {activeModule === 'rights' && (
-              <DigitalRightsLocker
-                organizationId={project.organizationId}
-                projectId={projectId}
-                currentUserEmail={userEmail}
-                currentUserName={userEmail.split('@')[0]}
-              />
+              <Suspense fallback={<LoadingFallback message="Loading rights manager..." />}>
+                <DigitalRightsLocker
+                  organizationId={project.organizationId}
+                  projectId={projectId}
+                  currentUserEmail={userEmail}
+                  currentUserName={userEmail.split('@')[0]}
+                />
+              </Suspense>
             )}
 
             {activeModule === 'compliance' && (
@@ -694,11 +712,13 @@ export default function ProjectDetail() {
             )}
 
             {activeModule === 'safety' && (
-              <SafetyRisk
-                projectId={projectId}
-                organizationId={project.organizationId}
-                currentUserEmail={userEmail}
-              />
+              <Suspense fallback={<LoadingFallback message="Loading safety tools..." />}>
+                <SafetyRisk
+                  projectId={projectId}
+                  organizationId={project.organizationId}
+                  currentUserEmail={userEmail}
+                />
+              </Suspense>
             )}
 
             {activeModule === 'insurance' && (
@@ -934,12 +954,14 @@ export default function ProjectDetail() {
             )}
 
             {activeModule === 'collections' && (
-              <Collections
-                organizationId={project.organizationId}
-                projectId={projectId}
-                userEmail={userEmail}
-                userId={userEmail}
-              />
+              <Suspense fallback={<LoadingFallback message="Loading collections..." />}>
+                <Collections
+                  organizationId={project.organizationId}
+                  projectId={projectId}
+                  userEmail={userEmail}
+                  userId={userEmail}
+                />
+              </Suspense>
             )}
 
             {activeModule === 'versions' && (
@@ -1042,11 +1064,13 @@ export default function ProjectDetail() {
 
             {/* DELIVERY PHASE MODULES */}
             {activeModule === 'distribution' && (
-              <DistributionEngine
-                projectId={projectId}
-                currentUserEmail={userEmail}
-                currentUserName={userEmail.split('@')[0]}
-              />
+              <Suspense fallback={<LoadingFallback message="Loading distribution engine..." />}>
+                <DistributionEngine
+                  projectId={projectId}
+                  currentUserEmail={userEmail}
+                  currentUserName={userEmail.split('@')[0]}
+                />
+              </Suspense>
             )}
 
             {activeModule === 'master-archive' && (
@@ -1101,11 +1125,13 @@ export default function ProjectDetail() {
 
             {/* DAM MODULES */}
             {activeModule === 'workflows' && (
-              <WorkflowAutomation
-                projectId={projectId}
-                organizationId={project.organizationId}
-                currentUserEmail={userEmail}
-              />
+              <Suspense fallback={<LoadingFallback message="Loading workflow automation..." />}>
+                <WorkflowAutomation
+                  projectId={projectId}
+                  organizationId={project.organizationId}
+                  currentUserEmail={userEmail}
+                />
+              </Suspense>
             )}
 
             {activeModule === 'downloads' && (
@@ -1140,34 +1166,42 @@ export default function ProjectDetail() {
             )}
 
             {activeModule === 'archive-intelligence' && (
-              <SmartArchiveIntelligence
-                organizationId={project.organizationId}
-                projectId={projectId}
-                currentUserEmail={userEmail}
-              />
+              <Suspense fallback={<LoadingFallback message="Loading archive intelligence..." />}>
+                <SmartArchiveIntelligence
+                  organizationId={project.organizationId}
+                  projectId={projectId}
+                  currentUserEmail={userEmail}
+                />
+              </Suspense>
             )}
 
             {activeModule === 'ai-analysis' && (
-              <AIEnhancements
-                organizationId={project.organizationId}
-                projectId={projectId}
-              />
+              <Suspense fallback={<LoadingFallback message="Loading AI analysis..." />}>
+                <AIEnhancements
+                  organizationId={project.organizationId}
+                  projectId={projectId}
+                />
+              </Suspense>
             )}
 
             {activeModule === 'smart-asset-hub' && (
-              <SmartAssetHub
-                organizationId={project.organizationId}
-                projectId={projectId}
-                currentUserEmail={userEmail}
-              />
+              <Suspense fallback={<LoadingFallback message="Loading asset hub..." />}>
+                <SmartAssetHub
+                  organizationId={project.organizationId}
+                  projectId={projectId}
+                  currentUserEmail={userEmail}
+                />
+              </Suspense>
             )}
 
             {activeModule === 'stakeholder-portal' && (
-              <StakeholderPortal
-                organizationId={project.organizationId}
-                projectId={projectId}
-                currentUserEmail={userEmail}
-              />
+              <Suspense fallback={<LoadingFallback message="Loading stakeholder portal..." />}>
+                <StakeholderPortal
+                  organizationId={project.organizationId}
+                  projectId={projectId}
+                  currentUserEmail={userEmail}
+                />
+              </Suspense>
             )}
 
             {activeModule === 'asset-relationships' && (
@@ -1179,11 +1213,13 @@ export default function ProjectDetail() {
             )}
 
             {activeModule === 'delivery-pipeline' && (
-              <AutomatedDeliveryPipeline
-                organizationId={project.organizationId}
-                projectId={projectId}
-                currentUserEmail={userEmail}
-              />
+              <Suspense fallback={<LoadingFallback message="Loading delivery pipeline..." />}>
+                <AutomatedDeliveryPipeline
+                  organizationId={project.organizationId}
+                  projectId={projectId}
+                  currentUserEmail={userEmail}
+                />
+              </Suspense>
             )}
 
             {/* SETTINGS & ACTIVITY */}

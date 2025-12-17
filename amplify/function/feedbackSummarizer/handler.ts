@@ -3,6 +3,32 @@ import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedroc
 
 const bedrockClient = new BedrockRuntimeClient({ region: process.env.AWS_REGION || 'eu-central-1' });
 
+// Simple in-memory rate limiter (20 requests per minute per user)
+class RateLimiter {
+  private requests = new Map<string, { count: number; windowStart: number }>();
+  constructor(private maxRequests = 20, private windowSeconds = 60) {}
+
+  check(identifier: string): { allowed: boolean; remaining: number } {
+    const now = Math.floor(Date.now() / 1000);
+    const record = this.requests.get(identifier);
+    if (!record || record.windowStart < now - this.windowSeconds) {
+      this.requests.set(identifier, { count: 1, windowStart: now });
+      return { allowed: true, remaining: this.maxRequests - 1 };
+    }
+    if (record.count >= this.maxRequests) {
+      return { allowed: false, remaining: 0 };
+    }
+    record.count++;
+    return { allowed: true, remaining: this.maxRequests - record.count };
+  }
+}
+
+const rateLimiter = new RateLimiter(20, 60);
+
+function getUserId(event: any): string {
+  return event.identity?.sub || event.identity?.username || 'anonymous';
+}
+
 interface ReviewComment {
   id: string;
   commentText: string;
@@ -39,10 +65,37 @@ export const handler = async (event: any) => {
   console.log('Feedback Summarizer AI processing started');
   console.log('Event:', JSON.stringify(event, null, 2));
 
+  // Rate limiting check
+  const userId = getUserId(event);
+  const rateCheck = rateLimiter.check(userId);
+  if (!rateCheck.allowed) {
+    throw new Error('Rate limit exceeded. Please wait before making another request.');
+  }
+
   // Extract arguments from GraphQL event
   const { comments } = event.arguments || {};
 
-  if (!comments || comments.length === 0) {
+  // Input validation
+  if (!comments || !Array.isArray(comments)) {
+    return {
+      overallSentiment: 'POSITIVE',
+      totalComments: 0,
+      unresolvedIssues: 0,
+      criticalIssues: 0,
+      approvalCount: 0,
+      rejectionCount: 0,
+      keyThemes: [],
+      priorityActions: [],
+      commonTimecodeRanges: [],
+      summaryText: 'No feedback comments yet.',
+      recommendations: ['Start gathering feedback by creating a review.']
+    };
+  }
+  if (comments.length > 500) {
+    throw new Error('Maximum 500 comments allowed per request');
+  }
+
+  if (comments.length === 0) {
     return {
       overallSentiment: 'POSITIVE',
       totalComments: 0,

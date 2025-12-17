@@ -4,6 +4,28 @@ import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 
+// Simple in-memory rate limiter (100 requests per minute per user)
+class RateLimiter {
+  private requests = new Map<string, { count: number; windowStart: number }>();
+  constructor(private maxRequests = 100, private windowSeconds = 60) {}
+
+  check(identifier: string): { allowed: boolean; remaining: number } {
+    const now = Math.floor(Date.now() / 1000);
+    const record = this.requests.get(identifier);
+    if (!record || record.windowStart < now - this.windowSeconds) {
+      this.requests.set(identifier, { count: 1, windowStart: now });
+      return { allowed: true, remaining: this.maxRequests - 1 };
+    }
+    if (record.count >= this.maxRequests) {
+      return { allowed: false, remaining: 0 };
+    }
+    record.count++;
+    return { allowed: true, remaining: this.maxRequests - record.count };
+  }
+}
+
+const rateLimiter = new RateLimiter(100, 60);
+
 // Environment variables set in resource.ts
 const env = {
   PROJECT_TABLE_NAME: process.env.PROJECT_TABLE_NAME || '',
@@ -35,6 +57,31 @@ export const handler = async (event: SearchEvent): Promise<SearchResult[]> => {
   const { query, limit = 10 } = event.arguments;
 
   console.log('🔍 Universal Search Lambda invoked:', { query, limit });
+
+  // Rate limiting check
+  const identity = (event as unknown as { identity?: { sub?: string; username?: string } }).identity;
+  const userId = identity?.sub || identity?.username || 'anonymous';
+  const rateCheck = rateLimiter.check(userId);
+  if (!rateCheck.allowed) {
+    throw new Error('Rate limit exceeded. Please wait before making another request.');
+  }
+
+  // Input validation
+  if (!query || typeof query !== 'string') {
+    console.log('⚠️ Invalid query, returning empty results');
+    return [];
+  }
+  if (query.length < 2) {
+    console.log('⚠️ Query too short, returning empty results');
+    return [];
+  }
+  if (query.length > 500) {
+    throw new Error('Query must not exceed 500 characters');
+  }
+  if (typeof limit !== 'number' || limit < 1 || limit > 100) {
+    throw new Error('Limit must be a number between 1 and 100');
+  }
+
   console.log('📋 Environment variables:', {
     PROJECT_TABLE_NAME: env.PROJECT_TABLE_NAME,
     ASSET_TABLE_NAME: env.ASSET_TABLE_NAME,
@@ -42,11 +89,6 @@ export const handler = async (event: SearchEvent): Promise<SearchResult[]> => {
     MESSAGE_TABLE_NAME: env.MESSAGE_TABLE_NAME,
     TASK_TABLE_NAME: env.TASK_TABLE_NAME,
   });
-
-  if (!query || query.length < 2) {
-    console.log('⚠️ Query too short, returning empty results');
-    return [];
-  }
 
   const searchTerm = query.toLowerCase();
   console.log('🔎 Search term:', searchTerm);

@@ -3,6 +3,32 @@ import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedroc
 
 const bedrockClient = new BedrockRuntimeClient({ region: process.env.AWS_REGION || 'eu-central-1' });
 
+// Simple in-memory rate limiter (10 requests per minute per user)
+class RateLimiter {
+  private requests = new Map<string, { count: number; windowStart: number }>();
+  constructor(private maxRequests = 10, private windowSeconds = 60) {}
+
+  check(identifier: string): { allowed: boolean; remaining: number } {
+    const now = Math.floor(Date.now() / 1000);
+    const record = this.requests.get(identifier);
+    if (!record || record.windowStart < now - this.windowSeconds) {
+      this.requests.set(identifier, { count: 1, windowStart: now });
+      return { allowed: true, remaining: this.maxRequests - 1 };
+    }
+    if (record.count >= this.maxRequests) {
+      return { allowed: false, remaining: 0 };
+    }
+    record.count++;
+    return { allowed: true, remaining: this.maxRequests - record.count };
+  }
+}
+
+const rateLimiter = new RateLimiter(10, 60);
+
+function getUserId(event: any): string {
+  return event.identity?.sub || event.identity?.username || 'anonymous';
+}
+
 interface ShotListItem {
   shotNumber: number;
   shotType: string; // "Wide", "Medium", "Close-up", "POV", "Aerial", "Tracking", etc.
@@ -73,11 +99,35 @@ export const handler = async (event: any) => {
   console.log('Smart Brief AI processing started');
   console.log('Event:', JSON.stringify(event, null, 2));
 
+  // Rate limiting check
+  const userId = getUserId(event);
+  const rateCheck = rateLimiter.check(userId);
+  if (!rateCheck.allowed) {
+    throw new Error('Rate limit exceeded. Please wait before making another request.');
+  }
+  console.log(`Rate limit: ${rateCheck.remaining} requests remaining for user ${userId}`);
+
   // Extract arguments from GraphQL event
   const { projectDescription, scriptOrNotes } = event.arguments || {};
 
+  // Input validation
   if (!projectDescription) {
     throw new Error('projectDescription is required');
+  }
+  if (typeof projectDescription !== 'string') {
+    throw new Error('projectDescription must be a string');
+  }
+  if (projectDescription.length < 10) {
+    throw new Error('projectDescription must be at least 10 characters');
+  }
+  if (projectDescription.length > 10000) {
+    throw new Error('projectDescription must not exceed 10,000 characters');
+  }
+  if (scriptOrNotes && typeof scriptOrNotes !== 'string') {
+    throw new Error('scriptOrNotes must be a string');
+  }
+  if (scriptOrNotes && scriptOrNotes.length > 50000) {
+    throw new Error('scriptOrNotes must not exceed 50,000 characters');
   }
 
   // Construct optimized Bedrock prompt - streamlined for faster response while maintaining quality
