@@ -1352,11 +1352,9 @@ const schema = a.schema({
   // WATERMARK POLICY - Forensic watermarking configuration
   WatermarkPolicy: a.model({
     organizationId: a.id().required(),
-    organization: a.belongsTo('Organization', 'organizationId'),
 
     // Scope (one of these should be set)
     projectId: a.id(),
-    project: a.belongsTo('Project', 'projectId'),
     assetId: a.id(),
 
     // Policy settings
