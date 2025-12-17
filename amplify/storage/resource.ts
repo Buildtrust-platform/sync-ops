@@ -20,6 +20,11 @@ export const storage = defineStorage({
       allow.authenticated.to(['read', 'write', 'delete']),
       allow.guest.to(['read']), // For external review links
     ],
+    // Moodboard references (images, videos for creative inspiration)
+    'moodboard/*': [
+      allow.authenticated.to(['read', 'write', 'delete']),
+      allow.guest.to(['read']), // For external sharing
+    ],
     // Public assets (thumbnails, exports)
     'public/*': [
       allow.authenticated.to(['read', 'write', 'delete']),
