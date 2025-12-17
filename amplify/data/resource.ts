@@ -1463,6 +1463,9 @@ const schema = a.schema({
       'GREENLIGHT_APPROVED',
       'GREENLIGHT_REJECTED',
       'REQUIREMENTS_UPDATED',
+      // Encoding actions
+      'VIDEO_ENCODING_STARTED',
+      'VIDEO_ENCODING_COMPLETED',
     ]),
 
     targetType: a.string(), // 'Asset', 'Project', 'User', 'Review', 'Comment'

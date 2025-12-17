@@ -519,7 +519,7 @@ async function startVideoEncoding(bucketName: string, key: string, asset: any) {
       const proxyFileResult = await client.models.ProxyFile.create({
         organizationId: asset.organizationId,
         assetId: asset.id,
-        proxyType: preset.name,
+        proxyType: preset.name as 'STREAMING_HD' | 'STREAMING_SD',
         resolution: preset.resolution,
         bitrate: Math.round(preset.bitrate / 1000), // Store in kbps
         codec: 'H.264',
