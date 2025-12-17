@@ -1077,9 +1077,10 @@ function AddReferenceModal({
 
     try {
       // Generate unique file path
+      // Using public/ prefix for immediate access while moodboard/ permissions deploy
       const timestamp = Date.now();
       const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-      const filePath = `moodboard/${projectId || 'general'}/${timestamp}-${sanitizedFileName}`;
+      const filePath = `public/moodboard/${projectId || 'general'}/${timestamp}-${sanitizedFileName}`;
 
       // Upload to S3
       const result = await uploadData({
