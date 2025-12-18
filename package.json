@@ -23,8 +23,8 @@
     "@stripe/stripe-js": "^8.5.3",
     "aws-amplify": "^6.15.8",
     "next": "15.3.3",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
     "rimraf": "^6.1.2",
     "stripe": "^20.0.0"
   },
