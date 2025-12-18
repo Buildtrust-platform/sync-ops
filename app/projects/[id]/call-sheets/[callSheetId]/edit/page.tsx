@@ -6,8 +6,8 @@ import CallSheetForm from '@/components/call-sheets/CallSheetForm';
 export default function EditCallSheetPage() {
   const router = useRouter();
   const params = useParams();
-  const projectId = params.id as string;
-  const callSheetId = params.callSheetId as string;
+  const projectId = params?.id as string;
+  const callSheetId = params?.callSheetId as string;
 
   const handleSuccess = () => {
     router.push(`/projects/${projectId}/call-sheets/${callSheetId}`);

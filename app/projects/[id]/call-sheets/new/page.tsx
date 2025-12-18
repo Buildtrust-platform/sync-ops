@@ -6,7 +6,7 @@ import CallSheetForm from '@/components/call-sheets/CallSheetForm';
 export default function NewCallSheetPage() {
   const router = useRouter();
   const params = useParams();
-  const projectId = params.id as string;
+  const projectId = params?.id as string;
 
   const handleSuccess = (callSheetId?: string) => {
     if (callSheetId) {

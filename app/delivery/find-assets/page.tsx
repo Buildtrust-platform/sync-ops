@@ -212,7 +212,7 @@ export default function FindAssetsPage() {
                       className="p-6 text-center cursor-pointer hover:shadow-md transition-all"
                       onClick={() => {
                         setTypeFilter(type);
-                        setResults(mockResults.filter(r => r.type === type));
+                        setResults(initialResults.filter(r => r.type === type));
                         setHasSearched(true);
                       }}
                     >

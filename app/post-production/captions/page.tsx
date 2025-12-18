@@ -621,7 +621,7 @@ export default function CaptionsPage() {
                               key={cue.id}
                               className="absolute h-6 bg-[var(--primary)] rounded cursor-pointer hover:bg-[var(--primary-hover)] transition-colors"
                               style={{
-                                left: `${(i / mockCues.length) * 90}%`,
+                                left: `${(i / (initialCues.length || 1)) * 90}%`,
                                 width: '8%',
                                 opacity: 0.8
                               }}

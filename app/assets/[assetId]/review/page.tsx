@@ -105,7 +105,7 @@ function formatDuration(seconds: number): string {
 
 export default function AssetReviewPage() {
   const params = useParams();
-  const assetId = params.assetId as string;
+  const assetId = params?.assetId as string;
 
   // Player state
   const [isPlaying, setIsPlaying] = useState(false);
@@ -168,13 +168,13 @@ export default function AssetReviewPage() {
           break;
         case 'ArrowRight':
           e.preventDefault();
-          setCurrentTime(t => Math.min(mockAsset.duration, t + (e.shiftKey ? 10 : 1)));
+          setCurrentTime(t => Math.min(initialAsset.duration, t + (e.shiftKey ? 10 : 1)));
           break;
         case 'j':
           setCurrentTime(t => Math.max(0, t - 10));
           break;
         case 'l':
-          setCurrentTime(t => Math.min(mockAsset.duration, t + 10));
+          setCurrentTime(t => Math.min(initialAsset.duration, t + 10));
           break;
         case 'k':
           setIsPlaying(p => !p);
@@ -209,9 +209,9 @@ export default function AssetReviewPage() {
 
     const interval = setInterval(() => {
       setCurrentTime(t => {
-        if (t >= mockAsset.duration) {
+        if (t >= initialAsset.duration) {
           setIsPlaying(false);
-          return mockAsset.duration;
+          return initialAsset.duration;
         }
         return t + 0.1 * playbackRate;
       });
@@ -224,7 +224,7 @@ export default function AssetReviewPage() {
     if (!timelineRef.current) return;
     const rect = timelineRef.current.getBoundingClientRect();
     const percent = (e.clientX - rect.left) / rect.width;
-    setCurrentTime(percent * mockAsset.duration);
+    setCurrentTime(percent * initialAsset.duration);
   };
 
   const jumpToComment = (comment: ReviewComment) => {
@@ -263,8 +263,8 @@ export default function AssetReviewPage() {
 
   // Calculate heatmap data
   const heatmapData = filteredComments.reduce((acc, comment) => {
-    const startPercent = (comment.timecode / mockAsset.duration) * 100;
-    const endPercent = ((comment.timecodeEnd || comment.timecode) / mockAsset.duration) * 100;
+    const startPercent = (comment.timecode / initialAsset.duration) * 100;
+    const endPercent = ((comment.timecodeEnd || comment.timecode) / initialAsset.duration) * 100;
     acc.push({ start: startPercent, end: endPercent, priority: comment.priority });
     return acc;
   }, [] as { start: number; end: number; priority: CommentPriority }[]);
@@ -282,19 +282,19 @@ export default function AssetReviewPage() {
               <Icons.ArrowLeft className="w-5 h-5 text-[var(--text-tertiary)]" />
             </Link>
             <div>
-              <h1 className="font-semibold text-[var(--text-primary)]">{mockAsset.name}</h1>
-              <p className="text-xs text-[var(--text-tertiary)]">{mockAsset.projectName}</p>
+              <h1 className="font-semibold text-[var(--text-primary)]">{initialAsset.name}</h1>
+              <p className="text-xs text-[var(--text-tertiary)]">{initialAsset.projectName}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             {/* Version Selector */}
             <select
-              value={activeVersion.id}
-              onChange={(e) => setActiveVersion(mockVersions.find(v => v.id === e.target.value) || mockVersions[0])}
+              value={activeVersion?.id || ''}
+              onChange={(e) => setActiveVersion(initialVersions.find(v => v.id === e.target.value) || initialVersions[0])}
               className="px-3 py-1.5 rounded-lg bg-[var(--bg-2)] border border-[var(--border-default)] text-sm text-[var(--text-primary)] focus:border-[var(--primary)] outline-none"
             >
-              {mockVersions.map(v => (
+              {initialVersions.map(v => (
                 <option key={v.id} value={v.id}>v{v.version} - {v.label}</option>
               ))}
             </select>
@@ -352,7 +352,7 @@ export default function AssetReviewPage() {
 
               {/* Timecode overlay */}
               <div className="absolute bottom-4 left-4 bg-black/80 rounded px-2 py-1">
-                <span className="font-mono text-sm text-white">{formatTimecode(currentTime, mockAsset.frameRate)}</span>
+                <span className="font-mono text-sm text-white">{formatTimecode(currentTime, initialAsset.frameRate)}</span>
               </div>
             </div>
           </div>
@@ -385,7 +385,7 @@ export default function AssetReviewPage() {
                     key={comment.id}
                     className="absolute top-1 w-3 h-3 rounded-full cursor-pointer transform -translate-x-1/2 hover:scale-125 transition-transform"
                     style={{
-                      left: `${(comment.timecode / mockAsset.duration) * 100}%`,
+                      left: `${(comment.timecode / initialAsset.duration) * 100}%`,
                       background: PRIORITY_CONFIG[comment.priority].color,
                       border: selectedComment?.id === comment.id ? '2px solid white' : 'none',
                     }}
@@ -400,20 +400,20 @@ export default function AssetReviewPage() {
                 {/* Progress bar */}
                 <div
                   className="absolute bottom-0 left-0 h-1 bg-[var(--primary)]"
-                  style={{ width: `${(currentTime / mockAsset.duration) * 100}%` }}
+                  style={{ width: `${(currentTime / initialAsset.duration) * 100}%` }}
                 />
 
                 {/* Playhead */}
                 <div
                   className="absolute top-0 bottom-0 w-0.5 bg-white"
-                  style={{ left: `${(currentTime / mockAsset.duration) * 100}%` }}
+                  style={{ left: `${(currentTime / initialAsset.duration) * 100}%` }}
                 />
               </div>
 
               {/* Time labels */}
               <div className="flex justify-between text-xs text-[var(--text-tertiary)] mt-1">
                 <span>{formatDuration(currentTime)}</span>
-                <span>{formatDuration(mockAsset.duration)}</span>
+                <span>{formatDuration(initialAsset.duration)}</span>
               </div>
             </div>
 
@@ -430,7 +430,7 @@ export default function AssetReviewPage() {
                 </button>
 
                 <button
-                  onClick={() => setCurrentTime(t => Math.max(0, t - 1 / mockAsset.frameRate))}
+                  onClick={() => setCurrentTime(t => Math.max(0, t - 1 / initialAsset.frameRate))}
                   className="p-2 hover:bg-[var(--bg-2)] rounded-lg transition-colors"
                   title="Previous frame"
                 >
@@ -450,7 +450,7 @@ export default function AssetReviewPage() {
                 </button>
 
                 <button
-                  onClick={() => setCurrentTime(t => Math.min(mockAsset.duration, t + 1 / mockAsset.frameRate))}
+                  onClick={() => setCurrentTime(t => Math.min(initialAsset.duration, t + 1 / initialAsset.frameRate))}
                   className="p-2 hover:bg-[var(--bg-2)] rounded-lg transition-colors"
                   title="Next frame"
                 >
@@ -458,7 +458,7 @@ export default function AssetReviewPage() {
                 </button>
 
                 <button
-                  onClick={() => setCurrentTime(t => Math.min(mockAsset.duration, t + 10))}
+                  onClick={() => setCurrentTime(t => Math.min(initialAsset.duration, t + 10))}
                   className="p-2 hover:bg-[var(--bg-2)] rounded-lg transition-colors"
                   title="Forward 10s (L)"
                 >
@@ -577,7 +577,7 @@ export default function AssetReviewPage() {
           <div className="flex border-b border-[var(--border-default)]">
             {[
               { id: 'comments', label: 'Comments', icon: 'MessageSquare', count: filteredComments.length },
-              { id: 'versions', label: 'Versions', icon: 'GitBranch', count: mockVersions.length },
+              { id: 'versions', label: 'Versions', icon: 'GitBranch', count: initialVersions.length },
               { id: 'info', label: 'Info', icon: 'Info', count: 0 },
             ].map((tab) => {
               const TabIcon = Icons[tab.icon as keyof typeof Icons];
@@ -634,7 +634,7 @@ export default function AssetReviewPage() {
               {isAddingComment && (
                 <div className="p-3 border-b border-[var(--border-default)] bg-[var(--bg-2)]">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs font-mono text-[var(--primary)]">{formatTimecode(currentTime, mockAsset.frameRate)}</span>
+                    <span className="text-xs font-mono text-[var(--primary)]">{formatTimecode(currentTime, initialAsset.frameRate)}</span>
                     {drawingMode && (
                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--accent-muted)] text-[var(--accent)]">+ Annotation</span>
                     )}
@@ -715,7 +715,7 @@ export default function AssetReviewPage() {
                           <p className="text-sm text-[var(--text-secondary)] mb-2 line-clamp-2">{comment.text}</p>
                           <div className="flex items-center gap-2">
                             <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-2)] text-[var(--primary)]">
-                              {formatTimecode(comment.timecode, mockAsset.frameRate)}
+                              {formatTimecode(comment.timecode, initialAsset.frameRate)}
                             </span>
                             <span
                               className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px]"
@@ -772,7 +772,7 @@ export default function AssetReviewPage() {
                     }}
                   >
                     <Icons.Plus className="w-4 h-4 mr-2" />
-                    Add Comment at {formatTimecode(currentTime, mockAsset.frameRate)}
+                    Add Comment at {formatTimecode(currentTime, initialAsset.frameRate)}
                   </Button>
                 </div>
               )}
@@ -782,17 +782,17 @@ export default function AssetReviewPage() {
           {/* Versions Tab */}
           {sidebarTab === 'versions' && (
             <div className="flex-1 overflow-y-auto divide-y divide-[var(--border-subtle)]">
-              {mockVersions.map(version => (
+              {initialVersions.map(version => (
                 <div
                   key={version.id}
                   onClick={() => setActiveVersion(version)}
                   className={`p-4 cursor-pointer transition-colors ${
-                    activeVersion.id === version.id ? 'bg-[var(--primary-muted)]' : 'hover:bg-[var(--bg-2)]'
+                    activeVersion?.id === version.id ? 'bg-[var(--primary-muted)]' : 'hover:bg-[var(--bg-2)]'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                      activeVersion.id === version.id ? 'bg-[var(--primary)] text-white' : 'bg-[var(--bg-2)]'
+                      activeVersion?.id === version.id ? 'bg-[var(--primary)] text-white' : 'bg-[var(--bg-2)]'
                     }`}>
                       <span className="font-bold">v{version.version}</span>
                     </div>
@@ -802,7 +802,7 @@ export default function AssetReviewPage() {
                         {version.uploadedBy} • {version.uploadedAt}
                       </p>
                     </div>
-                    {activeVersion.id === version.id && (
+                    {activeVersion?.id === version.id && (
                       <span className="px-2 py-1 rounded text-[10px] font-medium bg-[var(--success-muted)] text-[var(--success)]">
                         Current
                       </span>
@@ -821,11 +821,11 @@ export default function AssetReviewPage() {
                   <h4 className="text-xs font-medium text-[var(--text-tertiary)] uppercase mb-2">File Information</h4>
                   <Card className="divide-y divide-[var(--border-subtle)]">
                     {[
-                      { label: 'Resolution', value: mockAsset.resolution },
-                      { label: 'Frame Rate', value: `${mockAsset.frameRate} fps` },
-                      { label: 'Codec', value: mockAsset.codec },
-                      { label: 'File Size', value: mockAsset.fileSize },
-                      { label: 'Duration', value: formatDuration(mockAsset.duration) },
+                      { label: 'Resolution', value: initialAsset.resolution },
+                      { label: 'Frame Rate', value: `${initialAsset.frameRate} fps` },
+                      { label: 'Codec', value: initialAsset.codec },
+                      { label: 'File Size', value: initialAsset.fileSize },
+                      { label: 'Duration', value: formatDuration(initialAsset.duration) },
                     ].map(item => (
                       <div key={item.label} className="flex items-center justify-between p-3">
                         <span className="text-sm text-[var(--text-tertiary)]">{item.label}</span>

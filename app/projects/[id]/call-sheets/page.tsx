@@ -10,7 +10,7 @@ type CallSheet = Schema['CallSheet']['type'];
 export default function CallSheetsListPage() {
   const router = useRouter();
   const params = useParams();
-  const projectId = params.id as string;
+  const projectId = params?.id as string;
 
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const [callSheets, setCallSheets] = useState<CallSheet[]>([]);

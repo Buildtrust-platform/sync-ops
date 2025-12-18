@@ -62,7 +62,7 @@ interface AssetData {
 
 export default function SharePage() {
   const params = useParams();
-  const token = params.token as string;
+  const token = params?.token as string;
 
   // State
   const [isLoading, setIsLoading] = useState(true);

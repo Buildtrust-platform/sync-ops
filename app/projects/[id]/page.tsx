@@ -113,7 +113,7 @@ export default function ProjectDetail() {
   const [client, setClient] = useState<ReturnType<typeof generateClient<Schema>> | null>(null);
   const params = useParams();
   const router = useRouter();
-  const projectId = params.id as string;
+  const projectId = params?.id as string;
 
   // DATA STATE
   const [project, setProject] = useState<Schema["Project"]["type"] | null>(null);

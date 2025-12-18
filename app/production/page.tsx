@@ -116,10 +116,10 @@ export default function ProductionHub() {
                     <Icons.Clapperboard className="w-5 h-5 text-[var(--warning)]" />
                   </div>
                   <div>
-                    <p className="font-semibold text-[var(--text-primary)]">{currentShoot.name}</p>
+                    <p className="font-semibold text-[var(--text-primary)]">{currentShoot?.name}</p>
                     <p className="text-sm text-[var(--text-tertiary)]">
                       <Icons.MapPin className="w-3 h-3 inline mr-1" />
-                      {currentShoot.location} · {completedScenes}/{totalScenes} scenes complete
+                      {currentShoot?.location} · {completedScenes}/{totalScenes} scenes complete
                     </p>
                   </div>
                 </div>

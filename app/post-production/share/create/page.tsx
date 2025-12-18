@@ -447,7 +447,7 @@ export default function CreateSharePage() {
               <Button variant="secondary" onClick={() => {
                 setCurrentStep(1);
                 setCreatedLink(null);
-                setAssets(mockAssets);
+                setAssets(initialAssets);
               }}>
                 Create Another
               </Button>
