@@ -238,91 +238,15 @@ export default function SafetyRisk({
     notes: "",
   });
 
-  // Load data
+  // Load data - data will be fetched from API
   useEffect(() => {
     setIsLoading(true);
 
-    // Mock data
-    const mockRisks: RiskAssessment[] = [
-      {
-        id: "risk-1",
-        projectId,
-        title: "Rooftop Scene - Fall Hazard",
-        description: "Actors and crew working near unprotected edges on 5-story building rooftop",
-        category: "Heights/Rigging",
-        location: "123 Main St Rooftop",
-        riskLevel: "HIGH",
-        status: "MITIGATED",
-        likelihood: 2,
-        impact: 5,
-        mitigationPlan: "Install temporary guardrails, safety harnesses required, stunt coordinator on set",
-        responsiblePerson: "John Smith (Safety Coordinator)",
-        dueDate: new Date().toISOString(),
-        createdBy: currentUserEmail,
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: "risk-2",
-        projectId,
-        title: "Night Exterior - Low Visibility",
-        description: "Night shoot in industrial area with uneven terrain and limited lighting",
-        category: "Physical Hazards",
-        location: "Industrial District",
-        riskLevel: "MEDIUM",
-        status: "IDENTIFIED",
-        likelihood: 3,
-        impact: 3,
-        mitigationPlan: "Additional safety lighting, marked pathways, buddy system",
-        createdBy: currentUserEmail,
-        createdAt: new Date().toISOString(),
-      },
-    ];
-
-    const mockIncidents: SafetyIncident[] = [];
-
-    const mockChecklists: SafetyChecklist[] = [
-      {
-        id: "checklist-1",
-        projectId,
-        name: "Daily Safety Walkthrough",
-        department: "Production",
-        status: "IN_PROGRESS",
-        items: [
-          { id: "item-1", text: "Check all fire extinguishers are accessible", completed: true },
-          { id: "item-2", text: "Verify emergency exits are clear", completed: true },
-          { id: "item-3", text: "Confirm first aid kit is stocked", completed: false },
-          { id: "item-4", text: "Review weather conditions", completed: false },
-          { id: "item-5", text: "Check equipment for damage", completed: false },
-        ],
-        assignedTo: "Safety Coordinator",
-        createdAt: new Date().toISOString(),
-      },
-    ];
-
-    const mockContacts: EmergencyContact[] = [
-      {
-        id: "contact-1",
-        projectId,
-        name: "John Smith",
-        role: "Safety Coordinator",
-        phone: "(555) 123-4567",
-        email: "jsmith@production.com",
-        isPrimary: true,
-      },
-      {
-        id: "contact-2",
-        projectId,
-        name: "Local Hospital ER",
-        role: "Medical Emergency",
-        phone: "(555) 911-0000",
-        isPrimary: true,
-      },
-    ];
-
-    setRisks(mockRisks);
-    setIncidents(mockIncidents);
-    setChecklists(mockChecklists);
-    setEmergencyContacts(mockContacts);
+    // Data will be fetched from API
+    setRisks([]);
+    setIncidents([]);
+    setChecklists([]);
+    setEmergencyContacts([]);
     setIsLoading(false);
   }, [projectId, currentUserEmail]);
 

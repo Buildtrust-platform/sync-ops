@@ -35,132 +35,10 @@ interface SimulationResult {
   }[];
 }
 
-// Mock data for demonstration
-const mockPolicies: StorageLifecyclePolicy[] = [
-  {
-    id: 'policy-1',
-    organizationId: 'org-1',
-    name: 'Standard Archive Policy',
-    description: 'Move inactive assets to cold storage after 90 days',
-    type: 'TIME_BASED',
-    isActive: true,
-    priority: 100,
-    conditions: [
-      { field: 'daysSinceLastAccess', operator: 'greaterThan', value: 90 },
-      { field: 'currentStorageTier', operator: 'equals', value: 'HOT' },
-      { field: 'isLegalHold', operator: 'equals', value: false },
-    ],
-    actions: [
-      { type: 'TRANSITION', targetTier: 'COLD' },
-      { type: 'NOTIFY', notifyRoles: ['ADMIN'] },
-    ],
-    scope: {
-      assetTypes: ['video', 'audio'],
-    },
-    schedule: {
-      runFrequency: 'WEEKLY',
-      lastRunAt: '2024-06-08T02:00:00Z',
-      nextRunAt: '2024-06-15T02:00:00Z',
-    },
-    createdBy: 'admin',
-    createdAt: '2024-01-15T00:00:00Z',
-    updatedAt: '2024-06-01T00:00:00Z',
-    version: 1,
-  },
-  {
-    id: 'policy-2',
-    organizationId: 'org-1',
-    name: 'Deep Archive for Completed Projects',
-    description: 'Move completed project assets to glacier after 180 days',
-    type: 'PROJECT_STATUS',
-    isActive: true,
-    priority: 200,
-    conditions: [
-      { field: 'daysSinceProjectClose', operator: 'greaterThan', value: 180 },
-      { field: 'projectStatus', operator: 'equals', value: 'COMPLETED' },
-      { field: 'currentStorageTier', operator: 'equals', value: 'COLD' },
-    ],
-    actions: [
-      { type: 'TRANSITION', targetTier: 'DEEP_ARCHIVE' },
-      { type: 'NOTIFY', notifyRoles: ['ADMIN', 'PRODUCER'] },
-    ],
-    scope: {},
-    schedule: {
-      runFrequency: 'MONTHLY',
-      lastRunAt: '2024-06-01T03:00:00Z',
-      nextRunAt: '2024-07-01T03:00:00Z',
-    },
-    createdBy: 'admin',
-    createdAt: '2024-02-01T00:00:00Z',
-    updatedAt: '2024-05-15T00:00:00Z',
-    version: 2,
-  },
-  {
-    id: 'policy-3',
-    organizationId: 'org-1',
-    name: 'Legal Hold Protection',
-    description: 'Lock assets under legal hold',
-    type: 'LEGAL_HOLD',
-    isActive: true,
-    priority: 1,
-    conditions: [
-      { field: 'isLegalHold', operator: 'equals', value: true },
-    ],
-    actions: [
-      { type: 'LOCK' },
-    ],
-    scope: {},
-    schedule: {
-      runFrequency: 'HOURLY',
-    },
-    createdBy: 'legal-admin',
-    createdAt: '2024-03-10T00:00:00Z',
-    updatedAt: '2024-03-10T00:00:00Z',
-    version: 1,
-  },
-];
+// Data will be fetched from API
+const initialPolicies: StorageLifecyclePolicy[] = [];
 
-const mockLogs: PolicyExecutionLog[] = [
-  {
-    id: 'log-1',
-    policyId: 'policy-1',
-    policyName: 'Standard Archive Policy',
-    organizationId: 'org-1',
-    executedAt: '2024-06-08T02:15:00Z',
-    status: 'SUCCESS',
-    assetsEvaluated: 1250,
-    assetsTransitioned: 847,
-    errors: [],
-    costSavingsAchieved: 45.50,
-    executionTimeMs: 12500,
-  },
-  {
-    id: 'log-2',
-    policyId: 'policy-2',
-    policyName: 'Deep Archive for Completed Projects',
-    organizationId: 'org-1',
-    executedAt: '2024-06-01T03:00:00Z',
-    status: 'SUCCESS',
-    assetsEvaluated: 5420,
-    assetsTransitioned: 5420,
-    errors: [],
-    costSavingsAchieved: 312.40,
-    executionTimeMs: 45000,
-  },
-  {
-    id: 'log-3',
-    policyId: 'policy-1',
-    policyName: 'Standard Archive Policy',
-    organizationId: 'org-1',
-    executedAt: '2024-06-01T02:15:00Z',
-    status: 'PARTIAL',
-    assetsEvaluated: 980,
-    assetsTransitioned: 623,
-    errors: ['3 assets locked by active edit sessions', '12 assets have pending uploads'],
-    costSavingsAchieved: 32.10,
-    executionTimeMs: 8900,
-  },
-];
+const initialLogs: PolicyExecutionLog[] = [];
 
 interface Props {
   organizationId: string;
@@ -169,8 +47,8 @@ interface Props {
 }
 
 export default function LifecyclePolicyManager({ organizationId, projectId, currentUserEmail }: Props) {
-  const [policies, setPolicies] = useState<StorageLifecyclePolicy[]>(mockPolicies);
-  const [logs] = useState<PolicyExecutionLog[]>(mockLogs);
+  const [policies, setPolicies] = useState<StorageLifecyclePolicy[]>(initialPolicies);
+  const [logs] = useState<PolicyExecutionLog[]>(initialLogs);
   const [showTemplates, setShowTemplates] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const [showSimulation, setShowSimulation] = useState(false);

@@ -32,85 +32,10 @@ interface ArchivedProject {
   thumbnailUrl?: string;
 }
 
-// Mock data
-const mockArchivedProjects: ArchivedProject[] = [
-  {
-    id: 'proj-1',
-    name: 'Summer Campaign 2023',
-    description: 'Q3 marketing campaign with beach scenes',
-    archivedAt: '2023-12-15T00:00:00Z',
-    archivedBy: 'john.doe@studio.com',
-    assetCount: 2450,
-    totalSize: 850 * 1024 * 1024 * 1024, // 850 GB
-    storageTier: 'GLACIER',
-    lastAccessed: '2024-01-10T00:00:00Z',
-    thumbnailUrl: '/thumbnails/summer-campaign.jpg',
-  },
-  {
-    id: 'proj-2',
-    name: 'Product Launch Video',
-    description: 'Tech product launch video with VFX',
-    archivedAt: '2023-09-01T00:00:00Z',
-    archivedBy: 'jane.smith@studio.com',
-    assetCount: 1280,
-    totalSize: 2.1 * 1024 * 1024 * 1024 * 1024, // 2.1 TB
-    storageTier: 'DEEP_ARCHIVE',
-    lastAccessed: '2023-11-20T00:00:00Z',
-  },
-  {
-    id: 'proj-3',
-    name: 'Documentary Series S1',
-    description: '6-part documentary series',
-    archivedAt: '2024-03-01T00:00:00Z',
-    archivedBy: 'producer@studio.com',
-    assetCount: 8500,
-    totalSize: 5.5 * 1024 * 1024 * 1024 * 1024, // 5.5 TB
-    storageTier: 'COLD',
-    lastAccessed: '2024-05-15T00:00:00Z',
-  },
-];
+// Data will be fetched from API
+const initialArchivedProjects: ArchivedProject[] = [];
 
-const mockPendingRequests: ProjectResurrectionRequest[] = [
-  {
-    id: 'req-1',
-    projectId: 'proj-1',
-    projectName: 'Summer Campaign 2023',
-    requestedBy: 'editor@studio.com',
-    requestedAt: '2024-06-10T14:30:00Z',
-    reason: 'Need B-roll footage for new campaign',
-    priority: 'normal',
-    scope: { type: 'partial', assetTypes: ['video'], targetTier: 'HOT' },
-    options: {
-      tier: 'standard',
-      stagedRestore: true,
-      generateProxies: true,
-      verifyIntegrity: true,
-      notifyOnComplete: ['editor@studio.com'],
-      notifyOnMilestone: true,
-      autoReArchiveDays: 30,
-    },
-    estimates: {
-      totalAssets: 450,
-      assetsInGlacier: 450,
-      assetsInDeepArchive: 0,
-      totalSizeBytes: 180 * 1024 * 1024 * 1024,
-      metadataRestoreMinutes: 5,
-      assetRestoreMinutes: 540, // 9 hours
-      totalRestoreMinutes: 545,
-      restoreCost: 18.50,
-      storageCostPerMonth: 4.14,
-      tierBreakdown: [
-        { tier: 'GLACIER', assetCount: 450, sizeBytes: 180 * 1024 * 1024 * 1024, restoreCost: 18.50, restoreTimeMinutes: 540 },
-      ],
-    },
-    approvals: [
-      { role: 'MANAGER', status: 'approved', approvedBy: 'manager@studio.com', approvedAt: '2024-06-10T15:00:00Z' },
-      { role: 'FINANCE', status: 'pending' },
-    ],
-    status: 'awaiting_approval',
-    progress: { phase: 'awaiting_approval', percentComplete: 0 },
-  },
-];
+const initialPendingRequests: ProjectResurrectionRequest[] = [];
 
 interface Props {
   organizationId: string;
@@ -118,8 +43,8 @@ interface Props {
 }
 
 export default function ProjectResurrection({ organizationId, currentUserEmail }: Props) {
-  const [projects] = useState<ArchivedProject[]>(mockArchivedProjects);
-  const [pendingRequests, setPendingRequests] = useState<ProjectResurrectionRequest[]>(mockPendingRequests);
+  const [projects] = useState<ArchivedProject[]>(initialArchivedProjects);
+  const [pendingRequests, setPendingRequests] = useState<ProjectResurrectionRequest[]>(initialPendingRequests);
   const [selectedProject, setSelectedProject] = useState<ArchivedProject | null>(null);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'archived' | 'requests'>('archived');
@@ -196,13 +121,13 @@ export default function ProjectResurrection({ organizationId, currentUserEmail }
     });
 
     // Calculate estimates based on project
-    const mockAssets = Array.from({ length: project.assetCount }, (_, i) => ({
+    const estimatedAssets = Array.from({ length: project.assetCount }, (_, i) => ({
       id: `asset-${i}`,
       storageTier: project.storageTier,
       sizeBytes: project.totalSize / project.assetCount,
     }));
 
-    const est = calculateRestorationEstimates(mockAssets, {
+    const est = calculateRestorationEstimates(estimatedAssets, {
       tier: requestForm.tier,
       stagedRestore: requestForm.stagedRestore,
       generateProxies: requestForm.generateProxies,

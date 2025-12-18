@@ -93,50 +93,20 @@ export default function ViewAnalytics({
     setClient(generateClient<Schema>({ authMode: "userPool" }));
   }, []);
 
-  // Generate mock analytics data (in production, this would come from actual tracking)
+  // Load analytics data from API
   const loadAnalytics = useCallback(async () => {
     if (!client) return;
 
     try {
-      // In a real implementation, this would query ViewSession or Analytics models
-      // For now, we'll generate sample data to demonstrate the UI
-
-      // Simulated view sessions
-      const mockSessions: ViewSession[] = Array.from({ length: 12 }, (_, i) => {
-        const watchDuration = Math.random() * videoDuration * 0.8 + videoDuration * 0.2;
-        const positions: number[] = [];
-        let currentPos = 0;
-        while (currentPos < watchDuration) {
-          positions.push(currentPos);
-          currentPos += 2 + Math.random() * 3;
-        }
-
-        return {
-          id: `session-${i}`,
-          viewerId: `viewer-${Math.floor(Math.random() * 8)}`,
-          viewerEmail: i % 3 === 0 ? `viewer${i}@example.com` : null,
-          startTime: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-          endTime: new Date(Date.now() - Math.random() * 6 * 24 * 60 * 60 * 1000).toISOString(),
-          watchDuration,
-          totalDuration: videoDuration,
-          completionRate: (watchDuration / videoDuration) * 100,
-          playbackPositions: positions,
-          replayedSegments: Math.random() > 0.5 ? [
-            { start: Math.random() * videoDuration * 0.5, end: Math.random() * videoDuration * 0.3 + videoDuration * 0.5 }
-          ] : [],
-          deviceType: ["Desktop", "Mobile", "Tablet"][Math.floor(Math.random() * 3)],
-          location: ["US", "UK", "CA", "AU"][Math.floor(Math.random() * 4)],
-        };
-      });
-
-      setViewSessions(mockSessions);
+      // Data will be fetched from API
+      setViewSessions([]);
     } catch (err) {
       console.error("Error loading analytics:", err);
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [client, videoDuration]);
+  }, [client]);
 
   useEffect(() => {
     loadAnalytics();

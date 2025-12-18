@@ -31,74 +31,12 @@ interface TeamActivity {
   timestamp: string;
 }
 
-// Mock data
-const mockMetrics: DashboardMetric[] = [
-  {
-    label: 'Active Projects',
-    value: 12,
-    change: 2,
-    changeLabel: 'from last month',
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-      </svg>
-    ),
-    color: 'blue',
-  },
-  {
-    label: 'Team Members',
-    value: 8,
-    change: 1,
-    changeLabel: 'new this month',
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-      </svg>
-    ),
-    color: 'purple',
-  },
-  {
-    label: 'Storage Used',
-    value: '245.5 GB',
-    change: 12,
-    changeLabel: 'GB added this week',
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
-      </svg>
-    ),
-    color: 'emerald',
-  },
-  {
-    label: 'Total Budget',
-    value: '$485,000',
-    change: -5,
-    changeLabel: 'under budget',
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-    color: 'amber',
-  },
-];
+// Data will be fetched from API
+const initialMetrics: DashboardMetric[] = [];
 
-const mockProjects: ProjectSummary[] = [
-  { id: '1', name: 'Brand Campaign Q1', status: 'POST_PRODUCTION', progress: 75, budget: 150000, spent: 112500, dueDate: '2025-01-15', teamSize: 8 },
-  { id: '2', name: 'Product Launch Video', status: 'PRODUCTION', progress: 45, budget: 85000, spent: 42000, dueDate: '2025-01-28', teamSize: 6 },
-  { id: '3', name: 'Corporate Training Series', status: 'PRE_PRODUCTION', progress: 20, budget: 120000, spent: 18000, dueDate: '2025-02-15', teamSize: 5 },
-  { id: '4', name: 'Social Media Campaign', status: 'REVIEW_APPROVAL', progress: 90, budget: 45000, spent: 43500, dueDate: '2024-12-20', teamSize: 4 },
-  { id: '5', name: 'Annual Report Video', status: 'DEVELOPMENT', progress: 10, budget: 65000, spent: 5200, dueDate: '2025-03-01', teamSize: 3 },
-];
+const initialProjects: ProjectSummary[] = [];
 
-const mockActivity: TeamActivity[] = [
-  { id: '1', user: 'Sarah Johnson', avatar: 'S', action: 'uploaded', target: '15 new assets to Brand Campaign', timestamp: '5 minutes ago' },
-  { id: '2', user: 'Mike Davis', avatar: 'M', action: 'approved', target: 'Final cut for Product Launch', timestamp: '1 hour ago' },
-  { id: '3', user: 'Emily Chen', avatar: 'E', action: 'commented on', target: 'Scene 3 review', timestamp: '2 hours ago' },
-  { id: '4', user: 'John Smith', avatar: 'J', action: 'created', target: 'new call sheet for Day 5', timestamp: '3 hours ago' },
-  { id: '5', user: 'David Wilson', avatar: 'D', action: 'completed', target: 'color grading for Episode 2', timestamp: '5 hours ago' },
-  { id: '6', user: 'Sarah Johnson', avatar: 'S', action: 'invited', target: 'new team member', timestamp: 'Yesterday' },
-];
+const initialActivity: TeamActivity[] = [];
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; label: string }> = {
   DEVELOPMENT: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Development' },
@@ -130,7 +68,7 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {mockMetrics.map((metric, idx) => {
+        {initialMetrics.map((metric, idx) => {
           const colors = getMetricColor(metric.color);
           return (
             <div key={idx} className="bg-white rounded-xl border border-slate-200 p-5">
@@ -161,7 +99,7 @@ export default function AdminDashboard() {
             <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">View All</button>
           </div>
           <div className="divide-y divide-slate-100">
-            {mockProjects.slice(0, 4).map((project) => {
+            {initialProjects.slice(0, 4).map((project) => {
               const status = STATUS_COLORS[project.status] || STATUS_COLORS.DEVELOPMENT;
               const budgetPercent = (project.spent / project.budget) * 100;
               return (
@@ -221,7 +159,7 @@ export default function AdminDashboard() {
             <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">View All</button>
           </div>
           <div className="divide-y divide-slate-100 max-h-[400px] overflow-y-auto">
-            {mockActivity.map((activity) => (
+            {initialActivity.map((activity) => (
               <div key={activity.id} className="p-4 hover:bg-slate-50 transition-colors">
                 <div className="flex gap-3">
                   <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-sm font-medium text-slate-600 flex-shrink-0">

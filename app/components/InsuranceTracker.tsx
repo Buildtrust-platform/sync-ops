@@ -168,102 +168,13 @@ export default function InsuranceTracker({
     return "ACTIVE";
   };
 
-  // Load data
+  // Load data - data will be fetched from API
   useEffect(() => {
     setIsLoading(true);
 
-    // Mock policies
-    const mockPolicies: InsurancePolicy[] = [
-      {
-        id: "policy-1",
-        projectId,
-        policyType: "GENERAL_LIABILITY",
-        policyNumber: "GL-2024-001234",
-        carrier: "Entertainment Insurance Partners",
-        coverageAmount: 2000000,
-        deductible: 10000,
-        effectiveDate: "2024-01-01",
-        expirationDate: "2025-01-01",
-        holderName: "MasterOps Productions LLC",
-        holderType: "PRODUCTION",
-        holderEmail: "insurance@masterops.com",
-        additionalInsured: ["Location Owner LLC", "Client Corp"],
-        status: "ACTIVE",
-        verifiedBy: currentUserEmail,
-        verifiedAt: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: "policy-2",
-        projectId,
-        policyType: "WORKERS_COMP",
-        policyNumber: "WC-2024-005678",
-        carrier: "Workers Safety Insurance Co",
-        coverageAmount: 1000000,
-        effectiveDate: "2024-01-01",
-        expirationDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // 15 days from now
-        holderName: "MasterOps Productions LLC",
-        holderType: "PRODUCTION",
-        status: "EXPIRING_SOON",
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: "policy-3",
-        projectId,
-        policyType: "EQUIPMENT",
-        policyNumber: "EQ-2024-009012",
-        carrier: "Camera Coverage Inc",
-        coverageAmount: 500000,
-        deductible: 2500,
-        effectiveDate: "2024-06-01",
-        expirationDate: "2025-06-01",
-        holderName: "Lens Rental House",
-        holderType: "VENDOR",
-        holderEmail: "certs@lensrental.com",
-        status: "ACTIVE",
-        createdAt: new Date().toISOString(),
-      },
-    ];
-
-    // Update status based on dates
-    const updatedPolicies = mockPolicies.map((p) => ({
-      ...p,
-      status: calculateStatus(p.expirationDate),
-    }));
-
-    // Mock requirements
-    const mockRequirements: InsuranceRequirement[] = [
-      {
-        id: "req-1",
-        projectId,
-        requirementType: "GENERAL_LIABILITY",
-        minimumCoverage: 1000000,
-        description: "Minimum $1M general liability coverage required for all production activities",
-        requiredFor: "Production company",
-        isMet: true,
-      },
-      {
-        id: "req-2",
-        projectId,
-        requirementType: "WORKERS_COMP",
-        minimumCoverage: 500000,
-        description: "Workers compensation coverage as required by state law",
-        requiredFor: "All crew",
-        isMet: true,
-      },
-      {
-        id: "req-3",
-        projectId,
-        requirementType: "AUTO_LIABILITY",
-        minimumCoverage: 1000000,
-        description: "Auto liability for production vehicles",
-        requiredFor: "Transportation department",
-        isMet: false,
-      },
-    ];
-
-    setPolicies(updatedPolicies);
-    setRequirements(mockRequirements);
+    // Data will be fetched from API
+    setPolicies([]);
+    setRequirements([]);
     setIsLoading(false);
   }, [projectId, currentUserEmail]);
 

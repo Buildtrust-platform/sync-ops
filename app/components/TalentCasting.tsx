@@ -208,82 +208,13 @@ export default function TalentCasting({
     notes: "",
   });
 
-  // Load data - using mock data for now
+  // Load data - data will be fetched from API
   useEffect(() => {
     setIsLoading(true);
 
-    // Mock roles data
-    const mockRoles: ProjectRole[] = [
-      {
-        id: "role-1",
-        projectId,
-        roleName: "Sarah Mitchell",
-        characterDescription: "A driven corporate lawyer in her 30s who discovers a massive fraud conspiracy",
-        ageRange: "30-40",
-        gender: "Female",
-        speakingLines: true,
-        roleType: "LEAD",
-        payRate: 5000,
-        payType: "DAILY",
-        shootDays: 15,
-        castingStatus: "AUDITIONING",
-        notes: "Must have strong emotional range",
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: "role-2",
-        projectId,
-        roleName: "Detective Marcus Cole",
-        characterDescription: "Veteran detective helping Sarah uncover the truth",
-        ageRange: "45-55",
-        gender: "Male",
-        speakingLines: true,
-        roleType: "SUPPORTING",
-        payRate: 2500,
-        payType: "DAILY",
-        shootDays: 8,
-        castingStatus: "OPEN",
-        createdAt: new Date().toISOString(),
-      },
-    ];
-
-    // Mock talent data
-    const mockTalents: TalentProfile[] = [
-      {
-        id: "talent-1",
-        projectId,
-        firstName: "Emma",
-        lastName: "Roberts",
-        email: "emma.r@agency.com",
-        phone: "(555) 123-4567",
-        agentName: "Mike Chen",
-        agentEmail: "mike@talentco.com",
-        gender: "Female",
-        ageRange: "30-35",
-        unionStatus: "SAG-AFTRA",
-        specialSkills: ["Dance", "Martial Arts", "Horseback Riding"],
-        status: "AVAILABLE",
-        rating: 5,
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: "talent-2",
-        projectId,
-        firstName: "James",
-        lastName: "Wilson",
-        email: "jwilson@gmail.com",
-        phone: "(555) 987-6543",
-        gender: "Male",
-        ageRange: "45-50",
-        unionStatus: "SAG-AFTRA",
-        status: "AVAILABLE",
-        rating: 4,
-        createdAt: new Date().toISOString(),
-      },
-    ];
-
-    setRoles(mockRoles);
-    setTalents(mockTalents);
+    // Data will be fetched from API
+    setRoles([]);
+    setTalents([]);
     setAuditions([]);
     setIsLoading(false);
   }, [projectId]);

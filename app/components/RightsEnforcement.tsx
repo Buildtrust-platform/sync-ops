@@ -16,89 +16,12 @@ import {
   generateRightsReport,
 } from '@/lib/lifecycle';
 
-// Mock data
-const mockAssetRights: AssetRights[] = [
-  {
-    assetId: 'asset-1',
-    rightsHolder: { name: 'Getty Images', contactEmail: 'licensing@getty.com', contractId: 'GTY-2024-001' },
-    validFrom: '2024-01-01T00:00:00Z',
-    validUntil: '2024-12-31T23:59:59Z',
-    allowedUsageTypes: ['internal', 'digital', 'social_media'],
-    restrictedUsageTypes: ['broadcast', 'theatrical'],
-    allowedTerritories: ['US', 'CA', 'GB'],
-    restrictedTerritories: [],
-    maxDownloads: 50,
-    currentDownloads: 42,
-    requiresWatermark: false,
-    requiresApproval: false,
-    createdAt: '2024-01-15T00:00:00Z',
-    updatedAt: '2024-01-15T00:00:00Z',
-    createdBy: 'legal@studio.com',
-  },
-  {
-    assetId: 'asset-2',
-    rightsHolder: { name: 'Music Licensing Co', contactEmail: 'sync@musicco.com', contractId: 'MLC-2024-045' },
-    validFrom: '2024-03-01T00:00:00Z',
-    validUntil: '2024-06-30T23:59:59Z', // Expiring soon
-    allowedUsageTypes: ['internal', 'broadcast', 'digital'],
-    restrictedUsageTypes: [],
-    allowedTerritories: 'worldwide',
-    restrictedTerritories: ['CN', 'RU'],
-    requiresWatermark: false,
-    requiresApproval: true,
-    approverRoles: ['LEGAL', 'PRODUCER'],
-    currentDownloads: 15,
-    createdAt: '2024-03-01T00:00:00Z',
-    updatedAt: '2024-03-01T00:00:00Z',
-    createdBy: 'legal@studio.com',
-  },
-  {
-    assetId: 'asset-3',
-    rightsHolder: { name: 'Stock Footage Inc', contactEmail: 'rights@stockfootage.com' },
-    validFrom: '2023-01-01T00:00:00Z',
-    validUntil: '2023-12-31T23:59:59Z', // Expired
-    allowedUsageTypes: ['internal'],
-    restrictedUsageTypes: ['broadcast', 'digital', 'theatrical', 'print'],
-    allowedTerritories: ['US'],
-    restrictedTerritories: [],
-    requiresWatermark: true,
-    watermarkText: 'PREVIEW ONLY',
-    requiresApproval: false,
-    currentDownloads: 8,
-    createdAt: '2023-01-15T00:00:00Z',
-    updatedAt: '2023-01-15T00:00:00Z',
-    createdBy: 'legal@studio.com',
-  },
-];
+// Data will be fetched from API
+const initialAssetRights: AssetRights[] = [];
 
-const mockAssetNames: Record<string, string> = {
-  'asset-1': 'Beach_Sunset_4K_001.mov',
-  'asset-2': 'Background_Music_Track.wav',
-  'asset-3': 'City_Timelapse.mp4',
-};
+const initialAssetNames: Record<string, string> = {};
 
-const mockDownloadLogs: DownloadAuditLog[] = [
-  {
-    id: 'dl-1',
-    assetId: 'asset-1',
-    assetName: 'Beach_Sunset_4K_001.mov',
-    downloadedBy: 'editor@studio.com',
-    downloadedAt: '2024-06-10T14:30:00Z',
-    usageType: 'digital',
-    territory: 'US',
-    projectId: 'proj-1',
-    fileSize: 2.5 * 1024 * 1024 * 1024,
-    format: 'mov',
-    resolution: '3840x2160',
-    rightsSnapshot: {
-      validUntil: '2024-12-31T23:59:59Z',
-      allowedUsages: ['internal', 'digital', 'social_media'],
-      territories: ['US', 'CA', 'GB'],
-    },
-    ipAddress: '192.168.1.100',
-    userAgent: 'Mozilla/5.0',
-  },
-];
+const initialDownloadLogs: DownloadAuditLog[] = [];
 
 interface DownloadModalState {
   assetId: string;
@@ -117,13 +40,13 @@ interface Props {
 }
 
 export default function RightsEnforcement({ organizationId, projectId, currentUserEmail }: Props) {
-  const [rights] = useState<AssetRights[]>(mockAssetRights);
-  const [downloadLogs] = useState<DownloadAuditLog[]>(mockDownloadLogs);
+  const [rights] = useState<AssetRights[]>(initialAssetRights);
+  const [downloadLogs] = useState<DownloadAuditLog[]>(initialDownloadLogs);
   const [activeTab, setActiveTab] = useState<'overview' | 'validate' | 'audit' | 'reports'>('overview');
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [downloadModal, setDownloadModal] = useState<DownloadModalState | null>(null);
 
-  const report = generateRightsReport(rights, mockAssetNames, downloadLogs);
+  const report = generateRightsReport(rights, initialAssetNames, downloadLogs);
   const expiringRights = getExpiringRights(rights, 30);
 
   const formatDate = (dateStr: string): string => {
@@ -165,7 +88,7 @@ export default function RightsEnforcement({ organizationId, projectId, currentUs
     const assetRights = rights.find(r => r.assetId === assetId) || null;
     setDownloadModal({
       assetId,
-      assetName: mockAssetNames[assetId] || assetId,
+      assetName: initialAssetNames[assetId] || assetId,
       rights: assetRights,
       usageType: 'internal',
       territory: 'US',
@@ -276,7 +199,7 @@ export default function RightsEnforcement({ organizationId, projectId, currentUs
                   return (
                     <div key={right.assetId} className="flex items-center justify-between p-2 bg-gray-800/50 rounded-lg">
                       <div>
-                        <p className="text-white">{mockAssetNames[right.assetId]}</p>
+                        <p className="text-white">{initialAssetNames[right.assetId]}</p>
                         <p className="text-gray-400 text-sm">{right.rightsHolder.name}</p>
                       </div>
                       <div className="text-right">
@@ -303,7 +226,7 @@ export default function RightsEnforcement({ organizationId, projectId, currentUs
                     <div>
                       <div className="flex items-center gap-3">
                         <h3 className="text-lg font-semibold text-white">
-                          {mockAssetNames[right.assetId]}
+                          {initialAssetNames[right.assetId]}
                         </h3>
                         <span className={`px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(status)}`}>
                           {status}
@@ -412,7 +335,7 @@ export default function RightsEnforcement({ organizationId, projectId, currentUs
                     </svg>
                   </div>
                   <div className="text-left">
-                    <p className="text-white">{mockAssetNames[right.assetId]}</p>
+                    <p className="text-white">{initialAssetNames[right.assetId]}</p>
                     <p className="text-gray-400 text-sm">{right.rightsHolder.name}</p>
                   </div>
                 </div>

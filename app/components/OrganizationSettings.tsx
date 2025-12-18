@@ -42,43 +42,15 @@ interface OrganizationMember {
   lastActiveAt?: string;
 }
 
-// Mock data for development
-const mockOrganization: Organization = {
-  id: 'org-1',
-  name: 'Acme Studios',
-  slug: 'acme-studios',
-  description: 'Professional video production and post-production services',
-  email: 'admin@acmestudios.com',
-  phone: '+1 (555) 123-4567',
-  website: 'https://acmestudios.com',
-  industry: 'PRODUCTION_STUDIO',
-  address: '123 Production Lane',
-  city: 'Los Angeles',
-  state: 'CA',
-  country: 'US',
-  postalCode: '90028',
-  subscriptionTier: 'PROFESSIONAL',
-  subscriptionStatus: 'ACTIVE',
-  currentProjectCount: 12,
-  currentUserCount: 8,
-  currentStorageUsedGB: 245.5,
-  maxProjects: 50,
-  maxUsers: 25,
-  maxStorageGB: 500,
-  brandPrimaryColor: '#2563eb',
-  brandSecondaryColor: '#1e40af',
-  timezone: 'America/Los_Angeles',
-  currency: 'USD',
+// Data will be fetched from API
+const initialOrganization: Organization = {
+  id: '',
+  name: '',
+  slug: '',
+  email: '',
 };
 
-const mockMembers: OrganizationMember[] = [
-  { id: '1', email: 'john@acmestudios.com', name: 'John Smith', role: 'OWNER', status: 'ACTIVE', joinedAt: '2024-01-15', lastActiveAt: '2024-12-10' },
-  { id: '2', email: 'sarah@acmestudios.com', name: 'Sarah Johnson', role: 'ADMIN', status: 'ACTIVE', joinedAt: '2024-02-01', lastActiveAt: '2024-12-09' },
-  { id: '3', email: 'mike@acmestudios.com', name: 'Mike Davis', role: 'MANAGER', status: 'ACTIVE', joinedAt: '2024-03-10', lastActiveAt: '2024-12-08' },
-  { id: '4', email: 'emily@acmestudios.com', name: 'Emily Chen', role: 'MEMBER', status: 'ACTIVE', joinedAt: '2024-04-22', lastActiveAt: '2024-12-10' },
-  { id: '5', email: 'david@acmestudios.com', name: 'David Wilson', role: 'MEMBER', status: 'ACTIVE', joinedAt: '2024-05-15', lastActiveAt: '2024-12-07' },
-  { id: '6', email: 'pending@example.com', name: undefined, role: 'VIEWER', status: 'PENDING', joinedAt: undefined, lastActiveAt: undefined },
-];
+const initialMembers: OrganizationMember[] = [];
 
 const SUBSCRIPTION_TIERS = {
   FREE: { name: 'Free', color: 'bg-gray-100 text-gray-800', projects: 3, users: 2, storage: 5 },
@@ -114,8 +86,8 @@ type SettingsTab = 'general' | 'members' | 'billing' | 'usage' | 'branding' | 's
 
 export default function OrganizationSettings() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
-  const [organization, setOrganization] = useState<Organization>(mockOrganization);
-  const [members] = useState<OrganizationMember[]>(mockMembers);
+  const [organization, setOrganization] = useState<Organization>(initialOrganization);
+  const [members] = useState<OrganizationMember[]>(initialMembers);
   const [isEditing, setIsEditing] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');

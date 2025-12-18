@@ -213,30 +213,12 @@ export default function LocationMaps({ projectId, project, currentUserEmail }: L
     });
   }, [mapLoaded, showAddModal]);
 
-  // Load locations (mock data for now - would come from database)
+  // Load locations - data will be fetched from API
   useEffect(() => {
     setIsLoading(true);
 
-    // Mock locations based on project data
-    const mockLocations: ProductionLocation[] = [];
-
-    if (project.shootLocationCity && project.shootLocationCountry) {
-      mockLocations.push({
-        id: 'primary-1',
-        projectId,
-        name: 'Primary Shoot Location',
-        address: `${project.shootLocationCity}, ${project.shootLocationCountry}`,
-        city: project.shootLocationCity || undefined,
-        country: project.shootLocationCountry || undefined,
-        latitude: 34.0522, // Default LA coordinates
-        longitude: -118.2437,
-        locationType: 'PRIMARY',
-        isActive: true,
-        createdAt: new Date().toISOString(),
-      });
-    }
-
-    setLocations(mockLocations);
+    // Data will be fetched from API
+    setLocations([]);
     setIsLoading(false);
   }, [projectId, project]);
 
