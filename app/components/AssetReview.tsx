@@ -18,14 +18,13 @@ import {
 import { useToast } from "./Toast";
 import AnnotationToolbar, { type AnnotationTool, type AnnotationStyle } from "./AnnotationToolbar";
 import VideoAnnotationCanvas, { type VideoAnnotationCanvasRef, type AnnotationShape } from "./VideoAnnotationCanvas";
-import TranscriptViewer from "./TranscriptViewer";
 import VersionSwitcher from "./VersionSwitcher";
-import CaptionEditor from "./CaptionEditor";
 import type { CaptionCue } from "./CaptionOverlay";
-import EncodingStatus from "./EncodingStatus";
 import PresentationMode, { PresentationModeButton } from "./PresentationMode";
 import ViewAnalytics from "./ViewAnalytics";
-import DeliveryPresets from "./DeliveryPresets";
+// Consolidated components (replacing separate Transcript, Caption, Encoding, Delivery components)
+import MediaIntelligence from "./MediaIntelligence";
+import DeliveryCenter from "./DeliveryCenter";
 
 /**
  * ASSET REVIEW COMPONENT
@@ -152,20 +151,13 @@ export default function AssetReview({
   const [videoWidth, setVideoWidth] = useState(0);
   const [videoHeight, setVideoHeight] = useState(0);
 
-  // Transcript viewer state
-  const [showTranscript, setShowTranscript] = useState(false);
-
   // Version switcher state
   const [showVersionSwitcher, setShowVersionSwitcher] = useState(false);
   const [currentVersionS3Key, setCurrentVersionS3Key] = useState<string | null>(null);
 
-  // Caption state
-  const [showCaptionEditor, setShowCaptionEditor] = useState(false);
+  // Caption state (for video overlay)
   const [captions, setCaptions] = useState<CaptionCue[]>([]);
   const [captionsEnabled, setCaptionsEnabled] = useState(false);
-
-  // Encoding status state
-  const [showEncodingStatus, setShowEncodingStatus] = useState(false);
 
   // Presentation mode state
   const [showPresentationMode, setShowPresentationMode] = useState(false);
@@ -173,8 +165,9 @@ export default function AssetReview({
   // View analytics state
   const [showViewAnalytics, setShowViewAnalytics] = useState(false);
 
-  // Delivery presets state
-  const [showDeliveryPresets, setShowDeliveryPresets] = useState(false);
+  // Consolidated panel states (replacing multiple separate states)
+  const [showMediaIntelligence, setShowMediaIntelligence] = useState(false);
+  const [showDeliveryCenter, setShowDeliveryCenter] = useState(false);
 
   // Load asset and reviews
   useEffect(() => {
@@ -677,10 +670,7 @@ export default function AssetReview({
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-[6px] transition-colors"
-              style={{ color: 'var(--text-tertiary)' }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-tertiary)'; }}
+              className="p-2 rounded-[6px] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-2)] transition-all focus-ring"
             >
               <XIcon />
             </button>
@@ -855,12 +845,7 @@ export default function AssetReview({
                   <select
                     value={selectedRole}
                     onChange={(e) => setSelectedRole(e.target.value as typeof selectedRole)}
-                    className="w-full p-3 rounded-[6px] text-[14px]"
-                    style={{
-                      background: 'var(--bg-1)',
-                      border: '1px solid var(--border)',
-                      color: 'var(--text-primary)',
-                    }}
+                    className="input-professional select-professional text-[14px]"
                   >
                     <option value="INTERNAL">Internal Review</option>
                     <option value="CLIENT">Client Review</option>
@@ -870,10 +855,7 @@ export default function AssetReview({
                 </div>
                 <button
                   onClick={startReview}
-                  className="py-3 px-6 rounded-[6px] font-semibold text-[14px] transition-all duration-[80ms] active:scale-[0.98]"
-                  style={{ background: 'var(--primary)', color: 'var(--bg-0)' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.1)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.filter = 'brightness(1)'; }}
+                  className="py-3 px-6 text-[14px] action-primary focus-ring"
                 >
                   Start Review
                 </button>
@@ -900,10 +882,7 @@ export default function AssetReview({
                   {isLegalReviewer && !hasLegalApproval && (
                     <button
                       onClick={() => setShowLegalApproval(true)}
-                      className="py-2 px-4 rounded-[6px] font-semibold text-[13px] flex items-center gap-2 transition-all duration-[80ms] active:scale-[0.98]"
-                      style={{ background: 'var(--success)', color: 'white' }}
-                      onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.1)'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.filter = 'brightness(1)'; }}
+                      className="py-2 px-4 text-[13px] flex items-center gap-2 action-success focus-ring"
                     >
                       <ShieldCheckIcon />
                       Legal Approve & Lock
@@ -911,10 +890,7 @@ export default function AssetReview({
                   )}
                   <button
                     onClick={completeReview}
-                    className="py-2 px-4 rounded-[6px] font-semibold text-[13px] transition-all duration-[80ms] active:scale-[0.98]"
-                    style={{ background: 'var(--primary)', color: 'var(--bg-0)' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.1)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.filter = 'brightness(1)'; }}
+                    className="py-2 px-4 text-[13px] action-primary focus-ring"
                   >
                     Complete Review
                   </button>
@@ -925,20 +901,7 @@ export default function AssetReview({
               {!showCommentForm && (
                 <button
                   onClick={() => setShowCommentForm(true)}
-                  className="w-full py-4 rounded-[8px] font-semibold text-[14px] flex items-center justify-center gap-2 transition-all duration-[80ms]"
-                  style={{
-                    background: 'var(--bg-1)',
-                    border: '2px dashed var(--border)',
-                    color: 'var(--text-tertiary)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--primary)';
-                    e.currentTarget.style.color = 'var(--primary)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--border)';
-                    e.currentTarget.style.color = 'var(--text-tertiary)';
-                  }}
+                  className="w-full py-4 text-[14px] flex items-center justify-center gap-2 action-dashed focus-ring"
                 >
                   <PlusIcon />
                   Add Time-Coded Comment
@@ -967,19 +930,13 @@ export default function AssetReview({
                           value={timecode}
                           onChange={(e) => setTimecode(parseFloat(e.target.value) || 0)}
                           placeholder="0.0"
-                          className="flex-1 p-2 rounded-[6px] text-[13px] font-mono"
-                          style={{
-                            background: 'var(--bg-2)',
-                            border: '1px solid var(--border)',
-                            color: 'var(--text-primary)',
-                          }}
+                          className="input-professional flex-1 text-[13px] font-mono"
                         />
                         {(videoUrl || audioUrl) && (
                           <button
                             type="button"
                             onClick={() => setTimecode(Math.round((videoUrl ? currentVideoTime : currentAudioTime) * frameRate) / frameRate)}
-                            className="px-2 py-1 rounded-[6px] text-[11px] font-bold transition-all duration-[80ms]"
-                            style={{ background: 'var(--primary)', color: 'var(--bg-0)' }}
+                            className="px-3 py-1 text-[11px] font-bold action-primary focus-ring"
                             title="Use current playback time"
                           >
                             Use Now
@@ -1000,12 +957,7 @@ export default function AssetReview({
                       <select
                         value={commentType}
                         onChange={(e) => setCommentType(e.target.value as typeof commentType)}
-                        className="w-full p-2 rounded-[6px] text-[13px]"
-                        style={{
-                          background: 'var(--bg-2)',
-                          border: '1px solid var(--border)',
-                          color: 'var(--text-primary)',
-                        }}
+                        className="input-professional select-professional text-[13px]"
                       >
                         <option value="NOTE">Note</option>
                         <option value="ISSUE">Issue</option>
@@ -1023,12 +975,7 @@ export default function AssetReview({
                       <select
                         value={commentPriority}
                         onChange={(e) => setCommentPriority(e.target.value as typeof commentPriority)}
-                        className="w-full p-2 rounded-[6px] text-[13px]"
-                        style={{
-                          background: 'var(--bg-2)',
-                          border: '1px solid var(--border)',
-                          color: 'var(--text-primary)',
-                        }}
+                        className="input-professional select-professional text-[13px]"
                       >
                         <option value="LOW">Low</option>
                         <option value="MEDIUM">Medium</option>
@@ -1048,22 +995,14 @@ export default function AssetReview({
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
                       placeholder="Enter your feedback..."
-                      className="w-full p-3 rounded-[6px] text-[13px] h-24 resize-none"
-                      style={{
-                        background: 'var(--bg-2)',
-                        border: '1px solid var(--border)',
-                        color: 'var(--text-primary)',
-                      }}
+                      className="input-professional text-[13px] h-24 resize-none"
                     />
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={addComment}
                       disabled={!commentText.trim()}
-                      className="flex-1 py-2 px-4 rounded-[6px] font-semibold text-[13px] transition-all duration-[80ms] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-                      style={{ background: 'var(--primary)', color: 'var(--bg-0)' }}
-                      onMouseEnter={(e) => { if (!e.currentTarget.disabled) e.currentTarget.style.filter = 'brightness(1.1)'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.filter = 'brightness(1)'; }}
+                      className="flex-1 py-2 px-4 text-[13px] action-primary focus-ring disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Add Comment
                     </button>
@@ -1073,14 +1012,7 @@ export default function AssetReview({
                         setCommentText("");
                         setTimecode(0);
                       }}
-                      className="flex-1 py-2 px-4 rounded-[6px] font-semibold text-[13px] transition-all duration-[80ms] active:scale-[0.98]"
-                      style={{
-                        background: 'var(--bg-2)',
-                        border: '1px solid var(--border)',
-                        color: 'var(--text-primary)',
-                      }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-3)'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-2)'; }}
+                      className="flex-1 py-2 px-4 text-[13px] action-ghost focus-ring border border-[var(--border-default)]"
                     >
                       Cancel
                     </button>
@@ -1099,9 +1031,10 @@ export default function AssetReview({
               Comments Timeline ({comments.length})
             </h3>
             {comments.length === 0 ? (
-              <p className="text-center py-8" style={{ color: 'var(--text-tertiary)' }}>
-                No comments yet
-              </p>
+              <div className="empty-state py-8">
+                <p className="empty-state-title">No comments yet</p>
+                <p className="empty-state-description">Start a review to add time-coded feedback</p>
+              </div>
             ) : (
               <div className="space-y-3">
                 {comments.map((comment) => {
@@ -1157,10 +1090,7 @@ export default function AssetReview({
                         {!comment.isResolved && currentReviewId && (
                           <button
                             onClick={() => resolveComment(comment.id)}
-                            className="text-[11px] font-bold px-3 py-1 rounded-[4px] transition-all duration-[80ms]"
-                            style={{ background: 'var(--success)', color: 'white' }}
-                            onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.1)'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.filter = 'brightness(1)'; }}
+                            className="text-[11px] font-bold px-3 py-1 action-success focus-ring"
                           >
                             Resolve
                           </button>
@@ -1181,46 +1111,63 @@ export default function AssetReview({
             )}
           </div>
 
-          {/* Transcript Section (for video/audio assets) */}
+          {/* Media Intelligence Section (Transcripts + Captions - CONSOLIDATED) */}
           {(videoUrl || audioUrl) && (
             <div
               className="rounded-[12px] overflow-hidden"
               style={{ background: 'var(--bg-0)', border: '1px solid var(--border)' }}
             >
               <button
-                onClick={() => setShowTranscript(!showTranscript)}
+                onClick={() => setShowMediaIntelligence(!showMediaIntelligence)}
                 className="w-full p-4 flex items-center justify-between hover:bg-[var(--bg-1)] transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14,2 14,8 20,8"/>
-                    <line x1="16" y1="13" x2="8" y2="13"/>
-                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                   </svg>
                   <span className="font-bold text-[16px]" style={{ color: 'var(--text-primary)' }}>
-                    Transcript
+                    Media Intelligence
+                  </span>
+                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}>
+                    Transcripts & Captions
                   </span>
                 </div>
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  style={{
-                    transform: showTranscript ? 'rotate(180deg)' : 'rotate(0deg)',
-                    transition: 'transform 200ms',
-                    color: 'var(--text-tertiary)',
-                  }}
-                >
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
+                <div className="flex items-center gap-3">
+                  {captions.length > 0 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCaptionsEnabled(!captionsEnabled);
+                      }}
+                      className="text-xs px-3 py-1 rounded-lg transition-all"
+                      style={{
+                        background: captionsEnabled ? 'var(--primary)' : 'var(--bg-2)',
+                        color: captionsEnabled ? 'white' : 'var(--text-secondary)',
+                      }}
+                    >
+                      CC {captionsEnabled ? 'On' : 'Off'}
+                    </button>
+                  )}
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    style={{
+                      transform: showMediaIntelligence ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 200ms',
+                      color: 'var(--text-tertiary)',
+                    }}
+                  >
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </div>
               </button>
-              {showTranscript && (
+              {showMediaIntelligence && (
                 <div className="border-t border-[var(--border)]">
-                  <TranscriptViewer
+                  <MediaIntelligence
                     assetId={assetId}
                     organizationId={orgId}
                     currentTime={videoUrl ? currentVideoTime : currentAudioTime}
@@ -1237,91 +1184,14 @@ export default function AssetReview({
             </div>
           )}
 
-          {/* Caption Editor Section (for video/audio assets) */}
-          {(videoUrl || audioUrl) && (
-            <div
-              className="rounded-[12px] overflow-hidden"
-              style={{ background: 'var(--bg-0)', border: '1px solid var(--border)' }}
-            >
-              <button
-                onClick={() => setShowCaptionEditor(!showCaptionEditor)}
-                className="w-full p-4 flex items-center justify-between hover:bg-[var(--bg-1)] transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <rect x="2" y="4" width="20" height="16" rx="2" />
-                    <path d="M7 12h2m2 0h6M7 16h10" />
-                  </svg>
-                  <span className="font-bold text-[16px]" style={{ color: 'var(--text-primary)' }}>
-                    Captions
-                  </span>
-                  {captions.length > 0 && (
-                    <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'var(--bg-2)', color: 'var(--text-tertiary)' }}>
-                      {captions.length} segments
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-3">
-                  {captions.length > 0 && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCaptionsEnabled(!captionsEnabled);
-                      }}
-                      className="text-xs px-3 py-1 rounded-lg transition-all"
-                      style={{
-                        background: captionsEnabled ? 'var(--primary)' : 'var(--bg-2)',
-                        color: captionsEnabled ? 'white' : 'var(--text-secondary)',
-                      }}
-                    >
-                      {captionsEnabled ? 'On' : 'Off'}
-                    </button>
-                  )}
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    style={{
-                      transform: showCaptionEditor ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transition: 'transform 200ms',
-                      color: 'var(--text-tertiary)',
-                    }}
-                  >
-                    <polyline points="6 9 12 15 18 9"/>
-                  </svg>
-                </div>
-              </button>
-              {showCaptionEditor && (
-                <div className="border-t border-[var(--border)] max-h-[400px] overflow-y-auto">
-                  <CaptionEditor
-                    assetId={assetId}
-                    organizationId={orgId}
-                    currentTime={videoUrl ? currentVideoTime : currentAudioTime}
-                    onTimecodeClick={(time) => {
-                      if (videoUrl && videoPlayerRef.current) {
-                        videoPlayerRef.current.pause();
-                        setSeekToTime(time);
-                      }
-                    }}
-                    onCaptionsUpdate={setCaptions}
-                    isReadOnly={hasLegalApproval}
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Encoding Status Section (for video assets) */}
+          {/* Delivery Center Section (for video assets) - Consolidated Encoding + Export */}
           {videoUrl && (
             <div
               className="rounded-[12px] overflow-hidden"
               style={{ background: 'var(--bg-0)', border: '1px solid var(--border)' }}
             >
               <button
-                onClick={() => setShowEncodingStatus(!showEncodingStatus)}
+                onClick={() => setShowDeliveryCenter(!showDeliveryCenter)}
                 className="w-full p-4 flex items-center justify-between hover:bg-[var(--bg-1)] transition-colors"
               >
                 <div className="flex items-center gap-3">
@@ -1330,7 +1200,13 @@ export default function AssetReview({
                     <path d="m10 9 5 3-5 3V9z" />
                   </svg>
                   <span className="font-bold text-[16px]" style={{ color: 'var(--text-primary)' }}>
-                    Video Quality
+                    Delivery Center
+                  </span>
+                  <span
+                    className="text-[11px] font-medium px-2 py-0.5 rounded-full"
+                    style={{ background: 'var(--primary)', color: 'white', opacity: 0.9 }}
+                  >
+                    Quality & Export
                   </span>
                 </div>
                 <svg
@@ -1341,7 +1217,7 @@ export default function AssetReview({
                   stroke="currentColor"
                   strokeWidth="1.5"
                   style={{
-                    transform: showEncodingStatus ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transform: showDeliveryCenter ? 'rotate(180deg)' : 'rotate(0deg)',
                     transition: 'transform 200ms',
                     color: 'var(--text-tertiary)',
                   }}
@@ -1349,11 +1225,15 @@ export default function AssetReview({
                   <polyline points="6 9 12 15 18 9"/>
                 </svg>
               </button>
-              {showEncodingStatus && (
+              {showDeliveryCenter && (
                 <div className="border-t border-[var(--border)]">
-                  <EncodingStatus
+                  <DeliveryCenter
                     assetId={assetId}
                     organizationId={orgId}
+                    assetDuration={videoDuration}
+                    onExport={async (preset) => {
+                      toast.success("Export Started", `Exporting for ${preset.name}...`);
+                    }}
                   />
                 </div>
               )}
@@ -1401,57 +1281,6 @@ export default function AssetReview({
                     assetId={assetId}
                     organizationId={orgId}
                     videoDuration={videoDuration}
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Delivery Presets Section (for video assets) */}
-          {videoUrl && (
-            <div
-              className="rounded-[12px] overflow-hidden"
-              style={{ background: 'var(--bg-0)', border: '1px solid var(--border)' }}
-            >
-              <button
-                onClick={() => setShowDeliveryPresets(!showDeliveryPresets)}
-                className="w-full p-4 flex items-center justify-between hover:bg-[var(--bg-1)] transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="7 10 12 15 17 10" />
-                    <line x1="12" y1="15" x2="12" y2="3" />
-                  </svg>
-                  <span className="font-bold text-[16px]" style={{ color: 'var(--text-primary)' }}>
-                    Export Presets
-                  </span>
-                </div>
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  style={{
-                    transform: showDeliveryPresets ? 'rotate(180deg)' : 'rotate(0deg)',
-                    transition: 'transform 200ms',
-                    color: 'var(--text-tertiary)',
-                  }}
-                >
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              </button>
-              {showDeliveryPresets && (
-                <div className="border-t border-[var(--border)]">
-                  <DeliveryPresets
-                    assetId={assetId}
-                    organizationId={orgId}
-                    videoDuration={videoDuration}
-                    onExport={(preset) => {
-                      toast.success("Export Started", `Exporting for ${preset.name}...`);
-                    }}
                   />
                 </div>
               )}
@@ -1582,23 +1411,13 @@ export default function AssetReview({
               <div className="flex gap-4">
                 <button
                   onClick={() => setShowLegalApproval(false)}
-                  className="flex-1 py-3 px-6 rounded-[6px] font-semibold text-[14px] transition-all duration-[80ms] active:scale-[0.98]"
-                  style={{
-                    background: 'var(--bg-2)',
-                    border: '1px solid var(--border)',
-                    color: 'var(--text-primary)',
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-3)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-2)'; }}
+                  className="flex-1 py-3 px-6 rounded-[6px] font-semibold text-[14px] bg-[var(--bg-2)] border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--bg-3)] transition-all active:scale-[0.98] focus-ring"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={approveLegalReview}
-                  className="flex-1 py-3 px-6 rounded-[6px] font-semibold text-[14px] flex items-center justify-center gap-2 transition-all duration-[80ms] active:scale-[0.98]"
-                  style={{ background: 'var(--success)', color: 'white' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.1)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.filter = 'brightness(1)'; }}
+                  className="flex-1 py-3 px-6 text-[14px] flex items-center justify-center gap-2 action-success focus-ring"
                 >
                   <ShieldCheckIcon />
                   Approve & Lock Asset

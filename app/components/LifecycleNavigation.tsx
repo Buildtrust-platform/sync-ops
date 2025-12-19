@@ -30,35 +30,35 @@ const PHASES: Phase[] = [
     id: 'development',
     name: 'Development',
     icon: 'Lightbulb',
-    description: 'Brief & Approvals',
+    description: 'Define & get approved',
     states: ['INTAKE', 'LEGAL_REVIEW', 'BUDGET_APPROVAL'],
   },
   {
     id: 'preproduction',
     name: 'Pre-Production',
     icon: 'Clipboard',
-    description: 'Planning & Logistics',
+    description: 'Plan the shoot',
     states: ['GREENLIT', 'PRE_PRODUCTION'],
   },
   {
     id: 'production',
     name: 'Production',
     icon: 'Clapperboard',
-    description: 'Shooting & Capture',
+    description: 'Capture footage',
     states: ['PRODUCTION'],
   },
   {
     id: 'postproduction',
     name: 'Post-Production',
     icon: 'Scissors',
-    description: 'Edit & Review',
+    description: 'Review & export',
     states: ['POST_PRODUCTION', 'REVIEW'],
   },
   {
     id: 'delivery',
     name: 'Delivery',
     icon: 'Send',
-    description: 'Distribute & Archive',
+    description: 'Publish & archive',
     states: ['DISTRIBUTION', 'COMPLETED', 'ARCHIVED'],
   },
 ];
@@ -70,79 +70,100 @@ interface Module {
   hasBadge?: boolean;
 }
 
+/**
+ * PHASE MODULES - Task-based navigation
+ *
+ * Each phase answers: "What do you want to do?"
+ * Organized by user intent, not system features.
+ *
+ * Competitive advantages vs StudioBinder, Yamdu, ProductionPro:
+ * - AI-powered tools (SmartBrief, transcription search)
+ * - Full lifecycle coverage (competitors stop at production)
+ * - Integrated post-production pipeline (no separate Frame.io needed)
+ * - Archive intelligence (searchable institutional knowledge)
+ */
 const PHASE_MODULES: Record<string, Module[]> = {
   development: [
-    { id: 'overview', label: 'Overview', icon: 'FileText' },
-    { id: 'brief', label: 'Creative Brief', icon: 'FileEdit' },
-    { id: 'treatment', label: 'Treatment Builder', icon: 'Sparkles' },
-    { id: 'moodboard', label: 'Moodboard Library', icon: 'Image' },
-    { id: 'scope', label: 'Scope Document', icon: 'FileText' },
-    { id: 'budget', label: 'Budget', icon: 'DollarSign' },
-    { id: 'roi', label: 'ROI Projections', icon: 'TrendingUp' },
-    { id: 'vendors', label: 'Vendor Bids', icon: 'Briefcase' },
-    { id: 'contracts', label: 'Contracts', icon: 'FileCheck' },
-    { id: 'dev-timeline', label: 'Dev Timeline', icon: 'Calendar' },
-    { id: 'decisions', label: 'Decision Log', icon: 'ClipboardList' },
-    { id: 'change-requests', label: 'Change Requests', icon: 'GitPullRequest' },
-    { id: 'client-portal', label: 'Client Portal', icon: 'Users' },
-    { id: 'greenlight', label: 'Greenlight Gate', icon: 'CheckCircle', hasBadge: true },
-    { id: 'approvals', label: 'Approvals', icon: 'Shield', hasBadge: true },
+    // Define the Vision
+    { id: 'brief', label: 'Write the brief', icon: 'FileEdit' },
+    { id: 'smart-brief', label: 'Generate with AI', icon: 'Sparkles' },
+    { id: 'treatment', label: 'Build treatment', icon: 'Film' },
+    { id: 'moodboard', label: 'Create moodboards', icon: 'Image' },
+    // Plan the Money
+    { id: 'budget', label: 'Set the budget', icon: 'DollarSign' },
+    { id: 'vendors', label: 'Compare vendors', icon: 'Briefcase' },
+    { id: 'contracts', label: 'Manage contracts', icon: 'FileCheck' },
+    // Get Buy-In
+    { id: 'client-portal', label: 'Share with client', icon: 'Link' },
+    { id: 'approvals', label: 'Pending approvals', icon: 'Shield', hasBadge: true },
+    { id: 'greenlight', label: 'Greenlight checklist', icon: 'CheckCircle', hasBadge: true },
   ],
   preproduction: [
-    { id: 'team', label: 'Team & Crew', icon: 'Users' },
-    { id: 'locations', label: 'Locations', icon: 'MapPin' },
-    { id: 'equipment', label: 'Equipment', icon: 'Video' },
-    { id: 'call-sheets', label: 'Call Sheets', icon: 'ClipboardList' },
-    { id: 'calendar', label: 'Schedule', icon: 'Calendar' },
-    { id: 'rights', label: 'Rights & Permits', icon: 'Shield' },
-    { id: 'compliance', label: 'Compliance', icon: 'ShieldCheck' },
-    { id: 'casting', label: 'Talent & Casting', icon: 'Star' },
-    { id: 'safety', label: 'Safety & Risk', icon: 'AlertTriangle' },
-    { id: 'insurance', label: 'Insurance', icon: 'Receipt' },
-    { id: 'crew-scheduling', label: 'Crew Scheduling', icon: 'Clock' },
+    // Assemble the Team
+    { id: 'team', label: 'Hire crew', icon: 'Users' },
+    { id: 'casting', label: 'Cast talent', icon: 'Star' },
+    { id: 'contacts', label: 'Contact directory', icon: 'Book' },
+    // Plan the Shoot
+    { id: 'breakdown', label: 'Breakdown script', icon: 'Scissors' },
+    { id: 'stripboard', label: 'Build schedule', icon: 'Calendar' },
+    { id: 'call-sheets', label: 'Create call sheets', icon: 'ClipboardList' },
+    // Secure Resources
+    { id: 'locations', label: 'Scout locations', icon: 'MapPin' },
+    { id: 'equipment', label: 'Book equipment', icon: 'Video' },
+    { id: 'permits', label: 'Track permits', icon: 'Shield' },
+    // Prepare for Set
+    { id: 'shot-list', label: 'Plan shots', icon: 'Camera' },
+    { id: 'storyboard', label: 'View storyboards', icon: 'Grid' },
+    { id: 'safety', label: 'Safety briefing', icon: 'AlertTriangle' },
   ],
   production: [
-    { id: 'field-intel', label: 'Field Intelligence', icon: 'Globe' },
-    { id: 'progress-board', label: 'Progress Board', icon: 'Activity' },
-    { id: 'dpr', label: 'Daily Report', icon: 'FileText' },
-    { id: 'shot-logger', label: 'Shot Logger', icon: 'Clapperboard' },
-    { id: 'ingest', label: 'Media Ingest', icon: 'Upload' },
-    { id: 'media-verification', label: 'Media Verification', icon: 'ShieldCheck' },
-    { id: 'crew-time', label: 'Crew Time Clock', icon: 'Clock' },
-    { id: 'tasks', label: 'Tasks', icon: 'CheckSquare', hasBadge: true },
-    { id: 'communication', label: 'Communication', icon: 'MessageSquare' },
+    // Run the Day
+    { id: 'call-sheet-today', label: "Today's call sheet", icon: 'Sun', hasBadge: true },
+    { id: 'progress-board', label: 'Track progress', icon: 'Activity' },
+    { id: 'shot-logger', label: 'Log shots', icon: 'Clapperboard' },
+    // Capture & Verify
+    { id: 'ingest', label: 'Upload footage', icon: 'Upload' },
+    { id: 'verify', label: 'Verify media', icon: 'ShieldCheck' },
+    { id: 'continuity', label: 'Check continuity', icon: 'Eye' },
+    // Coordinate Team
+    { id: 'tasks', label: 'Manage tasks', icon: 'CheckSquare', hasBadge: true },
+    { id: 'crew-time', label: 'Track hours', icon: 'Clock' },
+    { id: 'chat', label: 'Message team', icon: 'MessageSquare' },
+    // End of Day
+    { id: 'dpr', label: 'File daily report', icon: 'FileText' },
+    { id: 'wrap', label: 'Wrap checklist', icon: 'CheckCircle' },
   ],
   postproduction: [
-    { id: 'assets', label: 'Asset Library', icon: 'Image', hasBadge: true },
-    { id: 'collections', label: 'Collections', icon: 'Folder' },
-    { id: 'versions', label: 'Versions', icon: 'GitBranch' },
-    { id: 'review', label: 'Review & Notes', icon: 'Eye' },
-    { id: 'ai-analysis', label: 'AI Analysis', icon: 'Brain' },
-    { id: 'smart-asset-hub', label: 'Smart Asset Hub', icon: 'Gauge' },
-    { id: 'asset-relationships', label: 'Asset Graph', icon: 'Network' },
-    { id: 'stakeholder-portal', label: 'Stakeholder Portal', icon: 'Users' },
-    { id: 'downloads', label: 'Downloads', icon: 'Download' },
-    { id: 'asset-analytics', label: 'Asset Analytics', icon: 'BarChart' },
-    { id: 'timeline', label: 'Timeline', icon: 'Clock' },
-    { id: 'edit-pipeline', label: 'Edit Pipeline', icon: 'Scissors' },
-    { id: 'vfx-tracker', label: 'VFX Tracker', icon: 'Sparkles' },
-    { id: 'color-pipeline', label: 'Color Pipeline', icon: 'Layers' },
-    { id: 'audio-post', label: 'Audio Post', icon: 'Music' },
-    { id: 'deliverables', label: 'Deliverables', icon: 'Package' },
-    { id: 'qc-checklist', label: 'QC Checklist', icon: 'ShieldCheck' },
+    // Review & Approve
+    { id: 'review', label: 'Review a video', icon: 'Play', hasBadge: true },
+    { id: 'compare', label: 'Compare versions', icon: 'GitBranch' },
+    { id: 'comments', label: 'See all comments', icon: 'MessageSquare' },
+    { id: 'approvals', label: 'Pending approvals', icon: 'CheckCircle' },
+    // Find & Organize
+    { id: 'assets', label: 'Browse assets', icon: 'Folder' },
+    { id: 'search', label: 'Search transcripts', icon: 'Search' },
+    { id: 'collections', label: 'Organize collections', icon: 'Layers' },
+    // Process & Polish
+    { id: 'transcripts', label: 'Edit transcripts', icon: 'FileText' },
+    { id: 'captions', label: 'Manage captions', icon: 'Subtitles' },
+    // Export & Share
+    { id: 'export', label: 'Export video', icon: 'Download' },
+    { id: 'share', label: 'Share with client', icon: 'Link' },
+    { id: 'encoding', label: 'Encoding queue', icon: 'Loader' },
   ],
   delivery: [
-    { id: 'distribution', label: 'Distribution', icon: 'Share2' },
-    { id: 'delivery-pipeline', label: 'Delivery Pipeline', icon: 'Rocket' },
-    { id: 'archive-dam', label: 'Archive DAM', icon: 'Database' },
-    { id: 'archive-intelligence', label: 'Archive Intelligence', icon: 'Brain' },
-    { id: 'master-archive', label: 'MasterOps Archive', icon: 'Library' },
-    { id: 'lifecycle-policies', label: 'Lifecycle Policies', icon: 'Clock' },
-    { id: 'project-resurrection', label: 'Resurrect Projects', icon: 'Refresh' },
-    { id: 'rights-enforcement', label: 'Rights Enforcement', icon: 'ShieldCheck' },
-    { id: 'archive', label: 'Legacy Archive', icon: 'Archive' },
-    { id: 'reports', label: 'Reports', icon: 'BarChart' },
-    { id: 'kpis', label: 'Analytics', icon: 'TrendingUp' },
+    // Publish
+    { id: 'distribution', label: 'Publish to platforms', icon: 'Share2' },
+    { id: 'deliverables', label: 'Check deliverables', icon: 'Package' },
+    { id: 'qc', label: 'Run QC checks', icon: 'ShieldCheck' },
+    // Archive
+    { id: 'archive', label: 'Archive project', icon: 'Archive' },
+    { id: 'find-assets', label: 'Search archive', icon: 'Search' },
+    { id: 'rights', label: 'Track usage rights', icon: 'Shield' },
+    // Analyze
+    { id: 'reports', label: 'View reports', icon: 'BarChart' },
+    { id: 'analytics', label: 'Track performance', icon: 'TrendingUp' },
+    { id: 'lessons', label: 'Capture learnings', icon: 'BookOpen' },
   ],
 };
 

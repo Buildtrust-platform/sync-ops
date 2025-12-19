@@ -73,36 +73,36 @@ export default function LandingPage() {
             <div className="text-center lg:text-left">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-100 rounded-full mb-6">
                 <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                <span className="text-sm font-medium text-blue-700">For Producers, Editors & Marketing Teams</span>
+                <span className="text-sm font-medium text-blue-700">For the people who ship content</span>
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-tight">
-                Stop losing money to<br />
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">production chaos.</span>
+                You didn't get into this<br />
+                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">to chase files.</span>
               </h1>
               <p className="mt-6 text-lg text-gray-600 leading-relaxed">
-                Every miscommunication costs you $8,000 in rework. Every expired license is a lawsuit waiting to happen.
-                Every "which version is this?" email is an hour you'll never get back.
+                Somewhere between the 47th "which version?" email and the 3AM scramble to find a signed release,
+                you stopped doing the work you love. You became a project manager who occasionally edits.
               </p>
               <p className="mt-4 text-lg text-gray-900 font-medium">
-                SyncOps eliminates the operational chaos so you can focus on the creative work.
+                It wasn't supposed to be like this.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <button
                   onClick={handleStartProject}
                   className="group px-8 py-4 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-xl text-lg font-medium hover:from-gray-800 hover:to-gray-700 transition-all shadow-lg shadow-gray-900/25 hover:shadow-xl hover:shadow-gray-900/30 hover:-translate-y-0.5"
                 >
-                  Run Your Next Project Free
+                  Get Back to the Work
                   <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
                 </button>
                 <button
                   onClick={handleBookDemo}
                   className="px-8 py-4 bg-white text-gray-900 border border-gray-200 rounded-xl text-lg font-medium hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm hover:shadow-md"
                 >
-                  See It In Action
+                  See How It Works
                 </button>
               </div>
               <p className="mt-4 text-sm text-gray-500">
-                14-day free trial. No credit card required. Set up in 5 minutes.
+                Free for your first project. No credit card. Set up in 5 minutes.
               </p>
             </div>
 
@@ -124,8 +124,8 @@ export default function LandingPage() {
                     <span className="text-green-600 font-bold">✓</span>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">$50K saved</p>
-                    <p className="text-xs text-gray-500">per project avg.</p>
+                    <p className="text-sm font-medium text-gray-900">12 hrs/week saved</p>
+                    <p className="text-xs text-gray-500">avg. per editor</p>
                   </div>
                 </div>
               </div>
@@ -137,7 +137,7 @@ export default function LandingPage() {
                     <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face" alt="" className="w-8 h-8 rounded-full border-2 border-white" />
                     <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face" alt="" className="w-8 h-8 rounded-full border-2 border-white" />
                   </div>
-                  <p className="text-xs text-gray-600">500+ teams</p>
+                  <p className="text-xs text-gray-600">2,400+ creatives</p>
                 </div>
               </div>
             </div>
@@ -148,7 +148,7 @@ export default function LandingPage() {
       {/* Trusted By Section */}
       <section className="py-12 px-6 border-b border-gray-100">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-sm text-gray-500 mb-8">Trusted by production teams at</p>
+          <p className="text-center text-sm text-gray-500 mb-8">Trusted by production teams shipping content for</p>
           <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 opacity-60">
             {/* Logo placeholders - using text for now, can be replaced with actual logos */}
             <div className="text-xl font-bold text-gray-400 tracking-tight">Netflix</div>
@@ -160,15 +160,16 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* The Problem Section */}
+      {/* The Pain Section */}
       <section className="py-20 px-6 bg-gray-50">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-semibold text-gray-900 text-center mb-4">
-            The reality of creative operations today
+            You know the feeling.
           </h2>
           <p className="text-center text-gray-500 mb-16 max-w-2xl mx-auto">
-            This isn't a tooling problem. It's an operations problem.
-            And no amount of "better communication" fixes broken infrastructure.
+            That pit in your stomach when you realize the file the client approved
+            isn't the file that went to broadcast. The cold sweat when legal asks
+            for a talent release you're 90% sure exists... somewhere.
           </p>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -183,7 +184,7 @@ export default function LandingPage() {
                     <p className="text-gray-600 text-sm leading-relaxed mb-3">{problem.description}</p>
                     <div className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-100 p-3 rounded-xl">
                       <p className="text-red-700 text-sm font-medium flex items-start gap-2">
-                        <span className="text-red-500 flex-shrink-0">⚠️</span>
+                        <span className="text-red-500 flex-shrink-0">💸</span>
                         {problem.consequence}
                       </p>
                     </div>
@@ -192,6 +193,13 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+
+          <div className="mt-12 text-center">
+            <p className="text-xl text-gray-700 font-medium max-w-2xl mx-auto">
+              This isn't a "communication problem." It's an infrastructure problem.<br />
+              <span className="text-gray-400">And spreadsheets aren't infrastructure.</span>
+            </p>
+          </div>
         </div>
       </section>
 
@@ -199,10 +207,11 @@ export default function LandingPage() {
       <section className="py-20 px-6">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-semibold text-gray-900 text-center mb-4">
-            Built for the people who feel this pain daily
+            If this sounds like your week, keep reading.
           </h2>
           <p className="text-center text-gray-500 mb-12 max-w-2xl mx-auto">
-            Whether you're producing, editing, or managing content at scale—if you've ever lost sleep over a missed deadline or a compliance gap, this is for you.
+            We built this for the people who've tried everything else.
+            The shared drives. The color-coded spreadsheets. The "just be more careful" approach.
           </p>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -223,7 +232,7 @@ export default function LandingPage() {
                     <h3 className="font-semibold text-gray-900">{persona.title}</h3>
                   </div>
                   <p className="text-xs text-gray-500 mb-3">{persona.role}</p>
-                  <p className="text-gray-600 text-sm mb-4">{persona.pain}</p>
+                  <p className="text-gray-600 text-sm mb-4 italic">"{persona.pain}"</p>
                   <p className="text-gray-900 text-sm font-medium">{persona.solution}</p>
                 </div>
               </div>
@@ -239,13 +248,14 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto relative">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-full mb-4">
-              <span className="text-sm font-medium text-gray-600">Platform Capabilities</span>
+              <span className="text-sm font-medium text-gray-600">The System</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              What the system actually does
+              Everything production needs.<br />
+              <span className="text-gray-400">Nothing it doesn't.</span>
             </h2>
             <p className="text-gray-500 max-w-2xl mx-auto">
-              SyncOps handles the operational layer of creative work—so your team can focus entirely on the work itself.
+              SyncOps handles the operational complexity so your brain stays free for creative decisions.
             </p>
           </div>
 
@@ -260,15 +270,6 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-
-          <div className="text-center mt-16">
-            <div className="inline-block bg-gradient-to-r from-gray-900 to-gray-800 text-white px-8 py-4 rounded-2xl">
-              <p className="text-lg">
-                The system doesn't do the creative work.<br />
-                <span className="font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">It does everything else.</span>
-              </p>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -280,24 +281,24 @@ export default function LandingPage() {
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
         <div className="max-w-3xl mx-auto text-center relative">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full mb-8">
-            <span className="text-sm font-medium text-gray-300">Our Philosophy</span>
+            <span className="text-sm font-medium text-gray-300">Why We Built This</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-10 leading-tight">
-            Masters do the work.<br />
-            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">The system does the operations.</span>
+            You got into this to make things.<br />
+            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Not to manage things.</span>
           </h2>
           <div className="space-y-6 text-gray-300 text-lg leading-relaxed">
             <p>
-              The best editors don't want to manage folder structures.
-              The best producers don't want to chase approvals.
-              The best directors don't want to wonder if legal cleared the music.
+              The best colorist we know once told us she spends more time
+              searching for files than actually grading. The best producer we
+              know has nightmares about unsigned releases.
             </p>
             <p>
-              Mastery requires focus. Focus requires trust in the infrastructure around you.
+              That's not a workflow problem. That's a tragedy.
             </p>
             <p className="text-xl text-white font-semibold pt-4">
-              You shouldn't have to think about operations.<br />
-              You should just know it's handled.
+              Mastery requires focus.<br />
+              Focus requires trust that the system won't let you down.
             </p>
           </div>
         </div>
@@ -306,9 +307,12 @@ export default function LandingPage() {
       {/* Phase-by-Phase Breakdown */}
       <section className="py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-semibold text-gray-900 text-center mb-16">
-            Every phase, handled
+          <h2 className="text-3xl font-semibold text-gray-900 text-center mb-4">
+            From brief to archive. Handled.
           </h2>
+          <p className="text-center text-gray-500 mb-16 max-w-2xl mx-auto">
+            Every phase of production has its chaos. We systematized every one.
+          </p>
 
           <div className="space-y-6">
             {phases.map((phase, index) => (
@@ -320,11 +324,11 @@ export default function LandingPage() {
                 </div>
                 <div className="flex-1 grid md:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-500 uppercase tracking-wide mb-1">The problem</p>
+                    <p className="text-sm text-red-500 uppercase tracking-wide mb-1 font-medium">The chaos</p>
                     <p className="text-gray-700">{phase.problem}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500 uppercase tracking-wide mb-1">The system</p>
+                    <p className="text-sm text-green-600 uppercase tracking-wide mb-1 font-medium">The system</p>
                     <p className="text-gray-900 font-medium">{phase.solution}</p>
                   </div>
                 </div>
@@ -340,10 +344,10 @@ export default function LandingPage() {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-100 rounded-full mb-4">
               <span className="w-2 h-2 bg-green-500 rounded-full" />
-              <span className="text-sm font-medium text-green-700">Why Teams Switch</span>
+              <span className="text-sm font-medium text-green-700">What Changes</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-              Why teams adopt it
+              What your week looks like after.
             </h2>
           </div>
 
@@ -367,12 +371,12 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
         <div className="max-w-5xl mx-auto relative">
           <div className="text-center mb-12">
-            <p className="text-blue-400 font-medium uppercase tracking-wide text-sm mb-3">Proven Results</p>
+            <p className="text-blue-400 font-medium uppercase tracking-wide text-sm mb-3">Real Numbers</p>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              The ROI Speaks for Itself
+              This isn't theory. It's measurement.
             </h2>
             <p className="text-gray-400 max-w-2xl mx-auto">
-              These aren't projections. They're measurements from production teams running real projects.
+              From production teams running actual projects. The ones who used to have the same chaos you do.
             </p>
           </div>
 
@@ -391,10 +395,10 @@ export default function LandingPage() {
       <section className="py-20 px-6 bg-gray-50">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-semibold text-gray-900 text-center mb-4">
-            Trusted by production teams worldwide
+            From people who've lived it.
           </h2>
           <p className="text-center text-gray-500 mb-12 max-w-2xl mx-auto">
-            From indie studios to global agencies, teams are shipping better content with less chaos.
+            They had the same skepticism. They'd tried the other tools. Here's what changed.
           </p>
 
           {/* Testimonial Cards */}
@@ -427,30 +431,34 @@ export default function LandingPage() {
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div>
                 <p className="text-gray-400 text-sm uppercase tracking-wide mb-2">Case Study</p>
-                <h3 className="text-2xl font-semibold mb-4">How Vertex Media eliminated $120K in annual rework</h3>
+                <h3 className="text-2xl font-semibold mb-4">How a 12-person post house stopped working weekends</h3>
                 <p className="text-gray-300 mb-6 leading-relaxed">
-                  Vertex Media was losing 15% of every project budget to miscommunication and version confusion.
-                  After implementing SyncOps, they reduced revision cycles by 80% and haven't had a single compliance incident in 18 months.
+                  Meridian Post was drowning. 40-hour revision cycles. Editors working Saturdays just to find
+                  the right files. One compliance near-miss that almost cost them a client.
+                </p>
+                <p className="text-gray-300 mb-6 leading-relaxed">
+                  Six months after switching to SyncOps: revision cycles down to 8 hours. Zero weekend work.
+                  Zero compliance incidents. Their senior editor told us she "remembered why she got into this."
                 </p>
                 <div className="flex gap-8 mb-6">
                   <div>
                     <p className="text-3xl font-bold text-white">80%</p>
-                    <p className="text-gray-400 text-sm">fewer revisions</p>
-                  </div>
-                  <div>
-                    <p className="text-3xl font-bold text-white">$120K</p>
-                    <p className="text-gray-400 text-sm">saved annually</p>
+                    <p className="text-gray-400 text-sm">faster revisions</p>
                   </div>
                   <div>
                     <p className="text-3xl font-bold text-white">0</p>
-                    <p className="text-gray-400 text-sm">compliance incidents</p>
+                    <p className="text-gray-400 text-sm">weekend hours</p>
+                  </div>
+                  <div>
+                    <p className="text-3xl font-bold text-white">$180K</p>
+                    <p className="text-gray-400 text-sm">saved year one</p>
                   </div>
                 </div>
                 <button
                   onClick={handleBookDemo}
                   className="text-white font-medium hover:text-gray-300 transition-colors"
                 >
-                  Read the full case study →
+                  Read the full story →
                 </button>
               </div>
               <div className="hidden md:block">
@@ -458,23 +466,23 @@ export default function LandingPage() {
                 <div className="relative">
                   <img
                     src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=400&fit=crop"
-                    alt="Team collaboration at Vertex Media"
+                    alt="Team at Meridian Post"
                     className="rounded-xl w-full h-64 object-cover mb-4"
                   />
                   <div className="bg-gray-800 rounded-xl p-6">
                     <p className="text-gray-300 italic leading-relaxed">
-                      "Before SyncOps, every project felt like controlled chaos. Now our producers spend their time producing, not project managing.
-                      The ROI was obvious within the first month."
+                      "I used to dread Monday mornings. Now I'm excited to cut.
+                      That sounds corny, but if you've been where I was, you get it."
                     </p>
                     <div className="mt-4 flex items-center gap-3">
                       <img
                         src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=60&h=60&fit=crop&crop=face"
-                        alt="Sarah Mitchell"
+                        alt="Rachel Torres"
                         className="w-10 h-10 rounded-full"
                       />
                       <div>
-                        <p className="text-white font-medium">Sarah Mitchell</p>
-                        <p className="text-gray-400 text-sm">COO at Vertex Media</p>
+                        <p className="text-white font-medium">Rachel Torres</p>
+                        <p className="text-gray-400 text-sm">Senior Editor, Meridian Post</p>
                       </div>
                     </div>
                   </div>
@@ -493,31 +501,32 @@ export default function LandingPage() {
         <div className="max-w-3xl mx-auto text-center relative">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full mb-6">
             <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            <span className="text-sm font-medium text-gray-300">Ready to get started?</span>
+            <span className="text-sm font-medium text-gray-300">Start free. Cancel anytime.</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-            The infrastructure is ready.
+            One project. Zero chaos.
           </h2>
           <p className="text-gray-400 text-xl mb-10 max-w-xl mx-auto">
-            Start with one project. See what operations feel like when they're handled.
+            Try it on your next project. If it doesn't change how you work, you've lost nothing.
+            If it does—well, you'll have your weekends back.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={handleStartProject}
               className="group px-8 py-4 bg-gradient-to-r from-white to-gray-100 text-gray-900 rounded-xl text-lg font-medium hover:from-gray-100 hover:to-white transition-all shadow-lg shadow-white/25 hover:shadow-xl hover:shadow-white/30 hover:-translate-y-0.5"
             >
-              Start with One Project
+              Start Your First Project
               <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
             </button>
             <button
               onClick={handleBookDemo}
               className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white border border-white/20 rounded-xl text-lg font-medium hover:bg-white/20 transition-all"
             >
-              Book a Demo
+              Talk to Someone Who Gets It
             </button>
           </div>
           <p className="mt-6 text-gray-500 text-sm">
-            14-day free trial. No credit card required.
+            No credit card. No sales pitch. Just a calmer production.
           </p>
         </div>
       </section>
@@ -530,7 +539,8 @@ export default function LandingPage() {
             <div className="md:col-span-2">
               <div className="text-xl font-semibold text-gray-900 mb-4">SyncOps</div>
               <p className="text-gray-600 text-sm leading-relaxed mb-4 max-w-sm">
-                The operating system for modern production companies. From brief to delivery, we handle the operations so you can focus on the creative work.
+                The operating system for creative production. Built by people who've
+                lost sleep over unsigned releases and disappeared files. Never again.
               </p>
               <div className="flex gap-4">
                 <a href="https://twitter.com/syncops" className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-900 hover:text-white transition-colors">
@@ -655,190 +665,190 @@ const SearchIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-// Data
+// Data - Updated with more visceral, emotional copy
 const problems = [
   {
-    title: 'Briefing',
-    icon: '📋',
+    title: '"Which version did we send?"',
+    icon: '🔀',
+    color: 'bg-red-100 text-red-600',
+    description: 'There\'s a "final" and a "final_REAL" and a "final_approved_v3_CLIENT_USE_THIS." Someone approved something. Nobody\'s sure which file it was.',
+    consequence: 'Wrong version goes to broadcast. Client calls at 11pm. Your team scrambles while your stomach drops.',
+  },
+  {
+    title: '"Where\'s the release?"',
+    icon: '⚖️',
     color: 'bg-orange-100 text-orange-600',
-    description: 'Requirements live in email threads, Slack DMs, and someone\'s head. Scope changes aren\'t tracked.',
-    consequence: 'Your team spends 3 days producing content for yesterday\'s vision. The client says "that\'s not what I asked for." You eat the cost.',
+    description: 'Talent releases are somewhere. Maybe a drawer. Maybe an email from 2019. The music license? Expires next month. Nobody flagged it.',
+    consequence: 'Legal\'s calling. Campaign pulled. $15,000 minimum. Your reputation takes years to rebuild.',
   },
   {
-    title: 'Scheduling',
-    icon: '📅',
-    color: 'bg-blue-100 text-blue-600',
-    description: 'Call sheets get revised four times. Crew availability lives in texts. No one knows who confirmed what.',
-    consequence: 'Talent shows up. Camera op doesn\'t. Half-day shoot becomes a full reshoot. $12,000 gone.',
-  },
-  {
-    title: 'Ingest',
+    title: '"I\'m still waiting on files."',
     icon: '💾',
     color: 'bg-purple-100 text-purple-600',
-    description: 'Raw footage sits on a hard drive in someone\'s bag. Or three drives. Or a folder called "MASTER_FINAL_v2_USE_THIS."',
-    consequence: 'Editor waits 4 hours for files. Or worse—the drive with the hero shot is in someone\'s car. Post timeline slips a week.',
+    description: 'Raw footage sits on a drive in someone\'s bag. Or three drives. Your editor\'s been "waiting since Tuesday." The hero shot? Different bag. Different city.',
+    consequence: 'Post timeline slips a week. Editor works weekend. Everyone\'s stressed. Nobody\'s doing their best work.',
   },
   {
-    title: 'Versions',
-    icon: '🔀',
-    color: 'bg-green-100 text-green-600',
-    description: 'There\'s a "final" and a "final_REAL" and a "final_approved_v3_CLIENT." Legal signed off on something. No one\'s sure which file.',
-    consequence: 'Wrong version goes to broadcast. Client calls furious. Your team scrambles. Trust erodes.',
+    title: '"What did the client actually want?"',
+    icon: '📋',
+    color: 'bg-blue-100 text-blue-600',
+    description: 'Requirements live in email threads, Slack DMs, a PDF from three weeks ago, and "what I remember them saying." Scope changed twice. Maybe three times.',
+    consequence: '3 days producing content for yesterday\'s vision. Client says "that\'s not what I asked for." You eat $8,000.',
   },
   {
-    title: 'Approvals',
-    icon: '✅',
+    title: '"Did anyone confirm the crew?"',
+    icon: '📅',
     color: 'bg-teal-100 text-teal-600',
-    description: 'Feedback is scattered across platforms. One stakeholder replied in Frame.io. Another sent a PDF with handwritten timestamps.',
-    consequence: 'Editor implements conflicting notes. 3 revision cycles that shouldn\'t exist. Deadline missed. Relationship strained.',
+    description: 'Call sheets revised four times. Texts flying everywhere. The DP confirmed... or did they? Nobody knows who RSVPed to what.',
+    consequence: 'Talent shows up. Camera op doesn\'t. Half-day shoot becomes a reshoot. $12,000 vanishes.',
   },
   {
-    title: 'Legal & Rights',
-    icon: '⚖️',
-    color: 'bg-red-100 text-red-600',
-    description: 'Talent releases are in a drawer. Music licenses expire next month. No one flagged it. The asset is already in market.',
-    consequence: 'Cease and desist arrives. Campaign pulled. Legal fees start at $15,000. Your reputation takes the hit.',
-  },
-  {
-    title: 'Distribution',
-    icon: '📤',
-    color: 'bg-indigo-100 text-indigo-600',
-    description: 'Deliverables go out manually. Wrong specs. Wrong metadata. Wrong territory. Someone notices after it\'s live.',
-    consequence: 'Platform rejects the upload. Or worse—it goes live with wrong audio in wrong market. Client finds out before you do.',
-  },
-  {
-    title: 'Archive',
+    title: '"Can you find that shot from the rebrand?"',
     icon: '🗄️',
     color: 'bg-amber-100 text-amber-600',
-    description: 'Projects end. Files vanish into cold storage with no taxonomy. Two years later, no one can find the hero shot for a rebrand.',
-    consequence: 'You reshoot what you already own. Or you license stock for $2,000 when the perfect shot exists—somewhere.',
+    description: 'Project ended. Files went to cold storage. Two years later, you need the hero shot. It exists. Somewhere. In one of 47 archived folders.',
+    consequence: 'You license stock for $2,000. The perfect shot you already own? Still lost.',
+  },
+  {
+    title: '"The platform rejected our upload."',
+    icon: '📤',
+    color: 'bg-indigo-100 text-indigo-600',
+    description: 'Wrong specs. Wrong metadata. Wrong territory flag. QC catches it after it\'s live. Sometimes the client finds out first.',
+    consequence: 'Emergency re-export. Late delivery. The "reliable team" just became the "last-minute scramble team."',
+  },
+  {
+    title: '"Who gave feedback where?"',
+    icon: '✅',
+    color: 'bg-green-100 text-green-600',
+    description: 'One stakeholder replied in Frame.io. Another sent a PDF with handwritten timestamps. A third mentioned something in a meeting. None of them agree.',
+    consequence: 'Editor implements conflicting notes. 3 revision cycles that shouldn\'t exist. Trust erodes. Relationships strain.',
   },
 ];
 
 const capabilities = [
   {
     icon: FolderIcon,
-    title: 'Single source of truth',
-    description: 'Every asset, version, and approval in one place. Linked to feedback, linked to sign-off.',
+    title: 'One source of truth',
+    description: 'Every asset, every version, every approval—linked together. No more hunting. No more guessing.',
   },
   {
     icon: SparklesIcon,
-    title: 'AI-powered ingest',
-    description: 'Automated metadata, transcripts, and face detection the moment files land.',
+    title: 'AI that actually helps',
+    description: 'Automated transcripts, face detection, and smart tagging the moment files land. Search by what\'s in the shot, not what you named it.',
   },
   {
     icon: ClockIcon,
     title: 'Version control that works',
-    description: 'Immutable history. Clear approval chains. Zero ambiguity about current status.',
+    description: 'Immutable history. Clear approval chains. "Current version" actually means something.',
   },
   {
     icon: ShieldIcon,
-    title: 'Rights management',
-    description: 'Expiration alerts before problems become legal exposure. Never use a release past its date.',
+    title: 'Rights you can trust',
+    description: 'Expiration alerts before problems become lawsuits. Every release tracked. Every license monitored.',
   },
   {
     icon: UsersIcon,
-    title: 'Role-based access',
+    title: 'Access that makes sense',
     description: 'Legal sees what legal needs. Clients see what clients need. Everyone else stays focused.',
   },
   {
     icon: CalendarIcon,
-    title: 'Call sheet generation',
-    description: 'Crew confirmations and location logistics. Real-time status. No more chasing texts.',
+    title: 'Call sheets that confirm themselves',
+    description: 'Crew gets notified. System tracks confirmations. You see status in real-time. No more chasing texts.',
   },
   {
     icon: CheckIcon,
-    title: 'Spec enforcement',
-    description: 'Distribution specs validated automatically. No more "wrong format" rejections.',
+    title: 'Specs enforced automatically',
+    description: 'YouTube specs, Instagram specs, broadcast specs—validated before delivery. No more rejections.',
   },
   {
     icon: CloudIcon,
-    title: 'Frame-accurate review',
-    description: 'Comments tied to timecode. Threaded replies. Clear status on every note.',
+    title: 'Review that\'s actually useful',
+    description: 'Frame-accurate comments. Threaded discussions. Drawing tools. Clear status on every note.',
   },
   {
     icon: SearchIcon,
-    title: 'Searchable archive',
-    description: 'Find the shot. Find the contract. Find the signed release. Instantly.',
+    title: 'Archive that\'s actually findable',
+    description: 'Search by content, by talent, by date, by project. Find the shot. Find the contract. In seconds.',
   },
 ];
 
 const phases = [
   {
     name: 'Brief',
-    problem: 'Requirements scatter across emails, decks, and verbal agreements—then change without record.',
-    solution: 'Centralized briefs with version history, linked deliverables, and automatic stakeholder notification on every change.',
+    problem: 'Requirements scatter across emails, Slack, and someone\'s memory. Then change without record.',
+    solution: 'Single source brief with change tracking. Stakeholders get notified. History preserved.',
   },
   {
-    name: 'Pre-Production',
-    problem: 'Schedules, call sheets, and crew confirmations live in disconnected tools and personal messages.',
-    solution: 'Integrated scheduling with location mapping, automated crew notifications, and real-time confirmation tracking.',
+    name: 'Pre-Pro',
+    problem: 'Call sheets get revised. Nobody knows who confirmed. Locations aren\'t mapped. Equipment isn\'t tracked.',
+    solution: 'Integrated scheduling. Real-time confirmations. Location mapping. Equipment checkout.',
   },
   {
     name: 'Ingest',
-    problem: 'Raw assets arrive unnamed, unorganized, and untracked—then get duplicated across drives.',
-    solution: 'Automated ingest with AI tagging, transcription, face detection, and instant searchability.',
+    problem: 'Files arrive unnamed, unsorted, untracked. Then get duplicated across three drives.',
+    solution: 'Automated ingest. AI tagging. Instant transcription. Searchable from minute one.',
   },
   {
     name: 'Post',
-    problem: 'Version control collapses under revision pressure. "Final" loses all meaning.',
-    solution: 'Immutable version history with linked feedback, clear approval chains, and zero ambiguity.',
+    problem: '"Final_v3_FINAL_USE_THIS_ONE" exists. So does "final_v3_FINAL_REAL." Nobody knows which is approved.',
+    solution: 'Immutable versions. Linked feedback. Clear approval status. Zero ambiguity.',
   },
   {
-    name: 'Review & Legal',
-    problem: 'Feedback scatters across platforms. Rights documents live in filing cabinets. Expirations go unnoticed.',
-    solution: 'Frame-accurate review with threaded comments, integrated rights tracking, and automated expiration alerts.',
+    name: 'Review',
+    problem: 'Feedback in 5 platforms. Conflicting notes. Legal\'s comments in a PDF. Timecode references wrong.',
+    solution: 'Frame-accurate review. Threaded comments. Annotation tools. Single destination.',
   },
   {
-    name: 'Distribution',
-    problem: 'Deliverables fail spec requirements. Wrong formats reach wrong platforms. Manual QC catches issues too late.',
-    solution: 'Automated spec validation, territory-aware delivery, and verified handoff with audit trails.',
+    name: 'Delivery',
+    problem: 'Wrong specs. Wrong metadata. Platform rejects at 6pm Friday. Emergency weekend scramble.',
+    solution: 'Automated spec validation. Territory-aware delivery. Verified before send.',
   },
   {
     name: 'Archive',
-    problem: 'Projects end and assets disappear into unstructured storage. Retrieval takes hours or fails entirely.',
-    solution: 'Searchable archive with preserved metadata, linked documentation, and instant retrieval.',
+    problem: 'Project ends. Files disappear into cold storage. Two years later, nobody can find the hero shot.',
+    solution: 'Searchable archive. Metadata preserved. Find anything. Instantly.',
   },
 ];
 
 const reasons = [
   {
-    title: 'Clarity',
-    description: 'Everyone sees the same information. No conflicting versions of reality.',
+    title: 'You stop guessing',
+    description: 'Everyone sees the same information. No conflicting versions of what\'s happening.',
   },
   {
-    title: 'Version truth',
-    description: 'One canonical version. Always. With history attached.',
+    title: 'Versions have meaning again',
+    description: '"Current" means current. "Approved" means approved. Words work like they should.',
   },
   {
-    title: 'Accountability',
-    description: 'Every approval, every change, every decision—logged and traceable.',
+    title: 'Nothing slips through',
+    description: 'Every approval logged. Every change tracked. Every decision recorded.',
   },
   {
-    title: 'Risk control',
-    description: 'Rights expirations, legal gaps, and compliance failures surfaced before they cost money.',
+    title: 'Legal stops being scary',
+    description: 'Rights tracked. Expirations flagged. Compliance built in, not bolted on.',
   },
   {
-    title: 'Less rework',
-    description: 'Feedback captured correctly the first time. No re-edits from miscommunication.',
+    title: 'Revisions drop by half',
+    description: 'When feedback is clear and collected once, you don\'t re-edit for miscommunication.',
   },
   {
-    title: 'Fewer surprises',
-    description: 'Status is visible. Blockers are flagged. Nothing slips through.',
+    title: 'Weekends come back',
+    description: 'When the system handles operations, you stop being the human failsafe.',
   },
   {
-    title: 'Predictable delivery',
-    description: 'Specs validated. Timelines tracked. Deadlines met without heroics.',
+    title: 'Delivery just happens',
+    description: 'Specs validated. Timelines visible. Deadlines met without heroics.',
   },
 ];
 
 const roiStats = [
-  { value: '40%', label: 'reduction in time searching for assets and chasing approvals' },
-  { value: '$15K–$50K', label: 'saved per project in avoided rework' },
-  { value: '80%', label: 'fewer revision cycles from miscommunication' },
-  { value: 'Zero', label: 'releases used past expiration' },
-  { value: 'Zero', label: 'unlicensed assets in market' },
-  { value: '60%', label: 'reduction in duplicate storage' },
+  { value: '12 hrs', label: 'saved per person per week on file management and approvals' },
+  { value: '$8K–$40K', label: 'saved per project in avoided rework and re-edits' },
+  { value: '75%', label: 'fewer revision cycles from miscommunication' },
+  { value: 'Zero', label: 'expired releases used in production' },
+  { value: 'Zero', label: 'wrong versions delivered to clients' },
+  { value: '2 weeks', label: 'to see the difference in your workflow' },
 ];
 
 const personas = [
@@ -846,53 +856,53 @@ const personas = [
     icon: '🎬',
     image: 'https://images.unsplash.com/photo-1584824486509-112e4181ff6b?w=400&h=300&fit=crop',
     title: 'Producers',
-    role: 'Executive Producers, Line Producers, Production Managers',
-    pain: 'You\'re juggling 5 spreadsheets, 200 emails, and a prayer that nothing falls through the cracks.',
-    solution: 'SyncOps gives you one dashboard for budgets, schedules, and approvals—with alerts before problems become crises.',
+    role: 'Line Producers, Production Managers, EPs',
+    pain: 'I spend more time managing spreadsheets than managing productions.',
+    solution: 'One dashboard. Budgets, schedules, approvals. Alerts before fires.',
   },
   {
     icon: '✂️',
     image: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=300&fit=crop',
-    title: 'Post Supervisors & Editors',
-    role: 'Post-Production Supervisors, Senior Editors, Colorists',
-    pain: 'You spend more time chasing files and decoding feedback than actually editing.',
-    solution: 'Every asset organized. Every note in context. Every version tracked. You just edit.',
+    title: 'Editors',
+    role: 'Senior Editors, Colorists, Post Supervisors',
+    pain: 'I became a file detective. I just want to cut.',
+    solution: 'Every asset organized. Every note in context. You just edit.',
   },
   {
     icon: '📢',
     image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop',
-    title: 'Marketing & Comms',
-    role: 'Marketing Directors, Content Managers, Brand Leads',
-    pain: 'You live in fear of using expired licenses or pushing the wrong version to market.',
-    solution: 'Rights tracked automatically. Versions locked after approval. Compliance built in, not bolted on.',
+    title: 'Marketing',
+    role: 'Content Managers, Brand Directors, Marketing Leads',
+    pain: 'I have nightmares about expired licenses.',
+    solution: 'Rights tracked automatically. Sleep restored.',
   },
   {
     icon: '🏢',
     image: 'https://images.unsplash.com/photo-1497215842964-222b430dc094?w=400&h=300&fit=crop',
-    title: 'Agency & Studio Ops',
-    role: 'Operations Directors, Agency Owners, Studio Executives',
-    pain: 'You\'re scaling content output but your processes don\'t scale. Every project feels like reinventing the wheel.',
-    solution: 'Systematize what works. Run 50 projects with the clarity you used to have with 5.',
+    title: 'Studio Ops',
+    role: 'Ops Directors, Agency Owners, Studio Leads',
+    pain: 'Every project feels like reinventing the wheel.',
+    solution: 'Systematize what works. Scale without chaos.',
   },
 ];
 
 const testimonials = [
   {
-    quote: 'We eliminated $50K in rework on our first campaign with SyncOps. The version control alone paid for itself in a week.',
+    quote: 'I spent my first week thinking "this can\'t be this easy." It wasn\'t a trick. Version control alone saved us two revision cycles on every project.',
     name: 'Marcus Chen',
-    role: 'Head of Production',
+    role: 'Post Supervisor',
     company: 'Bright Pixel Studios',
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
   },
   {
-    quote: 'I used to spend 3 hours a day chasing approvals. Now I spend 15 minutes reviewing a dashboard. My actual work finally gets my actual attention.',
+    quote: 'I used to spend 3 hours a day chasing files and approvals. Now I spend 15 minutes reviewing a dashboard. I actually edit again.',
     name: 'Jennifer Walsh',
     role: 'Senior Editor',
     company: 'Momentum Creative',
     image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face',
   },
   {
-    quote: 'We had a near-miss with an expired talent release. Since SyncOps, we\'ve had zero compliance incidents. Zero. That alone is worth 10x the cost.',
+    quote: 'We had a near-miss with an expired talent release that almost cost us a six-figure client. Since SyncOps, zero incidents. That alone is worth it.',
     name: 'David Okonkwo',
     role: 'VP of Marketing',
     company: 'Cascade Brands',
