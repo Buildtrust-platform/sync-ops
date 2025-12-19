@@ -379,7 +379,7 @@ export default function WorkflowAutomation({
     setShowCreateModal(true);
   };
 
-  const useTemplate = (template: Partial<WorkflowRule>) => {
+  const applyTemplate = (template: Partial<WorkflowRule>) => {
     setFormName(template.name || '');
     setFormDescription(template.description || '');
     setFormTrigger(template.triggerType || 'ASSET_UPLOADED');
@@ -863,7 +863,7 @@ export default function WorkflowAutomation({
               {WORKFLOW_TEMPLATES.map((template, index) => (
                 <button
                   key={index}
-                  onClick={() => useTemplate(template)}
+                  onClick={() => applyTemplate(template)}
                   style={{
                     padding: '16px',
                     borderRadius: '10px',

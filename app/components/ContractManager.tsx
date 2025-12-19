@@ -310,7 +310,7 @@ export default function ContractManager({ project, onSave }: ContractManagerProp
     return expDate <= thirtyDays && c.status === "executed";
   }).length;
 
-  const useTemplate = (template: ContractTemplate) => {
+  const applyTemplate = (template: ContractTemplate) => {
     setSelectedTemplate(template);
     setNewContract({
       ...newContract,
@@ -694,7 +694,7 @@ export default function ContractManager({ project, onSave }: ContractManagerProp
                     key={template.id}
                     className="rounded-[10px] p-4 cursor-pointer transition-all hover:border-[var(--primary)]"
                     style={{ background: "var(--bg-2)", border: "1px solid var(--border)" }}
-                    onClick={() => useTemplate(template)}
+                    onClick={() => applyTemplate(template)}
                   >
                     <div className="flex items-center gap-3 mb-3">
                       <div
