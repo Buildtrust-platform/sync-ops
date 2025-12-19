@@ -1,0 +1,2 @@
+# Pre-commit: quick lint check
+npm run lint --silent 2>/dev/null || echo "Lint warnings (non-blocking)"

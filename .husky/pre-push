@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# Run build before pushing to catch missing files early
+echo "🔍 Running build check before push..."
+
+npm run build 2>&1
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ Build failed! Fix errors before pushing."
+  echo "   This prevents broken deployments on Amplify."
+  exit 1
+fi
+
+echo "✅ Build passed - safe to push!"
