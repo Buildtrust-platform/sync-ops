@@ -18,8 +18,12 @@ export { Input, Textarea, Select, Checkbox } from './Input';
 export type { InputProps, InputSize, TextareaProps, SelectProps, SelectOption, CheckboxProps } from './Input';
 
 // Badge
-export { Badge, StatusBadge, PhaseBadge, CountBadge } from './Badge';
-export type { BadgeProps, BadgeVariant, BadgeSize, StatusBadgeProps, StatusType, PhaseBadgeProps, PhaseType, CountBadgeProps } from './Badge';
+export { Badge, StatusBadge as LegacyStatusBadge, PhaseBadge, CountBadge } from './Badge';
+export type { BadgeProps, BadgeVariant, BadgeSize, StatusBadgeProps as LegacyStatusBadgeProps, StatusType, PhaseBadgeProps, PhaseType, CountBadgeProps } from './Badge';
+
+// WorkflowStatusBadge (enhanced status badge for post-production)
+export { StatusBadge, ProgressStatusBadge, StatusDot, mapLegacyStatus, getStatusColor, getStatusBgColor, getStatusLabel } from './StatusBadge';
+export type { StatusBadgeProps, WorkflowStatus, StatusSize, ProgressStatusBadgeProps, StatusDotProps } from './StatusBadge';
 
 // Modal
 export { Modal, ConfirmModal, AlertModal } from './Modal';
@@ -48,3 +52,11 @@ export type { AvatarProps, AvatarSize, AvatarGroupProps } from './Avatar';
 // Progress
 export { Progress, CircularProgress, ProgressSteps } from './Progress';
 export type { ProgressProps, ProgressVariant, ProgressSize, CircularProgressProps, ProgressStepsProps, ProgressStep } from './Progress';
+
+// Tooltip
+export { Tooltip, TooltipProvider, IconButtonWithTooltip, SimpleTooltip } from './Tooltip';
+export type { TooltipProps, TooltipPosition, TooltipSize, IconButtonWithTooltipProps, SimpleTooltipProps } from './Tooltip';
+
+// Collapsible Section
+export { CollapsibleSection } from './CollapsibleSection';
+export type { CollapsibleSectionProps } from './CollapsibleSection';

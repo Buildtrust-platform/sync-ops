@@ -16,6 +16,8 @@ export interface IconProps {
   strokeWidth?: number;
   'aria-hidden'?: boolean;
   'aria-label'?: string;
+  title?: string;
+  style?: React.CSSProperties;
 }
 
 const defaultProps: IconProps = {
@@ -31,6 +33,8 @@ const IconBase = ({
   viewBox = '0 0 24 24',
   'aria-hidden': ariaHidden = true,
   'aria-label': ariaLabel,
+  title,
+  style,
   ...props
 }: IconProps & { children: React.ReactNode; viewBox?: string }) => (
   <svg
@@ -44,8 +48,10 @@ const IconBase = ({
     aria-hidden={ariaLabel ? undefined : ariaHidden}
     aria-label={ariaLabel}
     role={ariaLabel ? 'img' : undefined}
+    style={style}
     {...props}
   >
+    {title && <title>{title}</title>}
     {children}
   </svg>
 );
@@ -878,6 +884,237 @@ export const Icons = {
       <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
     </IconBase>
   ),
+
+  // Post-Production Icons
+  Sliders: (props: IconProps) => (
+    <IconBase {...props}>
+      <line x1="4" x2="4" y1="21" y2="14" />
+      <line x1="4" x2="4" y1="10" y2="3" />
+      <line x1="12" x2="12" y1="21" y2="12" />
+      <line x1="12" x2="12" y1="8" y2="3" />
+      <line x1="20" x2="20" y1="21" y2="16" />
+      <line x1="20" x2="20" y1="12" y2="3" />
+      <line x1="2" x2="6" y1="14" y2="14" />
+      <line x1="10" x2="14" y1="8" y2="8" />
+      <line x1="18" x2="22" y1="16" y2="16" />
+    </IconBase>
+  ),
+
+  Palette: (props: IconProps) => (
+    <IconBase {...props}>
+      <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
+      <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
+      <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
+      <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
+      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.555C21.965 6.012 17.461 2 12 2z" />
+    </IconBase>
+  ),
+
+  Building: (props: IconProps) => (
+    <IconBase {...props}>
+      <rect width="16" height="20" x="4" y="2" rx="2" ry="2" />
+      <path d="M9 22v-4h6v4" />
+      <path d="M8 6h.01" />
+      <path d="M16 6h.01" />
+      <path d="M12 6h.01" />
+      <path d="M12 10h.01" />
+      <path d="M12 14h.01" />
+      <path d="M16 10h.01" />
+      <path d="M16 14h.01" />
+      <path d="M8 10h.01" />
+      <path d="M8 14h.01" />
+    </IconBase>
+  ),
+
+  Subtitles: (props: IconProps) => (
+    <IconBase {...props}>
+      <rect width="20" height="16" x="2" y="4" rx="2" />
+      <path d="M6 12h4" />
+      <path d="M14 12h4" />
+      <path d="M6 16h8" />
+    </IconBase>
+  ),
+
+  RefreshCw: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+      <path d="M21 3v5h-5" />
+      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+      <path d="M3 21v-5h5" />
+    </IconBase>
+  ),
+
+  Undo: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M3 7v6h6" />
+      <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
+    </IconBase>
+  ),
+
+  Redo: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M21 7v6h-6" />
+      <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7" />
+    </IconBase>
+  ),
+
+  // Volume icons
+  Volume2: (props: IconProps) => (
+    <IconBase {...props}>
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+    </IconBase>
+  ),
+
+  VolumeX: (props: IconProps) => (
+    <IconBase {...props}>
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+      <line x1="23" y1="9" x2="17" y2="15" />
+      <line x1="17" y1="9" x2="23" y2="15" />
+    </IconBase>
+  ),
+
+  // Drawing/editing icons
+  Pencil: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+      <path d="m15 5 4 4" />
+    </IconBase>
+  ),
+
+  ArrowUpRight: (props: IconProps) => (
+    <IconBase {...props}>
+      <line x1="7" y1="17" x2="17" y2="7" />
+      <polyline points="7 7 17 7 17 17" />
+    </IconBase>
+  ),
+
+  Square: (props: IconProps) => (
+    <IconBase {...props}>
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+    </IconBase>
+  ),
+
+  Maximize: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M8 3H5a2 2 0 0 0-2 2v3" />
+      <path d="M21 8V5a2 2 0 0 0-2-2h-3" />
+      <path d="M3 16v3a2 2 0 0 0 2 2h3" />
+      <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+    </IconBase>
+  ),
+
+  GitCompare: (props: IconProps) => (
+    <IconBase {...props}>
+      <circle cx="18" cy="18" r="3" />
+      <circle cx="6" cy="6" r="3" />
+      <path d="M13 6h3a2 2 0 0 1 2 2v7" />
+      <path d="M11 18H8a2 2 0 0 1-2-2V9" />
+    </IconBase>
+  ),
+
+  // Social media icons
+  Instagram: (props: IconProps) => (
+    <IconBase {...props}>
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </IconBase>
+  ),
+
+  Twitter: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
+    </IconBase>
+  ),
+
+  Facebook: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </IconBase>
+  ),
+
+  Linkedin: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+      <rect x="2" y="9" width="4" height="12" />
+      <circle cx="4" cy="4" r="2" />
+    </IconBase>
+  ),
+
+  // Lifecycle Navigation icons
+  Sun: (props: IconProps) => (
+    <IconBase {...props}>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2" />
+      <path d="M12 20v2" />
+      <path d="m4.93 4.93 1.41 1.41" />
+      <path d="m17.66 17.66 1.41 1.41" />
+      <path d="M2 12h2" />
+      <path d="M20 12h2" />
+      <path d="m6.34 17.66-1.41 1.41" />
+      <path d="m19.07 4.93-1.41 1.41" />
+    </IconBase>
+  ),
+
+  Book: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+    </IconBase>
+  ),
+
+  BookOpen: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+    </IconBase>
+  ),
+
+  // Comparison & Layout icons
+  Columns: (props: IconProps) => (
+    <IconBase {...props}>
+      <rect x="3" y="3" width="7" height="18" rx="1" />
+      <rect x="14" y="3" width="7" height="18" rx="1" />
+    </IconBase>
+  ),
+
+  ArrowLeftRight: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M8 3 4 7l4 4" />
+      <path d="M4 7h16" />
+      <path d="m16 21 4-4-4-4" />
+      <path d="M20 17H4" />
+    </IconBase>
+  ),
+
+  ToggleLeft: (props: IconProps) => (
+    <IconBase {...props}>
+      <rect x="1" y="5" width="22" height="14" rx="7" ry="7" />
+      <circle cx="8" cy="12" r="3" />
+    </IconBase>
+  ),
+
+  Youtube: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" />
+      <path d="m10 15 5-3-5-3z" />
+    </IconBase>
+  ),
+
+  Construction: (props: IconProps) => (
+    <IconBase {...props}>
+      <rect x="2" y="6" width="20" height="8" rx="1" />
+      <path d="M17 14v7" />
+      <path d="M7 14v7" />
+      <path d="M17 3v3" />
+      <path d="M7 3v3" />
+      <path d="M10 14 2.3 6.3" />
+      <path d="m14 6 7.7 7.7" />
+      <path d="m8 6 8 8" />
+    </IconBase>
+  ),
+
 };
 
 export type IconName = keyof typeof Icons;
