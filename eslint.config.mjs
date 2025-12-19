@@ -16,6 +16,7 @@ export default [
   {
     ignores: [
       ".next/**",
+      ".amplify/**",
       "out/**",
       "build/**",
       "next-env.d.ts",
