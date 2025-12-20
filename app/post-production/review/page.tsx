@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
-import { Icons, Card, StatusBadge, Progress, Button, Badge } from '../../components/ui';
+import { useOrganization } from '@/app/hooks/useAmplifyData';
+import { Icons, Card, StatusBadge, Progress, Button, Badge, Skeleton } from '../../components/ui';
 
 /**
  * REVIEW CENTER
@@ -46,18 +47,39 @@ interface ReviewStats {
   avgResponseTime: string;
 }
 
-// Data will be fetched from API
-const initialReviewItems: ReviewItem[] = [];
+// Helper function to map API Review to ReviewItem
+const mapReviewToItem = (
+  review: Schema['Review']['type'],
+  asset: Schema['Asset']['type'] | null,
+  project: Schema['Project']['type'] | null,
+  commentsCount: number
+): ReviewItem => {
+  return {
+    id: review.id,
+    assetId: review.assetId,
+    assetName: asset?.s3Key?.split('/').pop() || 'Unknown Asset',
+    projectName: project?.name || 'Unknown Project',
+    thumbnail: asset?.thumbnailKey || undefined,
+    reviewType: review.reviewerRole || 'INTERNAL',
+    status: review.status === 'IN_PROGRESS' ? 'IN_REVIEW' :
+            review.status === 'APPROVED' ? 'APPROVED' :
+            review.status === 'REJECTED' ? 'REJECTED' : 'PENDING',
+    version: asset?.version || 1,
+    duration: asset?.duration ? formatDuration(asset.duration) : '0:00',
+    commentsCount: commentsCount,
+    unresolvedCount: 0, // Will be calculated from comments
+    requestedBy: review.reviewerEmail?.split('@')[0] || 'Unknown',
+    assignedTo: [review.reviewerEmail || 'Unknown'],
+    dueDate: undefined,
+    createdAt: review.createdAt || new Date().toISOString(),
+    lastActivity: review.updatedAt || review.createdAt || new Date().toISOString(),
+  };
+};
 
-// Initial stats - will be computed from data
-const initialStats: ReviewStats = {
-  pending: 0,
-  inReview: 0,
-  changesRequested: 0,
-  approved: 0,
-  rejected: 0,
-  totalComments: 0,
-  avgResponseTime: '-',
+const formatDuration = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
 
 const REVIEW_TYPE_COLORS: Record<ReviewType, { bg: string; text: string }> = {
@@ -89,12 +111,104 @@ const formatTimeAgo = (dateString: string): string => {
 
 export default function ReviewCenterPage() {
   const router = useRouter();
-  const [reviews, setReviews] = useState<ReviewItem[]>(initialReviewItems);
-  const [stats, setStats] = useState<ReviewStats>(initialStats);
+  const { organizationId, loading: orgLoading } = useOrganization();
+  const [reviews, setReviews] = useState<ReviewItem[]>([]);
+  const [stats, setStats] = useState<ReviewStats>({
+    pending: 0,
+    inReview: 0,
+    changesRequested: 0,
+    approved: 0,
+    rejected: 0,
+    totalComments: 0,
+    avgResponseTime: '-',
+  });
   const [activeFilter, setActiveFilter] = useState<ReviewStatus | 'ALL'>('ALL');
   const [activeTypeFilter, setActiveTypeFilter] = useState<ReviewType | 'ALL'>('ALL');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchReviews = useCallback(async () => {
+    if (!organizationId) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const client = generateClient<Schema>({ authMode: 'userPool' });
+
+      // Fetch all reviews for this organization
+      const { data: reviewsData } = await client.models.Review.list({
+        filter: { organizationId: { eq: organizationId } }
+      });
+
+      if (!reviewsData) {
+        setReviews([]);
+        return;
+      }
+
+      // Fetch associated assets, projects, and comment counts
+      const reviewsWithDetails: ReviewItem[] = await Promise.all(
+        reviewsData.map(async (review) => {
+          let asset: Schema['Asset']['type'] | null = null;
+          let project: Schema['Project']['type'] | null = null;
+          let commentsCount = 0;
+
+          try {
+            // Fetch asset
+            const { data: assetData } = await client.models.Asset.get({ id: review.assetId });
+            asset = assetData;
+
+            // Fetch project
+            const { data: projectData } = await client.models.Project.get({ id: review.projectId });
+            project = projectData;
+
+            // Count comments for this review
+            const { data: commentsData } = await client.models.ReviewComment.list({
+              filter: { reviewId: { eq: review.id } }
+            });
+            commentsCount = commentsData?.length || 0;
+
+          } catch (e) {
+            console.warn('Could not fetch related data for review:', review.id);
+          }
+
+          return mapReviewToItem(review, asset, project, commentsCount);
+        })
+      );
+
+      // Sort by last activity (most recent first)
+      reviewsWithDetails.sort((a, b) =>
+        new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()
+      );
+
+      setReviews(reviewsWithDetails);
+
+      // Calculate stats
+      const newStats: ReviewStats = {
+        pending: reviewsWithDetails.filter(r => r.status === 'PENDING').length,
+        inReview: reviewsWithDetails.filter(r => r.status === 'IN_REVIEW').length,
+        changesRequested: reviewsWithDetails.filter(r => r.status === 'CHANGES_REQUESTED').length,
+        approved: reviewsWithDetails.filter(r => r.status === 'APPROVED').length,
+        rejected: reviewsWithDetails.filter(r => r.status === 'REJECTED').length,
+        totalComments: reviewsWithDetails.reduce((sum, r) => sum + r.commentsCount, 0),
+        avgResponseTime: '-', // TODO: Calculate from actual data
+      };
+      setStats(newStats);
+
+    } catch (err) {
+      console.error('Error fetching reviews:', err);
+      setError('Failed to load reviews. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [organizationId]);
+
+  useEffect(() => {
+    if (organizationId) {
+      fetchReviews();
+    }
+  }, [organizationId, fetchReviews]);
 
   const filteredReviews = reviews.filter(review => {
     if (activeFilter !== 'ALL' && review.status !== activeFilter) return false;
@@ -169,43 +283,71 @@ export default function ReviewCenterPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-6">
           <Card className="p-4 card-cinema">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.pending}</p>
+              {orgLoading || loading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.pending}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">Pending</p>
             </div>
           </Card>
           <Card className="p-4 card-cinema">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--primary)]">{stats.inReview}</p>
+              {orgLoading || loading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--primary)]">{stats.inReview}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">In Review</p>
             </div>
           </Card>
           <Card className="p-4 card-cinema">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--warning)]">{stats.changesRequested}</p>
+              {orgLoading || loading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--warning)]">{stats.changesRequested}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">Changes</p>
             </div>
           </Card>
           <Card className="p-4 card-cinema">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--success)]">{stats.approved}</p>
+              {orgLoading || loading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--success)]">{stats.approved}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">Approved</p>
             </div>
           </Card>
           <Card className="p-4 card-cinema">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--danger)]">{stats.rejected}</p>
+              {orgLoading || loading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--danger)]">{stats.rejected}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">Rejected</p>
             </div>
           </Card>
           <Card className="p-4 card-cinema">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.totalComments}</p>
+              {orgLoading || loading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.totalComments}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">Comments</p>
             </div>
           </Card>
           <Card className="p-4 card-cinema">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--accent)]">{stats.avgResponseTime}</p>
+              {orgLoading || loading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--accent)]">{stats.avgResponseTime}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">Avg Response</p>
             </div>
           </Card>
@@ -257,8 +399,44 @@ export default function ReviewCenterPage() {
           </div>
         </div>
 
+        {/* Error State */}
+        {error && (
+          <Card className="p-6 mb-6 border-[var(--danger)]">
+            <div className="flex items-center gap-3 text-[var(--danger)]">
+              <Icons.AlertCircle className="w-5 h-5" />
+              <p>{error}</p>
+              <Button variant="secondary" size="sm" onClick={fetchReviews} className="ml-auto">
+                Retry
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        {/* Loading State */}
+        {(orgLoading || loading) && !error && (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="w-16 h-10 rounded" />
+                    <div>
+                      <Skeleton className="h-5 w-48 mb-2" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <Skeleton className="h-8 w-24" />
+                    <Skeleton className="h-6 w-20 rounded-full" />
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+
         {/* Review List */}
-        {viewMode === 'list' ? (
+        {!orgLoading && !loading && !error && viewMode === 'list' ? (
           <Card className="overflow-hidden">
             <table className="w-full">
               <thead>
@@ -371,7 +549,7 @@ export default function ReviewCenterPage() {
               </tbody>
             </table>
           </Card>
-        ) : (
+        ) : !orgLoading && !loading && !error && viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredReviews.map((review) => {
               const StatusIcon = Icons[STATUS_CONFIG[review.status].icon];
@@ -447,9 +625,9 @@ export default function ReviewCenterPage() {
               );
             })}
           </div>
-        )}
+        ) : null}
 
-        {filteredReviews.length === 0 && (
+        {!orgLoading && !loading && !error && filteredReviews.length === 0 && (
           <Card className="p-12 text-center">
             <Icons.Search className="w-12 h-12 text-[var(--text-tertiary)] mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">No reviews found</h3>

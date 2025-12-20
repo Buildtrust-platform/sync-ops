@@ -1,8 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Icons, Card, Button } from '@/app/components/ui';
+import { generateClient } from 'aws-amplify/data';
+import type { Schema } from '@/amplify/data/resource';
+import { useOrganization } from '@/app/hooks/useAmplifyData';
+import { Icons, Card, Button, Skeleton } from '@/app/components/ui';
 
 /**
  * BUDGET MANAGEMENT PAGE
@@ -28,9 +31,6 @@ interface BudgetSummary {
   variancePercent: number;
 }
 
-// Data will be fetched from API
-const initialLineItems: BudgetLineItem[] = [];
-
 const CATEGORY_CONFIG: Record<BudgetCategory, { label: string; color: string; icon: keyof typeof Icons }> = {
   PRE_PRODUCTION: { label: 'Pre-Production', color: 'var(--phase-preproduction)', icon: 'Clipboard' },
   PRODUCTION: { label: 'Production', color: 'var(--phase-production)', icon: 'Video' },
@@ -43,9 +43,100 @@ const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
 };
 
+// Map project data to budget line items
+function mapProjectToBudgetItems(project: Schema['Project']['type']): BudgetLineItem[] {
+  const items: BudgetLineItem[] = [];
+
+  // Map budget breakdown data if available
+  if (project.budgetPreProduction) {
+    items.push({
+      id: `${project.id}-preprod`,
+      category: 'PRE_PRODUCTION',
+      description: `Pre-Production - ${project.name}`,
+      budgeted: project.budgetPreProduction,
+      actual: 0,
+      notes: 'Pre-production expenses',
+    });
+  }
+
+  if (project.budgetProduction) {
+    items.push({
+      id: `${project.id}-prod`,
+      category: 'PRODUCTION',
+      description: `Production - ${project.name}`,
+      budgeted: project.budgetProduction,
+      actual: 0,
+      notes: 'Production expenses',
+    });
+  }
+
+  if (project.budgetPostProduction) {
+    items.push({
+      id: `${project.id}-postprod`,
+      category: 'POST_PRODUCTION',
+      description: `Post-Production - ${project.name}`,
+      budgeted: project.budgetPostProduction,
+      actual: 0,
+      notes: 'Post-production expenses',
+    });
+  }
+
+  if (project.budgetDistribution) {
+    items.push({
+      id: `${project.id}-dist`,
+      category: 'DISTRIBUTION',
+      description: `Distribution - ${project.name}`,
+      budgeted: project.budgetDistribution,
+      actual: 0,
+      notes: 'Distribution expenses',
+    });
+  }
+
+  return items;
+}
+
 export default function BudgetPage() {
-  const [lineItems] = useState<BudgetLineItem[]>(initialLineItems);
+  const { organizationId, loading: orgLoading } = useOrganization();
+  const [lineItems, setLineItems] = useState<BudgetLineItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<BudgetCategory | 'ALL'>('ALL');
+
+  const fetchBudgetData = useCallback(async () => {
+    if (!organizationId) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const client = generateClient<Schema>({ authMode: 'userPool' });
+
+      // Fetch projects for this organization
+      const { data: projectsData } = await client.models.Project.list({
+        filter: { organizationId: { eq: organizationId } }
+      });
+
+      if (!projectsData) {
+        setLineItems([]);
+        return;
+      }
+
+      // Map all projects to budget line items
+      const allItems = projectsData.flatMap(project => mapProjectToBudgetItems(project));
+      setLineItems(allItems);
+    } catch (err) {
+      console.error('Error fetching budget data:', err);
+      setError('Failed to load budget data. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [organizationId]);
+
+  useEffect(() => {
+    if (organizationId) {
+      fetchBudgetData();
+    }
+  }, [organizationId, fetchBudgetData]);
 
   const filteredItems = lineItems.filter(
     item => activeCategory === 'ALL' || item.category === activeCategory
@@ -64,6 +155,8 @@ export default function BudgetPage() {
     category: cat as BudgetCategory,
     ...calculateSummary(lineItems.filter(item => item.category === cat)),
   }));
+
+  const isLoading = orgLoading || loading;
 
   return (
     <div className="min-h-screen bg-[var(--bg-0)]">
@@ -104,77 +197,127 @@ export default function BudgetPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-6">
+        {/* Error State */}
+        {error && (
+          <Card className="p-6 mb-6 border-[var(--danger)]">
+            <div className="flex items-center gap-3 text-[var(--danger)]">
+              <Icons.AlertCircle className="w-5 h-5" />
+              <p>{error}</p>
+              <Button variant="secondary" size="sm" onClick={fetchBudgetData} className="ml-auto">
+                Retry
+              </Button>
+            </div>
+          </Card>
+        )}
+
         {/* Summary Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <Card className="p-5">
             <p className="text-sm text-[var(--text-tertiary)] mb-1">Total Budget</p>
-            <p className="text-2xl font-bold text-[var(--text-primary)]">{formatCurrency(summary.totalBudget)}</p>
+            {isLoading ? (
+              <Skeleton className="h-8 w-32 mt-1" />
+            ) : (
+              <p className="text-2xl font-bold text-[var(--text-primary)]">{formatCurrency(summary.totalBudget)}</p>
+            )}
           </Card>
           <Card className="p-5">
             <p className="text-sm text-[var(--text-tertiary)] mb-1">Actual Spend</p>
-            <p className="text-2xl font-bold text-[var(--text-primary)]">{formatCurrency(summary.totalActual)}</p>
+            {isLoading ? (
+              <Skeleton className="h-8 w-32 mt-1" />
+            ) : (
+              <p className="text-2xl font-bold text-[var(--text-primary)]">{formatCurrency(summary.totalActual)}</p>
+            )}
           </Card>
           <Card className="p-5">
             <p className="text-sm text-[var(--text-tertiary)] mb-1">Variance</p>
-            <p className={`text-2xl font-bold ${summary.variance >= 0 ? 'text-[var(--success)]' : 'text-[var(--danger)]'}`}>
-              {summary.variance >= 0 ? '+' : ''}{formatCurrency(summary.variance)}
-            </p>
+            {isLoading ? (
+              <Skeleton className="h-8 w-32 mt-1" />
+            ) : (
+              <p className={`text-2xl font-bold ${summary.variance >= 0 ? 'text-[var(--success)]' : 'text-[var(--danger)]'}`}>
+                {summary.variance >= 0 ? '+' : ''}{formatCurrency(summary.variance)}
+              </p>
+            )}
           </Card>
           <Card className="p-5">
             <p className="text-sm text-[var(--text-tertiary)] mb-1">% of Budget Used</p>
-            <p className="text-2xl font-bold text-[var(--text-primary)]">
-              {((summary.totalActual / summary.totalBudget) * 100).toFixed(1)}%
-            </p>
-            <div className="w-full h-2 bg-[var(--bg-3)] rounded-full mt-2">
-              <div
-                className="h-full rounded-full transition-all"
-                style={{
-                  width: `${Math.min((summary.totalActual / summary.totalBudget) * 100, 100)}%`,
-                  backgroundColor: summary.totalActual > summary.totalBudget ? 'var(--danger)' : 'var(--success)',
-                }}
-              />
-            </div>
+            {isLoading ? (
+              <Skeleton className="h-8 w-32 mt-1" />
+            ) : (
+              <>
+                <p className="text-2xl font-bold text-[var(--text-primary)]">
+                  {summary.totalBudget > 0 ? ((summary.totalActual / summary.totalBudget) * 100).toFixed(1) : '0.0'}%
+                </p>
+                <div className="w-full h-2 bg-[var(--bg-3)] rounded-full mt-2">
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${Math.min((summary.totalActual / summary.totalBudget) * 100, 100)}%`,
+                      backgroundColor: summary.totalActual > summary.totalBudget ? 'var(--danger)' : 'var(--success)',
+                    }}
+                  />
+                </div>
+              </>
+            )}
           </Card>
         </div>
 
         {/* Category Breakdown */}
-        <Card className="p-5 mb-6">
-          <h3 className="font-semibold text-[var(--text-primary)] mb-4">Budget by Category</h3>
-          <div className="space-y-3">
-            {categoryTotals.map(({ category, totalBudget, totalActual }) => {
-              const config = CATEGORY_CONFIG[category];
-              const percent = totalBudget > 0 ? (totalActual / totalBudget) * 100 : 0;
-              const CategoryIcon = Icons[config.icon];
-              return (
-                <div key={category} className="flex items-center gap-4">
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: `${config.color}20`, color: config.color }}
-                  >
-                    <CategoryIcon className="w-4 h-4" />
+        {!isLoading && (
+          <Card className="p-5 mb-6">
+            <h3 className="font-semibold text-[var(--text-primary)] mb-4">Budget by Category</h3>
+            <div className="space-y-3">
+              {categoryTotals.map(({ category, totalBudget, totalActual }) => {
+                const config = CATEGORY_CONFIG[category];
+                const percent = totalBudget > 0 ? (totalActual / totalBudget) * 100 : 0;
+                const CategoryIcon = Icons[config.icon];
+                return (
+                  <div key={category} className="flex items-center gap-4">
+                    <div
+                      className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                      style={{ backgroundColor: `${config.color}20`, color: config.color }}
+                    >
+                      <CategoryIcon className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-[var(--text-primary)]">{config.label}</span>
+                        <span className="text-sm text-[var(--text-secondary)]">
+                          {formatCurrency(totalActual)} / {formatCurrency(totalBudget)}
+                        </span>
+                      </div>
+                      <div className="w-full h-2 bg-[var(--bg-3)] rounded-full">
+                        <div
+                          className="h-full rounded-full transition-all"
+                          style={{
+                            width: `${Math.min(percent, 100)}%`,
+                            backgroundColor: percent > 100 ? 'var(--danger)' : config.color,
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium text-[var(--text-primary)]">{config.label}</span>
-                      <span className="text-sm text-[var(--text-secondary)]">
-                        {formatCurrency(totalActual)} / {formatCurrency(totalBudget)}
-                      </span>
-                    </div>
-                    <div className="w-full h-2 bg-[var(--bg-3)] rounded-full">
-                      <div
-                        className="h-full rounded-full transition-all"
-                        style={{
-                          width: `${Math.min(percent, 100)}%`,
-                          backgroundColor: percent > 100 ? 'var(--danger)' : config.color,
-                        }}
-                      />
-                    </div>
+                );
+              })}
+            </div>
+          </Card>
+        )}
+
+        {isLoading && (
+          <Card className="p-5 mb-6">
+            <h3 className="font-semibold text-[var(--text-primary)] mb-4">Budget by Category</h3>
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <Skeleton className="w-8 h-8 rounded-lg" />
+                  <div className="flex-1">
+                    <Skeleton className="h-4 w-full mb-2" />
+                    <Skeleton className="h-2 w-full" />
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </Card>
+              ))}
+            </div>
+          </Card>
+        )}
 
         {/* Category Filter */}
         <div className="flex items-center gap-2 mb-4 p-1 bg-[var(--bg-1)] rounded-lg border border-[var(--border-default)] w-fit">
@@ -204,69 +347,104 @@ export default function BudgetPage() {
         </div>
 
         {/* Line Items Table */}
-        <Card className="overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-[var(--border-default)] bg-[var(--bg-1)]">
-                <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">Description</th>
-                <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">Category</th>
-                <th className="text-right p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">Budgeted</th>
-                <th className="text-right p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">Actual</th>
-                <th className="text-right p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">Variance</th>
-                <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">Notes</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border-subtle)]">
-              {filteredItems.map((item) => {
-                const variance = item.budgeted - item.actual;
-                const config = CATEGORY_CONFIG[item.category];
-                return (
-                  <tr key={item.id} className="hover:bg-[var(--bg-1)] transition-colors">
-                    <td className="p-4">
-                      <span className="font-medium text-[var(--text-primary)]">{item.description}</span>
-                    </td>
-                    <td className="p-4">
-                      <span
-                        className="px-2 py-1 rounded text-xs font-medium"
-                        style={{ backgroundColor: `${config.color}20`, color: config.color }}
-                      >
-                        {config.label}
-                      </span>
-                    </td>
-                    <td className="p-4 text-right text-[var(--text-secondary)]">{formatCurrency(item.budgeted)}</td>
-                    <td className="p-4 text-right text-[var(--text-primary)] font-medium">{formatCurrency(item.actual)}</td>
-                    <td className={`p-4 text-right font-medium ${variance >= 0 ? 'text-[var(--success)]' : 'text-[var(--danger)]'}`}>
-                      {variance >= 0 ? '+' : ''}{formatCurrency(variance)}
-                    </td>
-                    <td className="p-4 text-sm text-[var(--text-tertiary)] max-w-xs truncate">
-                      {item.notes || '-'}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-            <tfoot>
-              <tr className="border-t-2 border-[var(--border-default)] bg-[var(--bg-1)]">
-                <td className="p-4 font-semibold text-[var(--text-primary)]" colSpan={2}>Total</td>
-                <td className="p-4 text-right font-semibold text-[var(--text-primary)]">
-                  {formatCurrency(filteredItems.reduce((sum, item) => sum + item.budgeted, 0))}
-                </td>
-                <td className="p-4 text-right font-semibold text-[var(--text-primary)]">
-                  {formatCurrency(filteredItems.reduce((sum, item) => sum + item.actual, 0))}
-                </td>
-                <td className={`p-4 text-right font-semibold ${
-                  filteredItems.reduce((sum, item) => sum + (item.budgeted - item.actual), 0) >= 0
-                    ? 'text-[var(--success)]'
-                    : 'text-[var(--danger)]'
-                }`}>
-                  {filteredItems.reduce((sum, item) => sum + (item.budgeted - item.actual), 0) >= 0 ? '+' : ''}
-                  {formatCurrency(filteredItems.reduce((sum, item) => sum + (item.budgeted - item.actual), 0))}
-                </td>
-                <td className="p-4"></td>
-              </tr>
-            </tfoot>
-          </table>
-        </Card>
+        {!isLoading && !error && filteredItems.length > 0 && (
+          <Card className="overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-[var(--border-default)] bg-[var(--bg-1)]">
+                  <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">Description</th>
+                  <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">Category</th>
+                  <th className="text-right p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">Budgeted</th>
+                  <th className="text-right p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">Actual</th>
+                  <th className="text-right p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">Variance</th>
+                  <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">Notes</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-subtle)]">
+                {filteredItems.map((item) => {
+                  const variance = item.budgeted - item.actual;
+                  const config = CATEGORY_CONFIG[item.category];
+                  return (
+                    <tr key={item.id} className="hover:bg-[var(--bg-1)] transition-colors">
+                      <td className="p-4">
+                        <span className="font-medium text-[var(--text-primary)]">{item.description}</span>
+                      </td>
+                      <td className="p-4">
+                        <span
+                          className="px-2 py-1 rounded text-xs font-medium"
+                          style={{ backgroundColor: `${config.color}20`, color: config.color }}
+                        >
+                          {config.label}
+                        </span>
+                      </td>
+                      <td className="p-4 text-right text-[var(--text-secondary)]">{formatCurrency(item.budgeted)}</td>
+                      <td className="p-4 text-right text-[var(--text-primary)] font-medium">{formatCurrency(item.actual)}</td>
+                      <td className={`p-4 text-right font-medium ${variance >= 0 ? 'text-[var(--success)]' : 'text-[var(--danger)]'}`}>
+                        {variance >= 0 ? '+' : ''}{formatCurrency(variance)}
+                      </td>
+                      <td className="p-4 text-sm text-[var(--text-tertiary)] max-w-xs truncate">
+                        {item.notes || '-'}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              <tfoot>
+                <tr className="border-t-2 border-[var(--border-default)] bg-[var(--bg-1)]">
+                  <td className="p-4 font-semibold text-[var(--text-primary)]" colSpan={2}>Total</td>
+                  <td className="p-4 text-right font-semibold text-[var(--text-primary)]">
+                    {formatCurrency(filteredItems.reduce((sum, item) => sum + item.budgeted, 0))}
+                  </td>
+                  <td className="p-4 text-right font-semibold text-[var(--text-primary)]">
+                    {formatCurrency(filteredItems.reduce((sum, item) => sum + item.actual, 0))}
+                  </td>
+                  <td className={`p-4 text-right font-semibold ${
+                    filteredItems.reduce((sum, item) => sum + (item.budgeted - item.actual), 0) >= 0
+                      ? 'text-[var(--success)]'
+                      : 'text-[var(--danger)]'
+                  }`}>
+                    {filteredItems.reduce((sum, item) => sum + (item.budgeted - item.actual), 0) >= 0 ? '+' : ''}
+                    {formatCurrency(filteredItems.reduce((sum, item) => sum + (item.budgeted - item.actual), 0))}
+                  </td>
+                  <td className="p-4"></td>
+                </tr>
+              </tfoot>
+            </table>
+          </Card>
+        )}
+
+        {/* Loading State */}
+        {isLoading && (
+          <Card className="p-5">
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center justify-between">
+                  <Skeleton className="h-6 w-48" />
+                  <Skeleton className="h-6 w-24" />
+                  <Skeleton className="h-6 w-32" />
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && !error && filteredItems.length === 0 && (
+          <Card className="p-12 text-center">
+            <Icons.DollarSign className="w-12 h-12 text-[var(--text-tertiary)] mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">No budget items found</h3>
+            <p className="text-[var(--text-tertiary)] mb-4">
+              {activeCategory === 'ALL'
+                ? 'Start by adding budget line items to track your project expenses.'
+                : `No budget items in the ${CATEGORY_CONFIG[activeCategory].label} category.`
+              }
+            </p>
+            <Button variant="primary" size="sm">
+              <Icons.Plus className="w-4 h-4 mr-2" />
+              Add Line Item
+            </Button>
+          </Card>
+        )}
       </div>
     </div>
   );

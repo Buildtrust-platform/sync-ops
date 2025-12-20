@@ -1,8 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Icons, Card, Button } from '../../components/ui';
+import { generateClient } from 'aws-amplify/data';
+import type { Schema } from '@/amplify/data/resource';
+import { useOrganization } from '@/app/hooks/useAmplifyData';
+import { Icons, Card, Button, Skeleton } from '../../components/ui';
 
 /**
  * APPROVALS PAGE
@@ -26,17 +29,129 @@ interface ApprovalItem {
   notes?: string;
 }
 
-// Data will be fetched from API
-const initialApprovals: ApprovalItem[] = [];
+// Helper function to map API Review to ApprovalItem
+const mapReviewToApproval = (
+  review: Schema['Review']['type'],
+  asset: Schema['Asset']['type'] | null,
+  commentsCount: number
+): ApprovalItem => {
+  // Determine approval type based on reviewer role
+  let type: 'creative' | 'legal' | 'client' | 'compliance' | 'final' = 'creative';
+  if (review.reviewerRole === 'LEGAL') type = 'legal';
+  else if (review.reviewerRole === 'CLIENT') type = 'client';
+  else if (review.reviewerRole === 'COMPLIANCE') type = 'compliance';
+  else if (review.isLegalApproved) type = 'final';
+
+  // Determine priority based on status and legal approval
+  let priority: 'low' | 'medium' | 'high' | 'critical' = 'medium';
+  if (review.isLegalApproved) priority = 'critical';
+  else if (review.reviewerRole === 'LEGAL' || review.reviewerRole === 'COMPLIANCE') priority = 'high';
+
+  // Create reviewer status based on review status
+  const reviewerStatus: 'pending' | 'approved' | 'rejected' =
+    review.status === 'APPROVED' ? 'approved' :
+    review.status === 'REJECTED' ? 'rejected' : 'pending';
+
+  return {
+    id: review.id,
+    assetId: review.assetId,
+    assetName: asset?.s3Key?.split('/').pop() || 'Unknown Asset',
+    versionNumber: asset?.version || 1,
+    type,
+    requestedBy: review.reviewerEmail?.split('@')[0] || 'Unknown',
+    requestedAt: new Date(review.createdAt || Date.now()).toLocaleDateString(),
+    dueDate: undefined, // Could be added to schema later
+    priority,
+    reviewers: [{
+      name: review.reviewerEmail?.split('@')[0] || 'Unknown',
+      role: review.reviewerRole || 'INTERNAL',
+      status: reviewerStatus
+    }],
+    thumbnail: asset?.thumbnailKey || undefined,
+    notes: commentsCount > 0 ? `${commentsCount} comments` : undefined,
+  };
+};
 
 type FilterType = 'all' | 'creative' | 'legal' | 'client' | 'compliance' | 'final';
 type SortOption = 'newest' | 'oldest' | 'priority' | 'due-date';
 
 export default function ApprovalsPage() {
-  const [approvals] = useState<ApprovalItem[]>(initialApprovals);
+  const { organizationId, loading: orgLoading } = useOrganization();
+  const [approvals, setApprovals] = useState<ApprovalItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [sortBy, setSortBy] = useState<SortOption>('priority');
   const [selectedApproval, setSelectedApproval] = useState<ApprovalItem | null>(null);
+
+  const fetchApprovals = useCallback(async () => {
+    if (!organizationId) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const client = generateClient<Schema>({ authMode: 'userPool' });
+
+      // Fetch reviews that are pending approval (IN_PROGRESS or COMPLETED status)
+      const { data: reviewsData } = await client.models.Review.list({
+        filter: {
+          organizationId: { eq: organizationId },
+          status: { ne: 'APPROVED' } // Get all non-approved reviews
+        }
+      });
+
+      if (!reviewsData) {
+        setApprovals([]);
+        return;
+      }
+
+      // Fetch associated assets and comment counts
+      const approvalsWithDetails: ApprovalItem[] = await Promise.all(
+        reviewsData.map(async (review) => {
+          let asset: Schema['Asset']['type'] | null = null;
+          let commentsCount = 0;
+
+          try {
+            // Fetch asset
+            const { data: assetData } = await client.models.Asset.get({ id: review.assetId });
+            asset = assetData;
+
+            // Count comments for this review
+            const { data: commentsData } = await client.models.ReviewComment.list({
+              filter: { reviewId: { eq: review.id } }
+            });
+            commentsCount = commentsData?.length || 0;
+
+          } catch (e) {
+            console.warn('Could not fetch related data for review:', review.id);
+          }
+
+          return mapReviewToApproval(review, asset, commentsCount);
+        })
+      );
+
+      // Sort by priority by default
+      approvalsWithDetails.sort((a, b) => {
+        const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+        return priorityOrder[a.priority] - priorityOrder[b.priority];
+      });
+
+      setApprovals(approvalsWithDetails);
+
+    } catch (err) {
+      console.error('Error fetching approvals:', err);
+      setError('Failed to load approvals. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [organizationId]);
+
+  useEffect(() => {
+    if (organizationId) {
+      fetchApprovals();
+    }
+  }, [organizationId, fetchApprovals]);
 
   const getTypeStyle = (type: string) => {
     switch (type) {
@@ -157,8 +272,43 @@ export default function ApprovalsPage() {
           </div>
         </div>
 
+        {/* Error State */}
+        {error && (
+          <Card className="p-6 mb-6 border-[var(--danger)]">
+            <div className="flex items-center gap-3 text-[var(--danger)]">
+              <Icons.AlertCircle className="w-5 h-5" />
+              <p>{error}</p>
+              <Button variant="secondary" size="sm" onClick={fetchApprovals} className="ml-auto">
+                Retry
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        {/* Loading State */}
+        {(orgLoading || loading) && !error && (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="p-4">
+                <div className="flex items-start gap-4">
+                  <Skeleton className="w-24 h-14 rounded" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Skeleton className="h-5 w-24" />
+                      <Skeleton className="h-5 w-16" />
+                    </div>
+                    <Skeleton className="h-5 w-48 mb-2" />
+                    <Skeleton className="h-4 w-64" />
+                  </div>
+                  <Skeleton className="h-9 w-24" />
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+
         {/* Approval List */}
-        {sortedApprovals.length > 0 ? (
+        {!orgLoading && !loading && !error && sortedApprovals.length > 0 ? (
           <div className="space-y-3">
             {sortedApprovals.map((approval) => {
               const typeStyle = getTypeStyle(approval.type);
@@ -287,7 +437,9 @@ export default function ApprovalsPage() {
               );
             })}
           </div>
-        ) : (
+        ) : null}
+
+        {!orgLoading && !loading && !error && sortedApprovals.length === 0 && (
           <Card className="p-12 text-center">
             <Icons.CheckCircle className="w-12 h-12 text-[var(--success)] mx-auto mb-4" />
             <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-2">All Caught Up!</h2>
@@ -304,25 +456,41 @@ export default function ApprovalsPage() {
         {/* Quick Stats */}
         <div className="mt-8 grid grid-cols-4 gap-4">
           <Card className="p-4 text-center">
-            <p className="text-2xl font-bold text-[var(--text-primary)]">{approvals.length}</p>
+            {orgLoading || loading ? (
+              <Skeleton className="h-8 w-12 mx-auto mb-1" />
+            ) : (
+              <p className="text-2xl font-bold text-[var(--text-primary)]">{approvals.length}</p>
+            )}
             <p className="text-sm text-[var(--text-tertiary)]">Total Pending</p>
           </Card>
           <Card className="p-4 text-center">
-            <p className="text-2xl font-bold text-[var(--danger)]">
-              {approvals.filter(a => a.priority === 'critical').length}
-            </p>
+            {orgLoading || loading ? (
+              <Skeleton className="h-8 w-12 mx-auto mb-1" />
+            ) : (
+              <p className="text-2xl font-bold text-[var(--danger)]">
+                {approvals.filter(a => a.priority === 'critical').length}
+              </p>
+            )}
             <p className="text-sm text-[var(--text-tertiary)]">Critical</p>
           </Card>
           <Card className="p-4 text-center">
-            <p className="text-2xl font-bold text-[var(--warning)]">
-              {approvals.filter(a => a.dueDate === 'Today').length}
-            </p>
+            {orgLoading || loading ? (
+              <Skeleton className="h-8 w-12 mx-auto mb-1" />
+            ) : (
+              <p className="text-2xl font-bold text-[var(--warning)]">
+                {approvals.filter(a => a.dueDate === 'Today').length}
+              </p>
+            )}
             <p className="text-sm text-[var(--text-tertiary)]">Due Today</p>
           </Card>
           <Card className="p-4 text-center">
-            <p className="text-2xl font-bold text-[var(--accent)]">
-              {approvals.filter(a => a.type === 'client').length}
-            </p>
+            {orgLoading || loading ? (
+              <Skeleton className="h-8 w-12 mx-auto mb-1" />
+            ) : (
+              <p className="text-2xl font-bold text-[var(--accent)]">
+                {approvals.filter(a => a.type === 'client').length}
+              </p>
+            )}
             <p className="text-sm text-[var(--text-tertiary)]">Client Reviews</p>
           </Card>
         </div>

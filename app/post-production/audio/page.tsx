@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '@/amplify/data/resource';
-import { Icons, Card, StatusBadge, Progress, Badge, Button } from '../../components/ui';
+import { Icons, Card, StatusBadge, Progress, Badge, Button, Modal, Input, Textarea, ConfirmModal } from '../../components/ui';
 import { CollapsibleSection } from '../../components/ui/CollapsibleSection';
 
 /**
@@ -94,11 +95,26 @@ const formatDuration = (seconds: number): string => {
 };
 
 export default function AudioSuitePage() {
+  const router = useRouter();
   const [audioTracks, setAudioTracks] = useState<AudioTrack[]>(initialAudioTracks);
   const [mixSessions, setMixSessions] = useState<MixSession[]>(initialMixSessions);
   const [adrCues, setADRCues] = useState<ADRCue[]>(initialADRCues);
   const [activeTab, setActiveTab] = useState<'tracks' | 'adr' | 'mixing'>('tracks');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Modal states
+  const [showNewSessionModal, setShowNewSessionModal] = useState(false);
+  const [showImportEDLModal, setShowImportEDLModal] = useState(false);
+
+  // New session form data
+  const [newSessionData, setNewSessionData] = useState({
+    name: '',
+    type: 'STEM_MIX' as 'STEM_MIX' | 'FINAL_MIX' | 'M_AND_E' | 'NEAR_FIELD' | 'THEATRICAL',
+    mixer: '',
+    studio: '',
+    scheduledDate: '',
+    stems: '',
+  });
 
   // Calculate stats
   const stats = {
@@ -114,6 +130,62 @@ export default function AudioSuitePage() {
     { id: 'adr', label: 'ADR/VO Manager', icon: 'Mic', count: adrCues.length },
     { id: 'mixing', label: 'Mix Sessions', icon: 'Sliders', count: mixSessions.length },
   ] as const;
+
+  // Handler functions
+  const handleExportOMF = () => {
+    // Placeholder - in production this would call an API
+    console.log('Exporting OMF...');
+    alert('OMF export started - file will download when ready');
+  };
+
+  const handleNewSession = () => {
+    setShowNewSessionModal(true);
+  };
+
+  const handleCreateSession = () => {
+    const stemsArray = newSessionData.stems
+      .split(',')
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+
+    const newSession: MixSession = {
+      id: `session-${Date.now()}`,
+      name: newSessionData.name,
+      type: newSessionData.type,
+      status: 'SCHEDULED',
+      mixer: newSessionData.mixer || undefined,
+      studio: newSessionData.studio || undefined,
+      scheduledDate: newSessionData.scheduledDate || undefined,
+      progress: 0,
+      stems: stemsArray,
+    };
+
+    setMixSessions([...mixSessions, newSession]);
+    setShowNewSessionModal(false);
+    setNewSessionData({
+      name: '',
+      type: 'STEM_MIX',
+      mixer: '',
+      studio: '',
+      scheduledDate: '',
+      stems: '',
+    });
+  };
+
+  const handleImportEDL = () => {
+    setShowImportEDLModal(true);
+  };
+
+  const handleExportADRSheet = () => {
+    const csv = 'Character,Actor,Timecode In,Original Line,Reason,Priority,Status\n' +
+      adrCues.map(c => [c.character, c.actor, c.timecodeIn, `"${c.originalLine}"`, c.reason, c.priority, c.status].join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'adr-cue-sheet.csv';
+    a.click();
+  };
 
   return (
     <div className="min-h-screen bg-[var(--bg-0)]">
@@ -141,11 +213,11 @@ export default function AudioSuitePage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="secondary" size="sm">
+              <Button variant="secondary" size="sm" onClick={handleExportOMF}>
                 <Icons.Download className="w-4 h-4 mr-2" />
                 Export OMF
               </Button>
-              <Button variant="primary" size="sm">
+              <Button variant="primary" size="sm" onClick={handleNewSession}>
                 <Icons.Plus className="w-4 h-4 mr-2" />
                 New Session
               </Button>
@@ -369,11 +441,11 @@ export default function AudioSuitePage() {
               <div className="p-4 border-b border-[var(--border-default)] flex items-center justify-between">
                 <h3 className="font-semibold text-[var(--text-primary)]">ADR Cue Sheet</h3>
                 <div className="flex items-center gap-2">
-                  <Button variant="secondary" size="sm">
+                  <Button variant="secondary" size="sm" onClick={handleImportEDL}>
                     <Icons.Upload className="w-4 h-4 mr-2" />
                     Import EDL
                   </Button>
-                  <Button variant="secondary" size="sm">
+                  <Button variant="secondary" size="sm" onClick={handleExportADRSheet}>
                     <Icons.Download className="w-4 h-4 mr-2" />
                     Export PDF
                   </Button>
@@ -528,7 +600,10 @@ export default function AudioSuitePage() {
               ))}
 
               {/* Add New Session Card */}
-              <button className="p-5 rounded-xl border-2 border-dashed border-[var(--border-default)] hover:border-[var(--primary)] hover:bg-[var(--bg-1)] transition-all flex flex-col items-center justify-center min-h-[200px] group">
+              <button
+                onClick={handleNewSession}
+                className="p-5 rounded-xl border-2 border-dashed border-[var(--border-default)] hover:border-[var(--primary)] hover:bg-[var(--bg-1)] transition-all flex flex-col items-center justify-center min-h-[200px] group"
+              >
                 <div className="w-12 h-12 rounded-full bg-[var(--bg-2)] flex items-center justify-center mb-3 group-hover:bg-[var(--primary-muted)] transition-colors">
                   <Icons.Plus className="w-6 h-6 text-[var(--text-tertiary)] group-hover:text-[var(--primary)]" />
                 </div>
@@ -540,6 +615,97 @@ export default function AudioSuitePage() {
           </div>
         )}
       </div>
+
+      {/* New Session Modal */}
+      <Modal
+        isOpen={showNewSessionModal}
+        onClose={() => setShowNewSessionModal(false)}
+        title="Create New Mix Session"
+        size="md"
+      >
+        <div className="space-y-4">
+          <Input
+            label="Session Name"
+            placeholder="e.g., Final Mix - Episode 1"
+            value={newSessionData.name}
+            onChange={(e) => setNewSessionData({ ...newSessionData, name: e.target.value })}
+          />
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-[var(--text-primary)]">
+              Session Type
+            </label>
+            <select
+              value={newSessionData.type}
+              onChange={(e) => setNewSessionData({ ...newSessionData, type: e.target.value as any })}
+              className="w-full px-3 py-2 bg-[var(--bg-1)] border border-[var(--border-default)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+            >
+              <option value="STEM_MIX">Stem Mix</option>
+              <option value="FINAL_MIX">Final Mix</option>
+              <option value="M_AND_E">M&E</option>
+              <option value="NEAR_FIELD">Near Field</option>
+              <option value="THEATRICAL">Theatrical</option>
+            </select>
+          </div>
+
+          <Input
+            label="Mixer"
+            placeholder="e.g., John Smith"
+            value={newSessionData.mixer}
+            onChange={(e) => setNewSessionData({ ...newSessionData, mixer: e.target.value })}
+          />
+
+          <Input
+            label="Studio"
+            placeholder="e.g., Studio A"
+            value={newSessionData.studio}
+            onChange={(e) => setNewSessionData({ ...newSessionData, studio: e.target.value })}
+          />
+
+          <Input
+            label="Scheduled Date"
+            type="date"
+            value={newSessionData.scheduledDate}
+            onChange={(e) => setNewSessionData({ ...newSessionData, scheduledDate: e.target.value })}
+          />
+
+          <Textarea
+            label="Stems"
+            placeholder="Enter stems separated by commas (e.g., Dialogue, Music, SFX)"
+            value={newSessionData.stems}
+            onChange={(e) => setNewSessionData({ ...newSessionData, stems: e.target.value })}
+            rows={3}
+          />
+
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="secondary" onClick={() => setShowNewSessionModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleCreateSession} disabled={!newSessionData.name}>
+              Create Session
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Import EDL Modal */}
+      <Modal
+        isOpen={showImportEDLModal}
+        onClose={() => setShowImportEDLModal(false)}
+        title="Import EDL"
+        size="md"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-[var(--text-secondary)]">
+            EDL import functionality will be available soon. This will allow you to import ADR cues directly from your editing timeline.
+          </p>
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="primary" onClick={() => setShowImportEDLModal(false)}>
+              Close
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

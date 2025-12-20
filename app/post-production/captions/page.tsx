@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Icons, Card, StatusBadge, Progress, Button } from '../../components/ui';
+import { Icons, Card, StatusBadge, Progress, Button, Modal, Input, Textarea, ConfirmModal } from '../../components/ui';
 
 /**
  * CAPTIONS CENTER
@@ -118,6 +118,18 @@ export default function CaptionsPage() {
   const [filterLanguage, setFilterLanguage] = useState<CaptionLanguage | 'ALL'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Modal states
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isTranslationModalOpen, setIsTranslationModalOpen] = useState(false);
+
+  // Form data
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [translationFormData, setTranslationFormData] = useState({
+    assetId: '',
+    sourceLanguage: 'en-US' as CaptionLanguage,
+    targetLanguage: 'es-ES' as CaptionLanguage,
+  });
+
   // Calculate stats
   const stats = {
     totalCaptions: captions.length,
@@ -160,6 +172,46 @@ export default function CaptionsPage() {
     setActiveTab('editor');
   };
 
+  // Export all captions as CSV
+  const handleExportAll = () => {
+    if (captions.length === 0) {
+      return;
+    }
+    const csv = 'Asset,Language,Format,Cues,Status\n' +
+      captions.map(c => [c.assetName, c.language, c.format, c.cueCount, c.status].join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'captions-export.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Handle caption import
+  const handleImportCaption = () => {
+    if (importFile) {
+      // TODO: Implement actual file upload logic
+      console.log('Importing caption file:', importFile.name);
+      setIsImportModalOpen(false);
+      setImportFile(null);
+    }
+  };
+
+  // Handle translation job creation
+  const handleCreateTranslation = () => {
+    if (translationFormData.assetId) {
+      // TODO: Implement actual translation job creation
+      console.log('Creating translation job:', translationFormData);
+      setIsTranslationModalOpen(false);
+      setTranslationFormData({
+        assetId: '',
+        sourceLanguage: 'en-US',
+        targetLanguage: 'es-ES',
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[var(--bg-0)]">
       {/* Header */}
@@ -186,7 +238,7 @@ export default function CaptionsPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="secondary" size="sm" onClick={() => alert('Exporting all captions...')}>
+              <Button variant="secondary" size="sm" onClick={handleExportAll}>
                 <Icons.Download className="w-4 h-4 mr-2" />
                 Export All
               </Button>
@@ -194,7 +246,7 @@ export default function CaptionsPage() {
                 <Icons.Globe className="w-4 h-4 mr-2" />
                 Translate
               </Button>
-              <Button variant="primary" size="sm" onClick={() => alert('Opening caption import dialog...')}>
+              <Button variant="primary" size="sm" onClick={() => setIsImportModalOpen(true)}>
                 <Icons.Plus className="w-4 h-4 mr-2" />
                 Import Captions
               </Button>
@@ -547,7 +599,7 @@ export default function CaptionsPage() {
                 <p className="text-sm text-[var(--text-tertiary)] mb-4">
                   Translate captions to over 50 languages using AI-powered translation
                 </p>
-                <Button variant="primary">
+                <Button variant="primary" onClick={() => setIsTranslationModalOpen(true)}>
                   <Icons.Globe className="w-4 h-4 mr-2" />
                   New Translation Job
                 </Button>
@@ -586,11 +638,11 @@ export default function CaptionsPage() {
                       >
                         {STATUS_STYLES[selectedCaption.status].label}
                       </span>
-                      <Button variant="secondary" size="sm">
+                      <Button variant="secondary" size="sm" onClick={() => console.log('Preview functionality coming soon')}>
                         <Icons.Play className="w-4 h-4 mr-1" />
                         Preview
                       </Button>
-                      <Button variant="primary" size="sm">
+                      <Button variant="primary" size="sm" onClick={() => console.log('Saving changes...')}>
                         <Icons.Check className="w-4 h-4 mr-1" />
                         Save Changes
                       </Button>
@@ -683,26 +735,26 @@ export default function CaptionsPage() {
                 <Card className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Button variant="secondary" size="sm">
+                      <Button variant="secondary" size="sm" onClick={() => console.log('Navigate to previous cue')}>
                         <Icons.ChevronUp className="w-4 h-4" />
                       </Button>
-                      <Button variant="secondary" size="sm">
+                      <Button variant="secondary" size="sm" onClick={() => console.log('Navigate to next cue')}>
                         <Icons.ChevronDown className="w-4 h-4" />
                       </Button>
                       <div className="w-px h-6 bg-[var(--border-default)] mx-2" />
-                      <Button variant="secondary" size="sm">Split Cue</Button>
-                      <Button variant="secondary" size="sm">Merge Cues</Button>
+                      <Button variant="secondary" size="sm" onClick={() => console.log('Split cue')}>Split Cue</Button>
+                      <Button variant="secondary" size="sm" onClick={() => console.log('Merge cues')}>Merge Cues</Button>
                       <div className="w-px h-6 bg-[var(--border-default)] mx-2" />
-                      <Button variant="secondary" size="sm">
+                      <Button variant="secondary" size="sm" onClick={() => console.log('Sync timing')}>
                         <Icons.Clock className="w-4 h-4 mr-1" />
                         Sync Timing
                       </Button>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="secondary" size="sm">
+                      <Button variant="secondary" size="sm" onClick={() => console.log('Undo')}>
                         <Icons.Undo className="w-4 h-4" />
                       </Button>
-                      <Button variant="secondary" size="sm">
+                      <Button variant="secondary" size="sm" onClick={() => console.log('Redo')}>
                         <Icons.Redo className="w-4 h-4" />
                       </Button>
                       <div className="w-px h-6 bg-[var(--border-default)] mx-2" />
@@ -712,7 +764,7 @@ export default function CaptionsPage() {
                         <option value="TTML">Export as TTML</option>
                         <option value="SCC">Export as SCC</option>
                       </select>
-                      <Button variant="primary" size="sm">
+                      <Button variant="primary" size="sm" onClick={() => console.log('Export caption file')}>
                         <Icons.Download className="w-4 h-4 mr-1" />
                         Export
                       </Button>
@@ -735,6 +787,129 @@ export default function CaptionsPage() {
           </div>
         )}
       </div>
+
+      {/* Import Caption Modal */}
+      <Modal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        title="Import Caption File"
+        size="md"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Caption File
+            </label>
+            <input
+              type="file"
+              accept=".srt,.vtt,.ttml,.scc,.dfxp"
+              onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-1)] border border-[var(--border-default)] text-sm text-[var(--text-primary)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-muted)] outline-none transition-all"
+            />
+            <p className="text-xs text-[var(--text-tertiary)] mt-1">
+              Supported formats: SRT, VTT, TTML, SCC, DFXP
+            </p>
+          </div>
+
+          {importFile && (
+            <div className="p-3 rounded-lg bg-[var(--bg-2)] border border-[var(--border-default)]">
+              <div className="flex items-center gap-2">
+                <Icons.File className="w-4 h-4 text-[var(--primary)]" />
+                <span className="text-sm text-[var(--text-primary)]">{importFile.name}</span>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="secondary" onClick={() => setIsImportModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleImportCaption} disabled={!importFile}>
+              Import Caption
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Translation Job Modal */}
+      <Modal
+        isOpen={isTranslationModalOpen}
+        onClose={() => setIsTranslationModalOpen(false)}
+        title="New Translation Job"
+        size="md"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Select Asset
+            </label>
+            <select
+              value={translationFormData.assetId}
+              onChange={(e) => setTranslationFormData({ ...translationFormData, assetId: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-1)] border border-[var(--border-default)] text-sm text-[var(--text-primary)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-muted)] outline-none transition-all"
+            >
+              <option value="">Select an asset...</option>
+              {captions.map((caption) => (
+                <option key={caption.id} value={caption.assetId}>
+                  {caption.assetName} ({LANGUAGE_NAMES[caption.language]})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Source Language
+            </label>
+            <select
+              value={translationFormData.sourceLanguage}
+              onChange={(e) => setTranslationFormData({ ...translationFormData, sourceLanguage: e.target.value as CaptionLanguage })}
+              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-1)] border border-[var(--border-default)] text-sm text-[var(--text-primary)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-muted)] outline-none transition-all"
+            >
+              {Object.entries(LANGUAGE_NAMES).map(([code, name]) => (
+                <option key={code} value={code}>
+                  {LANGUAGE_FLAGS[code as CaptionLanguage]} {name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Target Language
+            </label>
+            <select
+              value={translationFormData.targetLanguage}
+              onChange={(e) => setTranslationFormData({ ...translationFormData, targetLanguage: e.target.value as CaptionLanguage })}
+              className="w-full px-3 py-2 rounded-lg bg-[var(--bg-1)] border border-[var(--border-default)] text-sm text-[var(--text-primary)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-muted)] outline-none transition-all"
+            >
+              {Object.entries(LANGUAGE_NAMES).map(([code, name]) => (
+                <option key={code} value={code}>
+                  {LANGUAGE_FLAGS[code as CaptionLanguage]} {name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="p-3 rounded-lg bg-[var(--bg-2)] border border-[var(--border-default)]">
+            <div className="flex items-center gap-2 text-sm">
+              <Icons.Info className="w-4 h-4 text-[var(--primary)]" />
+              <span className="text-[var(--text-secondary)]">
+                Translation jobs are processed using AI-powered translation
+              </span>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="secondary" onClick={() => setIsTranslationModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleCreateTranslation} disabled={!translationFormData.assetId}>
+              Create Translation Job
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

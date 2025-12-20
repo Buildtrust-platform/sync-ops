@@ -118,6 +118,20 @@ export const Icons = {
     </IconBase>
   ),
 
+  ArrowUp: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="m5 12 7-7 7 7" />
+      <path d="M12 19V5" />
+    </IconBase>
+  ),
+
+  ArrowDown: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M12 5v14" />
+      <path d="m19 12-7 7-7-7" />
+    </IconBase>
+  ),
+
   MoreHorizontal: (props: IconProps) => (
     <IconBase {...props}>
       <circle cx="12" cy="12" r="1" />
@@ -297,6 +311,12 @@ export const Icons = {
     </IconBase>
   ),
 
+  FolderPlus: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M12 10v6M9 13h6M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
+    </IconBase>
+  ),
+
   File: (props: IconProps) => (
     <IconBase {...props}>
       <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
@@ -399,6 +419,13 @@ export const Icons = {
     <IconBase {...props}>
       <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
       <line x1="4" x2="4" y1="22" y2="15" />
+    </IconBase>
+  ),
+
+  Tag: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z" />
+      <path d="M7 7h.01" />
     </IconBase>
   ),
 
@@ -757,6 +784,28 @@ export const Icons = {
     </IconBase>
   ),
 
+  ThumbsUp: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M7 10v12" />
+      <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z" />
+    </IconBase>
+  ),
+
+  ThumbsDown: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M17 14V2" />
+      <path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z" />
+    </IconBase>
+  ),
+
+  Type: (props: IconProps) => (
+    <IconBase {...props}>
+      <polyline points="4 7 4 4 20 4 20 7" />
+      <line x1="9" x2="15" y1="20" y2="20" />
+      <line x1="12" x2="12" y1="4" y2="20" />
+    </IconBase>
+  ),
+
   Clipboard: (props: IconProps) => (
     <IconBase {...props}>
       <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
@@ -840,6 +889,15 @@ export const Icons = {
       <ellipse cx="12" cy="5" rx="9" ry="3" />
       <path d="M3 5v14a9 3 0 0 0 18 0V5" />
       <path d="M3 12a9 3 0 0 0 18 0" />
+    </IconBase>
+  ),
+
+  HardDrive: (props: IconProps) => (
+    <IconBase {...props}>
+      <line x1="22" x2="2" y1="12" y2="12" />
+      <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+      <line x1="6" x2="6.01" y1="16" y2="16" />
+      <line x1="10" x2="10.01" y1="16" y2="16" />
     </IconBase>
   ),
 
@@ -1112,6 +1170,98 @@ export const Icons = {
       <path d="M10 14 2.3 6.3" />
       <path d="m14 6 7.7 7.7" />
       <path d="m8 6 8 8" />
+    </IconBase>
+  ),
+
+  Car: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C1.4 11.3 1 12.1 1 13v3c0 .6.4 1 1 1h2" />
+      <circle cx="7" cy="17" r="2" />
+      <path d="M9 17h6" />
+      <circle cx="17" cy="17" r="2" />
+    </IconBase>
+  ),
+
+  Flame: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+    </IconBase>
+  ),
+
+  Wine: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M8 22h8" />
+      <path d="M12 11v11" />
+      <path d="m19 3-7 8-7-8" />
+      <path d="M5 3h14c0 2.8-1.2 5.4-3.2 7.3L12 14l-3.8-3.7C6.2 8.4 5 5.8 5 3z" />
+    </IconBase>
+  ),
+
+  Cloud: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+    </IconBase>
+  ),
+
+  XOctagon: (props: IconProps) => (
+    <IconBase {...props}>
+      <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2" />
+      <path d="m15 9-6 6" />
+      <path d="m9 9 6 6" />
+    </IconBase>
+  ),
+
+  GripVertical: (props: IconProps) => (
+    <IconBase {...props}>
+      <circle cx="9" cy="12" r="1" />
+      <circle cx="9" cy="5" r="1" />
+      <circle cx="9" cy="19" r="1" />
+      <circle cx="15" cy="12" r="1" />
+      <circle cx="15" cy="5" r="1" />
+      <circle cx="15" cy="19" r="1" />
+    </IconBase>
+  ),
+
+  Coffee: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+      <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
+      <line x1="6" x2="6" y1="2" y2="4" />
+      <line x1="10" x2="10" y1="2" y2="4" />
+      <line x1="14" x2="14" y1="2" y2="4" />
+    </IconBase>
+  ),
+
+  Printer: (props: IconProps) => (
+    <IconBase {...props}>
+      <polyline points="6 9 6 2 18 2 18 9" />
+      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+      <rect x="6" y="14" width="12" height="8" />
+    </IconBase>
+  ),
+
+  Move: (props: IconProps) => (
+    <IconBase {...props}>
+      <polyline points="5 9 2 12 5 15" />
+      <polyline points="9 5 12 2 15 5" />
+      <polyline points="15 19 12 22 9 19" />
+      <polyline points="19 9 22 12 19 15" />
+      <line x1="2" y1="12" x2="22" y2="12" />
+      <line x1="12" y1="2" x2="12" y2="22" />
+    </IconBase>
+  ),
+
+  Monitor: (props: IconProps) => (
+    <IconBase {...props}>
+      <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+      <line x1="8" y1="21" x2="16" y2="21" />
+      <line x1="12" y1="17" x2="12" y2="21" />
+    </IconBase>
+  ),
+
+  Shirt: (props: IconProps) => (
+    <IconBase {...props}>
+      <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
     </IconBase>
   ),
 

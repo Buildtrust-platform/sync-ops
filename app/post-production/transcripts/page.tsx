@@ -108,6 +108,28 @@ export default function TranscriptsPage() {
     }, 500);
   };
 
+  const handleExportAll = () => {
+    const csv = 'Asset,Project,Status,Language,Duration,Words,Speakers,Confidence,Created\n' +
+      transcripts.map(t => [
+        t.assetName,
+        t.projectName,
+        t.status,
+        t.language,
+        t.duration,
+        t.wordCount,
+        t.speakerCount,
+        t.confidence,
+        t.createdAt
+      ].join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'transcripts-export.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const tabs = [
     { id: 'transcripts', label: 'Transcripts', icon: 'FileText', count: transcripts.length },
     { id: 'captions', label: 'Captions', icon: 'Subtitles', count: captions.length },
@@ -140,7 +162,7 @@ export default function TranscriptsPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="secondary" size="sm" onClick={() => alert('Exporting all transcripts...')}>
+              <Button variant="secondary" size="sm" onClick={handleExportAll}>
                 <Icons.Download className="w-4 h-4 mr-2" />
                 Export All
               </Button>

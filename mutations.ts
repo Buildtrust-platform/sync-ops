@@ -1,0 +1,14827 @@
+/* tslint:disable */
+/* eslint-disable */
+// this is an auto generated file. This will be overwritten
+
+import * as APITypes from "./API";
+type GeneratedMutation<InputType, OutputType> = string & {
+  __generatedMutationInput: InputType;
+  __generatedMutationOutput: OutputType;
+};
+
+export const createAIAnalysisJob = /* GraphQL */ `mutation CreateAIAnalysisJob(
+  $condition: ModelAIAnalysisJobConditionInput
+  $input: CreateAIAnalysisJobInput!
+) {
+  createAIAnalysisJob(condition: $condition, input: $input) {
+    analysisType
+    asset {
+      aiConfidence
+      aiProcessedAt
+      aiTags
+      approvalRequirements
+      approvalState
+      clientApprovalNote
+      clientApproved
+      clientApprovedAt
+      clientApprovedBy
+      createdAt
+      dimensions
+      duration
+      fileSize
+      finalApprovedAt
+      finalApprovedBy
+      id
+      internalApprovalNote
+      internalApproved
+      internalApprovedAt
+      internalApprovedBy
+      isBRoll
+      isLegalLocked
+      isPlannedShot
+      legalApprovalNote
+      legalApproved
+      legalApprovedAt
+      legalApprovedBy
+      legalLockedAt
+      mimeType
+      organizationId
+      owner
+      projectId
+      s3Key
+      shotDescription
+      shotListItemId
+      storageClass
+      thumbnailKey
+      type
+      updatedAt
+      usageHeatmap
+      version
+      __typename
+    }
+    assetId
+    assetName
+    assetVersionId
+    assetVersionNumber
+    completedAt
+    createdAt
+    errorMessage
+    id
+    organizationId
+    progress
+    projectId
+    queuedAt
+    rekognitionJobId
+    resultsCount
+    resultsSnapshot
+    s3KeyAtAnalysis
+    startedAt
+    status
+    transcribeJobName
+    triggeredBy
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAIAnalysisJobMutationVariables,
+  APITypes.CreateAIAnalysisJobMutation
+>;
+export const createAIFaceDetection = /* GraphQL */ `mutation CreateAIFaceDetection(
+  $condition: ModelAIFaceDetectionConditionInput
+  $input: CreateAIFaceDetectionInput!
+) {
+  createAIFaceDetection(condition: $condition, input: $input) {
+    ageRange
+    asset {
+      aiConfidence
+      aiProcessedAt
+      aiTags
+      approvalRequirements
+      approvalState
+      clientApprovalNote
+      clientApproved
+      clientApprovedAt
+      clientApprovedBy
+      createdAt
+      dimensions
+      duration
+      fileSize
+      finalApprovedAt
+      finalApprovedBy
+      id
+      internalApprovalNote
+      internalApproved
+      internalApprovedAt
+      internalApprovedBy
+      isBRoll
+      isLegalLocked
+      isPlannedShot
+      legalApprovalNote
+      legalApproved
+      legalApprovedAt
+      legalApprovedBy
+      legalLockedAt
+      mimeType
+      organizationId
+      owner
+      projectId
+      s3Key
+      shotDescription
+      shotListItemId
+      storageClass
+      thumbnailKey
+      type
+      updatedAt
+      usageHeatmap
+      version
+      __typename
+    }
+    assetId
+    beard
+    boundingBox
+    confidence
+    createdAt
+    emotions
+    eyeglasses
+    eyesOpen
+    gender
+    id
+    landmarks
+    mouthOpen
+    mustache
+    organizationId
+    personId
+    personName
+    processingJobId
+    projectId
+    smile
+    sunglasses
+    timestamp
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAIFaceDetectionMutationVariables,
+  APITypes.CreateAIFaceDetectionMutation
+>;
+export const createAISceneDetection = /* GraphQL */ `mutation CreateAISceneDetection(
+  $condition: ModelAISceneDetectionConditionInput
+  $input: CreateAISceneDetectionInput!
+) {
+  createAISceneDetection(condition: $condition, input: $input) {
+    asset {
+      aiConfidence
+      aiProcessedAt
+      aiTags
+      approvalRequirements
+      approvalState
+      clientApprovalNote
+      clientApproved
+      clientApprovedAt
+      clientApprovedBy
+      createdAt
+      dimensions
+      duration
+      fileSize
+      finalApprovedAt
+      finalApprovedBy
+      id
+      internalApprovalNote
+      internalApproved
+      internalApprovedAt
+      internalApprovedBy
+      isBRoll
+      isLegalLocked
+      isPlannedShot
+      legalApprovalNote
+      legalApproved
+      legalApprovedAt
+      legalApprovedBy
+      legalLockedAt
+      mimeType
+      organizationId
+      owner
+      projectId
+      s3Key
+      shotDescription
+      shotListItemId
+      storageClass
+      thumbnailKey
+      type
+      updatedAt
+      usageHeatmap
+      version
+      __typename
+    }
+    assetId
+    confidence
+    createdAt
+    duration
+    endTime
+    id
+    labels
+    lighting
+    movement
+    organizationId
+    processingJobId
+    projectId
+    shotType
+    startTime
+    thumbnailKey
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAISceneDetectionMutationVariables,
+  APITypes.CreateAISceneDetectionMutation
+>;
+export const createAITranscript = /* GraphQL */ `mutation CreateAITranscript(
+  $condition: ModelAITranscriptConditionInput
+  $input: CreateAITranscriptInput!
+) {
+  createAITranscript(condition: $condition, input: $input) {
+    asset {
+      aiConfidence
+      aiProcessedAt
+      aiTags
+      approvalRequirements
+      approvalState
+      clientApprovalNote
+      clientApproved
+      clientApprovedAt
+      clientApprovedBy
+      createdAt
+      dimensions
+      duration
+      fileSize
+      finalApprovedAt
+      finalApprovedBy
+      id
+      internalApprovalNote
+      internalApproved
+      internalApprovedAt
+      internalApprovedBy
+      isBRoll
+      isLegalLocked
+      isPlannedShot
+      legalApprovalNote
+      legalApproved
+      legalApprovedAt
+      legalApprovedBy
+      legalLockedAt
+      mimeType
+      organizationId
+      owner
+      projectId
+      s3Key
+      shotDescription
+      shotListItemId
+      storageClass
+      thumbnailKey
+      type
+      updatedAt
+      usageHeatmap
+      version
+      __typename
+    }
+    assetId
+    confidence
+    createdAt
+    endTime
+    id
+    languageCode
+    organizationId
+    processingJobId
+    projectId
+    speakerId
+    speakerName
+    startTime
+    text
+    updatedAt
+    words
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAITranscriptMutationVariables,
+  APITypes.CreateAITranscriptMutation
+>;
+export const createAccessException = /* GraphQL */ `mutation CreateAccessException(
+  $condition: ModelAccessExceptionConditionInput
+  $input: CreateAccessExceptionInput!
+) {
+  createAccessException(condition: $condition, input: $input) {
+    approvedAt
+    approvedBy
+    approvedByEmail
+    approverRole
+    createdAt
+    denialReason
+    durationHours
+    expiresAt
+    id
+    organizationId
+    owner
+    projectId
+    reason
+    requestedAction
+    requestedAssetId
+    requestedAt
+    requestedBy
+    requestedByEmail
+    status
+    targetUserEmail
+    targetUserId
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAccessExceptionMutationVariables,
+  APITypes.CreateAccessExceptionMutation
+>;
+export const createActivityLog = /* GraphQL */ `mutation CreateActivityLog(
+  $condition: ModelActivityLogConditionInput
+  $input: CreateActivityLogInput!
+) {
+  createActivityLog(condition: $condition, input: $input) {
+    action
+    createdAt
+    id
+    ipAddress
+    metadata
+    organizationId
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectId
+    targetId
+    targetName
+    targetType
+    updatedAt
+    userEmail
+    userId
+    userRole
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateActivityLogMutationVariables,
+  APITypes.CreateActivityLogMutation
+>;
+export const createArchiveAsset = /* GraphQL */ `mutation CreateArchiveAsset(
+  $condition: ModelArchiveAssetConditionInput
+  $input: CreateArchiveAssetInput!
+) {
+  createArchiveAsset(condition: $condition, input: $input) {
+    aiEmotions
+    aiFaces
+    aiObjects
+    aiSceneDescription
+    aiSentiment
+    aiSummary
+    aiTextOnScreen
+    aiTranscript
+    aspectRatio
+    assetId
+    audioChannels
+    audioCodec
+    audioSampleRate
+    bitDepth
+    bitrate
+    camera
+    cameraSettings
+    childAssetIds
+    codec
+    colorPalette
+    colorSpace
+    createdAt
+    creativeMetadata
+    duration
+    fileSizeBytes
+    frameRate
+    fullTextIndex
+    glacierArchiveId
+    glacierVaultId
+    hdr
+    id
+    labels
+    lastTierChangeAt
+    lastUsedAt
+    lastUsedBy
+    legalMetadata
+    lens
+    linkedProjects
+    linkedVersions
+    locationReleases
+    mood
+    operationalMetadata
+    organizationId
+    parentAssetId
+    partialRetrievalSupported
+    permitExpiry
+    permitId
+    projectId
+    proxyKey
+    regionRestrictions
+    releaseStatus
+    resolution
+    rightsExpiration
+    riskFactors
+    riskScore
+    s3Bucket
+    s3Key
+    sceneNumber
+    searchVector
+    shotType
+    storageMetadata
+    storageTier
+    subjects
+    takeNumber
+    talentReleases
+    technicalMetadata
+    thawCostEstimate
+    thumbnailKey
+    tierChangeHistory
+    transcriptKeywords
+    updatedAt
+    uploadTimestamp
+    uploaderEmail
+    uploaderName
+    usageCount
+    usageRestrictions
+    visualStyle
+    waveformKey
+    workflowStage
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateArchiveAssetMutationVariables,
+  APITypes.CreateArchiveAssetMutation
+>;
+export const createArchivePolicy = /* GraphQL */ `mutation CreateArchivePolicy(
+  $condition: ModelArchivePolicyConditionInput
+  $input: CreateArchivePolicyInput!
+) {
+  createArchivePolicy(condition: $condition, input: $input) {
+    assetsProcessed
+    createdAt
+    createdBy
+    createdByEmail
+    daysUntilArchive
+    description
+    excludeAssetTypes
+    excludeTaggedWith
+    id
+    includeAssetTypes
+    isEnabled
+    lastExecutedAt
+    minFileSizeMB
+    name
+    nextScheduledRun
+    onlyProjectStatus
+    organizationId
+    projectId
+    storageFreedGB
+    targetStorageClass
+    triggerType
+    updatedAt
+    usageScoreThreshold
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateArchivePolicyMutationVariables,
+  APITypes.CreateArchivePolicyMutation
+>;
+export const createAsset = /* GraphQL */ `mutation CreateAsset(
+  $condition: ModelAssetConditionInput
+  $input: CreateAssetInput!
+) {
+  createAsset(condition: $condition, input: $input) {
+    aiAnalysisJobs {
+      nextToken
+      __typename
+    }
+    aiConfidence
+    aiFaceDetections {
+      nextToken
+      __typename
+    }
+    aiProcessedAt
+    aiSceneDetections {
+      nextToken
+      __typename
+    }
+    aiTags
+    aiTranscripts {
+      nextToken
+      __typename
+    }
+    approvalRequirements
+    approvalState
+    clientApprovalNote
+    clientApproved
+    clientApprovedAt
+    clientApprovedBy
+    createdAt
+    dimensions
+    duration
+    fileSize
+    finalApprovedAt
+    finalApprovedBy
+    id
+    internalApprovalNote
+    internalApproved
+    internalApprovedAt
+    internalApprovedBy
+    isBRoll
+    isLegalLocked
+    isPlannedShot
+    legalApprovalNote
+    legalApproved
+    legalApprovedAt
+    legalApprovedBy
+    legalLockedAt
+    mimeType
+    organizationId
+    owner
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectId
+    reviews {
+      nextToken
+      __typename
+    }
+    s3Key
+    shotDescription
+    shotListItemId
+    storageClass
+    thumbnailKey
+    type
+    updatedAt
+    usageHeatmap
+    version
+    versions {
+      nextToken
+      __typename
+    }
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAssetMutationVariables,
+  APITypes.CreateAssetMutation
+>;
+export const createAssetAnalytics = /* GraphQL */ `mutation CreateAssetAnalytics(
+  $condition: ModelAssetAnalyticsConditionInput
+  $input: CreateAssetAnalyticsInput!
+) {
+  createAssetAnalytics(condition: $condition, input: $input) {
+    approvalCount
+    assetId
+    averageRating
+    averageWatchPercentage
+    commentCount
+    createdAt
+    dataIntegrity
+    distributionLinksCreated
+    downloadCount
+    estimatedValue
+    externalEmbeds
+    feedbackSentiment
+    firstViewedAt
+    id
+    lastUpdated
+    lastViewedAt
+    organizationId
+    peakUsageCount
+    peakUsageDate
+    productionCost
+    projectId
+    revenueGenerated
+    revisionRequestCount
+    roiLastCalculated
+    roiPercentage
+    shareCount
+    socialOutputsCreated
+    totalPlayDuration
+    totalViews
+    uniqueViewers
+    updatedAt
+    usageScore
+    usageScoreUpdatedAt
+    usageTrend
+    viewerDevices
+    viewerLocations
+    viewsByDay
+    viewsByHour
+    viewsByMonth
+    viewsByWeek
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAssetAnalyticsMutationVariables,
+  APITypes.CreateAssetAnalyticsMutation
+>;
+export const createAssetLineage = /* GraphQL */ `mutation CreateAssetLineage(
+  $condition: ModelAssetLineageConditionInput
+  $input: CreateAssetLineageInput!
+) {
+  createAssetLineage(condition: $condition, input: $input) {
+    approvals
+    approvedAt
+    approvedBy
+    childAssets
+    createdAt
+    currentVersion
+    derivationDetails
+    derivationType
+    generationNumber
+    id
+    inheritedMetadata
+    isApproved
+    lastUsedAt
+    masterAssetId
+    masterAssetName
+    masterProjectId
+    organizationId
+    overriddenMetadata
+    updatedAt
+    usageCount
+    usedInDeliverables
+    usedInProjects
+    versionHistory
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAssetLineageMutationVariables,
+  APITypes.CreateAssetLineageMutation
+>;
+export const createAssetUsageHeatmap = /* GraphQL */ `mutation CreateAssetUsageHeatmap(
+  $condition: ModelAssetUsageHeatmapConditionInput
+  $input: CreateAssetUsageHeatmapInput!
+) {
+  createAssetUsageHeatmap(condition: $condition, input: $input) {
+    archiveRecommendation
+    archiveRecommendationReason
+    assetId
+    createdAt
+    dataQuality
+    deliverableCount
+    engagementRate
+    estimatedImpressions
+    estimatedRevenueGenerated
+    id
+    lastCalculated
+    lastUsed
+    organizationId
+    peakUsageCount
+    peakUsageDate
+    platformUsage
+    predictedUsageNext30Days
+    productionCost
+    projectId
+    recommendedStorageTier
+    relatedDeliverables
+    reusabilityScore
+    roiScore
+    strategicValue
+    topUsers
+    trendAnalysis
+    uniquenessScore
+    updatedAt
+    usageByDayOfWeek
+    usageByHour
+    usageByMonth
+    usageByWeek
+    usageTrend
+    useByRole
+    useByTeam
+    useByUser
+    useFrequencyDaily
+    useFrequencyMonthly
+    useFrequencyWeekly
+    valueJustification
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAssetUsageHeatmapMutationVariables,
+  APITypes.CreateAssetUsageHeatmapMutation
+>;
+export const createAssetVersion = /* GraphQL */ `mutation CreateAssetVersion(
+  $condition: ModelAssetVersionConditionInput
+  $input: CreateAssetVersionInput!
+) {
+  createAssetVersion(condition: $condition, input: $input) {
+    asset {
+      aiConfidence
+      aiProcessedAt
+      aiTags
+      approvalRequirements
+      approvalState
+      clientApprovalNote
+      clientApproved
+      clientApprovedAt
+      clientApprovedBy
+      createdAt
+      dimensions
+      duration
+      fileSize
+      finalApprovedAt
+      finalApprovedBy
+      id
+      internalApprovalNote
+      internalApproved
+      internalApprovedAt
+      internalApprovedBy
+      isBRoll
+      isLegalLocked
+      isPlannedShot
+      legalApprovalNote
+      legalApproved
+      legalApprovedAt
+      legalApprovedBy
+      legalLockedAt
+      mimeType
+      organizationId
+      owner
+      projectId
+      s3Key
+      shotDescription
+      shotListItemId
+      storageClass
+      thumbnailKey
+      type
+      updatedAt
+      usageHeatmap
+      version
+      __typename
+    }
+    assetId
+    changeDescription
+    createdAt
+    createdBy
+    createdByEmail
+    fileSize
+    id
+    isCurrentVersion
+    isReviewReady
+    mimeType
+    organizationId
+    previousVersionId
+    projectId
+    s3Key
+    updatedAt
+    versionLabel
+    versionNumber
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAssetVersionMutationVariables,
+  APITypes.CreateAssetVersionMutation
+>;
+export const createAudioCue = /* GraphQL */ `mutation CreateAudioCue(
+  $condition: ModelAudioCueConditionInput
+  $input: CreateAudioCueInput!
+) {
+  createAudioCue(condition: $condition, input: $input) {
+    actor
+    character
+    clearanceDate
+    clearanceNotes
+    clearanceStatus
+    composer
+    createdAt
+    createdBy
+    cueNumber
+    cueType
+    duration
+    editedKey
+    id
+    licenseFee
+    lineText
+    masterOwner
+    name
+    notes
+    organizationId
+    projectId
+    publisher
+    recordingDate
+    recordingFacility
+    recordingStatus
+    sourceKey
+    syncOwner
+    term
+    territories
+    timecodeIn
+    timecodeOut
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAudioCueMutationVariables,
+  APITypes.CreateAudioCueMutation
+>;
+export const createAuditLog = /* GraphQL */ `mutation CreateAuditLog(
+  $condition: ModelAuditLogConditionInput
+  $input: CreateAuditLogInput!
+) {
+  createAuditLog(condition: $condition, input: $input) {
+    action
+    actionCategory
+    assetId
+    createdAt
+    deniedReason
+    details
+    geoLocation
+    id
+    ipAddress
+    isExternal
+    organizationId
+    projectId
+    resourceId
+    resourceType
+    sessionId
+    success
+    timestamp
+    updatedAt
+    userAgent
+    userEmail
+    userId
+    userRole
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateAuditLogMutationVariables,
+  APITypes.CreateAuditLogMutation
+>;
+export const createBrief = /* GraphQL */ `mutation CreateBrief(
+  $condition: ModelBriefConditionInput
+  $input: CreateBriefInput!
+) {
+  createBrief(condition: $condition, input: $input) {
+    accessibilityRequired
+    aiProcessedAt
+    approvedByFinance
+    approvedByLegal
+    approvedByProducer
+    brandGuidelines
+    budgetRange
+    complexity
+    copyrightOwnership
+    covidProtocolsRequired
+    createdAt
+    creativeProposals
+    crewRoles
+    deliverables
+    distributionChannels
+    embargoDate
+    equipmentNeeds
+    estimatedDuration
+    geoRights
+    hasDroneRisk
+    hasHazardousLocationRisk
+    hasMinorRisk
+    hasPublicSpaceRisk
+    hasStuntRisk
+    id
+    inspirationReferences
+    insuranceRequired
+    keyMessages
+    languageVersions
+    locationDetails
+    locationReleasesRequired
+    masterFormat
+    musicLicensing
+    organizationId
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectDescription
+    projectId
+    requiredPermits
+    riskLevel
+    safetyOfficerNeeded
+    scenes
+    scriptOrNotes
+    selectedProposalId
+    socialCropsRequired
+    stockFootageNeeded
+    subtitlesRequired
+    talentOnScreen
+    talentReleasesRequired
+    talentVoiceOver
+    targetAudience
+    tone
+    unionRules
+    updatedAt
+    usageRightsDuration
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateBriefMutationVariables,
+  APITypes.CreateBriefMutation
+>;
+export const createBudgetLineItem = /* GraphQL */ `mutation CreateBudgetLineItem(
+  $condition: ModelBudgetLineItemConditionInput
+  $input: CreateBudgetLineItemInput!
+) {
+  createBudgetLineItem(condition: $condition, input: $input) {
+    actualAmount
+    actualUnits
+    approvedAt
+    approvedBy
+    category
+    createdAt
+    createdBy
+    createdByEmail
+    description
+    endDate
+    estimatedAmount
+    estimatedUnits
+    id
+    notes
+    organizationId
+    phase
+    projectId
+    purchaseOrderNumber
+    startDate
+    status
+    subcategory
+    unitRate
+    unitType
+    updatedAt
+    variance
+    vendorContact
+    vendorName
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateBudgetLineItemMutationVariables,
+  APITypes.CreateBudgetLineItemMutation
+>;
+export const createCallSheet = /* GraphQL */ `mutation CreateCallSheet(
+  $condition: ModelCallSheetConditionInput
+  $input: CreateCallSheetInput!
+) {
+  createCallSheet(condition: $condition, input: $input) {
+    castMembers {
+      nextToken
+      __typename
+    }
+    cateringLocation
+    createdAt
+    crewMembers {
+      nextToken
+      __typename
+    }
+    directorName
+    directorPhone
+    episodeNumber
+    estimatedWrap
+    firstADName
+    firstADPhone
+    generalCrewCall
+    hospitalAddress
+    id
+    lastUpdatedBy
+    mealTimes
+    nearestHospital
+    nextDaySchedule
+    organizationId
+    parkingInstructions
+    primaryLocation
+    primaryLocationAddress
+    producerName
+    producerPhone
+    productionCompany
+    productionManagerName
+    productionManagerPhone
+    productionOfficePhone
+    productionTitle
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectId
+    publishedAt
+    safetyNotes
+    scenes {
+      nextToken
+      __typename
+    }
+    shootDate
+    shootDayNumber
+    specialInstructions
+    status
+    sunset
+    temperature
+    timezone
+    totalShootDays
+    transportationNotes
+    updatedAt
+    version
+    weatherForecast
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateCallSheetMutationVariables,
+  APITypes.CreateCallSheetMutation
+>;
+export const createCallSheetCast = /* GraphQL */ `mutation CreateCallSheetCast(
+  $condition: ModelCallSheetCastConditionInput
+  $input: CreateCallSheetCastInput!
+) {
+  createCallSheetCast(condition: $condition, input: $input) {
+    actorName
+    callSheet {
+      cateringLocation
+      createdAt
+      directorName
+      directorPhone
+      episodeNumber
+      estimatedWrap
+      firstADName
+      firstADPhone
+      generalCrewCall
+      hospitalAddress
+      id
+      lastUpdatedBy
+      mealTimes
+      nearestHospital
+      nextDaySchedule
+      organizationId
+      parkingInstructions
+      primaryLocation
+      primaryLocationAddress
+      producerName
+      producerPhone
+      productionCompany
+      productionManagerName
+      productionManagerPhone
+      productionOfficePhone
+      productionTitle
+      projectId
+      publishedAt
+      safetyNotes
+      shootDate
+      shootDayNumber
+      specialInstructions
+      status
+      sunset
+      temperature
+      timezone
+      totalShootDays
+      transportationNotes
+      updatedAt
+      version
+      weatherForecast
+      __typename
+    }
+    callSheetId
+    callToSet
+    characterName
+    createdAt
+    email
+    id
+    makeupCall
+    notes
+    phone
+    pickupLocation
+    pickupTime
+    sortOrder
+    updatedAt
+    wardrobeCall
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateCallSheetCastMutationVariables,
+  APITypes.CreateCallSheetCastMutation
+>;
+export const createCallSheetCrew = /* GraphQL */ `mutation CreateCallSheetCrew(
+  $condition: ModelCallSheetCrewConditionInput
+  $input: CreateCallSheetCrewInput!
+) {
+  createCallSheetCrew(condition: $condition, input: $input) {
+    callSheet {
+      cateringLocation
+      createdAt
+      directorName
+      directorPhone
+      episodeNumber
+      estimatedWrap
+      firstADName
+      firstADPhone
+      generalCrewCall
+      hospitalAddress
+      id
+      lastUpdatedBy
+      mealTimes
+      nearestHospital
+      nextDaySchedule
+      organizationId
+      parkingInstructions
+      primaryLocation
+      primaryLocationAddress
+      producerName
+      producerPhone
+      productionCompany
+      productionManagerName
+      productionManagerPhone
+      productionOfficePhone
+      productionTitle
+      projectId
+      publishedAt
+      safetyNotes
+      shootDate
+      shootDayNumber
+      specialInstructions
+      status
+      sunset
+      temperature
+      timezone
+      totalShootDays
+      transportationNotes
+      updatedAt
+      version
+      weatherForecast
+      __typename
+    }
+    callSheetId
+    callTime
+    createdAt
+    department
+    email
+    id
+    name
+    notes
+    phone
+    role
+    sortOrder
+    updatedAt
+    walkieChannel
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateCallSheetCrewMutationVariables,
+  APITypes.CreateCallSheetCrewMutation
+>;
+export const createCallSheetScene = /* GraphQL */ `mutation CreateCallSheetScene(
+  $condition: ModelCallSheetSceneConditionInput
+  $input: CreateCallSheetSceneInput!
+) {
+  createCallSheetScene(condition: $condition, input: $input) {
+    callSheet {
+      cateringLocation
+      createdAt
+      directorName
+      directorPhone
+      episodeNumber
+      estimatedWrap
+      firstADName
+      firstADPhone
+      generalCrewCall
+      hospitalAddress
+      id
+      lastUpdatedBy
+      mealTimes
+      nearestHospital
+      nextDaySchedule
+      organizationId
+      parkingInstructions
+      primaryLocation
+      primaryLocationAddress
+      producerName
+      producerPhone
+      productionCompany
+      productionManagerName
+      productionManagerPhone
+      productionOfficePhone
+      productionTitle
+      projectId
+      publishedAt
+      safetyNotes
+      shootDate
+      shootDayNumber
+      specialInstructions
+      status
+      sunset
+      temperature
+      timezone
+      totalShootDays
+      transportationNotes
+      updatedAt
+      version
+      weatherForecast
+      __typename
+    }
+    callSheetId
+    createdAt
+    description
+    estimatedDuration
+    id
+    location
+    notes
+    pageCount
+    sceneHeading
+    sceneNumber
+    scheduledTime
+    sortOrder
+    status
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateCallSheetSceneMutationVariables,
+  APITypes.CreateCallSheetSceneMutation
+>;
+export const createCollection = /* GraphQL */ `mutation CreateCollection(
+  $condition: ModelCollectionConditionInput
+  $input: CreateCollectionInput!
+) {
+  createCollection(condition: $condition, input: $input) {
+    allowComments
+    allowDownloads
+    assetCount
+    collectionType
+    color
+    coverImageKey
+    createdAt
+    createdBy
+    createdByEmail
+    description
+    icon
+    id
+    isSmartCollection
+    lastModifiedAt
+    lastModifiedBy
+    name
+    organizationId
+    projectId
+    shareLink
+    shareLinkExpiry
+    shareLinkPassword
+    sharedWith
+    smartLastUpdated
+    smartRules
+    sortBy
+    sortOrder
+    tags
+    totalSizeBytes
+    updatedAt
+    viewMode
+    visibility
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateCollectionMutationVariables,
+  APITypes.CreateCollectionMutation
+>;
+export const createCollectionAsset = /* GraphQL */ `mutation CreateCollectionAsset(
+  $condition: ModelCollectionAssetConditionInput
+  $input: CreateCollectionAssetInput!
+) {
+  createCollectionAsset(condition: $condition, input: $input) {
+    addedAt
+    addedBy
+    addedByEmail
+    assetId
+    collectionId
+    createdAt
+    id
+    notes
+    organizationId
+    selectedClipIn
+    selectedClipOut
+    selectedFrameTimecode
+    sortOrder
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateCollectionAssetMutationVariables,
+  APITypes.CreateCollectionAssetMutation
+>;
+export const createColorSession = /* GraphQL */ `mutation CreateColorSession(
+  $condition: ModelColorSessionConditionInput
+  $input: CreateColorSessionInput!
+) {
+  createColorSession(condition: $condition, input: $input) {
+    cdlOffset
+    cdlPower
+    cdlSaturation
+    cdlSlope
+    colorSpace
+    coloristEmail
+    coloristName
+    cost
+    createdAt
+    createdBy
+    durationHours
+    facility
+    hdrFormat
+    id
+    lookApproved
+    lookApprovedAt
+    lookApprovedBy
+    lutFileName
+    lutKey
+    name
+    notes
+    organizationId
+    peakNits
+    projectId
+    sessionDate
+    stage
+    status
+    suite
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateColorSessionMutationVariables,
+  APITypes.CreateColorSessionMutation
+>;
+export const createCrewCost = /* GraphQL */ `mutation CreateCrewCost(
+  $condition: ModelCrewCostConditionInput
+  $input: CreateCrewCostInput!
+) {
+  createCrewCost(condition: $condition, input: $input) {
+    baseCost
+    baseRate
+    callSheetId
+    callTime
+    createdAt
+    createdBy
+    crewMemberEmail
+    crewMemberName
+    deductions
+    department
+    doubleTimeCost
+    doubleTimeHours
+    id
+    kitFee
+    kitFeeCost
+    mealPenaltyCost
+    mealPenaltyHours
+    mileageCost
+    mileageRate
+    netPay
+    notes
+    organizationId
+    overtimeCost
+    overtimeHours
+    overtimeRate
+    paymentDate
+    paymentReference
+    paymentStatus
+    perDiem
+    perDiemCost
+    projectId
+    rateType
+    regularHours
+    role
+    shootDay
+    taxWithheld
+    timesheetApproved
+    timesheetApprovedAt
+    timesheetApprovedBy
+    timesheetKey
+    totalCost
+    travelHours
+    updatedAt
+    workDate
+    wrapTime
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateCrewCostMutationVariables,
+  APITypes.CreateCrewCostMutation
+>;
+export const createCustomMetadataSchema = /* GraphQL */ `mutation CreateCustomMetadataSchema(
+  $condition: ModelCustomMetadataSchemaConditionInput
+  $input: CreateCustomMetadataSchemaInput!
+) {
+  createCustomMetadataSchema(condition: $condition, input: $input) {
+    appliesTo
+    assetTypes
+    canEditRoles
+    canViewRoles
+    collapsedByDefault
+    createdAt
+    createdBy
+    description
+    displayOrder
+    fields
+    id
+    isActive
+    lastModifiedAt
+    lastModifiedBy
+    name
+    organizationId
+    showInDetail
+    showInList
+    slug
+    updatedAt
+    version
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateCustomMetadataSchemaMutationVariables,
+  APITypes.CreateCustomMetadataSchemaMutation
+>;
+export const createCustomMetadataValue = /* GraphQL */ `mutation CreateCustomMetadataValue(
+  $condition: ModelCustomMetadataValueConditionInput
+  $input: CreateCustomMetadataValueInput!
+) {
+  createCustomMetadataValue(condition: $condition, input: $input) {
+    changeHistory
+    createdAt
+    createdBy
+    id
+    lastModifiedAt
+    lastModifiedBy
+    organizationId
+    schemaId
+    targetId
+    targetType
+    updatedAt
+    values
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateCustomMetadataValueMutationVariables,
+  APITypes.CreateCustomMetadataValueMutation
+>;
+export const createDailyCostSummary = /* GraphQL */ `mutation CreateDailyCostSummary(
+  $condition: ModelDailyCostSummaryConditionInput
+  $input: CreateDailyCostSummaryInput!
+) {
+  createDailyCostSummary(condition: $condition, input: $input) {
+    callSheetId
+    cateringCost
+    createdAt
+    createdBy
+    crewBaseCost
+    crewCount
+    crewKitFees
+    crewOvertimeCost
+    crewOvertimeHours
+    crewPerDiem
+    crewTotalCost
+    crewTotalHours
+    date
+    equipmentOwnedCost
+    equipmentRentalCost
+    equipmentTotalCost
+    finalizedAt
+    finalizedBy
+    id
+    isFinalized
+    issues
+    locationFees
+    locationTotalCost
+    miscCost
+    notes
+    organizationId
+    otherTotalCost
+    parkingCost
+    permitFees
+    projectId
+    shootDay
+    talentFees
+    talentPerDiem
+    talentTotalCost
+    totalActualCost
+    totalPlannedCost
+    transportCost
+    updatedAt
+    variance
+    variancePercentage
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateDailyCostSummaryMutationVariables,
+  APITypes.CreateDailyCostSummaryMutation
+>;
+export const createDailyProductionReport = /* GraphQL */ `mutation CreateDailyProductionReport(
+  $condition: ModelDailyProductionReportConditionInput
+  $input: CreateDailyProductionReportInput!
+) {
+  createDailyProductionReport(condition: $condition, input: $input) {
+    approvedAt
+    approvedBy
+    cameraWrap
+    cardsUsed
+    completedScenes
+    createdAt
+    createdBy
+    createdByEmail
+    crewCall
+    crewWrap
+    date
+    director
+    firstAD
+    firstShot
+    goodTakes
+    id
+    incidents
+    lastShot
+    lunchEnd
+    lunchStart
+    mealPenalties
+    organizationId
+    overtimeCrew
+    partialScenes
+    producer
+    productionNotes
+    projectId
+    rejectionReason
+    runningTotal
+    scheduledScenes
+    shootDay
+    status
+    storageUsedGB
+    submittedAt
+    submittedBy
+    temperature
+    tomorrowPrep
+    totalCrewMembers
+    totalMinutesShot
+    totalSetups
+    totalTakes
+    unit
+    updatedAt
+    upm
+    weatherConditions
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateDailyProductionReportMutationVariables,
+  APITypes.CreateDailyProductionReportMutation
+>;
+export const createDistributionLink = /* GraphQL */ `mutation CreateDistributionLink(
+  $condition: ModelDistributionLinkConditionInput
+  $input: CreateDistributionLinkInput!
+) {
+  createDistributionLink(condition: $condition, input: $input) {
+    accessCode
+    accessToken
+    allowDownload
+    allowShare
+    allowedCountries
+    assetId
+    assetVersionId
+    averageViewDuration
+    blockedCountries
+    completionRate
+    createdAt
+    createdBy
+    createdByEmail
+    currentViews
+    description
+    downloadResolution
+    expiresAt
+    geoRestriction
+    id
+    isExpired
+    isPasswordProtected
+    isWatermarked
+    lastAccessedAt
+    lastAccessedBy
+    lastAccessedFrom
+    linkType
+    maxViews
+    name
+    notifyOnDownload
+    notifyOnView
+    organizationId
+    playlistAssetIds
+    projectId
+    recipientCompany
+    recipientEmail
+    recipientName
+    recipientRole
+    revokedAt
+    revokedBy
+    revokedReason
+    status
+    streamQuality
+    totalViewDuration
+    updatedAt
+    viewLogs {
+      nextToken
+      __typename
+    }
+    watermarkOpacity
+    watermarkPosition
+    watermarkText
+    watermarkType
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateDistributionLinkMutationVariables,
+  APITypes.CreateDistributionLinkMutation
+>;
+export const createDistributionViewLog = /* GraphQL */ `mutation CreateDistributionViewLog(
+  $condition: ModelDistributionViewLogConditionInput
+  $input: CreateDistributionViewLogInput!
+) {
+  createDistributionViewLog(condition: $condition, input: $input) {
+    averageBitrate
+    bufferingDuration
+    bufferingEvents
+    createdAt
+    distributionLink {
+      accessCode
+      accessToken
+      allowDownload
+      allowShare
+      allowedCountries
+      assetId
+      assetVersionId
+      averageViewDuration
+      blockedCountries
+      completionRate
+      createdAt
+      createdBy
+      createdByEmail
+      currentViews
+      description
+      downloadResolution
+      expiresAt
+      geoRestriction
+      id
+      isExpired
+      isPasswordProtected
+      isWatermarked
+      lastAccessedAt
+      lastAccessedBy
+      lastAccessedFrom
+      linkType
+      maxViews
+      name
+      notifyOnDownload
+      notifyOnView
+      organizationId
+      playlistAssetIds
+      projectId
+      recipientCompany
+      recipientEmail
+      recipientName
+      recipientRole
+      revokedAt
+      revokedBy
+      revokedReason
+      status
+      streamQuality
+      totalViewDuration
+      updatedAt
+      watermarkOpacity
+      watermarkPosition
+      watermarkText
+      watermarkType
+      __typename
+    }
+    distributionLinkId
+    downloadAttempted
+    duration
+    endTime
+    geoBlockReason
+    geoBlocked
+    id
+    pauseEvents
+    percentageWatched
+    playbackSpeed
+    qualityChanges
+    screenshotAttempted
+    seekEvents
+    sessionId
+    startTime
+    updatedAt
+    viewerBrowser
+    viewerCity
+    viewerCountry
+    viewerDevice
+    viewerEmail
+    viewerIP
+    viewerName
+    viewerOS
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateDistributionViewLogMutationVariables,
+  APITypes.CreateDistributionViewLogMutation
+>;
+export const createDownloadRequest = /* GraphQL */ `mutation CreateDownloadRequest(
+  $condition: ModelDownloadRequestConditionInput
+  $input: CreateDownloadRequestInput!
+) {
+  createDownloadRequest(condition: $condition, input: $input) {
+    applyWatermark
+    assetIds
+    burnInSubtitles
+    burnInTimecode
+    collectionId
+    completedAt
+    createdAt
+    downloadCount
+    downloadKey
+    downloadUrl
+    downloadedBy
+    errorMessage
+    expiresAt
+    fileCount
+    folderStructure
+    id
+    includeMetadata
+    includeSidecar
+    includeTranscript
+    lastDownloadedAt
+    organizationId
+    outputCodec
+    outputFormat
+    outputFrameRate
+    outputResolution
+    packageFormat
+    progress
+    requestType
+    requestedAt
+    requestedBy
+    requestedByEmail
+    startedAt
+    status
+    totalSizeBytes
+    updatedAt
+    watermarkOpacity
+    watermarkPosition
+    watermarkText
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateDownloadRequestMutationVariables,
+  APITypes.CreateDownloadRequestMutation
+>;
+export const createEditSession = /* GraphQL */ `mutation CreateEditSession(
+  $condition: ModelEditSessionConditionInput
+  $input: CreateEditSessionInput!
+) {
+  createEditSession(condition: $condition, input: $input) {
+    addressedNotes
+    approvedAt
+    approvedBy
+    completedAt
+    createdAt
+    createdBy
+    duration
+    editorEmail
+    editorName
+    exportKey
+    frameRate
+    id
+    isCurrentVersion
+    name
+    organizationId
+    projectId
+    resolution
+    stage
+    startedAt
+    status
+    timelineKey
+    totalNotes
+    updatedAt
+    versionNumber
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateEditSessionMutationVariables,
+  APITypes.CreateEditSessionMutation
+>;
+export const createEquipment = /* GraphQL */ `mutation CreateEquipment(
+  $condition: ModelEquipmentConditionInput
+  $input: CreateEquipmentInput!
+) {
+  createEquipment(condition: $condition, input: $input) {
+    assetTag
+    barcode
+    calibrationDate
+    category
+    checkouts {
+      nextToken
+      __typename
+    }
+    condition
+    createdAt
+    description
+    homeBase
+    id
+    imageKey
+    insurancePolicyNumber
+    insuranceValue
+    kitItems {
+      nextToken
+      __typename
+    }
+    lastMaintenanceDate
+    maintenanceNotes
+    manufacturer
+    model
+    name
+    nextMaintenanceDate
+    organizationId
+    ownershipType
+    purchaseDate
+    purchasePrice
+    rentalRate
+    replacementValue
+    serialNumber
+    specifications
+    status
+    storageLocation
+    subcategory
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateEquipmentMutationVariables,
+  APITypes.CreateEquipmentMutation
+>;
+export const createEquipmentCheckout = /* GraphQL */ `mutation CreateEquipmentCheckout(
+  $condition: ModelEquipmentCheckoutConditionInput
+  $input: CreateEquipmentCheckoutInput!
+) {
+  createEquipmentCheckout(condition: $condition, input: $input) {
+    actualReturnDate
+    approvedBy
+    checkedOutBy
+    checkedOutByName
+    checkoutDate
+    checkoutSignature
+    conditionAtCheckout
+    conditionAtReturn
+    conditionNotes
+    createdAt
+    damageDescription
+    damageReported
+    equipment {
+      assetTag
+      barcode
+      calibrationDate
+      category
+      condition
+      createdAt
+      description
+      homeBase
+      id
+      imageKey
+      insurancePolicyNumber
+      insuranceValue
+      lastMaintenanceDate
+      maintenanceNotes
+      manufacturer
+      model
+      name
+      nextMaintenanceDate
+      organizationId
+      ownershipType
+      purchaseDate
+      purchasePrice
+      rentalRate
+      replacementValue
+      serialNumber
+      specifications
+      status
+      storageLocation
+      subcategory
+      updatedAt
+      __typename
+    }
+    equipmentId
+    expectedReturnDate
+    id
+    organizationId
+    projectId
+    purpose
+    returnSignature
+    returnedBy
+    shootLocation
+    status
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateEquipmentCheckoutMutationVariables,
+  APITypes.CreateEquipmentCheckoutMutation
+>;
+export const createEquipmentKit = /* GraphQL */ `mutation CreateEquipmentKit(
+  $condition: ModelEquipmentKitConditionInput
+  $input: CreateEquipmentKitInput!
+) {
+  createEquipmentKit(condition: $condition, input: $input) {
+    category
+    createdAt
+    description
+    id
+    isActive
+    isTemplate
+    itemCount
+    kitContents {
+      nextToken
+      __typename
+    }
+    name
+    organizationId
+    totalValue
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateEquipmentKitMutationVariables,
+  APITypes.CreateEquipmentKitMutation
+>;
+export const createEquipmentKitItem = /* GraphQL */ `mutation CreateEquipmentKitItem(
+  $condition: ModelEquipmentKitItemConditionInput
+  $input: CreateEquipmentKitItemInput!
+) {
+  createEquipmentKitItem(condition: $condition, input: $input) {
+    createdAt
+    equipment {
+      assetTag
+      barcode
+      calibrationDate
+      category
+      condition
+      createdAt
+      description
+      homeBase
+      id
+      imageKey
+      insurancePolicyNumber
+      insuranceValue
+      lastMaintenanceDate
+      maintenanceNotes
+      manufacturer
+      model
+      name
+      nextMaintenanceDate
+      organizationId
+      ownershipType
+      purchaseDate
+      purchasePrice
+      rentalRate
+      replacementValue
+      serialNumber
+      specifications
+      status
+      storageLocation
+      subcategory
+      updatedAt
+      __typename
+    }
+    equipmentId
+    id
+    isRequired
+    kit {
+      category
+      createdAt
+      description
+      id
+      isActive
+      isTemplate
+      itemCount
+      name
+      organizationId
+      totalValue
+      updatedAt
+      __typename
+    }
+    kitId
+    notes
+    quantity
+    sortOrder
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateEquipmentKitItemMutationVariables,
+  APITypes.CreateEquipmentKitItemMutation
+>;
+export const createEquipmentRental = /* GraphQL */ `mutation CreateEquipmentRental(
+  $condition: ModelEquipmentRentalConditionInput
+  $input: CreateEquipmentRentalInput!
+) {
+  createEquipmentRental(condition: $condition, input: $input) {
+    contractKey
+    createdAt
+    createdBy
+    createdByEmail
+    dailyRate
+    damageCost
+    damageNotes
+    deliveryFee
+    depositAmount
+    depositPaid
+    depositPaidDate
+    description
+    discountAmount
+    equipmentCategory
+    equipmentId
+    equipmentName
+    id
+    insuranceCost
+    insuranceRate
+    invoiceKey
+    invoiceNumber
+    lateFee
+    monthlyRate
+    notes
+    organizationId
+    paymentDate
+    paymentMethod
+    paymentReference
+    paymentStatus
+    pickupDate
+    pickupFee
+    projectId
+    purchaseOrderNumber
+    quantity
+    quoteNumber
+    rentalDays
+    rentalEndDate
+    rentalStartDate
+    returnCondition
+    returnDate
+    serialNumber
+    status
+    subtotal
+    taxAmount
+    totalCost
+    updatedAt
+    usageByDay
+    vendorAddress
+    vendorContact
+    vendorEmail
+    vendorName
+    vendorPhone
+    weeklyRate
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateEquipmentRentalMutationVariables,
+  APITypes.CreateEquipmentRentalMutation
+>;
+export const createExpense = /* GraphQL */ `mutation CreateExpense(
+  $condition: ModelExpenseConditionInput
+  $input: CreateExpenseInput!
+) {
+  createExpense(condition: $condition, input: $input) {
+    amount
+    approvedAt
+    approvedBy
+    budgetLineItemId
+    category
+    createdAt
+    createdBy
+    createdByEmail
+    currency
+    description
+    exchangeRate
+    expenseDate
+    hasReceipt
+    id
+    invoiceDate
+    invoiceNumber
+    isReimbursement
+    notes
+    organizationId
+    paymentDate
+    paymentMethod
+    paymentReference
+    paymentStatus
+    phase
+    projectId
+    receiptFileName
+    receiptKey
+    reimburseTo
+    reimburseToName
+    reimbursementStatus
+    rejectionReason
+    shootDay
+    status
+    subcategory
+    submittedAt
+    submittedBy
+    updatedAt
+    vendorId
+    vendorName
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateExpenseMutationVariables,
+  APITypes.CreateExpenseMutation
+>;
+export const createInvoice = /* GraphQL */ `mutation CreateInvoice(
+  $condition: ModelInvoiceConditionInput
+  $input: CreateInvoiceInput!
+) {
+  createInvoice(condition: $condition, input: $input) {
+    billingPeriod
+    createdAt
+    currency
+    discount
+    dueDate
+    hostedInvoiceUrl
+    id
+    invoiceNumber
+    invoicePdfUrl
+    lineItems
+    notes
+    organization {
+      address
+      autoArchiveDays
+      billingCycleDay
+      brandAccentColor
+      brandPrimaryColor
+      brandSecondaryColor
+      city
+      country
+      createdAt
+      createdBy
+      currency
+      currentAICreditsUsed
+      currentProjectCount
+      currentStorageUsedGB
+      currentUserCount
+      customDomain
+      customFeatures
+      dataProcessingAgreementSigned
+      dataRetentionDays
+      deletedAt
+      description
+      dpaSignedAt
+      email
+      emailFromAddress
+      emailFromName
+      featuresEnabled
+      id
+      industry
+      ipWhitelist
+      isGDPRCompliant
+      isHIPAACompliant
+      isSOC2Compliant
+      locale
+      logo
+      maxAICredits
+      maxProjects
+      maxStorageGB
+      maxUsers
+      mfaRequired
+      name
+      onboardingCompleted
+      onboardingCompletedAt
+      onboardingStep
+      owner
+      phone
+      postalCode
+      sessionTimeoutMinutes
+      slug
+      ssoConfig
+      ssoEnabled
+      ssoProvider
+      state
+      status
+      stripeCustomerId
+      stripePaymentMethodId
+      stripePriceId
+      stripeSubscriptionId
+      subscriptionEndsAt
+      subscriptionStartedAt
+      subscriptionStatus
+      subscriptionTier
+      suspendedAt
+      suspendedReason
+      timezone
+      trialEndsAt
+      updatedAt
+      usageResetDate
+      website
+      __typename
+    }
+    organizationId
+    paidAt
+    paymentMethod
+    periodEnd
+    periodStart
+    status
+    stripeInvoiceId
+    subtotal
+    tax
+    total
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateInvoiceMutationVariables,
+  APITypes.CreateInvoiceMutation
+>;
+export const createLocationCost = /* GraphQL */ `mutation CreateLocationCost(
+  $condition: ModelLocationCostConditionInput
+  $input: CreateLocationCostInput!
+) {
+  createLocationCost(condition: $condition, input: $input) {
+    callSheetId
+    cancellationFee
+    cateringFee
+    cleaningFee
+    contactEmail
+    contactName
+    contactPhone
+    contractKey
+    contractSigned
+    contractSignedDate
+    costByDay
+    createdAt
+    createdBy
+    createdByEmail
+    dailyRate
+    damageDeposit
+    depositPaid
+    depositPaidDate
+    feeType
+    halfDayRate
+    holdingFee
+    hourlyRate
+    id
+    insuranceCertKey
+    insuranceFee
+    invoiceKey
+    locationAddress
+    locationFee
+    locationName
+    locationType
+    notes
+    organizationId
+    otherFees
+    otherFeesDescription
+    overtimeRate
+    ownerName
+    parkingFee
+    paymentDate
+    paymentMethod
+    paymentReference
+    paymentStatus
+    permitFee
+    permitKey
+    powerFee
+    projectId
+    restrictions
+    securityFee
+    shootDays
+    specialRequirements
+    status
+    subtotal
+    taxAmount
+    totalCost
+    updatedAt
+    useDays
+    useEndDate
+    useStartDate
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateLocationCostMutationVariables,
+  APITypes.CreateLocationCostMutation
+>;
+export const createMessage = /* GraphQL */ `mutation CreateMessage(
+  $condition: ModelMessageConditionInput
+  $input: CreateMessageInput!
+) {
+  createMessage(condition: $condition, input: $input) {
+    assetId
+    attachmentKeys
+    attachmentNames
+    convertedToTask
+    createdAt
+    deletedAt
+    editedAt
+    id
+    isDeleted
+    isEdited
+    mentionedUsers
+    messageText
+    messageType
+    organizationId
+    owner
+    parentMessageId
+    priority
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectId
+    readBy
+    senderEmail
+    senderId
+    senderName
+    senderRole
+    taskAssignedTo
+    taskDeadline
+    taskId
+    threadDepth
+    timecode
+    timecodeFormatted
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateMessageMutationVariables,
+  APITypes.CreateMessageMutation
+>;
+export const createNotification = /* GraphQL */ `mutation CreateNotification(
+  $condition: ModelNotificationConditionInput
+  $input: CreateNotificationInput!
+) {
+  createNotification(condition: $condition, input: $input) {
+    actionLabel
+    actionUrl
+    assetId
+    assetName
+    createdAt
+    deliveryChannels
+    emailSent
+    emailSentAt
+    expiresAt
+    id
+    isRead
+    message
+    messageId
+    organizationId
+    owner
+    priority
+    projectId
+    projectName
+    readAt
+    reviewId
+    senderEmail
+    senderId
+    senderName
+    slackSent
+    slackSentAt
+    smsSent
+    smsSentAt
+    title
+    type
+    updatedAt
+    userId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateNotificationMutationVariables,
+  APITypes.CreateNotificationMutation
+>;
+export const createOrganization = /* GraphQL */ `mutation CreateOrganization(
+  $condition: ModelOrganizationConditionInput
+  $input: CreateOrganizationInput!
+) {
+  createOrganization(condition: $condition, input: $input) {
+    address
+    autoArchiveDays
+    billingCycleDay
+    brandAccentColor
+    brandPrimaryColor
+    brandSecondaryColor
+    city
+    country
+    createdAt
+    createdBy
+    currency
+    currentAICreditsUsed
+    currentProjectCount
+    currentStorageUsedGB
+    currentUserCount
+    customDomain
+    customFeatures
+    dataProcessingAgreementSigned
+    dataRetentionDays
+    deletedAt
+    description
+    dpaSignedAt
+    email
+    emailFromAddress
+    emailFromName
+    featuresEnabled
+    id
+    industry
+    invitations {
+      nextToken
+      __typename
+    }
+    invoices {
+      nextToken
+      __typename
+    }
+    ipWhitelist
+    isGDPRCompliant
+    isHIPAACompliant
+    isSOC2Compliant
+    locale
+    logo
+    maxAICredits
+    maxProjects
+    maxStorageGB
+    maxUsers
+    members {
+      nextToken
+      __typename
+    }
+    mfaRequired
+    name
+    onboardingCompleted
+    onboardingCompletedAt
+    onboardingStep
+    owner
+    phone
+    postalCode
+    projects {
+      nextToken
+      __typename
+    }
+    sessionTimeoutMinutes
+    slug
+    ssoConfig
+    ssoEnabled
+    ssoProvider
+    state
+    status
+    stripeCustomerId
+    stripePaymentMethodId
+    stripePriceId
+    stripeSubscriptionId
+    subscriptionEndsAt
+    subscriptionStartedAt
+    subscriptionStatus
+    subscriptionTier
+    suspendedAt
+    suspendedReason
+    timezone
+    trialEndsAt
+    updatedAt
+    usageRecords {
+      nextToken
+      __typename
+    }
+    usageResetDate
+    website
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateOrganizationMutationVariables,
+  APITypes.CreateOrganizationMutation
+>;
+export const createOrganizationInvitation = /* GraphQL */ `mutation CreateOrganizationInvitation(
+  $condition: ModelOrganizationInvitationConditionInput
+  $input: CreateOrganizationInvitationInput!
+) {
+  createOrganizationInvitation(condition: $condition, input: $input) {
+    acceptedAt
+    createdAt
+    declinedAt
+    email
+    expiresAt
+    id
+    inviteToken
+    invitedBy
+    invitedByEmail
+    lastReminderAt
+    message
+    organization {
+      address
+      autoArchiveDays
+      billingCycleDay
+      brandAccentColor
+      brandPrimaryColor
+      brandSecondaryColor
+      city
+      country
+      createdAt
+      createdBy
+      currency
+      currentAICreditsUsed
+      currentProjectCount
+      currentStorageUsedGB
+      currentUserCount
+      customDomain
+      customFeatures
+      dataProcessingAgreementSigned
+      dataRetentionDays
+      deletedAt
+      description
+      dpaSignedAt
+      email
+      emailFromAddress
+      emailFromName
+      featuresEnabled
+      id
+      industry
+      ipWhitelist
+      isGDPRCompliant
+      isHIPAACompliant
+      isSOC2Compliant
+      locale
+      logo
+      maxAICredits
+      maxProjects
+      maxStorageGB
+      maxUsers
+      mfaRequired
+      name
+      onboardingCompleted
+      onboardingCompletedAt
+      onboardingStep
+      owner
+      phone
+      postalCode
+      sessionTimeoutMinutes
+      slug
+      ssoConfig
+      ssoEnabled
+      ssoProvider
+      state
+      status
+      stripeCustomerId
+      stripePaymentMethodId
+      stripePriceId
+      stripeSubscriptionId
+      subscriptionEndsAt
+      subscriptionStartedAt
+      subscriptionStatus
+      subscriptionTier
+      suspendedAt
+      suspendedReason
+      timezone
+      trialEndsAt
+      updatedAt
+      usageResetDate
+      website
+      __typename
+    }
+    organizationId
+    remindersSent
+    role
+    status
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateOrganizationInvitationMutationVariables,
+  APITypes.CreateOrganizationInvitationMutation
+>;
+export const createOrganizationMember = /* GraphQL */ `mutation CreateOrganizationMember(
+  $condition: ModelOrganizationMemberConditionInput
+  $input: CreateOrganizationMemberInput!
+) {
+  createOrganizationMember(condition: $condition, input: $input) {
+    apiKeyId
+    apiKeyLastUsed
+    avatar
+    createdAt
+    customPermissions
+    department
+    email
+    emailNotifications
+    id
+    invitedAt
+    invitedBy
+    joinedAt
+    lastActiveAt
+    name
+    organization {
+      address
+      autoArchiveDays
+      billingCycleDay
+      brandAccentColor
+      brandPrimaryColor
+      brandSecondaryColor
+      city
+      country
+      createdAt
+      createdBy
+      currency
+      currentAICreditsUsed
+      currentProjectCount
+      currentStorageUsedGB
+      currentUserCount
+      customDomain
+      customFeatures
+      dataProcessingAgreementSigned
+      dataRetentionDays
+      deletedAt
+      description
+      dpaSignedAt
+      email
+      emailFromAddress
+      emailFromName
+      featuresEnabled
+      id
+      industry
+      ipWhitelist
+      isGDPRCompliant
+      isHIPAACompliant
+      isSOC2Compliant
+      locale
+      logo
+      maxAICredits
+      maxProjects
+      maxStorageGB
+      maxUsers
+      mfaRequired
+      name
+      onboardingCompleted
+      onboardingCompletedAt
+      onboardingStep
+      owner
+      phone
+      postalCode
+      sessionTimeoutMinutes
+      slug
+      ssoConfig
+      ssoEnabled
+      ssoProvider
+      state
+      status
+      stripeCustomerId
+      stripePaymentMethodId
+      stripePriceId
+      stripeSubscriptionId
+      subscriptionEndsAt
+      subscriptionStartedAt
+      subscriptionStatus
+      subscriptionTier
+      suspendedAt
+      suspendedReason
+      timezone
+      trialEndsAt
+      updatedAt
+      usageResetDate
+      website
+      __typename
+    }
+    organizationId
+    owner
+    phone
+    role
+    slackNotifications
+    slackUserId
+    status
+    suspendedAt
+    suspendedBy
+    suspendedReason
+    title
+    updatedAt
+    userId
+    weeklyDigest
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateOrganizationMemberMutationVariables,
+  APITypes.CreateOrganizationMemberMutation
+>;
+export const createProject = /* GraphQL */ `mutation CreateProject(
+  $condition: ModelProjectConditionInput
+  $input: CreateProjectInput!
+) {
+  createProject(condition: $condition, input: $input) {
+    activityLogs {
+      nextToken
+      __typename
+    }
+    archiveComplete
+    archiveCompletedAt
+    archiveLocation
+    assets {
+      nextToken
+      __typename
+    }
+    assetsDelivered
+    assetsDeliveredAt
+    brief {
+      accessibilityRequired
+      aiProcessedAt
+      approvedByFinance
+      approvedByLegal
+      approvedByProducer
+      brandGuidelines
+      budgetRange
+      complexity
+      copyrightOwnership
+      covidProtocolsRequired
+      createdAt
+      creativeProposals
+      crewRoles
+      deliverables
+      distributionChannels
+      embargoDate
+      equipmentNeeds
+      estimatedDuration
+      geoRights
+      hasDroneRisk
+      hasHazardousLocationRisk
+      hasMinorRisk
+      hasPublicSpaceRisk
+      hasStuntRisk
+      id
+      inspirationReferences
+      insuranceRequired
+      keyMessages
+      languageVersions
+      locationDetails
+      locationReleasesRequired
+      masterFormat
+      musicLicensing
+      organizationId
+      projectDescription
+      projectId
+      requiredPermits
+      riskLevel
+      safetyOfficerNeeded
+      scenes
+      scriptOrNotes
+      selectedProposalId
+      socialCropsRequired
+      stockFootageNeeded
+      subtitlesRequired
+      talentOnScreen
+      talentReleasesRequired
+      talentVoiceOver
+      targetAudience
+      tone
+      unionRules
+      updatedAt
+      usageRightsDuration
+      __typename
+    }
+    briefComplete
+    briefCompletedAt
+    budgetApproved
+    budgetApprovedAt
+    budgetCap
+    budgetContingency
+    budgetDistribution
+    budgetPostProduction
+    budgetPreProduction
+    budgetProduction
+    callSheets {
+      nextToken
+      __typename
+    }
+    callSheetsReady
+    callSheetsReadyAt
+    clientContactEmail
+    confidentiality
+    contractsSigned
+    contractsSignedAt
+    createdAt
+    creativeDirectorEmail
+    deadline
+    deliverablesReady
+    deliverablesReadyAt
+    deliveryConfirmedBy
+    department
+    description
+    distributionDate
+    executiveSponsorEmail
+    fieldIntelligenceFeasibilityScore
+    fieldIntelligenceHealthAlerts
+    fieldIntelligenceLastUpdated
+    fieldIntelligenceRiskAlerts
+    fieldIntelligenceWeatherData
+    finalApproved
+    finalApprovedAt
+    finalApprovedBy
+    finalAssetId
+    financeContactEmail
+    fundingSource
+    greenlightBlockers
+    greenlightClientApproved
+    greenlightClientApprovedAt
+    greenlightClientApprovedBy
+    greenlightClientComment
+    greenlightCompletedAt
+    greenlightExecutiveApproved
+    greenlightExecutiveApprovedAt
+    greenlightExecutiveApprovedBy
+    greenlightExecutiveComment
+    greenlightFinanceApproved
+    greenlightFinanceApprovedAt
+    greenlightFinanceApprovedBy
+    greenlightFinanceComment
+    greenlightLegalApproved
+    greenlightLegalApprovedAt
+    greenlightLegalApprovedBy
+    greenlightLegalComment
+    greenlightProducerApproved
+    greenlightProducerApprovedAt
+    greenlightProducerApprovedBy
+    greenlightProducerComment
+    greenlightRequirements
+    id
+    kickoffDate
+    legalApproved
+    legalApprovedAt
+    legalContactEmail
+    legalLockDeadline
+    lifecycleState
+    locationsConfirmed
+    locationsConfirmedAt
+    mediaIngested
+    messages {
+      nextToken
+      __typename
+    }
+    name
+    organization {
+      address
+      autoArchiveDays
+      billingCycleDay
+      brandAccentColor
+      brandPrimaryColor
+      brandSecondaryColor
+      city
+      country
+      createdAt
+      createdBy
+      currency
+      currentAICreditsUsed
+      currentProjectCount
+      currentStorageUsedGB
+      currentUserCount
+      customDomain
+      customFeatures
+      dataProcessingAgreementSigned
+      dataRetentionDays
+      deletedAt
+      description
+      dpaSignedAt
+      email
+      emailFromAddress
+      emailFromName
+      featuresEnabled
+      id
+      industry
+      ipWhitelist
+      isGDPRCompliant
+      isHIPAACompliant
+      isSOC2Compliant
+      locale
+      logo
+      maxAICredits
+      maxProjects
+      maxStorageGB
+      maxUsers
+      mfaRequired
+      name
+      onboardingCompleted
+      onboardingCompletedAt
+      onboardingStep
+      owner
+      phone
+      postalCode
+      sessionTimeoutMinutes
+      slug
+      ssoConfig
+      ssoEnabled
+      ssoProvider
+      state
+      status
+      stripeCustomerId
+      stripePaymentMethodId
+      stripePriceId
+      stripeSubscriptionId
+      subscriptionEndsAt
+      subscriptionStartedAt
+      subscriptionStatus
+      subscriptionTier
+      suspendedAt
+      suspendedReason
+      timezone
+      trialEndsAt
+      updatedAt
+      usageResetDate
+      website
+      __typename
+    }
+    organizationId
+    owner
+    permitsObtained
+    permitsObtainedAt
+    postProductionEndDate
+    postProductionStartDate
+    preProductionEndDate
+    preProductionStartDate
+    primaryKPI
+    principalPhotographyComplete
+    principalPhotographyCompleteAt
+    priority
+    producerEmail
+    productionEndDate
+    productionStartDate
+    projectOwnerEmail
+    projectType
+    purchaseOrderNumber
+    reviewDeadline
+    reviews {
+      nextToken
+      __typename
+    }
+    roughCutAssetId
+    roughCutComplete
+    roughCutCompleteAt
+    shootLocationCity
+    shootLocationCoordinates
+    shootLocationCountry
+    stakeholderSignoff
+    stakeholderSignoffAt
+    status
+    targetMetric
+    teamAssigned
+    teamMembers {
+      nextToken
+      __typename
+    }
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateProjectMutationVariables,
+  APITypes.CreateProjectMutation
+>;
+export const createProjectArchive = /* GraphQL */ `mutation CreateProjectArchive(
+  $condition: ModelProjectArchiveConditionInput
+  $input: CreateProjectArchiveInput!
+) {
+  createProjectArchive(condition: $condition, input: $input) {
+    accessCount
+    aiKeyMoments
+    aiLessonsLearned
+    aiSummary
+    approvals
+    archiveReason
+    archiveStatus
+    archivedAt
+    archivedBy
+    assetGraph
+    budgetSummary
+    costPerDeliverable
+    createdAt
+    deliverables
+    greenlightHistory
+    id
+    keyAssets
+    keyAssetsMetadata
+    keywords
+    lastAccessedAt
+    legalDetails
+    legalStatus
+    masterDeliverableIds
+    metadataSummary
+    organizationId
+    productionStats
+    projectId
+    reconstructionManifest
+    regionRestrictions
+    rightsExpirations
+    roiCalculated
+    searchEmbedding
+    themes
+    timelinePhases
+    topics
+    totalCost
+    updatedAt
+    versionTree
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateProjectArchiveMutationVariables,
+  APITypes.CreateProjectArchiveMutation
+>;
+export const createProjectMember = /* GraphQL */ `mutation CreateProjectMember(
+  $condition: ModelProjectMemberConditionInput
+  $input: CreateProjectMemberInput!
+) {
+  createProjectMember(condition: $condition, input: $input) {
+    accessExpiresAt
+    accessStartsAt
+    assignedAssetIds
+    assignedPhases
+    assignedTaskIds
+    avatar
+    createdAt
+    customPermissions
+    email
+    emailNotifications
+    externalRole
+    id
+    invitedAt
+    invitedBy
+    isExternal
+    joinedAt
+    lastActiveAt
+    name
+    organizationId
+    owner
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectId
+    projectRole
+    revokedAt
+    revokedBy
+    revokedReason
+    slackUserId
+    status
+    suspendedAt
+    suspendedBy
+    suspendedReason
+    title
+    updatedAt
+    userId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateProjectMemberMutationVariables,
+  APITypes.CreateProjectMemberMutation
+>;
+export const createProxyFile = /* GraphQL */ `mutation CreateProxyFile(
+  $condition: ModelProxyFileConditionInput
+  $input: CreateProxyFileInput!
+) {
+  createProxyFile(condition: $condition, input: $input) {
+    assetId
+    assetVersionId
+    audioBitrate
+    audioCodec
+    bitrate
+    cdnUrl
+    codec
+    createdAt
+    createdBy
+    duration
+    errorMessage
+    fileSizeBytes
+    frameRate
+    id
+    jobId
+    lastViewedAt
+    organizationId
+    processingCompleted
+    processingDuration
+    processingStarted
+    processor
+    progress
+    proxyType
+    resolution
+    s3Bucket
+    s3Key
+    status
+    updatedAt
+    viewCount
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateProxyFileMutationVariables,
+  APITypes.CreateProxyFileMutation
+>;
+export const createQCReport = /* GraphQL */ `mutation CreateQCReport(
+  $condition: ModelQCReportConditionInput
+  $input: CreateQCReportInput!
+) {
+  createQCReport(condition: $condition, input: $input) {
+    assetId
+    audioQuality
+    audioTechnical
+    checkResults
+    compliance
+    createdAt
+    createdBy
+    criticalIssues
+    deliverableId
+    editorial
+    failedChecks
+    graphicsText
+    id
+    majorIssues
+    minorIssues
+    name
+    organizationId
+    overallStatus
+    passedChecks
+    projectId
+    qcDate
+    qcDuration
+    qcOperator
+    qcOperatorEmail
+    reportKey
+    reportType
+    signOffNotes
+    signedOffAt
+    signedOffBy
+    totalChecks
+    updatedAt
+    videoQuality
+    videoTechnical
+    warningChecks
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateQCReportMutationVariables,
+  APITypes.CreateQCReportMutation
+>;
+export const createQualityScore = /* GraphQL */ `mutation CreateQualityScore(
+  $condition: ModelQualityScoreConditionInput
+  $input: CreateQualityScoreInput!
+) {
+  createQualityScore(condition: $condition, input: $input) {
+    analysisDuration
+    analysisVersion
+    analyzedAt
+    analyzedBy
+    assetId
+    assetVersionId
+    audioBitrate
+    audioChannels
+    audioClippingDetected
+    audioCodec
+    audioLoudnessLUFS
+    audioNoiseFloor
+    audioPeakdB
+    audioQualityScore
+    audioSampleRate
+    audioSilencePercentage
+    checksumMD5
+    checksumSHA256
+    colorGradeConsistency
+    complianceIssues
+    compositionScore
+    contentClarity
+    corruptionDetails
+    createdAt
+    fileIntegrity
+    formatCompliance
+    grade
+    id
+    motionSmoothnessScore
+    organizationId
+    overallScore
+    projectId
+    recommendedFixes
+    updatedAt
+    videoBitDepth
+    videoBitrate
+    videoBitrateScore
+    videoCodec
+    videoColorSpace
+    videoExposureScore
+    videoFrameRate
+    videoHDR
+    videoResolution
+    videoResolutionScore
+    videoStabilityScore
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateQualityScoreMutationVariables,
+  APITypes.CreateQualityScoreMutation
+>;
+export const createRestoreRequest = /* GraphQL */ `mutation CreateRestoreRequest(
+  $condition: ModelRestoreRequestConditionInput
+  $input: CreateRestoreRequestInput!
+) {
+  createRestoreRequest(condition: $condition, input: $input) {
+    actualCost
+    assetId
+    completedAt
+    createdAt
+    errorMessage
+    estimatedCompletion
+    estimatedCost
+    expiresAt
+    id
+    notificationSent
+    notifyOnComplete
+    organizationId
+    partialEndSeconds
+    partialReason
+    partialStartSeconds
+    projectId
+    requestType
+    requestedAt
+    requestedBy
+    requestedByEmail
+    restoreDurationDays
+    restoreTier
+    restoredKey
+    restoredSize
+    status
+    storageTierId
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateRestoreRequestMutationVariables,
+  APITypes.CreateRestoreRequestMutation
+>;
+export const createReview = /* GraphQL */ `mutation CreateReview(
+  $condition: ModelReviewConditionInput
+  $input: CreateReviewInput!
+) {
+  createReview(condition: $condition, input: $input) {
+    asset {
+      aiConfidence
+      aiProcessedAt
+      aiTags
+      approvalRequirements
+      approvalState
+      clientApprovalNote
+      clientApproved
+      clientApprovedAt
+      clientApprovedBy
+      createdAt
+      dimensions
+      duration
+      fileSize
+      finalApprovedAt
+      finalApprovedBy
+      id
+      internalApprovalNote
+      internalApproved
+      internalApprovedAt
+      internalApprovedBy
+      isBRoll
+      isLegalLocked
+      isPlannedShot
+      legalApprovalNote
+      legalApproved
+      legalApprovedAt
+      legalApprovedBy
+      legalLockedAt
+      mimeType
+      organizationId
+      owner
+      projectId
+      s3Key
+      shotDescription
+      shotListItemId
+      storageClass
+      thumbnailKey
+      type
+      updatedAt
+      usageHeatmap
+      version
+      __typename
+    }
+    assetId
+    comments {
+      nextToken
+      __typename
+    }
+    createdAt
+    id
+    isLegalApproved
+    legalApprovedAt
+    legalApprovedBy
+    organizationId
+    owner
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectId
+    reviewerEmail
+    reviewerId
+    reviewerRole
+    status
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateReviewMutationVariables,
+  APITypes.CreateReviewMutation
+>;
+export const createReviewComment = /* GraphQL */ `mutation CreateReviewComment(
+  $condition: ModelReviewCommentConditionInput
+  $input: CreateReviewCommentInput!
+) {
+  createReviewComment(condition: $condition, input: $input) {
+    assetId
+    attachmentKeys
+    commentText
+    commentType
+    commenterEmail
+    commenterId
+    commenterRole
+    createdAt
+    id
+    isResolved
+    linkedAssetVersionId
+    linkedTaskId
+    linkedTaskStatus
+    organizationId
+    owner
+    priority
+    projectId
+    replies {
+      nextToken
+      __typename
+    }
+    resolvedAt
+    resolvedBy
+    resolvedByEmail
+    resolvedInAssetVersionId
+    review {
+      assetId
+      createdAt
+      id
+      isLegalApproved
+      legalApprovedAt
+      legalApprovedBy
+      organizationId
+      owner
+      projectId
+      reviewerEmail
+      reviewerId
+      reviewerRole
+      status
+      updatedAt
+      __typename
+    }
+    reviewId
+    timecode
+    timecodeFormatted
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateReviewCommentMutationVariables,
+  APITypes.CreateReviewCommentMutation
+>;
+export const createReviewCommentReply = /* GraphQL */ `mutation CreateReviewCommentReply(
+  $condition: ModelReviewCommentReplyConditionInput
+  $input: CreateReviewCommentReplyInput!
+) {
+  createReviewCommentReply(condition: $condition, input: $input) {
+    createdAt
+    id
+    owner
+    parentComment {
+      assetId
+      attachmentKeys
+      commentText
+      commentType
+      commenterEmail
+      commenterId
+      commenterRole
+      createdAt
+      id
+      isResolved
+      linkedAssetVersionId
+      linkedTaskId
+      linkedTaskStatus
+      organizationId
+      owner
+      priority
+      projectId
+      resolvedAt
+      resolvedBy
+      resolvedByEmail
+      resolvedInAssetVersionId
+      reviewId
+      timecode
+      timecodeFormatted
+      updatedAt
+      __typename
+    }
+    parentCommentId
+    replierEmail
+    replierId
+    replierRole
+    replyText
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateReviewCommentReplyMutationVariables,
+  APITypes.CreateReviewCommentReplyMutation
+>;
+export const createRightsDocument = /* GraphQL */ `mutation CreateRightsDocument(
+  $condition: ModelRightsDocumentConditionInput
+  $input: CreateRightsDocumentInput!
+) {
+  createRightsDocument(condition: $condition, input: $input) {
+    approvalDate
+    approvedBy
+    approvedByName
+    coverageAmount
+    coverageType
+    createdAt
+    description
+    documentNumber
+    documentType
+    effectiveDate
+    expirationDate
+    fileKey
+    fileName
+    fileSize
+    id
+    isCritical
+    isLatestVersion
+    isRequired
+    issueDate
+    issuingAuthority
+    jurisdiction
+    lastReminderSent
+    locationAddress
+    locationName
+    mimeType
+    name
+    notes
+    organizationId
+    personEmail
+    personName
+    personRole
+    previousVersionId
+    projectId
+    rejectionReason
+    reminderDays
+    renewalDate
+    restrictions
+    reviewDate
+    reviewedBy
+    reviewedByName
+    shootDay
+    status
+    tags
+    thumbnailKey
+    updatedAt
+    uploadedBy
+    uploadedByName
+    version
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateRightsDocumentMutationVariables,
+  APITypes.CreateRightsDocumentMutation
+>;
+export const createSavedSearch = /* GraphQL */ `mutation CreateSavedSearch(
+  $condition: ModelSavedSearchConditionInput
+  $input: CreateSavedSearchInput!
+) {
+  createSavedSearch(condition: $condition, input: $input) {
+    color
+    createdAt
+    createdBy
+    createdByEmail
+    description
+    displayOrder
+    filters
+    icon
+    id
+    isPinned
+    lastModifiedAt
+    lastModifiedBy
+    lastNotifiedAt
+    lastUsedAt
+    name
+    notifyEmail
+    notifyOnNewMatches
+    organizationId
+    projectId
+    scope
+    searchQuery
+    sharedWith
+    sortBy
+    sortOrder
+    updatedAt
+    usageCount
+    visibility
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateSavedSearchMutationVariables,
+  APITypes.CreateSavedSearchMutation
+>;
+export const createShareLink = /* GraphQL */ `mutation CreateShareLink(
+  $condition: ModelShareLinkConditionInput
+  $input: CreateShareLinkInput!
+) {
+  createShareLink(condition: $condition, input: $input) {
+    accessLog
+    allowComment
+    allowDownload
+    allowPreview
+    allowedDomains
+    allowedEmails
+    createdAt
+    createdBy
+    createdByEmail
+    deactivatedAt
+    deactivatedBy
+    deactivationReason
+    downloadCount
+    downloadQuality
+    expiresAt
+    id
+    isActive
+    lastAccessedAt
+    lastAccessedBy
+    maxDownloads
+    maxViews
+    name
+    notifyEmail
+    notifyOnAccess
+    organizationId
+    password
+    requiresPassword
+    shareType
+    targetIds
+    token
+    updatedAt
+    viewCount
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateShareLinkMutationVariables,
+  APITypes.CreateShareLinkMutation
+>;
+export const createShotListTracker = /* GraphQL */ `mutation CreateShotListTracker(
+  $condition: ModelShotListTrackerConditionInput
+  $input: CreateShotListTrackerInput!
+) {
+  createShotListTracker(condition: $condition, input: $input) {
+    briefId
+    callSheetId
+    captureStatus
+    capturedAssetIds
+    capturedAt
+    capturedBy
+    continuityNotes
+    createdAt
+    directorApproved
+    directorApprovedAt
+    dpApproved
+    dpApprovedAt
+    framing
+    id
+    movement
+    notes
+    organizationId
+    plannedDuration
+    projectId
+    propNotes
+    proposalId
+    qualityNotes
+    qualityRating
+    selectedAssetId
+    shootDay
+    shotDescription
+    shotNumber
+    shotType
+    takeCount
+    updatedAt
+    wardrobeNotes
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateShotListTrackerMutationVariables,
+  APITypes.CreateShotListTrackerMutation
+>;
+export const createShotLog = /* GraphQL */ `mutation CreateShotLog(
+  $condition: ModelShotLogConditionInput
+  $input: CreateShotLogInput!
+) {
+  createShotLog(condition: $condition, input: $input) {
+    camera
+    cardId
+    circled
+    continuityNotes
+    createdAt
+    dprId
+    duration
+    fStop
+    fps
+    id
+    iso
+    lens
+    loggedBy
+    loggedByEmail
+    notes
+    organizationId
+    performanceNotes
+    projectId
+    scene
+    shot
+    status
+    take
+    technicalNotes
+    timecodeIn
+    timecodeOut
+    timestamp
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateShotLogMutationVariables,
+  APITypes.CreateShotLogMutation
+>;
+export const createSocialOutput = /* GraphQL */ `mutation CreateSocialOutput(
+  $condition: ModelSocialOutputConditionInput
+  $input: CreateSocialOutputInput!
+) {
+  createSocialOutput(condition: $condition, input: $input) {
+    addEndCard
+    addWatermark
+    aspectRatio
+    audioTrack
+    captionFileKey
+    captionLanguage
+    captionStyle
+    cmsEndpoint
+    cmsIntegration
+    cmsPublishStatus
+    cmsPublishedAt
+    cmsPublishedUrl
+    createdAt
+    createdBy
+    createdByEmail
+    cropPosition
+    cropX
+    cropY
+    customHeight
+    customWidth
+    description
+    endCardDuration
+    endCardKey
+    id
+    includeCaptions
+    includeSubtitles
+    isScheduled
+    maxDuration
+    name
+    normalizeAudio
+    organizationId
+    outputBitrate
+    outputCodec
+    outputDuration
+    outputFileKey
+    outputFileSize
+    outputFormat
+    outputResolution
+    platform
+    postCallToAction
+    postCallToActionUrl
+    postCaption
+    postCategory
+    postDescription
+    postHashtags
+    postLocation
+    postMentions
+    postPrivacy
+    postTags
+    postThumbnailKey
+    postTitle
+    processingCompletedAt
+    processingError
+    processingProgress
+    processingStartedAt
+    projectId
+    scheduledPublishAt
+    socialPostId
+    socialPublishError
+    socialPublishStatus
+    socialPublishedAt
+    socialPublishedUrl
+    sourceAssetId
+    sourceVersionId
+    status
+    subtitleLanguages
+    targetLoudness
+    trimEnd
+    trimStart
+    updatedAt
+    watermarkKey
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateSocialOutputMutationVariables,
+  APITypes.CreateSocialOutputMutation
+>;
+export const createStorageTier = /* GraphQL */ `mutation CreateStorageTier(
+  $condition: ModelStorageTierConditionInput
+  $input: CreateStorageTierInput!
+) {
+  createStorageTier(condition: $condition, input: $input) {
+    archiveReason
+    archivedAt
+    archivedBy
+    assetId
+    createdAt
+    currentStorageClass
+    fileSizeBytes
+    id
+    isArchived
+    isRestoring
+    lastChecked
+    lastCostCalculation
+    lastRestoredAt
+    lifecyclePolicyApplied
+    monthlyStorageCost
+    nextTransitionClass
+    nextTransitionDate
+    organizationId
+    originalStorageClass
+    partialRestoreExpiresAt
+    partialRestoreKey
+    partialRestoreRanges
+    projectId
+    projectedAnnualCost
+    restoreCount
+    restoreExpiresAt
+    restoreRequestedAt
+    restoreRequestedBy
+    restoreType
+    s3Bucket
+    s3Key
+    totalStorageCostToDate
+    transitionHistory
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateStorageTierMutationVariables,
+  APITypes.CreateStorageTierMutation
+>;
+export const createSubscriptionPlan = /* GraphQL */ `mutation CreateSubscriptionPlan(
+  $condition: ModelSubscriptionPlanConditionInput
+  $input: CreateSubscriptionPlanInput!
+) {
+  createSubscriptionPlan(condition: $condition, input: $input) {
+    annualPrice
+    createdAt
+    currency
+    description
+    features
+    featuresDescription
+    id
+    isActive
+    isPopular
+    isPublic
+    maxAICreditsPerMonth
+    maxBandwidthGB
+    maxProjects
+    maxStorageGB
+    maxUsers
+    monthlyPrice
+    name
+    slug
+    sortOrder
+    stripePriceIdAnnual
+    stripePriceIdMonthly
+    tier
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateSubscriptionPlanMutationVariables,
+  APITypes.CreateSubscriptionPlanMutation
+>;
+export const createTask = /* GraphQL */ `mutation CreateTask(
+  $condition: ModelTaskConditionInput
+  $input: CreateTaskInput!
+) {
+  createTask(condition: $condition, input: $input) {
+    actualHours
+    assignedAt
+    assignedBy
+    assignedByEmail
+    assignedToEmail
+    assignedToName
+    attachmentKeys
+    blockedBy
+    blockedReason
+    completedAt
+    completedBy
+    completedByEmail
+    createdAt
+    createdBy
+    createdByEmail
+    dependsOn
+    description
+    dueDate
+    estimatedHours
+    id
+    linkedAssetId
+    linkedAssetName
+    linkedTimecode
+    linkedTimecodeFormatted
+    organizationId
+    priority
+    progressPercentage
+    projectId
+    resolutionNote
+    resolvedInAssetVersionId
+    resolvedInAssetVersionNumber
+    sourceAssetId
+    sourceCommentId
+    sourceMessageId
+    startDate
+    status
+    tags
+    taskType
+    title
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateTaskMutationVariables,
+  APITypes.CreateTaskMutation
+>;
+export const createTeamMember = /* GraphQL */ `mutation CreateTeamMember(
+  $condition: ModelTeamMemberConditionInput
+  $input: CreateTeamMemberInput!
+) {
+  createTeamMember(condition: $condition, input: $input) {
+    acceptedAt
+    avatar
+    company
+    contributionCount
+    createdAt
+    customRoleTitle
+    department
+    email
+    id
+    invitedAt
+    invitedBy
+    lastActiveAt
+    name
+    notifyOnApprovals
+    notifyOnAssets
+    notifyOnMessages
+    notifyOnTasks
+    organizationId
+    permissions
+    phone
+    projectId
+    removalReason
+    removedAt
+    removedBy
+    role
+    status
+    title
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateTeamMemberMutationVariables,
+  APITypes.CreateTeamMemberMutation
+>;
+export const createTranscription = /* GraphQL */ `mutation CreateTranscription(
+  $condition: ModelTranscriptionConditionInput
+  $input: CreateTranscriptionInput!
+) {
+  createTranscription(condition: $condition, input: $input) {
+    assetId
+    assetVersionId
+    averageConfidence
+    completedAt
+    createdAt
+    createdBy
+    errorMessage
+    fullText
+    hasManualEdits
+    id
+    jobId
+    keywords
+    language
+    languageConfidence
+    lastEditedAt
+    lastEditedBy
+    lowConfidenceSegments
+    organizationId
+    progress
+    provider
+    segments
+    speakerCount
+    speakers
+    srtKey
+    status
+    transcriptKey
+    updatedAt
+    vttKey
+    wordCount
+    words
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateTranscriptionMutationVariables,
+  APITypes.CreateTranscriptionMutation
+>;
+export const createUsageRecord = /* GraphQL */ `mutation CreateUsageRecord(
+  $condition: ModelUsageRecordConditionInput
+  $input: CreateUsageRecordInput!
+) {
+  createUsageRecord(condition: $condition, input: $input) {
+    billingPeriod
+    createdAt
+    currency
+    description
+    id
+    includedQuantity
+    organization {
+      address
+      autoArchiveDays
+      billingCycleDay
+      brandAccentColor
+      brandPrimaryColor
+      brandSecondaryColor
+      city
+      country
+      createdAt
+      createdBy
+      currency
+      currentAICreditsUsed
+      currentProjectCount
+      currentStorageUsedGB
+      currentUserCount
+      customDomain
+      customFeatures
+      dataProcessingAgreementSigned
+      dataRetentionDays
+      deletedAt
+      description
+      dpaSignedAt
+      email
+      emailFromAddress
+      emailFromName
+      featuresEnabled
+      id
+      industry
+      ipWhitelist
+      isGDPRCompliant
+      isHIPAACompliant
+      isSOC2Compliant
+      locale
+      logo
+      maxAICredits
+      maxProjects
+      maxStorageGB
+      maxUsers
+      mfaRequired
+      name
+      onboardingCompleted
+      onboardingCompletedAt
+      onboardingStep
+      owner
+      phone
+      postalCode
+      sessionTimeoutMinutes
+      slug
+      ssoConfig
+      ssoEnabled
+      ssoProvider
+      state
+      status
+      stripeCustomerId
+      stripePaymentMethodId
+      stripePriceId
+      stripeSubscriptionId
+      subscriptionEndsAt
+      subscriptionStartedAt
+      subscriptionStatus
+      subscriptionTier
+      suspendedAt
+      suspendedReason
+      timezone
+      trialEndsAt
+      updatedAt
+      usageResetDate
+      website
+      __typename
+    }
+    organizationId
+    overageCost
+    overageQuantity
+    periodEnd
+    periodStart
+    projectId
+    quantity
+    totalCost
+    unit
+    unitPrice
+    updatedAt
+    usageType
+    userId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateUsageRecordMutationVariables,
+  APITypes.CreateUsageRecordMutation
+>;
+export const createVFXShot = /* GraphQL */ `mutation CreateVFXShot(
+  $condition: ModelVFXShotConditionInput
+  $input: CreateVFXShotInput!
+) {
+  createVFXShot(condition: $condition, input: $input) {
+    actualAmount
+    bidAmount
+    briefKey
+    complexity
+    createdAt
+    createdBy
+    currentVersion
+    deliveryStage
+    description
+    dueDate
+    frameCount
+    frameIn
+    frameOut
+    id
+    latestDeliveryKey
+    notes
+    organizationId
+    plateDelivered
+    plateDeliveredAt
+    plateKey
+    projectId
+    referenceDelivered
+    referenceDeliveredAt
+    sequence
+    shotCode
+    status
+    updatedAt
+    variance
+    vendor
+    vendorContact
+    vendorEmail
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateVFXShotMutationVariables,
+  APITypes.CreateVFXShotMutation
+>;
+export const createWorkflowExecutionLog = /* GraphQL */ `mutation CreateWorkflowExecutionLog(
+  $condition: ModelWorkflowExecutionLogConditionInput
+  $input: CreateWorkflowExecutionLogInput!
+) {
+  createWorkflowExecutionLog(condition: $condition, input: $input) {
+    actionResults
+    assetIds
+    assetsFailed
+    assetsProcessed
+    assetsSucceeded
+    completedAt
+    createdAt
+    durationMs
+    errorDetails
+    errorMessage
+    executionLog
+    id
+    organizationId
+    startedAt
+    status
+    triggerEvent
+    triggeredBy
+    triggeredByUser
+    updatedAt
+    workflowRuleId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateWorkflowExecutionLogMutationVariables,
+  APITypes.CreateWorkflowExecutionLogMutation
+>;
+export const createWorkflowRule = /* GraphQL */ `mutation CreateWorkflowRule(
+  $condition: ModelWorkflowRuleConditionInput
+  $input: CreateWorkflowRuleInput!
+) {
+  createWorkflowRule(condition: $condition, input: $input) {
+    actions
+    createdAt
+    createdBy
+    description
+    failedExecutions
+    id
+    isActive
+    lastExecutionAt
+    lastExecutionLog
+    lastExecutionStatus
+    lastModifiedAt
+    lastModifiedBy
+    lastRunAt
+    name
+    nextRunAt
+    organizationId
+    priority
+    projectId
+    schedule
+    scope
+    successfulExecutions
+    totalExecutions
+    triggerConditions
+    triggerType
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateWorkflowRuleMutationVariables,
+  APITypes.CreateWorkflowRuleMutation
+>;
+export const deleteAIAnalysisJob = /* GraphQL */ `mutation DeleteAIAnalysisJob(
+  $condition: ModelAIAnalysisJobConditionInput
+  $input: DeleteAIAnalysisJobInput!
+) {
+  deleteAIAnalysisJob(condition: $condition, input: $input) {
+    analysisType
+    asset {
+      aiConfidence
+      aiProcessedAt
+      aiTags
+      approvalRequirements
+      approvalState
+      clientApprovalNote
+      clientApproved
+      clientApprovedAt
+      clientApprovedBy
+      createdAt
+      dimensions
+      duration
+      fileSize
+      finalApprovedAt
+      finalApprovedBy
+      id
+      internalApprovalNote
+      internalApproved
+      internalApprovedAt
+      internalApprovedBy
+      isBRoll
+      isLegalLocked
+      isPlannedShot
+      legalApprovalNote
+      legalApproved
+      legalApprovedAt
+      legalApprovedBy
+      legalLockedAt
+      mimeType
+      organizationId
+      owner
+      projectId
+      s3Key
+      shotDescription
+      shotListItemId
+      storageClass
+      thumbnailKey
+      type
+      updatedAt
+      usageHeatmap
+      version
+      __typename
+    }
+    assetId
+    assetName
+    assetVersionId
+    assetVersionNumber
+    completedAt
+    createdAt
+    errorMessage
+    id
+    organizationId
+    progress
+    projectId
+    queuedAt
+    rekognitionJobId
+    resultsCount
+    resultsSnapshot
+    s3KeyAtAnalysis
+    startedAt
+    status
+    transcribeJobName
+    triggeredBy
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAIAnalysisJobMutationVariables,
+  APITypes.DeleteAIAnalysisJobMutation
+>;
+export const deleteAIFaceDetection = /* GraphQL */ `mutation DeleteAIFaceDetection(
+  $condition: ModelAIFaceDetectionConditionInput
+  $input: DeleteAIFaceDetectionInput!
+) {
+  deleteAIFaceDetection(condition: $condition, input: $input) {
+    ageRange
+    asset {
+      aiConfidence
+      aiProcessedAt
+      aiTags
+      approvalRequirements
+      approvalState
+      clientApprovalNote
+      clientApproved
+      clientApprovedAt
+      clientApprovedBy
+      createdAt
+      dimensions
+      duration
+      fileSize
+      finalApprovedAt
+      finalApprovedBy
+      id
+      internalApprovalNote
+      internalApproved
+      internalApprovedAt
+      internalApprovedBy
+      isBRoll
+      isLegalLocked
+      isPlannedShot
+      legalApprovalNote
+      legalApproved
+      legalApprovedAt
+      legalApprovedBy
+      legalLockedAt
+      mimeType
+      organizationId
+      owner
+      projectId
+      s3Key
+      shotDescription
+      shotListItemId
+      storageClass
+      thumbnailKey
+      type
+      updatedAt
+      usageHeatmap
+      version
+      __typename
+    }
+    assetId
+    beard
+    boundingBox
+    confidence
+    createdAt
+    emotions
+    eyeglasses
+    eyesOpen
+    gender
+    id
+    landmarks
+    mouthOpen
+    mustache
+    organizationId
+    personId
+    personName
+    processingJobId
+    projectId
+    smile
+    sunglasses
+    timestamp
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAIFaceDetectionMutationVariables,
+  APITypes.DeleteAIFaceDetectionMutation
+>;
+export const deleteAISceneDetection = /* GraphQL */ `mutation DeleteAISceneDetection(
+  $condition: ModelAISceneDetectionConditionInput
+  $input: DeleteAISceneDetectionInput!
+) {
+  deleteAISceneDetection(condition: $condition, input: $input) {
+    asset {
+      aiConfidence
+      aiProcessedAt
+      aiTags
+      approvalRequirements
+      approvalState
+      clientApprovalNote
+      clientApproved
+      clientApprovedAt
+      clientApprovedBy
+      createdAt
+      dimensions
+      duration
+      fileSize
+      finalApprovedAt
+      finalApprovedBy
+      id
+      internalApprovalNote
+      internalApproved
+      internalApprovedAt
+      internalApprovedBy
+      isBRoll
+      isLegalLocked
+      isPlannedShot
+      legalApprovalNote
+      legalApproved
+      legalApprovedAt
+      legalApprovedBy
+      legalLockedAt
+      mimeType
+      organizationId
+      owner
+      projectId
+      s3Key
+      shotDescription
+      shotListItemId
+      storageClass
+      thumbnailKey
+      type
+      updatedAt
+      usageHeatmap
+      version
+      __typename
+    }
+    assetId
+    confidence
+    createdAt
+    duration
+    endTime
+    id
+    labels
+    lighting
+    movement
+    organizationId
+    processingJobId
+    projectId
+    shotType
+    startTime
+    thumbnailKey
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAISceneDetectionMutationVariables,
+  APITypes.DeleteAISceneDetectionMutation
+>;
+export const deleteAITranscript = /* GraphQL */ `mutation DeleteAITranscript(
+  $condition: ModelAITranscriptConditionInput
+  $input: DeleteAITranscriptInput!
+) {
+  deleteAITranscript(condition: $condition, input: $input) {
+    asset {
+      aiConfidence
+      aiProcessedAt
+      aiTags
+      approvalRequirements
+      approvalState
+      clientApprovalNote
+      clientApproved
+      clientApprovedAt
+      clientApprovedBy
+      createdAt
+      dimensions
+      duration
+      fileSize
+      finalApprovedAt
+      finalApprovedBy
+      id
+      internalApprovalNote
+      internalApproved
+      internalApprovedAt
+      internalApprovedBy
+      isBRoll
+      isLegalLocked
+      isPlannedShot
+      legalApprovalNote
+      legalApproved
+      legalApprovedAt
+      legalApprovedBy
+      legalLockedAt
+      mimeType
+      organizationId
+      owner
+      projectId
+      s3Key
+      shotDescription
+      shotListItemId
+      storageClass
+      thumbnailKey
+      type
+      updatedAt
+      usageHeatmap
+      version
+      __typename
+    }
+    assetId
+    confidence
+    createdAt
+    endTime
+    id
+    languageCode
+    organizationId
+    processingJobId
+    projectId
+    speakerId
+    speakerName
+    startTime
+    text
+    updatedAt
+    words
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAITranscriptMutationVariables,
+  APITypes.DeleteAITranscriptMutation
+>;
+export const deleteAccessException = /* GraphQL */ `mutation DeleteAccessException(
+  $condition: ModelAccessExceptionConditionInput
+  $input: DeleteAccessExceptionInput!
+) {
+  deleteAccessException(condition: $condition, input: $input) {
+    approvedAt
+    approvedBy
+    approvedByEmail
+    approverRole
+    createdAt
+    denialReason
+    durationHours
+    expiresAt
+    id
+    organizationId
+    owner
+    projectId
+    reason
+    requestedAction
+    requestedAssetId
+    requestedAt
+    requestedBy
+    requestedByEmail
+    status
+    targetUserEmail
+    targetUserId
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAccessExceptionMutationVariables,
+  APITypes.DeleteAccessExceptionMutation
+>;
+export const deleteActivityLog = /* GraphQL */ `mutation DeleteActivityLog(
+  $condition: ModelActivityLogConditionInput
+  $input: DeleteActivityLogInput!
+) {
+  deleteActivityLog(condition: $condition, input: $input) {
+    action
+    createdAt
+    id
+    ipAddress
+    metadata
+    organizationId
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectId
+    targetId
+    targetName
+    targetType
+    updatedAt
+    userEmail
+    userId
+    userRole
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteActivityLogMutationVariables,
+  APITypes.DeleteActivityLogMutation
+>;
+export const deleteArchiveAsset = /* GraphQL */ `mutation DeleteArchiveAsset(
+  $condition: ModelArchiveAssetConditionInput
+  $input: DeleteArchiveAssetInput!
+) {
+  deleteArchiveAsset(condition: $condition, input: $input) {
+    aiEmotions
+    aiFaces
+    aiObjects
+    aiSceneDescription
+    aiSentiment
+    aiSummary
+    aiTextOnScreen
+    aiTranscript
+    aspectRatio
+    assetId
+    audioChannels
+    audioCodec
+    audioSampleRate
+    bitDepth
+    bitrate
+    camera
+    cameraSettings
+    childAssetIds
+    codec
+    colorPalette
+    colorSpace
+    createdAt
+    creativeMetadata
+    duration
+    fileSizeBytes
+    frameRate
+    fullTextIndex
+    glacierArchiveId
+    glacierVaultId
+    hdr
+    id
+    labels
+    lastTierChangeAt
+    lastUsedAt
+    lastUsedBy
+    legalMetadata
+    lens
+    linkedProjects
+    linkedVersions
+    locationReleases
+    mood
+    operationalMetadata
+    organizationId
+    parentAssetId
+    partialRetrievalSupported
+    permitExpiry
+    permitId
+    projectId
+    proxyKey
+    regionRestrictions
+    releaseStatus
+    resolution
+    rightsExpiration
+    riskFactors
+    riskScore
+    s3Bucket
+    s3Key
+    sceneNumber
+    searchVector
+    shotType
+    storageMetadata
+    storageTier
+    subjects
+    takeNumber
+    talentReleases
+    technicalMetadata
+    thawCostEstimate
+    thumbnailKey
+    tierChangeHistory
+    transcriptKeywords
+    updatedAt
+    uploadTimestamp
+    uploaderEmail
+    uploaderName
+    usageCount
+    usageRestrictions
+    visualStyle
+    waveformKey
+    workflowStage
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteArchiveAssetMutationVariables,
+  APITypes.DeleteArchiveAssetMutation
+>;
+export const deleteArchivePolicy = /* GraphQL */ `mutation DeleteArchivePolicy(
+  $condition: ModelArchivePolicyConditionInput
+  $input: DeleteArchivePolicyInput!
+) {
+  deleteArchivePolicy(condition: $condition, input: $input) {
+    assetsProcessed
+    createdAt
+    createdBy
+    createdByEmail
+    daysUntilArchive
+    description
+    excludeAssetTypes
+    excludeTaggedWith
+    id
+    includeAssetTypes
+    isEnabled
+    lastExecutedAt
+    minFileSizeMB
+    name
+    nextScheduledRun
+    onlyProjectStatus
+    organizationId
+    projectId
+    storageFreedGB
+    targetStorageClass
+    triggerType
+    updatedAt
+    usageScoreThreshold
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteArchivePolicyMutationVariables,
+  APITypes.DeleteArchivePolicyMutation
+>;
+export const deleteAsset = /* GraphQL */ `mutation DeleteAsset(
+  $condition: ModelAssetConditionInput
+  $input: DeleteAssetInput!
+) {
+  deleteAsset(condition: $condition, input: $input) {
+    aiAnalysisJobs {
+      nextToken
+      __typename
+    }
+    aiConfidence
+    aiFaceDetections {
+      nextToken
+      __typename
+    }
+    aiProcessedAt
+    aiSceneDetections {
+      nextToken
+      __typename
+    }
+    aiTags
+    aiTranscripts {
+      nextToken
+      __typename
+    }
+    approvalRequirements
+    approvalState
+    clientApprovalNote
+    clientApproved
+    clientApprovedAt
+    clientApprovedBy
+    createdAt
+    dimensions
+    duration
+    fileSize
+    finalApprovedAt
+    finalApprovedBy
+    id
+    internalApprovalNote
+    internalApproved
+    internalApprovedAt
+    internalApprovedBy
+    isBRoll
+    isLegalLocked
+    isPlannedShot
+    legalApprovalNote
+    legalApproved
+    legalApprovedAt
+    legalApprovedBy
+    legalLockedAt
+    mimeType
+    organizationId
+    owner
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectId
+    reviews {
+      nextToken
+      __typename
+    }
+    s3Key
+    shotDescription
+    shotListItemId
+    storageClass
+    thumbnailKey
+    type
+    updatedAt
+    usageHeatmap
+    version
+    versions {
+      nextToken
+      __typename
+    }
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAssetMutationVariables,
+  APITypes.DeleteAssetMutation
+>;
+export const deleteAssetAnalytics = /* GraphQL */ `mutation DeleteAssetAnalytics(
+  $condition: ModelAssetAnalyticsConditionInput
+  $input: DeleteAssetAnalyticsInput!
+) {
+  deleteAssetAnalytics(condition: $condition, input: $input) {
+    approvalCount
+    assetId
+    averageRating
+    averageWatchPercentage
+    commentCount
+    createdAt
+    dataIntegrity
+    distributionLinksCreated
+    downloadCount
+    estimatedValue
+    externalEmbeds
+    feedbackSentiment
+    firstViewedAt
+    id
+    lastUpdated
+    lastViewedAt
+    organizationId
+    peakUsageCount
+    peakUsageDate
+    productionCost
+    projectId
+    revenueGenerated
+    revisionRequestCount
+    roiLastCalculated
+    roiPercentage
+    shareCount
+    socialOutputsCreated
+    totalPlayDuration
+    totalViews
+    uniqueViewers
+    updatedAt
+    usageScore
+    usageScoreUpdatedAt
+    usageTrend
+    viewerDevices
+    viewerLocations
+    viewsByDay
+    viewsByHour
+    viewsByMonth
+    viewsByWeek
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAssetAnalyticsMutationVariables,
+  APITypes.DeleteAssetAnalyticsMutation
+>;
+export const deleteAssetLineage = /* GraphQL */ `mutation DeleteAssetLineage(
+  $condition: ModelAssetLineageConditionInput
+  $input: DeleteAssetLineageInput!
+) {
+  deleteAssetLineage(condition: $condition, input: $input) {
+    approvals
+    approvedAt
+    approvedBy
+    childAssets
+    createdAt
+    currentVersion
+    derivationDetails
+    derivationType
+    generationNumber
+    id
+    inheritedMetadata
+    isApproved
+    lastUsedAt
+    masterAssetId
+    masterAssetName
+    masterProjectId
+    organizationId
+    overriddenMetadata
+    updatedAt
+    usageCount
+    usedInDeliverables
+    usedInProjects
+    versionHistory
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAssetLineageMutationVariables,
+  APITypes.DeleteAssetLineageMutation
+>;
+export const deleteAssetUsageHeatmap = /* GraphQL */ `mutation DeleteAssetUsageHeatmap(
+  $condition: ModelAssetUsageHeatmapConditionInput
+  $input: DeleteAssetUsageHeatmapInput!
+) {
+  deleteAssetUsageHeatmap(condition: $condition, input: $input) {
+    archiveRecommendation
+    archiveRecommendationReason
+    assetId
+    createdAt
+    dataQuality
+    deliverableCount
+    engagementRate
+    estimatedImpressions
+    estimatedRevenueGenerated
+    id
+    lastCalculated
+    lastUsed
+    organizationId
+    peakUsageCount
+    peakUsageDate
+    platformUsage
+    predictedUsageNext30Days
+    productionCost
+    projectId
+    recommendedStorageTier
+    relatedDeliverables
+    reusabilityScore
+    roiScore
+    strategicValue
+    topUsers
+    trendAnalysis
+    uniquenessScore
+    updatedAt
+    usageByDayOfWeek
+    usageByHour
+    usageByMonth
+    usageByWeek
+    usageTrend
+    useByRole
+    useByTeam
+    useByUser
+    useFrequencyDaily
+    useFrequencyMonthly
+    useFrequencyWeekly
+    valueJustification
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAssetUsageHeatmapMutationVariables,
+  APITypes.DeleteAssetUsageHeatmapMutation
+>;
+export const deleteAssetVersion = /* GraphQL */ `mutation DeleteAssetVersion(
+  $condition: ModelAssetVersionConditionInput
+  $input: DeleteAssetVersionInput!
+) {
+  deleteAssetVersion(condition: $condition, input: $input) {
+    asset {
+      aiConfidence
+      aiProcessedAt
+      aiTags
+      approvalRequirements
+      approvalState
+      clientApprovalNote
+      clientApproved
+      clientApprovedAt
+      clientApprovedBy
+      createdAt
+      dimensions
+      duration
+      fileSize
+      finalApprovedAt
+      finalApprovedBy
+      id
+      internalApprovalNote
+      internalApproved
+      internalApprovedAt
+      internalApprovedBy
+      isBRoll
+      isLegalLocked
+      isPlannedShot
+      legalApprovalNote
+      legalApproved
+      legalApprovedAt
+      legalApprovedBy
+      legalLockedAt
+      mimeType
+      organizationId
+      owner
+      projectId
+      s3Key
+      shotDescription
+      shotListItemId
+      storageClass
+      thumbnailKey
+      type
+      updatedAt
+      usageHeatmap
+      version
+      __typename
+    }
+    assetId
+    changeDescription
+    createdAt
+    createdBy
+    createdByEmail
+    fileSize
+    id
+    isCurrentVersion
+    isReviewReady
+    mimeType
+    organizationId
+    previousVersionId
+    projectId
+    s3Key
+    updatedAt
+    versionLabel
+    versionNumber
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAssetVersionMutationVariables,
+  APITypes.DeleteAssetVersionMutation
+>;
+export const deleteAudioCue = /* GraphQL */ `mutation DeleteAudioCue(
+  $condition: ModelAudioCueConditionInput
+  $input: DeleteAudioCueInput!
+) {
+  deleteAudioCue(condition: $condition, input: $input) {
+    actor
+    character
+    clearanceDate
+    clearanceNotes
+    clearanceStatus
+    composer
+    createdAt
+    createdBy
+    cueNumber
+    cueType
+    duration
+    editedKey
+    id
+    licenseFee
+    lineText
+    masterOwner
+    name
+    notes
+    organizationId
+    projectId
+    publisher
+    recordingDate
+    recordingFacility
+    recordingStatus
+    sourceKey
+    syncOwner
+    term
+    territories
+    timecodeIn
+    timecodeOut
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAudioCueMutationVariables,
+  APITypes.DeleteAudioCueMutation
+>;
+export const deleteAuditLog = /* GraphQL */ `mutation DeleteAuditLog(
+  $condition: ModelAuditLogConditionInput
+  $input: DeleteAuditLogInput!
+) {
+  deleteAuditLog(condition: $condition, input: $input) {
+    action
+    actionCategory
+    assetId
+    createdAt
+    deniedReason
+    details
+    geoLocation
+    id
+    ipAddress
+    isExternal
+    organizationId
+    projectId
+    resourceId
+    resourceType
+    sessionId
+    success
+    timestamp
+    updatedAt
+    userAgent
+    userEmail
+    userId
+    userRole
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteAuditLogMutationVariables,
+  APITypes.DeleteAuditLogMutation
+>;
+export const deleteBrief = /* GraphQL */ `mutation DeleteBrief(
+  $condition: ModelBriefConditionInput
+  $input: DeleteBriefInput!
+) {
+  deleteBrief(condition: $condition, input: $input) {
+    accessibilityRequired
+    aiProcessedAt
+    approvedByFinance
+    approvedByLegal
+    approvedByProducer
+    brandGuidelines
+    budgetRange
+    complexity
+    copyrightOwnership
+    covidProtocolsRequired
+    createdAt
+    creativeProposals
+    crewRoles
+    deliverables
+    distributionChannels
+    embargoDate
+    equipmentNeeds
+    estimatedDuration
+    geoRights
+    hasDroneRisk
+    hasHazardousLocationRisk
+    hasMinorRisk
+    hasPublicSpaceRisk
+    hasStuntRisk
+    id
+    inspirationReferences
+    insuranceRequired
+    keyMessages
+    languageVersions
+    locationDetails
+    locationReleasesRequired
+    masterFormat
+    musicLicensing
+    organizationId
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectDescription
+    projectId
+    requiredPermits
+    riskLevel
+    safetyOfficerNeeded
+    scenes
+    scriptOrNotes
+    selectedProposalId
+    socialCropsRequired
+    stockFootageNeeded
+    subtitlesRequired
+    talentOnScreen
+    talentReleasesRequired
+    talentVoiceOver
+    targetAudience
+    tone
+    unionRules
+    updatedAt
+    usageRightsDuration
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteBriefMutationVariables,
+  APITypes.DeleteBriefMutation
+>;
+export const deleteBudgetLineItem = /* GraphQL */ `mutation DeleteBudgetLineItem(
+  $condition: ModelBudgetLineItemConditionInput
+  $input: DeleteBudgetLineItemInput!
+) {
+  deleteBudgetLineItem(condition: $condition, input: $input) {
+    actualAmount
+    actualUnits
+    approvedAt
+    approvedBy
+    category
+    createdAt
+    createdBy
+    createdByEmail
+    description
+    endDate
+    estimatedAmount
+    estimatedUnits
+    id
+    notes
+    organizationId
+    phase
+    projectId
+    purchaseOrderNumber
+    startDate
+    status
+    subcategory
+    unitRate
+    unitType
+    updatedAt
+    variance
+    vendorContact
+    vendorName
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteBudgetLineItemMutationVariables,
+  APITypes.DeleteBudgetLineItemMutation
+>;
+export const deleteCallSheet = /* GraphQL */ `mutation DeleteCallSheet(
+  $condition: ModelCallSheetConditionInput
+  $input: DeleteCallSheetInput!
+) {
+  deleteCallSheet(condition: $condition, input: $input) {
+    castMembers {
+      nextToken
+      __typename
+    }
+    cateringLocation
+    createdAt
+    crewMembers {
+      nextToken
+      __typename
+    }
+    directorName
+    directorPhone
+    episodeNumber
+    estimatedWrap
+    firstADName
+    firstADPhone
+    generalCrewCall
+    hospitalAddress
+    id
+    lastUpdatedBy
+    mealTimes
+    nearestHospital
+    nextDaySchedule
+    organizationId
+    parkingInstructions
+    primaryLocation
+    primaryLocationAddress
+    producerName
+    producerPhone
+    productionCompany
+    productionManagerName
+    productionManagerPhone
+    productionOfficePhone
+    productionTitle
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectId
+    publishedAt
+    safetyNotes
+    scenes {
+      nextToken
+      __typename
+    }
+    shootDate
+    shootDayNumber
+    specialInstructions
+    status
+    sunset
+    temperature
+    timezone
+    totalShootDays
+    transportationNotes
+    updatedAt
+    version
+    weatherForecast
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteCallSheetMutationVariables,
+  APITypes.DeleteCallSheetMutation
+>;
+export const deleteCallSheetCast = /* GraphQL */ `mutation DeleteCallSheetCast(
+  $condition: ModelCallSheetCastConditionInput
+  $input: DeleteCallSheetCastInput!
+) {
+  deleteCallSheetCast(condition: $condition, input: $input) {
+    actorName
+    callSheet {
+      cateringLocation
+      createdAt
+      directorName
+      directorPhone
+      episodeNumber
+      estimatedWrap
+      firstADName
+      firstADPhone
+      generalCrewCall
+      hospitalAddress
+      id
+      lastUpdatedBy
+      mealTimes
+      nearestHospital
+      nextDaySchedule
+      organizationId
+      parkingInstructions
+      primaryLocation
+      primaryLocationAddress
+      producerName
+      producerPhone
+      productionCompany
+      productionManagerName
+      productionManagerPhone
+      productionOfficePhone
+      productionTitle
+      projectId
+      publishedAt
+      safetyNotes
+      shootDate
+      shootDayNumber
+      specialInstructions
+      status
+      sunset
+      temperature
+      timezone
+      totalShootDays
+      transportationNotes
+      updatedAt
+      version
+      weatherForecast
+      __typename
+    }
+    callSheetId
+    callToSet
+    characterName
+    createdAt
+    email
+    id
+    makeupCall
+    notes
+    phone
+    pickupLocation
+    pickupTime
+    sortOrder
+    updatedAt
+    wardrobeCall
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteCallSheetCastMutationVariables,
+  APITypes.DeleteCallSheetCastMutation
+>;
+export const deleteCallSheetCrew = /* GraphQL */ `mutation DeleteCallSheetCrew(
+  $condition: ModelCallSheetCrewConditionInput
+  $input: DeleteCallSheetCrewInput!
+) {
+  deleteCallSheetCrew(condition: $condition, input: $input) {
+    callSheet {
+      cateringLocation
+      createdAt
+      directorName
+      directorPhone
+      episodeNumber
+      estimatedWrap
+      firstADName
+      firstADPhone
+      generalCrewCall
+      hospitalAddress
+      id
+      lastUpdatedBy
+      mealTimes
+      nearestHospital
+      nextDaySchedule
+      organizationId
+      parkingInstructions
+      primaryLocation
+      primaryLocationAddress
+      producerName
+      producerPhone
+      productionCompany
+      productionManagerName
+      productionManagerPhone
+      productionOfficePhone
+      productionTitle
+      projectId
+      publishedAt
+      safetyNotes
+      shootDate
+      shootDayNumber
+      specialInstructions
+      status
+      sunset
+      temperature
+      timezone
+      totalShootDays
+      transportationNotes
+      updatedAt
+      version
+      weatherForecast
+      __typename
+    }
+    callSheetId
+    callTime
+    createdAt
+    department
+    email
+    id
+    name
+    notes
+    phone
+    role
+    sortOrder
+    updatedAt
+    walkieChannel
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteCallSheetCrewMutationVariables,
+  APITypes.DeleteCallSheetCrewMutation
+>;
+export const deleteCallSheetScene = /* GraphQL */ `mutation DeleteCallSheetScene(
+  $condition: ModelCallSheetSceneConditionInput
+  $input: DeleteCallSheetSceneInput!
+) {
+  deleteCallSheetScene(condition: $condition, input: $input) {
+    callSheet {
+      cateringLocation
+      createdAt
+      directorName
+      directorPhone
+      episodeNumber
+      estimatedWrap
+      firstADName
+      firstADPhone
+      generalCrewCall
+      hospitalAddress
+      id
+      lastUpdatedBy
+      mealTimes
+      nearestHospital
+      nextDaySchedule
+      organizationId
+      parkingInstructions
+      primaryLocation
+      primaryLocationAddress
+      producerName
+      producerPhone
+      productionCompany
+      productionManagerName
+      productionManagerPhone
+      productionOfficePhone
+      productionTitle
+      projectId
+      publishedAt
+      safetyNotes
+      shootDate
+      shootDayNumber
+      specialInstructions
+      status
+      sunset
+      temperature
+      timezone
+      totalShootDays
+      transportationNotes
+      updatedAt
+      version
+      weatherForecast
+      __typename
+    }
+    callSheetId
+    createdAt
+    description
+    estimatedDuration
+    id
+    location
+    notes
+    pageCount
+    sceneHeading
+    sceneNumber
+    scheduledTime
+    sortOrder
+    status
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteCallSheetSceneMutationVariables,
+  APITypes.DeleteCallSheetSceneMutation
+>;
+export const deleteCollection = /* GraphQL */ `mutation DeleteCollection(
+  $condition: ModelCollectionConditionInput
+  $input: DeleteCollectionInput!
+) {
+  deleteCollection(condition: $condition, input: $input) {
+    allowComments
+    allowDownloads
+    assetCount
+    collectionType
+    color
+    coverImageKey
+    createdAt
+    createdBy
+    createdByEmail
+    description
+    icon
+    id
+    isSmartCollection
+    lastModifiedAt
+    lastModifiedBy
+    name
+    organizationId
+    projectId
+    shareLink
+    shareLinkExpiry
+    shareLinkPassword
+    sharedWith
+    smartLastUpdated
+    smartRules
+    sortBy
+    sortOrder
+    tags
+    totalSizeBytes
+    updatedAt
+    viewMode
+    visibility
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteCollectionMutationVariables,
+  APITypes.DeleteCollectionMutation
+>;
+export const deleteCollectionAsset = /* GraphQL */ `mutation DeleteCollectionAsset(
+  $condition: ModelCollectionAssetConditionInput
+  $input: DeleteCollectionAssetInput!
+) {
+  deleteCollectionAsset(condition: $condition, input: $input) {
+    addedAt
+    addedBy
+    addedByEmail
+    assetId
+    collectionId
+    createdAt
+    id
+    notes
+    organizationId
+    selectedClipIn
+    selectedClipOut
+    selectedFrameTimecode
+    sortOrder
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteCollectionAssetMutationVariables,
+  APITypes.DeleteCollectionAssetMutation
+>;
+export const deleteColorSession = /* GraphQL */ `mutation DeleteColorSession(
+  $condition: ModelColorSessionConditionInput
+  $input: DeleteColorSessionInput!
+) {
+  deleteColorSession(condition: $condition, input: $input) {
+    cdlOffset
+    cdlPower
+    cdlSaturation
+    cdlSlope
+    colorSpace
+    coloristEmail
+    coloristName
+    cost
+    createdAt
+    createdBy
+    durationHours
+    facility
+    hdrFormat
+    id
+    lookApproved
+    lookApprovedAt
+    lookApprovedBy
+    lutFileName
+    lutKey
+    name
+    notes
+    organizationId
+    peakNits
+    projectId
+    sessionDate
+    stage
+    status
+    suite
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteColorSessionMutationVariables,
+  APITypes.DeleteColorSessionMutation
+>;
+export const deleteCrewCost = /* GraphQL */ `mutation DeleteCrewCost(
+  $condition: ModelCrewCostConditionInput
+  $input: DeleteCrewCostInput!
+) {
+  deleteCrewCost(condition: $condition, input: $input) {
+    baseCost
+    baseRate
+    callSheetId
+    callTime
+    createdAt
+    createdBy
+    crewMemberEmail
+    crewMemberName
+    deductions
+    department
+    doubleTimeCost
+    doubleTimeHours
+    id
+    kitFee
+    kitFeeCost
+    mealPenaltyCost
+    mealPenaltyHours
+    mileageCost
+    mileageRate
+    netPay
+    notes
+    organizationId
+    overtimeCost
+    overtimeHours
+    overtimeRate
+    paymentDate
+    paymentReference
+    paymentStatus
+    perDiem
+    perDiemCost
+    projectId
+    rateType
+    regularHours
+    role
+    shootDay
+    taxWithheld
+    timesheetApproved
+    timesheetApprovedAt
+    timesheetApprovedBy
+    timesheetKey
+    totalCost
+    travelHours
+    updatedAt
+    workDate
+    wrapTime
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteCrewCostMutationVariables,
+  APITypes.DeleteCrewCostMutation
+>;
+export const deleteCustomMetadataSchema = /* GraphQL */ `mutation DeleteCustomMetadataSchema(
+  $condition: ModelCustomMetadataSchemaConditionInput
+  $input: DeleteCustomMetadataSchemaInput!
+) {
+  deleteCustomMetadataSchema(condition: $condition, input: $input) {
+    appliesTo
+    assetTypes
+    canEditRoles
+    canViewRoles
+    collapsedByDefault
+    createdAt
+    createdBy
+    description
+    displayOrder
+    fields
+    id
+    isActive
+    lastModifiedAt
+    lastModifiedBy
+    name
+    organizationId
+    showInDetail
+    showInList
+    slug
+    updatedAt
+    version
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteCustomMetadataSchemaMutationVariables,
+  APITypes.DeleteCustomMetadataSchemaMutation
+>;
+export const deleteCustomMetadataValue = /* GraphQL */ `mutation DeleteCustomMetadataValue(
+  $condition: ModelCustomMetadataValueConditionInput
+  $input: DeleteCustomMetadataValueInput!
+) {
+  deleteCustomMetadataValue(condition: $condition, input: $input) {
+    changeHistory
+    createdAt
+    createdBy
+    id
+    lastModifiedAt
+    lastModifiedBy
+    organizationId
+    schemaId
+    targetId
+    targetType
+    updatedAt
+    values
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteCustomMetadataValueMutationVariables,
+  APITypes.DeleteCustomMetadataValueMutation
+>;
+export const deleteDailyCostSummary = /* GraphQL */ `mutation DeleteDailyCostSummary(
+  $condition: ModelDailyCostSummaryConditionInput
+  $input: DeleteDailyCostSummaryInput!
+) {
+  deleteDailyCostSummary(condition: $condition, input: $input) {
+    callSheetId
+    cateringCost
+    createdAt
+    createdBy
+    crewBaseCost
+    crewCount
+    crewKitFees
+    crewOvertimeCost
+    crewOvertimeHours
+    crewPerDiem
+    crewTotalCost
+    crewTotalHours
+    date
+    equipmentOwnedCost
+    equipmentRentalCost
+    equipmentTotalCost
+    finalizedAt
+    finalizedBy
+    id
+    isFinalized
+    issues
+    locationFees
+    locationTotalCost
+    miscCost
+    notes
+    organizationId
+    otherTotalCost
+    parkingCost
+    permitFees
+    projectId
+    shootDay
+    talentFees
+    talentPerDiem
+    talentTotalCost
+    totalActualCost
+    totalPlannedCost
+    transportCost
+    updatedAt
+    variance
+    variancePercentage
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteDailyCostSummaryMutationVariables,
+  APITypes.DeleteDailyCostSummaryMutation
+>;
+export const deleteDailyProductionReport = /* GraphQL */ `mutation DeleteDailyProductionReport(
+  $condition: ModelDailyProductionReportConditionInput
+  $input: DeleteDailyProductionReportInput!
+) {
+  deleteDailyProductionReport(condition: $condition, input: $input) {
+    approvedAt
+    approvedBy
+    cameraWrap
+    cardsUsed
+    completedScenes
+    createdAt
+    createdBy
+    createdByEmail
+    crewCall
+    crewWrap
+    date
+    director
+    firstAD
+    firstShot
+    goodTakes
+    id
+    incidents
+    lastShot
+    lunchEnd
+    lunchStart
+    mealPenalties
+    organizationId
+    overtimeCrew
+    partialScenes
+    producer
+    productionNotes
+    projectId
+    rejectionReason
+    runningTotal
+    scheduledScenes
+    shootDay
+    status
+    storageUsedGB
+    submittedAt
+    submittedBy
+    temperature
+    tomorrowPrep
+    totalCrewMembers
+    totalMinutesShot
+    totalSetups
+    totalTakes
+    unit
+    updatedAt
+    upm
+    weatherConditions
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteDailyProductionReportMutationVariables,
+  APITypes.DeleteDailyProductionReportMutation
+>;
+export const deleteDistributionLink = /* GraphQL */ `mutation DeleteDistributionLink(
+  $condition: ModelDistributionLinkConditionInput
+  $input: DeleteDistributionLinkInput!
+) {
+  deleteDistributionLink(condition: $condition, input: $input) {
+    accessCode
+    accessToken
+    allowDownload
+    allowShare
+    allowedCountries
+    assetId
+    assetVersionId
+    averageViewDuration
+    blockedCountries
+    completionRate
+    createdAt
+    createdBy
+    createdByEmail
+    currentViews
+    description
+    downloadResolution
+    expiresAt
+    geoRestriction
+    id
+    isExpired
+    isPasswordProtected
+    isWatermarked
+    lastAccessedAt
+    lastAccessedBy
+    lastAccessedFrom
+    linkType
+    maxViews
+    name
+    notifyOnDownload
+    notifyOnView
+    organizationId
+    playlistAssetIds
+    projectId
+    recipientCompany
+    recipientEmail
+    recipientName
+    recipientRole
+    revokedAt
+    revokedBy
+    revokedReason
+    status
+    streamQuality
+    totalViewDuration
+    updatedAt
+    viewLogs {
+      nextToken
+      __typename
+    }
+    watermarkOpacity
+    watermarkPosition
+    watermarkText
+    watermarkType
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteDistributionLinkMutationVariables,
+  APITypes.DeleteDistributionLinkMutation
+>;
+export const deleteDistributionViewLog = /* GraphQL */ `mutation DeleteDistributionViewLog(
+  $condition: ModelDistributionViewLogConditionInput
+  $input: DeleteDistributionViewLogInput!
+) {
+  deleteDistributionViewLog(condition: $condition, input: $input) {
+    averageBitrate
+    bufferingDuration
+    bufferingEvents
+    createdAt
+    distributionLink {
+      accessCode
+      accessToken
+      allowDownload
+      allowShare
+      allowedCountries
+      assetId
+      assetVersionId
+      averageViewDuration
+      blockedCountries
+      completionRate
+      createdAt
+      createdBy
+      createdByEmail
+      currentViews
+      description
+      downloadResolution
+      expiresAt
+      geoRestriction
+      id
+      isExpired
+      isPasswordProtected
+      isWatermarked
+      lastAccessedAt
+      lastAccessedBy
+      lastAccessedFrom
+      linkType
+      maxViews
+      name
+      notifyOnDownload
+      notifyOnView
+      organizationId
+      playlistAssetIds
+      projectId
+      recipientCompany
+      recipientEmail
+      recipientName
+      recipientRole
+      revokedAt
+      revokedBy
+      revokedReason
+      status
+      streamQuality
+      totalViewDuration
+      updatedAt
+      watermarkOpacity
+      watermarkPosition
+      watermarkText
+      watermarkType
+      __typename
+    }
+    distributionLinkId
+    downloadAttempted
+    duration
+    endTime
+    geoBlockReason
+    geoBlocked
+    id
+    pauseEvents
+    percentageWatched
+    playbackSpeed
+    qualityChanges
+    screenshotAttempted
+    seekEvents
+    sessionId
+    startTime
+    updatedAt
+    viewerBrowser
+    viewerCity
+    viewerCountry
+    viewerDevice
+    viewerEmail
+    viewerIP
+    viewerName
+    viewerOS
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteDistributionViewLogMutationVariables,
+  APITypes.DeleteDistributionViewLogMutation
+>;
+export const deleteDownloadRequest = /* GraphQL */ `mutation DeleteDownloadRequest(
+  $condition: ModelDownloadRequestConditionInput
+  $input: DeleteDownloadRequestInput!
+) {
+  deleteDownloadRequest(condition: $condition, input: $input) {
+    applyWatermark
+    assetIds
+    burnInSubtitles
+    burnInTimecode
+    collectionId
+    completedAt
+    createdAt
+    downloadCount
+    downloadKey
+    downloadUrl
+    downloadedBy
+    errorMessage
+    expiresAt
+    fileCount
+    folderStructure
+    id
+    includeMetadata
+    includeSidecar
+    includeTranscript
+    lastDownloadedAt
+    organizationId
+    outputCodec
+    outputFormat
+    outputFrameRate
+    outputResolution
+    packageFormat
+    progress
+    requestType
+    requestedAt
+    requestedBy
+    requestedByEmail
+    startedAt
+    status
+    totalSizeBytes
+    updatedAt
+    watermarkOpacity
+    watermarkPosition
+    watermarkText
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteDownloadRequestMutationVariables,
+  APITypes.DeleteDownloadRequestMutation
+>;
+export const deleteEditSession = /* GraphQL */ `mutation DeleteEditSession(
+  $condition: ModelEditSessionConditionInput
+  $input: DeleteEditSessionInput!
+) {
+  deleteEditSession(condition: $condition, input: $input) {
+    addressedNotes
+    approvedAt
+    approvedBy
+    completedAt
+    createdAt
+    createdBy
+    duration
+    editorEmail
+    editorName
+    exportKey
+    frameRate
+    id
+    isCurrentVersion
+    name
+    organizationId
+    projectId
+    resolution
+    stage
+    startedAt
+    status
+    timelineKey
+    totalNotes
+    updatedAt
+    versionNumber
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteEditSessionMutationVariables,
+  APITypes.DeleteEditSessionMutation
+>;
+export const deleteEquipment = /* GraphQL */ `mutation DeleteEquipment(
+  $condition: ModelEquipmentConditionInput
+  $input: DeleteEquipmentInput!
+) {
+  deleteEquipment(condition: $condition, input: $input) {
+    assetTag
+    barcode
+    calibrationDate
+    category
+    checkouts {
+      nextToken
+      __typename
+    }
+    condition
+    createdAt
+    description
+    homeBase
+    id
+    imageKey
+    insurancePolicyNumber
+    insuranceValue
+    kitItems {
+      nextToken
+      __typename
+    }
+    lastMaintenanceDate
+    maintenanceNotes
+    manufacturer
+    model
+    name
+    nextMaintenanceDate
+    organizationId
+    ownershipType
+    purchaseDate
+    purchasePrice
+    rentalRate
+    replacementValue
+    serialNumber
+    specifications
+    status
+    storageLocation
+    subcategory
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteEquipmentMutationVariables,
+  APITypes.DeleteEquipmentMutation
+>;
+export const deleteEquipmentCheckout = /* GraphQL */ `mutation DeleteEquipmentCheckout(
+  $condition: ModelEquipmentCheckoutConditionInput
+  $input: DeleteEquipmentCheckoutInput!
+) {
+  deleteEquipmentCheckout(condition: $condition, input: $input) {
+    actualReturnDate
+    approvedBy
+    checkedOutBy
+    checkedOutByName
+    checkoutDate
+    checkoutSignature
+    conditionAtCheckout
+    conditionAtReturn
+    conditionNotes
+    createdAt
+    damageDescription
+    damageReported
+    equipment {
+      assetTag
+      barcode
+      calibrationDate
+      category
+      condition
+      createdAt
+      description
+      homeBase
+      id
+      imageKey
+      insurancePolicyNumber
+      insuranceValue
+      lastMaintenanceDate
+      maintenanceNotes
+      manufacturer
+      model
+      name
+      nextMaintenanceDate
+      organizationId
+      ownershipType
+      purchaseDate
+      purchasePrice
+      rentalRate
+      replacementValue
+      serialNumber
+      specifications
+      status
+      storageLocation
+      subcategory
+      updatedAt
+      __typename
+    }
+    equipmentId
+    expectedReturnDate
+    id
+    organizationId
+    projectId
+    purpose
+    returnSignature
+    returnedBy
+    shootLocation
+    status
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteEquipmentCheckoutMutationVariables,
+  APITypes.DeleteEquipmentCheckoutMutation
+>;
+export const deleteEquipmentKit = /* GraphQL */ `mutation DeleteEquipmentKit(
+  $condition: ModelEquipmentKitConditionInput
+  $input: DeleteEquipmentKitInput!
+) {
+  deleteEquipmentKit(condition: $condition, input: $input) {
+    category
+    createdAt
+    description
+    id
+    isActive
+    isTemplate
+    itemCount
+    kitContents {
+      nextToken
+      __typename
+    }
+    name
+    organizationId
+    totalValue
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteEquipmentKitMutationVariables,
+  APITypes.DeleteEquipmentKitMutation
+>;
+export const deleteEquipmentKitItem = /* GraphQL */ `mutation DeleteEquipmentKitItem(
+  $condition: ModelEquipmentKitItemConditionInput
+  $input: DeleteEquipmentKitItemInput!
+) {
+  deleteEquipmentKitItem(condition: $condition, input: $input) {
+    createdAt
+    equipment {
+      assetTag
+      barcode
+      calibrationDate
+      category
+      condition
+      createdAt
+      description
+      homeBase
+      id
+      imageKey
+      insurancePolicyNumber
+      insuranceValue
+      lastMaintenanceDate
+      maintenanceNotes
+      manufacturer
+      model
+      name
+      nextMaintenanceDate
+      organizationId
+      ownershipType
+      purchaseDate
+      purchasePrice
+      rentalRate
+      replacementValue
+      serialNumber
+      specifications
+      status
+      storageLocation
+      subcategory
+      updatedAt
+      __typename
+    }
+    equipmentId
+    id
+    isRequired
+    kit {
+      category
+      createdAt
+      description
+      id
+      isActive
+      isTemplate
+      itemCount
+      name
+      organizationId
+      totalValue
+      updatedAt
+      __typename
+    }
+    kitId
+    notes
+    quantity
+    sortOrder
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteEquipmentKitItemMutationVariables,
+  APITypes.DeleteEquipmentKitItemMutation
+>;
+export const deleteEquipmentRental = /* GraphQL */ `mutation DeleteEquipmentRental(
+  $condition: ModelEquipmentRentalConditionInput
+  $input: DeleteEquipmentRentalInput!
+) {
+  deleteEquipmentRental(condition: $condition, input: $input) {
+    contractKey
+    createdAt
+    createdBy
+    createdByEmail
+    dailyRate
+    damageCost
+    damageNotes
+    deliveryFee
+    depositAmount
+    depositPaid
+    depositPaidDate
+    description
+    discountAmount
+    equipmentCategory
+    equipmentId
+    equipmentName
+    id
+    insuranceCost
+    insuranceRate
+    invoiceKey
+    invoiceNumber
+    lateFee
+    monthlyRate
+    notes
+    organizationId
+    paymentDate
+    paymentMethod
+    paymentReference
+    paymentStatus
+    pickupDate
+    pickupFee
+    projectId
+    purchaseOrderNumber
+    quantity
+    quoteNumber
+    rentalDays
+    rentalEndDate
+    rentalStartDate
+    returnCondition
+    returnDate
+    serialNumber
+    status
+    subtotal
+    taxAmount
+    totalCost
+    updatedAt
+    usageByDay
+    vendorAddress
+    vendorContact
+    vendorEmail
+    vendorName
+    vendorPhone
+    weeklyRate
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteEquipmentRentalMutationVariables,
+  APITypes.DeleteEquipmentRentalMutation
+>;
+export const deleteExpense = /* GraphQL */ `mutation DeleteExpense(
+  $condition: ModelExpenseConditionInput
+  $input: DeleteExpenseInput!
+) {
+  deleteExpense(condition: $condition, input: $input) {
+    amount
+    approvedAt
+    approvedBy
+    budgetLineItemId
+    category
+    createdAt
+    createdBy
+    createdByEmail
+    currency
+    description
+    exchangeRate
+    expenseDate
+    hasReceipt
+    id
+    invoiceDate
+    invoiceNumber
+    isReimbursement
+    notes
+    organizationId
+    paymentDate
+    paymentMethod
+    paymentReference
+    paymentStatus
+    phase
+    projectId
+    receiptFileName
+    receiptKey
+    reimburseTo
+    reimburseToName
+    reimbursementStatus
+    rejectionReason
+    shootDay
+    status
+    subcategory
+    submittedAt
+    submittedBy
+    updatedAt
+    vendorId
+    vendorName
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteExpenseMutationVariables,
+  APITypes.DeleteExpenseMutation
+>;
+export const deleteInvoice = /* GraphQL */ `mutation DeleteInvoice(
+  $condition: ModelInvoiceConditionInput
+  $input: DeleteInvoiceInput!
+) {
+  deleteInvoice(condition: $condition, input: $input) {
+    billingPeriod
+    createdAt
+    currency
+    discount
+    dueDate
+    hostedInvoiceUrl
+    id
+    invoiceNumber
+    invoicePdfUrl
+    lineItems
+    notes
+    organization {
+      address
+      autoArchiveDays
+      billingCycleDay
+      brandAccentColor
+      brandPrimaryColor
+      brandSecondaryColor
+      city
+      country
+      createdAt
+      createdBy
+      currency
+      currentAICreditsUsed
+      currentProjectCount
+      currentStorageUsedGB
+      currentUserCount
+      customDomain
+      customFeatures
+      dataProcessingAgreementSigned
+      dataRetentionDays
+      deletedAt
+      description
+      dpaSignedAt
+      email
+      emailFromAddress
+      emailFromName
+      featuresEnabled
+      id
+      industry
+      ipWhitelist
+      isGDPRCompliant
+      isHIPAACompliant
+      isSOC2Compliant
+      locale
+      logo
+      maxAICredits
+      maxProjects
+      maxStorageGB
+      maxUsers
+      mfaRequired
+      name
+      onboardingCompleted
+      onboardingCompletedAt
+      onboardingStep
+      owner
+      phone
+      postalCode
+      sessionTimeoutMinutes
+      slug
+      ssoConfig
+      ssoEnabled
+      ssoProvider
+      state
+      status
+      stripeCustomerId
+      stripePaymentMethodId
+      stripePriceId
+      stripeSubscriptionId
+      subscriptionEndsAt
+      subscriptionStartedAt
+      subscriptionStatus
+      subscriptionTier
+      suspendedAt
+      suspendedReason
+      timezone
+      trialEndsAt
+      updatedAt
+      usageResetDate
+      website
+      __typename
+    }
+    organizationId
+    paidAt
+    paymentMethod
+    periodEnd
+    periodStart
+    status
+    stripeInvoiceId
+    subtotal
+    tax
+    total
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteInvoiceMutationVariables,
+  APITypes.DeleteInvoiceMutation
+>;
+export const deleteLocationCost = /* GraphQL */ `mutation DeleteLocationCost(
+  $condition: ModelLocationCostConditionInput
+  $input: DeleteLocationCostInput!
+) {
+  deleteLocationCost(condition: $condition, input: $input) {
+    callSheetId
+    cancellationFee
+    cateringFee
+    cleaningFee
+    contactEmail
+    contactName
+    contactPhone
+    contractKey
+    contractSigned
+    contractSignedDate
+    costByDay
+    createdAt
+    createdBy
+    createdByEmail
+    dailyRate
+    damageDeposit
+    depositPaid
+    depositPaidDate
+    feeType
+    halfDayRate
+    holdingFee
+    hourlyRate
+    id
+    insuranceCertKey
+    insuranceFee
+    invoiceKey
+    locationAddress
+    locationFee
+    locationName
+    locationType
+    notes
+    organizationId
+    otherFees
+    otherFeesDescription
+    overtimeRate
+    ownerName
+    parkingFee
+    paymentDate
+    paymentMethod
+    paymentReference
+    paymentStatus
+    permitFee
+    permitKey
+    powerFee
+    projectId
+    restrictions
+    securityFee
+    shootDays
+    specialRequirements
+    status
+    subtotal
+    taxAmount
+    totalCost
+    updatedAt
+    useDays
+    useEndDate
+    useStartDate
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteLocationCostMutationVariables,
+  APITypes.DeleteLocationCostMutation
+>;
+export const deleteMessage = /* GraphQL */ `mutation DeleteMessage(
+  $condition: ModelMessageConditionInput
+  $input: DeleteMessageInput!
+) {
+  deleteMessage(condition: $condition, input: $input) {
+    assetId
+    attachmentKeys
+    attachmentNames
+    convertedToTask
+    createdAt
+    deletedAt
+    editedAt
+    id
+    isDeleted
+    isEdited
+    mentionedUsers
+    messageText
+    messageType
+    organizationId
+    owner
+    parentMessageId
+    priority
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectId
+    readBy
+    senderEmail
+    senderId
+    senderName
+    senderRole
+    taskAssignedTo
+    taskDeadline
+    taskId
+    threadDepth
+    timecode
+    timecodeFormatted
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteMessageMutationVariables,
+  APITypes.DeleteMessageMutation
+>;
+export const deleteNotification = /* GraphQL */ `mutation DeleteNotification(
+  $condition: ModelNotificationConditionInput
+  $input: DeleteNotificationInput!
+) {
+  deleteNotification(condition: $condition, input: $input) {
+    actionLabel
+    actionUrl
+    assetId
+    assetName
+    createdAt
+    deliveryChannels
+    emailSent
+    emailSentAt
+    expiresAt
+    id
+    isRead
+    message
+    messageId
+    organizationId
+    owner
+    priority
+    projectId
+    projectName
+    readAt
+    reviewId
+    senderEmail
+    senderId
+    senderName
+    slackSent
+    slackSentAt
+    smsSent
+    smsSentAt
+    title
+    type
+    updatedAt
+    userId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteNotificationMutationVariables,
+  APITypes.DeleteNotificationMutation
+>;
+export const deleteOrganization = /* GraphQL */ `mutation DeleteOrganization(
+  $condition: ModelOrganizationConditionInput
+  $input: DeleteOrganizationInput!
+) {
+  deleteOrganization(condition: $condition, input: $input) {
+    address
+    autoArchiveDays
+    billingCycleDay
+    brandAccentColor
+    brandPrimaryColor
+    brandSecondaryColor
+    city
+    country
+    createdAt
+    createdBy
+    currency
+    currentAICreditsUsed
+    currentProjectCount
+    currentStorageUsedGB
+    currentUserCount
+    customDomain
+    customFeatures
+    dataProcessingAgreementSigned
+    dataRetentionDays
+    deletedAt
+    description
+    dpaSignedAt
+    email
+    emailFromAddress
+    emailFromName
+    featuresEnabled
+    id
+    industry
+    invitations {
+      nextToken
+      __typename
+    }
+    invoices {
+      nextToken
+      __typename
+    }
+    ipWhitelist
+    isGDPRCompliant
+    isHIPAACompliant
+    isSOC2Compliant
+    locale
+    logo
+    maxAICredits
+    maxProjects
+    maxStorageGB
+    maxUsers
+    members {
+      nextToken
+      __typename
+    }
+    mfaRequired
+    name
+    onboardingCompleted
+    onboardingCompletedAt
+    onboardingStep
+    owner
+    phone
+    postalCode
+    projects {
+      nextToken
+      __typename
+    }
+    sessionTimeoutMinutes
+    slug
+    ssoConfig
+    ssoEnabled
+    ssoProvider
+    state
+    status
+    stripeCustomerId
+    stripePaymentMethodId
+    stripePriceId
+    stripeSubscriptionId
+    subscriptionEndsAt
+    subscriptionStartedAt
+    subscriptionStatus
+    subscriptionTier
+    suspendedAt
+    suspendedReason
+    timezone
+    trialEndsAt
+    updatedAt
+    usageRecords {
+      nextToken
+      __typename
+    }
+    usageResetDate
+    website
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteOrganizationMutationVariables,
+  APITypes.DeleteOrganizationMutation
+>;
+export const deleteOrganizationInvitation = /* GraphQL */ `mutation DeleteOrganizationInvitation(
+  $condition: ModelOrganizationInvitationConditionInput
+  $input: DeleteOrganizationInvitationInput!
+) {
+  deleteOrganizationInvitation(condition: $condition, input: $input) {
+    acceptedAt
+    createdAt
+    declinedAt
+    email
+    expiresAt
+    id
+    inviteToken
+    invitedBy
+    invitedByEmail
+    lastReminderAt
+    message
+    organization {
+      address
+      autoArchiveDays
+      billingCycleDay
+      brandAccentColor
+      brandPrimaryColor
+      brandSecondaryColor
+      city
+      country
+      createdAt
+      createdBy
+      currency
+      currentAICreditsUsed
+      currentProjectCount
+      currentStorageUsedGB
+      currentUserCount
+      customDomain
+      customFeatures
+      dataProcessingAgreementSigned
+      dataRetentionDays
+      deletedAt
+      description
+      dpaSignedAt
+      email
+      emailFromAddress
+      emailFromName
+      featuresEnabled
+      id
+      industry
+      ipWhitelist
+      isGDPRCompliant
+      isHIPAACompliant
+      isSOC2Compliant
+      locale
+      logo
+      maxAICredits
+      maxProjects
+      maxStorageGB
+      maxUsers
+      mfaRequired
+      name
+      onboardingCompleted
+      onboardingCompletedAt
+      onboardingStep
+      owner
+      phone
+      postalCode
+      sessionTimeoutMinutes
+      slug
+      ssoConfig
+      ssoEnabled
+      ssoProvider
+      state
+      status
+      stripeCustomerId
+      stripePaymentMethodId
+      stripePriceId
+      stripeSubscriptionId
+      subscriptionEndsAt
+      subscriptionStartedAt
+      subscriptionStatus
+      subscriptionTier
+      suspendedAt
+      suspendedReason
+      timezone
+      trialEndsAt
+      updatedAt
+      usageResetDate
+      website
+      __typename
+    }
+    organizationId
+    remindersSent
+    role
+    status
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteOrganizationInvitationMutationVariables,
+  APITypes.DeleteOrganizationInvitationMutation
+>;
+export const deleteOrganizationMember = /* GraphQL */ `mutation DeleteOrganizationMember(
+  $condition: ModelOrganizationMemberConditionInput
+  $input: DeleteOrganizationMemberInput!
+) {
+  deleteOrganizationMember(condition: $condition, input: $input) {
+    apiKeyId
+    apiKeyLastUsed
+    avatar
+    createdAt
+    customPermissions
+    department
+    email
+    emailNotifications
+    id
+    invitedAt
+    invitedBy
+    joinedAt
+    lastActiveAt
+    name
+    organization {
+      address
+      autoArchiveDays
+      billingCycleDay
+      brandAccentColor
+      brandPrimaryColor
+      brandSecondaryColor
+      city
+      country
+      createdAt
+      createdBy
+      currency
+      currentAICreditsUsed
+      currentProjectCount
+      currentStorageUsedGB
+      currentUserCount
+      customDomain
+      customFeatures
+      dataProcessingAgreementSigned
+      dataRetentionDays
+      deletedAt
+      description
+      dpaSignedAt
+      email
+      emailFromAddress
+      emailFromName
+      featuresEnabled
+      id
+      industry
+      ipWhitelist
+      isGDPRCompliant
+      isHIPAACompliant
+      isSOC2Compliant
+      locale
+      logo
+      maxAICredits
+      maxProjects
+      maxStorageGB
+      maxUsers
+      mfaRequired
+      name
+      onboardingCompleted
+      onboardingCompletedAt
+      onboardingStep
+      owner
+      phone
+      postalCode
+      sessionTimeoutMinutes
+      slug
+      ssoConfig
+      ssoEnabled
+      ssoProvider
+      state
+      status
+      stripeCustomerId
+      stripePaymentMethodId
+      stripePriceId
+      stripeSubscriptionId
+      subscriptionEndsAt
+      subscriptionStartedAt
+      subscriptionStatus
+      subscriptionTier
+      suspendedAt
+      suspendedReason
+      timezone
+      trialEndsAt
+      updatedAt
+      usageResetDate
+      website
+      __typename
+    }
+    organizationId
+    owner
+    phone
+    role
+    slackNotifications
+    slackUserId
+    status
+    suspendedAt
+    suspendedBy
+    suspendedReason
+    title
+    updatedAt
+    userId
+    weeklyDigest
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteOrganizationMemberMutationVariables,
+  APITypes.DeleteOrganizationMemberMutation
+>;
+export const deleteProject = /* GraphQL */ `mutation DeleteProject(
+  $condition: ModelProjectConditionInput
+  $input: DeleteProjectInput!
+) {
+  deleteProject(condition: $condition, input: $input) {
+    activityLogs {
+      nextToken
+      __typename
+    }
+    archiveComplete
+    archiveCompletedAt
+    archiveLocation
+    assets {
+      nextToken
+      __typename
+    }
+    assetsDelivered
+    assetsDeliveredAt
+    brief {
+      accessibilityRequired
+      aiProcessedAt
+      approvedByFinance
+      approvedByLegal
+      approvedByProducer
+      brandGuidelines
+      budgetRange
+      complexity
+      copyrightOwnership
+      covidProtocolsRequired
+      createdAt
+      creativeProposals
+      crewRoles
+      deliverables
+      distributionChannels
+      embargoDate
+      equipmentNeeds
+      estimatedDuration
+      geoRights
+      hasDroneRisk
+      hasHazardousLocationRisk
+      hasMinorRisk
+      hasPublicSpaceRisk
+      hasStuntRisk
+      id
+      inspirationReferences
+      insuranceRequired
+      keyMessages
+      languageVersions
+      locationDetails
+      locationReleasesRequired
+      masterFormat
+      musicLicensing
+      organizationId
+      projectDescription
+      projectId
+      requiredPermits
+      riskLevel
+      safetyOfficerNeeded
+      scenes
+      scriptOrNotes
+      selectedProposalId
+      socialCropsRequired
+      stockFootageNeeded
+      subtitlesRequired
+      talentOnScreen
+      talentReleasesRequired
+      talentVoiceOver
+      targetAudience
+      tone
+      unionRules
+      updatedAt
+      usageRightsDuration
+      __typename
+    }
+    briefComplete
+    briefCompletedAt
+    budgetApproved
+    budgetApprovedAt
+    budgetCap
+    budgetContingency
+    budgetDistribution
+    budgetPostProduction
+    budgetPreProduction
+    budgetProduction
+    callSheets {
+      nextToken
+      __typename
+    }
+    callSheetsReady
+    callSheetsReadyAt
+    clientContactEmail
+    confidentiality
+    contractsSigned
+    contractsSignedAt
+    createdAt
+    creativeDirectorEmail
+    deadline
+    deliverablesReady
+    deliverablesReadyAt
+    deliveryConfirmedBy
+    department
+    description
+    distributionDate
+    executiveSponsorEmail
+    fieldIntelligenceFeasibilityScore
+    fieldIntelligenceHealthAlerts
+    fieldIntelligenceLastUpdated
+    fieldIntelligenceRiskAlerts
+    fieldIntelligenceWeatherData
+    finalApproved
+    finalApprovedAt
+    finalApprovedBy
+    finalAssetId
+    financeContactEmail
+    fundingSource
+    greenlightBlockers
+    greenlightClientApproved
+    greenlightClientApprovedAt
+    greenlightClientApprovedBy
+    greenlightClientComment
+    greenlightCompletedAt
+    greenlightExecutiveApproved
+    greenlightExecutiveApprovedAt
+    greenlightExecutiveApprovedBy
+    greenlightExecutiveComment
+    greenlightFinanceApproved
+    greenlightFinanceApprovedAt
+    greenlightFinanceApprovedBy
+    greenlightFinanceComment
+    greenlightLegalApproved
+    greenlightLegalApprovedAt
+    greenlightLegalApprovedBy
+    greenlightLegalComment
+    greenlightProducerApproved
+    greenlightProducerApprovedAt
+    greenlightProducerApprovedBy
+    greenlightProducerComment
+    greenlightRequirements
+    id
+    kickoffDate
+    legalApproved
+    legalApprovedAt
+    legalContactEmail
+    legalLockDeadline
+    lifecycleState
+    locationsConfirmed
+    locationsConfirmedAt
+    mediaIngested
+    messages {
+      nextToken
+      __typename
+    }
+    name
+    organization {
+      address
+      autoArchiveDays
+      billingCycleDay
+      brandAccentColor
+      brandPrimaryColor
+      brandSecondaryColor
+      city
+      country
+      createdAt
+      createdBy
+      currency
+      currentAICreditsUsed
+      currentProjectCount
+      currentStorageUsedGB
+      currentUserCount
+      customDomain
+      customFeatures
+      dataProcessingAgreementSigned
+      dataRetentionDays
+      deletedAt
+      description
+      dpaSignedAt
+      email
+      emailFromAddress
+      emailFromName
+      featuresEnabled
+      id
+      industry
+      ipWhitelist
+      isGDPRCompliant
+      isHIPAACompliant
+      isSOC2Compliant
+      locale
+      logo
+      maxAICredits
+      maxProjects
+      maxStorageGB
+      maxUsers
+      mfaRequired
+      name
+      onboardingCompleted
+      onboardingCompletedAt
+      onboardingStep
+      owner
+      phone
+      postalCode
+      sessionTimeoutMinutes
+      slug
+      ssoConfig
+      ssoEnabled
+      ssoProvider
+      state
+      status
+      stripeCustomerId
+      stripePaymentMethodId
+      stripePriceId
+      stripeSubscriptionId
+      subscriptionEndsAt
+      subscriptionStartedAt
+      subscriptionStatus
+      subscriptionTier
+      suspendedAt
+      suspendedReason
+      timezone
+      trialEndsAt
+      updatedAt
+      usageResetDate
+      website
+      __typename
+    }
+    organizationId
+    owner
+    permitsObtained
+    permitsObtainedAt
+    postProductionEndDate
+    postProductionStartDate
+    preProductionEndDate
+    preProductionStartDate
+    primaryKPI
+    principalPhotographyComplete
+    principalPhotographyCompleteAt
+    priority
+    producerEmail
+    productionEndDate
+    productionStartDate
+    projectOwnerEmail
+    projectType
+    purchaseOrderNumber
+    reviewDeadline
+    reviews {
+      nextToken
+      __typename
+    }
+    roughCutAssetId
+    roughCutComplete
+    roughCutCompleteAt
+    shootLocationCity
+    shootLocationCoordinates
+    shootLocationCountry
+    stakeholderSignoff
+    stakeholderSignoffAt
+    status
+    targetMetric
+    teamAssigned
+    teamMembers {
+      nextToken
+      __typename
+    }
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteProjectMutationVariables,
+  APITypes.DeleteProjectMutation
+>;
+export const deleteProjectArchive = /* GraphQL */ `mutation DeleteProjectArchive(
+  $condition: ModelProjectArchiveConditionInput
+  $input: DeleteProjectArchiveInput!
+) {
+  deleteProjectArchive(condition: $condition, input: $input) {
+    accessCount
+    aiKeyMoments
+    aiLessonsLearned
+    aiSummary
+    approvals
+    archiveReason
+    archiveStatus
+    archivedAt
+    archivedBy
+    assetGraph
+    budgetSummary
+    costPerDeliverable
+    createdAt
+    deliverables
+    greenlightHistory
+    id
+    keyAssets
+    keyAssetsMetadata
+    keywords
+    lastAccessedAt
+    legalDetails
+    legalStatus
+    masterDeliverableIds
+    metadataSummary
+    organizationId
+    productionStats
+    projectId
+    reconstructionManifest
+    regionRestrictions
+    rightsExpirations
+    roiCalculated
+    searchEmbedding
+    themes
+    timelinePhases
+    topics
+    totalCost
+    updatedAt
+    versionTree
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteProjectArchiveMutationVariables,
+  APITypes.DeleteProjectArchiveMutation
+>;
+export const deleteProjectMember = /* GraphQL */ `mutation DeleteProjectMember(
+  $condition: ModelProjectMemberConditionInput
+  $input: DeleteProjectMemberInput!
+) {
+  deleteProjectMember(condition: $condition, input: $input) {
+    accessExpiresAt
+    accessStartsAt
+    assignedAssetIds
+    assignedPhases
+    assignedTaskIds
+    avatar
+    createdAt
+    customPermissions
+    email
+    emailNotifications
+    externalRole
+    id
+    invitedAt
+    invitedBy
+    isExternal
+    joinedAt
+    lastActiveAt
+    name
+    organizationId
+    owner
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectId
+    projectRole
+    revokedAt
+    revokedBy
+    revokedReason
+    slackUserId
+    status
+    suspendedAt
+    suspendedBy
+    suspendedReason
+    title
+    updatedAt
+    userId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteProjectMemberMutationVariables,
+  APITypes.DeleteProjectMemberMutation
+>;
+export const deleteProxyFile = /* GraphQL */ `mutation DeleteProxyFile(
+  $condition: ModelProxyFileConditionInput
+  $input: DeleteProxyFileInput!
+) {
+  deleteProxyFile(condition: $condition, input: $input) {
+    assetId
+    assetVersionId
+    audioBitrate
+    audioCodec
+    bitrate
+    cdnUrl
+    codec
+    createdAt
+    createdBy
+    duration
+    errorMessage
+    fileSizeBytes
+    frameRate
+    id
+    jobId
+    lastViewedAt
+    organizationId
+    processingCompleted
+    processingDuration
+    processingStarted
+    processor
+    progress
+    proxyType
+    resolution
+    s3Bucket
+    s3Key
+    status
+    updatedAt
+    viewCount
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteProxyFileMutationVariables,
+  APITypes.DeleteProxyFileMutation
+>;
+export const deleteQCReport = /* GraphQL */ `mutation DeleteQCReport(
+  $condition: ModelQCReportConditionInput
+  $input: DeleteQCReportInput!
+) {
+  deleteQCReport(condition: $condition, input: $input) {
+    assetId
+    audioQuality
+    audioTechnical
+    checkResults
+    compliance
+    createdAt
+    createdBy
+    criticalIssues
+    deliverableId
+    editorial
+    failedChecks
+    graphicsText
+    id
+    majorIssues
+    minorIssues
+    name
+    organizationId
+    overallStatus
+    passedChecks
+    projectId
+    qcDate
+    qcDuration
+    qcOperator
+    qcOperatorEmail
+    reportKey
+    reportType
+    signOffNotes
+    signedOffAt
+    signedOffBy
+    totalChecks
+    updatedAt
+    videoQuality
+    videoTechnical
+    warningChecks
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteQCReportMutationVariables,
+  APITypes.DeleteQCReportMutation
+>;
+export const deleteQualityScore = /* GraphQL */ `mutation DeleteQualityScore(
+  $condition: ModelQualityScoreConditionInput
+  $input: DeleteQualityScoreInput!
+) {
+  deleteQualityScore(condition: $condition, input: $input) {
+    analysisDuration
+    analysisVersion
+    analyzedAt
+    analyzedBy
+    assetId
+    assetVersionId
+    audioBitrate
+    audioChannels
+    audioClippingDetected
+    audioCodec
+    audioLoudnessLUFS
+    audioNoiseFloor
+    audioPeakdB
+    audioQualityScore
+    audioSampleRate
+    audioSilencePercentage
+    checksumMD5
+    checksumSHA256
+    colorGradeConsistency
+    complianceIssues
+    compositionScore
+    contentClarity
+    corruptionDetails
+    createdAt
+    fileIntegrity
+    formatCompliance
+    grade
+    id
+    motionSmoothnessScore
+    organizationId
+    overallScore
+    projectId
+    recommendedFixes
+    updatedAt
+    videoBitDepth
+    videoBitrate
+    videoBitrateScore
+    videoCodec
+    videoColorSpace
+    videoExposureScore
+    videoFrameRate
+    videoHDR
+    videoResolution
+    videoResolutionScore
+    videoStabilityScore
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteQualityScoreMutationVariables,
+  APITypes.DeleteQualityScoreMutation
+>;
+export const deleteRestoreRequest = /* GraphQL */ `mutation DeleteRestoreRequest(
+  $condition: ModelRestoreRequestConditionInput
+  $input: DeleteRestoreRequestInput!
+) {
+  deleteRestoreRequest(condition: $condition, input: $input) {
+    actualCost
+    assetId
+    completedAt
+    createdAt
+    errorMessage
+    estimatedCompletion
+    estimatedCost
+    expiresAt
+    id
+    notificationSent
+    notifyOnComplete
+    organizationId
+    partialEndSeconds
+    partialReason
+    partialStartSeconds
+    projectId
+    requestType
+    requestedAt
+    requestedBy
+    requestedByEmail
+    restoreDurationDays
+    restoreTier
+    restoredKey
+    restoredSize
+    status
+    storageTierId
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteRestoreRequestMutationVariables,
+  APITypes.DeleteRestoreRequestMutation
+>;
+export const deleteReview = /* GraphQL */ `mutation DeleteReview(
+  $condition: ModelReviewConditionInput
+  $input: DeleteReviewInput!
+) {
+  deleteReview(condition: $condition, input: $input) {
+    asset {
+      aiConfidence
+      aiProcessedAt
+      aiTags
+      approvalRequirements
+      approvalState
+      clientApprovalNote
+      clientApproved
+      clientApprovedAt
+      clientApprovedBy
+      createdAt
+      dimensions
+      duration
+      fileSize
+      finalApprovedAt
+      finalApprovedBy
+      id
+      internalApprovalNote
+      internalApproved
+      internalApprovedAt
+      internalApprovedBy
+      isBRoll
+      isLegalLocked
+      isPlannedShot
+      legalApprovalNote
+      legalApproved
+      legalApprovedAt
+      legalApprovedBy
+      legalLockedAt
+      mimeType
+      organizationId
+      owner
+      projectId
+      s3Key
+      shotDescription
+      shotListItemId
+      storageClass
+      thumbnailKey
+      type
+      updatedAt
+      usageHeatmap
+      version
+      __typename
+    }
+    assetId
+    comments {
+      nextToken
+      __typename
+    }
+    createdAt
+    id
+    isLegalApproved
+    legalApprovedAt
+    legalApprovedBy
+    organizationId
+    owner
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectId
+    reviewerEmail
+    reviewerId
+    reviewerRole
+    status
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteReviewMutationVariables,
+  APITypes.DeleteReviewMutation
+>;
+export const deleteReviewComment = /* GraphQL */ `mutation DeleteReviewComment(
+  $condition: ModelReviewCommentConditionInput
+  $input: DeleteReviewCommentInput!
+) {
+  deleteReviewComment(condition: $condition, input: $input) {
+    assetId
+    attachmentKeys
+    commentText
+    commentType
+    commenterEmail
+    commenterId
+    commenterRole
+    createdAt
+    id
+    isResolved
+    linkedAssetVersionId
+    linkedTaskId
+    linkedTaskStatus
+    organizationId
+    owner
+    priority
+    projectId
+    replies {
+      nextToken
+      __typename
+    }
+    resolvedAt
+    resolvedBy
+    resolvedByEmail
+    resolvedInAssetVersionId
+    review {
+      assetId
+      createdAt
+      id
+      isLegalApproved
+      legalApprovedAt
+      legalApprovedBy
+      organizationId
+      owner
+      projectId
+      reviewerEmail
+      reviewerId
+      reviewerRole
+      status
+      updatedAt
+      __typename
+    }
+    reviewId
+    timecode
+    timecodeFormatted
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteReviewCommentMutationVariables,
+  APITypes.DeleteReviewCommentMutation
+>;
+export const deleteReviewCommentReply = /* GraphQL */ `mutation DeleteReviewCommentReply(
+  $condition: ModelReviewCommentReplyConditionInput
+  $input: DeleteReviewCommentReplyInput!
+) {
+  deleteReviewCommentReply(condition: $condition, input: $input) {
+    createdAt
+    id
+    owner
+    parentComment {
+      assetId
+      attachmentKeys
+      commentText
+      commentType
+      commenterEmail
+      commenterId
+      commenterRole
+      createdAt
+      id
+      isResolved
+      linkedAssetVersionId
+      linkedTaskId
+      linkedTaskStatus
+      organizationId
+      owner
+      priority
+      projectId
+      resolvedAt
+      resolvedBy
+      resolvedByEmail
+      resolvedInAssetVersionId
+      reviewId
+      timecode
+      timecodeFormatted
+      updatedAt
+      __typename
+    }
+    parentCommentId
+    replierEmail
+    replierId
+    replierRole
+    replyText
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteReviewCommentReplyMutationVariables,
+  APITypes.DeleteReviewCommentReplyMutation
+>;
+export const deleteRightsDocument = /* GraphQL */ `mutation DeleteRightsDocument(
+  $condition: ModelRightsDocumentConditionInput
+  $input: DeleteRightsDocumentInput!
+) {
+  deleteRightsDocument(condition: $condition, input: $input) {
+    approvalDate
+    approvedBy
+    approvedByName
+    coverageAmount
+    coverageType
+    createdAt
+    description
+    documentNumber
+    documentType
+    effectiveDate
+    expirationDate
+    fileKey
+    fileName
+    fileSize
+    id
+    isCritical
+    isLatestVersion
+    isRequired
+    issueDate
+    issuingAuthority
+    jurisdiction
+    lastReminderSent
+    locationAddress
+    locationName
+    mimeType
+    name
+    notes
+    organizationId
+    personEmail
+    personName
+    personRole
+    previousVersionId
+    projectId
+    rejectionReason
+    reminderDays
+    renewalDate
+    restrictions
+    reviewDate
+    reviewedBy
+    reviewedByName
+    shootDay
+    status
+    tags
+    thumbnailKey
+    updatedAt
+    uploadedBy
+    uploadedByName
+    version
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteRightsDocumentMutationVariables,
+  APITypes.DeleteRightsDocumentMutation
+>;
+export const deleteSavedSearch = /* GraphQL */ `mutation DeleteSavedSearch(
+  $condition: ModelSavedSearchConditionInput
+  $input: DeleteSavedSearchInput!
+) {
+  deleteSavedSearch(condition: $condition, input: $input) {
+    color
+    createdAt
+    createdBy
+    createdByEmail
+    description
+    displayOrder
+    filters
+    icon
+    id
+    isPinned
+    lastModifiedAt
+    lastModifiedBy
+    lastNotifiedAt
+    lastUsedAt
+    name
+    notifyEmail
+    notifyOnNewMatches
+    organizationId
+    projectId
+    scope
+    searchQuery
+    sharedWith
+    sortBy
+    sortOrder
+    updatedAt
+    usageCount
+    visibility
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteSavedSearchMutationVariables,
+  APITypes.DeleteSavedSearchMutation
+>;
+export const deleteShareLink = /* GraphQL */ `mutation DeleteShareLink(
+  $condition: ModelShareLinkConditionInput
+  $input: DeleteShareLinkInput!
+) {
+  deleteShareLink(condition: $condition, input: $input) {
+    accessLog
+    allowComment
+    allowDownload
+    allowPreview
+    allowedDomains
+    allowedEmails
+    createdAt
+    createdBy
+    createdByEmail
+    deactivatedAt
+    deactivatedBy
+    deactivationReason
+    downloadCount
+    downloadQuality
+    expiresAt
+    id
+    isActive
+    lastAccessedAt
+    lastAccessedBy
+    maxDownloads
+    maxViews
+    name
+    notifyEmail
+    notifyOnAccess
+    organizationId
+    password
+    requiresPassword
+    shareType
+    targetIds
+    token
+    updatedAt
+    viewCount
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteShareLinkMutationVariables,
+  APITypes.DeleteShareLinkMutation
+>;
+export const deleteShotListTracker = /* GraphQL */ `mutation DeleteShotListTracker(
+  $condition: ModelShotListTrackerConditionInput
+  $input: DeleteShotListTrackerInput!
+) {
+  deleteShotListTracker(condition: $condition, input: $input) {
+    briefId
+    callSheetId
+    captureStatus
+    capturedAssetIds
+    capturedAt
+    capturedBy
+    continuityNotes
+    createdAt
+    directorApproved
+    directorApprovedAt
+    dpApproved
+    dpApprovedAt
+    framing
+    id
+    movement
+    notes
+    organizationId
+    plannedDuration
+    projectId
+    propNotes
+    proposalId
+    qualityNotes
+    qualityRating
+    selectedAssetId
+    shootDay
+    shotDescription
+    shotNumber
+    shotType
+    takeCount
+    updatedAt
+    wardrobeNotes
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteShotListTrackerMutationVariables,
+  APITypes.DeleteShotListTrackerMutation
+>;
+export const deleteShotLog = /* GraphQL */ `mutation DeleteShotLog(
+  $condition: ModelShotLogConditionInput
+  $input: DeleteShotLogInput!
+) {
+  deleteShotLog(condition: $condition, input: $input) {
+    camera
+    cardId
+    circled
+    continuityNotes
+    createdAt
+    dprId
+    duration
+    fStop
+    fps
+    id
+    iso
+    lens
+    loggedBy
+    loggedByEmail
+    notes
+    organizationId
+    performanceNotes
+    projectId
+    scene
+    shot
+    status
+    take
+    technicalNotes
+    timecodeIn
+    timecodeOut
+    timestamp
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteShotLogMutationVariables,
+  APITypes.DeleteShotLogMutation
+>;
+export const deleteSocialOutput = /* GraphQL */ `mutation DeleteSocialOutput(
+  $condition: ModelSocialOutputConditionInput
+  $input: DeleteSocialOutputInput!
+) {
+  deleteSocialOutput(condition: $condition, input: $input) {
+    addEndCard
+    addWatermark
+    aspectRatio
+    audioTrack
+    captionFileKey
+    captionLanguage
+    captionStyle
+    cmsEndpoint
+    cmsIntegration
+    cmsPublishStatus
+    cmsPublishedAt
+    cmsPublishedUrl
+    createdAt
+    createdBy
+    createdByEmail
+    cropPosition
+    cropX
+    cropY
+    customHeight
+    customWidth
+    description
+    endCardDuration
+    endCardKey
+    id
+    includeCaptions
+    includeSubtitles
+    isScheduled
+    maxDuration
+    name
+    normalizeAudio
+    organizationId
+    outputBitrate
+    outputCodec
+    outputDuration
+    outputFileKey
+    outputFileSize
+    outputFormat
+    outputResolution
+    platform
+    postCallToAction
+    postCallToActionUrl
+    postCaption
+    postCategory
+    postDescription
+    postHashtags
+    postLocation
+    postMentions
+    postPrivacy
+    postTags
+    postThumbnailKey
+    postTitle
+    processingCompletedAt
+    processingError
+    processingProgress
+    processingStartedAt
+    projectId
+    scheduledPublishAt
+    socialPostId
+    socialPublishError
+    socialPublishStatus
+    socialPublishedAt
+    socialPublishedUrl
+    sourceAssetId
+    sourceVersionId
+    status
+    subtitleLanguages
+    targetLoudness
+    trimEnd
+    trimStart
+    updatedAt
+    watermarkKey
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteSocialOutputMutationVariables,
+  APITypes.DeleteSocialOutputMutation
+>;
+export const deleteStorageTier = /* GraphQL */ `mutation DeleteStorageTier(
+  $condition: ModelStorageTierConditionInput
+  $input: DeleteStorageTierInput!
+) {
+  deleteStorageTier(condition: $condition, input: $input) {
+    archiveReason
+    archivedAt
+    archivedBy
+    assetId
+    createdAt
+    currentStorageClass
+    fileSizeBytes
+    id
+    isArchived
+    isRestoring
+    lastChecked
+    lastCostCalculation
+    lastRestoredAt
+    lifecyclePolicyApplied
+    monthlyStorageCost
+    nextTransitionClass
+    nextTransitionDate
+    organizationId
+    originalStorageClass
+    partialRestoreExpiresAt
+    partialRestoreKey
+    partialRestoreRanges
+    projectId
+    projectedAnnualCost
+    restoreCount
+    restoreExpiresAt
+    restoreRequestedAt
+    restoreRequestedBy
+    restoreType
+    s3Bucket
+    s3Key
+    totalStorageCostToDate
+    transitionHistory
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteStorageTierMutationVariables,
+  APITypes.DeleteStorageTierMutation
+>;
+export const deleteSubscriptionPlan = /* GraphQL */ `mutation DeleteSubscriptionPlan(
+  $condition: ModelSubscriptionPlanConditionInput
+  $input: DeleteSubscriptionPlanInput!
+) {
+  deleteSubscriptionPlan(condition: $condition, input: $input) {
+    annualPrice
+    createdAt
+    currency
+    description
+    features
+    featuresDescription
+    id
+    isActive
+    isPopular
+    isPublic
+    maxAICreditsPerMonth
+    maxBandwidthGB
+    maxProjects
+    maxStorageGB
+    maxUsers
+    monthlyPrice
+    name
+    slug
+    sortOrder
+    stripePriceIdAnnual
+    stripePriceIdMonthly
+    tier
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteSubscriptionPlanMutationVariables,
+  APITypes.DeleteSubscriptionPlanMutation
+>;
+export const deleteTask = /* GraphQL */ `mutation DeleteTask(
+  $condition: ModelTaskConditionInput
+  $input: DeleteTaskInput!
+) {
+  deleteTask(condition: $condition, input: $input) {
+    actualHours
+    assignedAt
+    assignedBy
+    assignedByEmail
+    assignedToEmail
+    assignedToName
+    attachmentKeys
+    blockedBy
+    blockedReason
+    completedAt
+    completedBy
+    completedByEmail
+    createdAt
+    createdBy
+    createdByEmail
+    dependsOn
+    description
+    dueDate
+    estimatedHours
+    id
+    linkedAssetId
+    linkedAssetName
+    linkedTimecode
+    linkedTimecodeFormatted
+    organizationId
+    priority
+    progressPercentage
+    projectId
+    resolutionNote
+    resolvedInAssetVersionId
+    resolvedInAssetVersionNumber
+    sourceAssetId
+    sourceCommentId
+    sourceMessageId
+    startDate
+    status
+    tags
+    taskType
+    title
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteTaskMutationVariables,
+  APITypes.DeleteTaskMutation
+>;
+export const deleteTeamMember = /* GraphQL */ `mutation DeleteTeamMember(
+  $condition: ModelTeamMemberConditionInput
+  $input: DeleteTeamMemberInput!
+) {
+  deleteTeamMember(condition: $condition, input: $input) {
+    acceptedAt
+    avatar
+    company
+    contributionCount
+    createdAt
+    customRoleTitle
+    department
+    email
+    id
+    invitedAt
+    invitedBy
+    lastActiveAt
+    name
+    notifyOnApprovals
+    notifyOnAssets
+    notifyOnMessages
+    notifyOnTasks
+    organizationId
+    permissions
+    phone
+    projectId
+    removalReason
+    removedAt
+    removedBy
+    role
+    status
+    title
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteTeamMemberMutationVariables,
+  APITypes.DeleteTeamMemberMutation
+>;
+export const deleteTranscription = /* GraphQL */ `mutation DeleteTranscription(
+  $condition: ModelTranscriptionConditionInput
+  $input: DeleteTranscriptionInput!
+) {
+  deleteTranscription(condition: $condition, input: $input) {
+    assetId
+    assetVersionId
+    averageConfidence
+    completedAt
+    createdAt
+    createdBy
+    errorMessage
+    fullText
+    hasManualEdits
+    id
+    jobId
+    keywords
+    language
+    languageConfidence
+    lastEditedAt
+    lastEditedBy
+    lowConfidenceSegments
+    organizationId
+    progress
+    provider
+    segments
+    speakerCount
+    speakers
+    srtKey
+    status
+    transcriptKey
+    updatedAt
+    vttKey
+    wordCount
+    words
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteTranscriptionMutationVariables,
+  APITypes.DeleteTranscriptionMutation
+>;
+export const deleteUsageRecord = /* GraphQL */ `mutation DeleteUsageRecord(
+  $condition: ModelUsageRecordConditionInput
+  $input: DeleteUsageRecordInput!
+) {
+  deleteUsageRecord(condition: $condition, input: $input) {
+    billingPeriod
+    createdAt
+    currency
+    description
+    id
+    includedQuantity
+    organization {
+      address
+      autoArchiveDays
+      billingCycleDay
+      brandAccentColor
+      brandPrimaryColor
+      brandSecondaryColor
+      city
+      country
+      createdAt
+      createdBy
+      currency
+      currentAICreditsUsed
+      currentProjectCount
+      currentStorageUsedGB
+      currentUserCount
+      customDomain
+      customFeatures
+      dataProcessingAgreementSigned
+      dataRetentionDays
+      deletedAt
+      description
+      dpaSignedAt
+      email
+      emailFromAddress
+      emailFromName
+      featuresEnabled
+      id
+      industry
+      ipWhitelist
+      isGDPRCompliant
+      isHIPAACompliant
+      isSOC2Compliant
+      locale
+      logo
+      maxAICredits
+      maxProjects
+      maxStorageGB
+      maxUsers
+      mfaRequired
+      name
+      onboardingCompleted
+      onboardingCompletedAt
+      onboardingStep
+      owner
+      phone
+      postalCode
+      sessionTimeoutMinutes
+      slug
+      ssoConfig
+      ssoEnabled
+      ssoProvider
+      state
+      status
+      stripeCustomerId
+      stripePaymentMethodId
+      stripePriceId
+      stripeSubscriptionId
+      subscriptionEndsAt
+      subscriptionStartedAt
+      subscriptionStatus
+      subscriptionTier
+      suspendedAt
+      suspendedReason
+      timezone
+      trialEndsAt
+      updatedAt
+      usageResetDate
+      website
+      __typename
+    }
+    organizationId
+    overageCost
+    overageQuantity
+    periodEnd
+    periodStart
+    projectId
+    quantity
+    totalCost
+    unit
+    unitPrice
+    updatedAt
+    usageType
+    userId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteUsageRecordMutationVariables,
+  APITypes.DeleteUsageRecordMutation
+>;
+export const deleteVFXShot = /* GraphQL */ `mutation DeleteVFXShot(
+  $condition: ModelVFXShotConditionInput
+  $input: DeleteVFXShotInput!
+) {
+  deleteVFXShot(condition: $condition, input: $input) {
+    actualAmount
+    bidAmount
+    briefKey
+    complexity
+    createdAt
+    createdBy
+    currentVersion
+    deliveryStage
+    description
+    dueDate
+    frameCount
+    frameIn
+    frameOut
+    id
+    latestDeliveryKey
+    notes
+    organizationId
+    plateDelivered
+    plateDeliveredAt
+    plateKey
+    projectId
+    referenceDelivered
+    referenceDeliveredAt
+    sequence
+    shotCode
+    status
+    updatedAt
+    variance
+    vendor
+    vendorContact
+    vendorEmail
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteVFXShotMutationVariables,
+  APITypes.DeleteVFXShotMutation
+>;
+export const deleteWorkflowExecutionLog = /* GraphQL */ `mutation DeleteWorkflowExecutionLog(
+  $condition: ModelWorkflowExecutionLogConditionInput
+  $input: DeleteWorkflowExecutionLogInput!
+) {
+  deleteWorkflowExecutionLog(condition: $condition, input: $input) {
+    actionResults
+    assetIds
+    assetsFailed
+    assetsProcessed
+    assetsSucceeded
+    completedAt
+    createdAt
+    durationMs
+    errorDetails
+    errorMessage
+    executionLog
+    id
+    organizationId
+    startedAt
+    status
+    triggerEvent
+    triggeredBy
+    triggeredByUser
+    updatedAt
+    workflowRuleId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteWorkflowExecutionLogMutationVariables,
+  APITypes.DeleteWorkflowExecutionLogMutation
+>;
+export const deleteWorkflowRule = /* GraphQL */ `mutation DeleteWorkflowRule(
+  $condition: ModelWorkflowRuleConditionInput
+  $input: DeleteWorkflowRuleInput!
+) {
+  deleteWorkflowRule(condition: $condition, input: $input) {
+    actions
+    createdAt
+    createdBy
+    description
+    failedExecutions
+    id
+    isActive
+    lastExecutionAt
+    lastExecutionLog
+    lastExecutionStatus
+    lastModifiedAt
+    lastModifiedBy
+    lastRunAt
+    name
+    nextRunAt
+    organizationId
+    priority
+    projectId
+    schedule
+    scope
+    successfulExecutions
+    totalExecutions
+    triggerConditions
+    triggerType
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteWorkflowRuleMutationVariables,
+  APITypes.DeleteWorkflowRuleMutation
+>;
+export const updateAIAnalysisJob = /* GraphQL */ `mutation UpdateAIAnalysisJob(
+  $condition: ModelAIAnalysisJobConditionInput
+  $input: UpdateAIAnalysisJobInput!
+) {
+  updateAIAnalysisJob(condition: $condition, input: $input) {
+    analysisType
+    asset {
+      aiConfidence
+      aiProcessedAt
+      aiTags
+      approvalRequirements
+      approvalState
+      clientApprovalNote
+      clientApproved
+      clientApprovedAt
+      clientApprovedBy
+      createdAt
+      dimensions
+      duration
+      fileSize
+      finalApprovedAt
+      finalApprovedBy
+      id
+      internalApprovalNote
+      internalApproved
+      internalApprovedAt
+      internalApprovedBy
+      isBRoll
+      isLegalLocked
+      isPlannedShot
+      legalApprovalNote
+      legalApproved
+      legalApprovedAt
+      legalApprovedBy
+      legalLockedAt
+      mimeType
+      organizationId
+      owner
+      projectId
+      s3Key
+      shotDescription
+      shotListItemId
+      storageClass
+      thumbnailKey
+      type
+      updatedAt
+      usageHeatmap
+      version
+      __typename
+    }
+    assetId
+    assetName
+    assetVersionId
+    assetVersionNumber
+    completedAt
+    createdAt
+    errorMessage
+    id
+    organizationId
+    progress
+    projectId
+    queuedAt
+    rekognitionJobId
+    resultsCount
+    resultsSnapshot
+    s3KeyAtAnalysis
+    startedAt
+    status
+    transcribeJobName
+    triggeredBy
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAIAnalysisJobMutationVariables,
+  APITypes.UpdateAIAnalysisJobMutation
+>;
+export const updateAIFaceDetection = /* GraphQL */ `mutation UpdateAIFaceDetection(
+  $condition: ModelAIFaceDetectionConditionInput
+  $input: UpdateAIFaceDetectionInput!
+) {
+  updateAIFaceDetection(condition: $condition, input: $input) {
+    ageRange
+    asset {
+      aiConfidence
+      aiProcessedAt
+      aiTags
+      approvalRequirements
+      approvalState
+      clientApprovalNote
+      clientApproved
+      clientApprovedAt
+      clientApprovedBy
+      createdAt
+      dimensions
+      duration
+      fileSize
+      finalApprovedAt
+      finalApprovedBy
+      id
+      internalApprovalNote
+      internalApproved
+      internalApprovedAt
+      internalApprovedBy
+      isBRoll
+      isLegalLocked
+      isPlannedShot
+      legalApprovalNote
+      legalApproved
+      legalApprovedAt
+      legalApprovedBy
+      legalLockedAt
+      mimeType
+      organizationId
+      owner
+      projectId
+      s3Key
+      shotDescription
+      shotListItemId
+      storageClass
+      thumbnailKey
+      type
+      updatedAt
+      usageHeatmap
+      version
+      __typename
+    }
+    assetId
+    beard
+    boundingBox
+    confidence
+    createdAt
+    emotions
+    eyeglasses
+    eyesOpen
+    gender
+    id
+    landmarks
+    mouthOpen
+    mustache
+    organizationId
+    personId
+    personName
+    processingJobId
+    projectId
+    smile
+    sunglasses
+    timestamp
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAIFaceDetectionMutationVariables,
+  APITypes.UpdateAIFaceDetectionMutation
+>;
+export const updateAISceneDetection = /* GraphQL */ `mutation UpdateAISceneDetection(
+  $condition: ModelAISceneDetectionConditionInput
+  $input: UpdateAISceneDetectionInput!
+) {
+  updateAISceneDetection(condition: $condition, input: $input) {
+    asset {
+      aiConfidence
+      aiProcessedAt
+      aiTags
+      approvalRequirements
+      approvalState
+      clientApprovalNote
+      clientApproved
+      clientApprovedAt
+      clientApprovedBy
+      createdAt
+      dimensions
+      duration
+      fileSize
+      finalApprovedAt
+      finalApprovedBy
+      id
+      internalApprovalNote
+      internalApproved
+      internalApprovedAt
+      internalApprovedBy
+      isBRoll
+      isLegalLocked
+      isPlannedShot
+      legalApprovalNote
+      legalApproved
+      legalApprovedAt
+      legalApprovedBy
+      legalLockedAt
+      mimeType
+      organizationId
+      owner
+      projectId
+      s3Key
+      shotDescription
+      shotListItemId
+      storageClass
+      thumbnailKey
+      type
+      updatedAt
+      usageHeatmap
+      version
+      __typename
+    }
+    assetId
+    confidence
+    createdAt
+    duration
+    endTime
+    id
+    labels
+    lighting
+    movement
+    organizationId
+    processingJobId
+    projectId
+    shotType
+    startTime
+    thumbnailKey
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAISceneDetectionMutationVariables,
+  APITypes.UpdateAISceneDetectionMutation
+>;
+export const updateAITranscript = /* GraphQL */ `mutation UpdateAITranscript(
+  $condition: ModelAITranscriptConditionInput
+  $input: UpdateAITranscriptInput!
+) {
+  updateAITranscript(condition: $condition, input: $input) {
+    asset {
+      aiConfidence
+      aiProcessedAt
+      aiTags
+      approvalRequirements
+      approvalState
+      clientApprovalNote
+      clientApproved
+      clientApprovedAt
+      clientApprovedBy
+      createdAt
+      dimensions
+      duration
+      fileSize
+      finalApprovedAt
+      finalApprovedBy
+      id
+      internalApprovalNote
+      internalApproved
+      internalApprovedAt
+      internalApprovedBy
+      isBRoll
+      isLegalLocked
+      isPlannedShot
+      legalApprovalNote
+      legalApproved
+      legalApprovedAt
+      legalApprovedBy
+      legalLockedAt
+      mimeType
+      organizationId
+      owner
+      projectId
+      s3Key
+      shotDescription
+      shotListItemId
+      storageClass
+      thumbnailKey
+      type
+      updatedAt
+      usageHeatmap
+      version
+      __typename
+    }
+    assetId
+    confidence
+    createdAt
+    endTime
+    id
+    languageCode
+    organizationId
+    processingJobId
+    projectId
+    speakerId
+    speakerName
+    startTime
+    text
+    updatedAt
+    words
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAITranscriptMutationVariables,
+  APITypes.UpdateAITranscriptMutation
+>;
+export const updateAccessException = /* GraphQL */ `mutation UpdateAccessException(
+  $condition: ModelAccessExceptionConditionInput
+  $input: UpdateAccessExceptionInput!
+) {
+  updateAccessException(condition: $condition, input: $input) {
+    approvedAt
+    approvedBy
+    approvedByEmail
+    approverRole
+    createdAt
+    denialReason
+    durationHours
+    expiresAt
+    id
+    organizationId
+    owner
+    projectId
+    reason
+    requestedAction
+    requestedAssetId
+    requestedAt
+    requestedBy
+    requestedByEmail
+    status
+    targetUserEmail
+    targetUserId
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAccessExceptionMutationVariables,
+  APITypes.UpdateAccessExceptionMutation
+>;
+export const updateActivityLog = /* GraphQL */ `mutation UpdateActivityLog(
+  $condition: ModelActivityLogConditionInput
+  $input: UpdateActivityLogInput!
+) {
+  updateActivityLog(condition: $condition, input: $input) {
+    action
+    createdAt
+    id
+    ipAddress
+    metadata
+    organizationId
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectId
+    targetId
+    targetName
+    targetType
+    updatedAt
+    userEmail
+    userId
+    userRole
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateActivityLogMutationVariables,
+  APITypes.UpdateActivityLogMutation
+>;
+export const updateArchiveAsset = /* GraphQL */ `mutation UpdateArchiveAsset(
+  $condition: ModelArchiveAssetConditionInput
+  $input: UpdateArchiveAssetInput!
+) {
+  updateArchiveAsset(condition: $condition, input: $input) {
+    aiEmotions
+    aiFaces
+    aiObjects
+    aiSceneDescription
+    aiSentiment
+    aiSummary
+    aiTextOnScreen
+    aiTranscript
+    aspectRatio
+    assetId
+    audioChannels
+    audioCodec
+    audioSampleRate
+    bitDepth
+    bitrate
+    camera
+    cameraSettings
+    childAssetIds
+    codec
+    colorPalette
+    colorSpace
+    createdAt
+    creativeMetadata
+    duration
+    fileSizeBytes
+    frameRate
+    fullTextIndex
+    glacierArchiveId
+    glacierVaultId
+    hdr
+    id
+    labels
+    lastTierChangeAt
+    lastUsedAt
+    lastUsedBy
+    legalMetadata
+    lens
+    linkedProjects
+    linkedVersions
+    locationReleases
+    mood
+    operationalMetadata
+    organizationId
+    parentAssetId
+    partialRetrievalSupported
+    permitExpiry
+    permitId
+    projectId
+    proxyKey
+    regionRestrictions
+    releaseStatus
+    resolution
+    rightsExpiration
+    riskFactors
+    riskScore
+    s3Bucket
+    s3Key
+    sceneNumber
+    searchVector
+    shotType
+    storageMetadata
+    storageTier
+    subjects
+    takeNumber
+    talentReleases
+    technicalMetadata
+    thawCostEstimate
+    thumbnailKey
+    tierChangeHistory
+    transcriptKeywords
+    updatedAt
+    uploadTimestamp
+    uploaderEmail
+    uploaderName
+    usageCount
+    usageRestrictions
+    visualStyle
+    waveformKey
+    workflowStage
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateArchiveAssetMutationVariables,
+  APITypes.UpdateArchiveAssetMutation
+>;
+export const updateArchivePolicy = /* GraphQL */ `mutation UpdateArchivePolicy(
+  $condition: ModelArchivePolicyConditionInput
+  $input: UpdateArchivePolicyInput!
+) {
+  updateArchivePolicy(condition: $condition, input: $input) {
+    assetsProcessed
+    createdAt
+    createdBy
+    createdByEmail
+    daysUntilArchive
+    description
+    excludeAssetTypes
+    excludeTaggedWith
+    id
+    includeAssetTypes
+    isEnabled
+    lastExecutedAt
+    minFileSizeMB
+    name
+    nextScheduledRun
+    onlyProjectStatus
+    organizationId
+    projectId
+    storageFreedGB
+    targetStorageClass
+    triggerType
+    updatedAt
+    usageScoreThreshold
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateArchivePolicyMutationVariables,
+  APITypes.UpdateArchivePolicyMutation
+>;
+export const updateAsset = /* GraphQL */ `mutation UpdateAsset(
+  $condition: ModelAssetConditionInput
+  $input: UpdateAssetInput!
+) {
+  updateAsset(condition: $condition, input: $input) {
+    aiAnalysisJobs {
+      nextToken
+      __typename
+    }
+    aiConfidence
+    aiFaceDetections {
+      nextToken
+      __typename
+    }
+    aiProcessedAt
+    aiSceneDetections {
+      nextToken
+      __typename
+    }
+    aiTags
+    aiTranscripts {
+      nextToken
+      __typename
+    }
+    approvalRequirements
+    approvalState
+    clientApprovalNote
+    clientApproved
+    clientApprovedAt
+    clientApprovedBy
+    createdAt
+    dimensions
+    duration
+    fileSize
+    finalApprovedAt
+    finalApprovedBy
+    id
+    internalApprovalNote
+    internalApproved
+    internalApprovedAt
+    internalApprovedBy
+    isBRoll
+    isLegalLocked
+    isPlannedShot
+    legalApprovalNote
+    legalApproved
+    legalApprovedAt
+    legalApprovedBy
+    legalLockedAt
+    mimeType
+    organizationId
+    owner
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectId
+    reviews {
+      nextToken
+      __typename
+    }
+    s3Key
+    shotDescription
+    shotListItemId
+    storageClass
+    thumbnailKey
+    type
+    updatedAt
+    usageHeatmap
+    version
+    versions {
+      nextToken
+      __typename
+    }
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAssetMutationVariables,
+  APITypes.UpdateAssetMutation
+>;
+export const updateAssetAnalytics = /* GraphQL */ `mutation UpdateAssetAnalytics(
+  $condition: ModelAssetAnalyticsConditionInput
+  $input: UpdateAssetAnalyticsInput!
+) {
+  updateAssetAnalytics(condition: $condition, input: $input) {
+    approvalCount
+    assetId
+    averageRating
+    averageWatchPercentage
+    commentCount
+    createdAt
+    dataIntegrity
+    distributionLinksCreated
+    downloadCount
+    estimatedValue
+    externalEmbeds
+    feedbackSentiment
+    firstViewedAt
+    id
+    lastUpdated
+    lastViewedAt
+    organizationId
+    peakUsageCount
+    peakUsageDate
+    productionCost
+    projectId
+    revenueGenerated
+    revisionRequestCount
+    roiLastCalculated
+    roiPercentage
+    shareCount
+    socialOutputsCreated
+    totalPlayDuration
+    totalViews
+    uniqueViewers
+    updatedAt
+    usageScore
+    usageScoreUpdatedAt
+    usageTrend
+    viewerDevices
+    viewerLocations
+    viewsByDay
+    viewsByHour
+    viewsByMonth
+    viewsByWeek
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAssetAnalyticsMutationVariables,
+  APITypes.UpdateAssetAnalyticsMutation
+>;
+export const updateAssetLineage = /* GraphQL */ `mutation UpdateAssetLineage(
+  $condition: ModelAssetLineageConditionInput
+  $input: UpdateAssetLineageInput!
+) {
+  updateAssetLineage(condition: $condition, input: $input) {
+    approvals
+    approvedAt
+    approvedBy
+    childAssets
+    createdAt
+    currentVersion
+    derivationDetails
+    derivationType
+    generationNumber
+    id
+    inheritedMetadata
+    isApproved
+    lastUsedAt
+    masterAssetId
+    masterAssetName
+    masterProjectId
+    organizationId
+    overriddenMetadata
+    updatedAt
+    usageCount
+    usedInDeliverables
+    usedInProjects
+    versionHistory
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAssetLineageMutationVariables,
+  APITypes.UpdateAssetLineageMutation
+>;
+export const updateAssetUsageHeatmap = /* GraphQL */ `mutation UpdateAssetUsageHeatmap(
+  $condition: ModelAssetUsageHeatmapConditionInput
+  $input: UpdateAssetUsageHeatmapInput!
+) {
+  updateAssetUsageHeatmap(condition: $condition, input: $input) {
+    archiveRecommendation
+    archiveRecommendationReason
+    assetId
+    createdAt
+    dataQuality
+    deliverableCount
+    engagementRate
+    estimatedImpressions
+    estimatedRevenueGenerated
+    id
+    lastCalculated
+    lastUsed
+    organizationId
+    peakUsageCount
+    peakUsageDate
+    platformUsage
+    predictedUsageNext30Days
+    productionCost
+    projectId
+    recommendedStorageTier
+    relatedDeliverables
+    reusabilityScore
+    roiScore
+    strategicValue
+    topUsers
+    trendAnalysis
+    uniquenessScore
+    updatedAt
+    usageByDayOfWeek
+    usageByHour
+    usageByMonth
+    usageByWeek
+    usageTrend
+    useByRole
+    useByTeam
+    useByUser
+    useFrequencyDaily
+    useFrequencyMonthly
+    useFrequencyWeekly
+    valueJustification
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAssetUsageHeatmapMutationVariables,
+  APITypes.UpdateAssetUsageHeatmapMutation
+>;
+export const updateAssetVersion = /* GraphQL */ `mutation UpdateAssetVersion(
+  $condition: ModelAssetVersionConditionInput
+  $input: UpdateAssetVersionInput!
+) {
+  updateAssetVersion(condition: $condition, input: $input) {
+    asset {
+      aiConfidence
+      aiProcessedAt
+      aiTags
+      approvalRequirements
+      approvalState
+      clientApprovalNote
+      clientApproved
+      clientApprovedAt
+      clientApprovedBy
+      createdAt
+      dimensions
+      duration
+      fileSize
+      finalApprovedAt
+      finalApprovedBy
+      id
+      internalApprovalNote
+      internalApproved
+      internalApprovedAt
+      internalApprovedBy
+      isBRoll
+      isLegalLocked
+      isPlannedShot
+      legalApprovalNote
+      legalApproved
+      legalApprovedAt
+      legalApprovedBy
+      legalLockedAt
+      mimeType
+      organizationId
+      owner
+      projectId
+      s3Key
+      shotDescription
+      shotListItemId
+      storageClass
+      thumbnailKey
+      type
+      updatedAt
+      usageHeatmap
+      version
+      __typename
+    }
+    assetId
+    changeDescription
+    createdAt
+    createdBy
+    createdByEmail
+    fileSize
+    id
+    isCurrentVersion
+    isReviewReady
+    mimeType
+    organizationId
+    previousVersionId
+    projectId
+    s3Key
+    updatedAt
+    versionLabel
+    versionNumber
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAssetVersionMutationVariables,
+  APITypes.UpdateAssetVersionMutation
+>;
+export const updateAudioCue = /* GraphQL */ `mutation UpdateAudioCue(
+  $condition: ModelAudioCueConditionInput
+  $input: UpdateAudioCueInput!
+) {
+  updateAudioCue(condition: $condition, input: $input) {
+    actor
+    character
+    clearanceDate
+    clearanceNotes
+    clearanceStatus
+    composer
+    createdAt
+    createdBy
+    cueNumber
+    cueType
+    duration
+    editedKey
+    id
+    licenseFee
+    lineText
+    masterOwner
+    name
+    notes
+    organizationId
+    projectId
+    publisher
+    recordingDate
+    recordingFacility
+    recordingStatus
+    sourceKey
+    syncOwner
+    term
+    territories
+    timecodeIn
+    timecodeOut
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAudioCueMutationVariables,
+  APITypes.UpdateAudioCueMutation
+>;
+export const updateAuditLog = /* GraphQL */ `mutation UpdateAuditLog(
+  $condition: ModelAuditLogConditionInput
+  $input: UpdateAuditLogInput!
+) {
+  updateAuditLog(condition: $condition, input: $input) {
+    action
+    actionCategory
+    assetId
+    createdAt
+    deniedReason
+    details
+    geoLocation
+    id
+    ipAddress
+    isExternal
+    organizationId
+    projectId
+    resourceId
+    resourceType
+    sessionId
+    success
+    timestamp
+    updatedAt
+    userAgent
+    userEmail
+    userId
+    userRole
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateAuditLogMutationVariables,
+  APITypes.UpdateAuditLogMutation
+>;
+export const updateBrief = /* GraphQL */ `mutation UpdateBrief(
+  $condition: ModelBriefConditionInput
+  $input: UpdateBriefInput!
+) {
+  updateBrief(condition: $condition, input: $input) {
+    accessibilityRequired
+    aiProcessedAt
+    approvedByFinance
+    approvedByLegal
+    approvedByProducer
+    brandGuidelines
+    budgetRange
+    complexity
+    copyrightOwnership
+    covidProtocolsRequired
+    createdAt
+    creativeProposals
+    crewRoles
+    deliverables
+    distributionChannels
+    embargoDate
+    equipmentNeeds
+    estimatedDuration
+    geoRights
+    hasDroneRisk
+    hasHazardousLocationRisk
+    hasMinorRisk
+    hasPublicSpaceRisk
+    hasStuntRisk
+    id
+    inspirationReferences
+    insuranceRequired
+    keyMessages
+    languageVersions
+    locationDetails
+    locationReleasesRequired
+    masterFormat
+    musicLicensing
+    organizationId
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectDescription
+    projectId
+    requiredPermits
+    riskLevel
+    safetyOfficerNeeded
+    scenes
+    scriptOrNotes
+    selectedProposalId
+    socialCropsRequired
+    stockFootageNeeded
+    subtitlesRequired
+    talentOnScreen
+    talentReleasesRequired
+    talentVoiceOver
+    targetAudience
+    tone
+    unionRules
+    updatedAt
+    usageRightsDuration
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateBriefMutationVariables,
+  APITypes.UpdateBriefMutation
+>;
+export const updateBudgetLineItem = /* GraphQL */ `mutation UpdateBudgetLineItem(
+  $condition: ModelBudgetLineItemConditionInput
+  $input: UpdateBudgetLineItemInput!
+) {
+  updateBudgetLineItem(condition: $condition, input: $input) {
+    actualAmount
+    actualUnits
+    approvedAt
+    approvedBy
+    category
+    createdAt
+    createdBy
+    createdByEmail
+    description
+    endDate
+    estimatedAmount
+    estimatedUnits
+    id
+    notes
+    organizationId
+    phase
+    projectId
+    purchaseOrderNumber
+    startDate
+    status
+    subcategory
+    unitRate
+    unitType
+    updatedAt
+    variance
+    vendorContact
+    vendorName
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateBudgetLineItemMutationVariables,
+  APITypes.UpdateBudgetLineItemMutation
+>;
+export const updateCallSheet = /* GraphQL */ `mutation UpdateCallSheet(
+  $condition: ModelCallSheetConditionInput
+  $input: UpdateCallSheetInput!
+) {
+  updateCallSheet(condition: $condition, input: $input) {
+    castMembers {
+      nextToken
+      __typename
+    }
+    cateringLocation
+    createdAt
+    crewMembers {
+      nextToken
+      __typename
+    }
+    directorName
+    directorPhone
+    episodeNumber
+    estimatedWrap
+    firstADName
+    firstADPhone
+    generalCrewCall
+    hospitalAddress
+    id
+    lastUpdatedBy
+    mealTimes
+    nearestHospital
+    nextDaySchedule
+    organizationId
+    parkingInstructions
+    primaryLocation
+    primaryLocationAddress
+    producerName
+    producerPhone
+    productionCompany
+    productionManagerName
+    productionManagerPhone
+    productionOfficePhone
+    productionTitle
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectId
+    publishedAt
+    safetyNotes
+    scenes {
+      nextToken
+      __typename
+    }
+    shootDate
+    shootDayNumber
+    specialInstructions
+    status
+    sunset
+    temperature
+    timezone
+    totalShootDays
+    transportationNotes
+    updatedAt
+    version
+    weatherForecast
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateCallSheetMutationVariables,
+  APITypes.UpdateCallSheetMutation
+>;
+export const updateCallSheetCast = /* GraphQL */ `mutation UpdateCallSheetCast(
+  $condition: ModelCallSheetCastConditionInput
+  $input: UpdateCallSheetCastInput!
+) {
+  updateCallSheetCast(condition: $condition, input: $input) {
+    actorName
+    callSheet {
+      cateringLocation
+      createdAt
+      directorName
+      directorPhone
+      episodeNumber
+      estimatedWrap
+      firstADName
+      firstADPhone
+      generalCrewCall
+      hospitalAddress
+      id
+      lastUpdatedBy
+      mealTimes
+      nearestHospital
+      nextDaySchedule
+      organizationId
+      parkingInstructions
+      primaryLocation
+      primaryLocationAddress
+      producerName
+      producerPhone
+      productionCompany
+      productionManagerName
+      productionManagerPhone
+      productionOfficePhone
+      productionTitle
+      projectId
+      publishedAt
+      safetyNotes
+      shootDate
+      shootDayNumber
+      specialInstructions
+      status
+      sunset
+      temperature
+      timezone
+      totalShootDays
+      transportationNotes
+      updatedAt
+      version
+      weatherForecast
+      __typename
+    }
+    callSheetId
+    callToSet
+    characterName
+    createdAt
+    email
+    id
+    makeupCall
+    notes
+    phone
+    pickupLocation
+    pickupTime
+    sortOrder
+    updatedAt
+    wardrobeCall
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateCallSheetCastMutationVariables,
+  APITypes.UpdateCallSheetCastMutation
+>;
+export const updateCallSheetCrew = /* GraphQL */ `mutation UpdateCallSheetCrew(
+  $condition: ModelCallSheetCrewConditionInput
+  $input: UpdateCallSheetCrewInput!
+) {
+  updateCallSheetCrew(condition: $condition, input: $input) {
+    callSheet {
+      cateringLocation
+      createdAt
+      directorName
+      directorPhone
+      episodeNumber
+      estimatedWrap
+      firstADName
+      firstADPhone
+      generalCrewCall
+      hospitalAddress
+      id
+      lastUpdatedBy
+      mealTimes
+      nearestHospital
+      nextDaySchedule
+      organizationId
+      parkingInstructions
+      primaryLocation
+      primaryLocationAddress
+      producerName
+      producerPhone
+      productionCompany
+      productionManagerName
+      productionManagerPhone
+      productionOfficePhone
+      productionTitle
+      projectId
+      publishedAt
+      safetyNotes
+      shootDate
+      shootDayNumber
+      specialInstructions
+      status
+      sunset
+      temperature
+      timezone
+      totalShootDays
+      transportationNotes
+      updatedAt
+      version
+      weatherForecast
+      __typename
+    }
+    callSheetId
+    callTime
+    createdAt
+    department
+    email
+    id
+    name
+    notes
+    phone
+    role
+    sortOrder
+    updatedAt
+    walkieChannel
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateCallSheetCrewMutationVariables,
+  APITypes.UpdateCallSheetCrewMutation
+>;
+export const updateCallSheetScene = /* GraphQL */ `mutation UpdateCallSheetScene(
+  $condition: ModelCallSheetSceneConditionInput
+  $input: UpdateCallSheetSceneInput!
+) {
+  updateCallSheetScene(condition: $condition, input: $input) {
+    callSheet {
+      cateringLocation
+      createdAt
+      directorName
+      directorPhone
+      episodeNumber
+      estimatedWrap
+      firstADName
+      firstADPhone
+      generalCrewCall
+      hospitalAddress
+      id
+      lastUpdatedBy
+      mealTimes
+      nearestHospital
+      nextDaySchedule
+      organizationId
+      parkingInstructions
+      primaryLocation
+      primaryLocationAddress
+      producerName
+      producerPhone
+      productionCompany
+      productionManagerName
+      productionManagerPhone
+      productionOfficePhone
+      productionTitle
+      projectId
+      publishedAt
+      safetyNotes
+      shootDate
+      shootDayNumber
+      specialInstructions
+      status
+      sunset
+      temperature
+      timezone
+      totalShootDays
+      transportationNotes
+      updatedAt
+      version
+      weatherForecast
+      __typename
+    }
+    callSheetId
+    createdAt
+    description
+    estimatedDuration
+    id
+    location
+    notes
+    pageCount
+    sceneHeading
+    sceneNumber
+    scheduledTime
+    sortOrder
+    status
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateCallSheetSceneMutationVariables,
+  APITypes.UpdateCallSheetSceneMutation
+>;
+export const updateCollection = /* GraphQL */ `mutation UpdateCollection(
+  $condition: ModelCollectionConditionInput
+  $input: UpdateCollectionInput!
+) {
+  updateCollection(condition: $condition, input: $input) {
+    allowComments
+    allowDownloads
+    assetCount
+    collectionType
+    color
+    coverImageKey
+    createdAt
+    createdBy
+    createdByEmail
+    description
+    icon
+    id
+    isSmartCollection
+    lastModifiedAt
+    lastModifiedBy
+    name
+    organizationId
+    projectId
+    shareLink
+    shareLinkExpiry
+    shareLinkPassword
+    sharedWith
+    smartLastUpdated
+    smartRules
+    sortBy
+    sortOrder
+    tags
+    totalSizeBytes
+    updatedAt
+    viewMode
+    visibility
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateCollectionMutationVariables,
+  APITypes.UpdateCollectionMutation
+>;
+export const updateCollectionAsset = /* GraphQL */ `mutation UpdateCollectionAsset(
+  $condition: ModelCollectionAssetConditionInput
+  $input: UpdateCollectionAssetInput!
+) {
+  updateCollectionAsset(condition: $condition, input: $input) {
+    addedAt
+    addedBy
+    addedByEmail
+    assetId
+    collectionId
+    createdAt
+    id
+    notes
+    organizationId
+    selectedClipIn
+    selectedClipOut
+    selectedFrameTimecode
+    sortOrder
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateCollectionAssetMutationVariables,
+  APITypes.UpdateCollectionAssetMutation
+>;
+export const updateColorSession = /* GraphQL */ `mutation UpdateColorSession(
+  $condition: ModelColorSessionConditionInput
+  $input: UpdateColorSessionInput!
+) {
+  updateColorSession(condition: $condition, input: $input) {
+    cdlOffset
+    cdlPower
+    cdlSaturation
+    cdlSlope
+    colorSpace
+    coloristEmail
+    coloristName
+    cost
+    createdAt
+    createdBy
+    durationHours
+    facility
+    hdrFormat
+    id
+    lookApproved
+    lookApprovedAt
+    lookApprovedBy
+    lutFileName
+    lutKey
+    name
+    notes
+    organizationId
+    peakNits
+    projectId
+    sessionDate
+    stage
+    status
+    suite
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateColorSessionMutationVariables,
+  APITypes.UpdateColorSessionMutation
+>;
+export const updateCrewCost = /* GraphQL */ `mutation UpdateCrewCost(
+  $condition: ModelCrewCostConditionInput
+  $input: UpdateCrewCostInput!
+) {
+  updateCrewCost(condition: $condition, input: $input) {
+    baseCost
+    baseRate
+    callSheetId
+    callTime
+    createdAt
+    createdBy
+    crewMemberEmail
+    crewMemberName
+    deductions
+    department
+    doubleTimeCost
+    doubleTimeHours
+    id
+    kitFee
+    kitFeeCost
+    mealPenaltyCost
+    mealPenaltyHours
+    mileageCost
+    mileageRate
+    netPay
+    notes
+    organizationId
+    overtimeCost
+    overtimeHours
+    overtimeRate
+    paymentDate
+    paymentReference
+    paymentStatus
+    perDiem
+    perDiemCost
+    projectId
+    rateType
+    regularHours
+    role
+    shootDay
+    taxWithheld
+    timesheetApproved
+    timesheetApprovedAt
+    timesheetApprovedBy
+    timesheetKey
+    totalCost
+    travelHours
+    updatedAt
+    workDate
+    wrapTime
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateCrewCostMutationVariables,
+  APITypes.UpdateCrewCostMutation
+>;
+export const updateCustomMetadataSchema = /* GraphQL */ `mutation UpdateCustomMetadataSchema(
+  $condition: ModelCustomMetadataSchemaConditionInput
+  $input: UpdateCustomMetadataSchemaInput!
+) {
+  updateCustomMetadataSchema(condition: $condition, input: $input) {
+    appliesTo
+    assetTypes
+    canEditRoles
+    canViewRoles
+    collapsedByDefault
+    createdAt
+    createdBy
+    description
+    displayOrder
+    fields
+    id
+    isActive
+    lastModifiedAt
+    lastModifiedBy
+    name
+    organizationId
+    showInDetail
+    showInList
+    slug
+    updatedAt
+    version
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateCustomMetadataSchemaMutationVariables,
+  APITypes.UpdateCustomMetadataSchemaMutation
+>;
+export const updateCustomMetadataValue = /* GraphQL */ `mutation UpdateCustomMetadataValue(
+  $condition: ModelCustomMetadataValueConditionInput
+  $input: UpdateCustomMetadataValueInput!
+) {
+  updateCustomMetadataValue(condition: $condition, input: $input) {
+    changeHistory
+    createdAt
+    createdBy
+    id
+    lastModifiedAt
+    lastModifiedBy
+    organizationId
+    schemaId
+    targetId
+    targetType
+    updatedAt
+    values
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateCustomMetadataValueMutationVariables,
+  APITypes.UpdateCustomMetadataValueMutation
+>;
+export const updateDailyCostSummary = /* GraphQL */ `mutation UpdateDailyCostSummary(
+  $condition: ModelDailyCostSummaryConditionInput
+  $input: UpdateDailyCostSummaryInput!
+) {
+  updateDailyCostSummary(condition: $condition, input: $input) {
+    callSheetId
+    cateringCost
+    createdAt
+    createdBy
+    crewBaseCost
+    crewCount
+    crewKitFees
+    crewOvertimeCost
+    crewOvertimeHours
+    crewPerDiem
+    crewTotalCost
+    crewTotalHours
+    date
+    equipmentOwnedCost
+    equipmentRentalCost
+    equipmentTotalCost
+    finalizedAt
+    finalizedBy
+    id
+    isFinalized
+    issues
+    locationFees
+    locationTotalCost
+    miscCost
+    notes
+    organizationId
+    otherTotalCost
+    parkingCost
+    permitFees
+    projectId
+    shootDay
+    talentFees
+    talentPerDiem
+    talentTotalCost
+    totalActualCost
+    totalPlannedCost
+    transportCost
+    updatedAt
+    variance
+    variancePercentage
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateDailyCostSummaryMutationVariables,
+  APITypes.UpdateDailyCostSummaryMutation
+>;
+export const updateDailyProductionReport = /* GraphQL */ `mutation UpdateDailyProductionReport(
+  $condition: ModelDailyProductionReportConditionInput
+  $input: UpdateDailyProductionReportInput!
+) {
+  updateDailyProductionReport(condition: $condition, input: $input) {
+    approvedAt
+    approvedBy
+    cameraWrap
+    cardsUsed
+    completedScenes
+    createdAt
+    createdBy
+    createdByEmail
+    crewCall
+    crewWrap
+    date
+    director
+    firstAD
+    firstShot
+    goodTakes
+    id
+    incidents
+    lastShot
+    lunchEnd
+    lunchStart
+    mealPenalties
+    organizationId
+    overtimeCrew
+    partialScenes
+    producer
+    productionNotes
+    projectId
+    rejectionReason
+    runningTotal
+    scheduledScenes
+    shootDay
+    status
+    storageUsedGB
+    submittedAt
+    submittedBy
+    temperature
+    tomorrowPrep
+    totalCrewMembers
+    totalMinutesShot
+    totalSetups
+    totalTakes
+    unit
+    updatedAt
+    upm
+    weatherConditions
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateDailyProductionReportMutationVariables,
+  APITypes.UpdateDailyProductionReportMutation
+>;
+export const updateDistributionLink = /* GraphQL */ `mutation UpdateDistributionLink(
+  $condition: ModelDistributionLinkConditionInput
+  $input: UpdateDistributionLinkInput!
+) {
+  updateDistributionLink(condition: $condition, input: $input) {
+    accessCode
+    accessToken
+    allowDownload
+    allowShare
+    allowedCountries
+    assetId
+    assetVersionId
+    averageViewDuration
+    blockedCountries
+    completionRate
+    createdAt
+    createdBy
+    createdByEmail
+    currentViews
+    description
+    downloadResolution
+    expiresAt
+    geoRestriction
+    id
+    isExpired
+    isPasswordProtected
+    isWatermarked
+    lastAccessedAt
+    lastAccessedBy
+    lastAccessedFrom
+    linkType
+    maxViews
+    name
+    notifyOnDownload
+    notifyOnView
+    organizationId
+    playlistAssetIds
+    projectId
+    recipientCompany
+    recipientEmail
+    recipientName
+    recipientRole
+    revokedAt
+    revokedBy
+    revokedReason
+    status
+    streamQuality
+    totalViewDuration
+    updatedAt
+    viewLogs {
+      nextToken
+      __typename
+    }
+    watermarkOpacity
+    watermarkPosition
+    watermarkText
+    watermarkType
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateDistributionLinkMutationVariables,
+  APITypes.UpdateDistributionLinkMutation
+>;
+export const updateDistributionViewLog = /* GraphQL */ `mutation UpdateDistributionViewLog(
+  $condition: ModelDistributionViewLogConditionInput
+  $input: UpdateDistributionViewLogInput!
+) {
+  updateDistributionViewLog(condition: $condition, input: $input) {
+    averageBitrate
+    bufferingDuration
+    bufferingEvents
+    createdAt
+    distributionLink {
+      accessCode
+      accessToken
+      allowDownload
+      allowShare
+      allowedCountries
+      assetId
+      assetVersionId
+      averageViewDuration
+      blockedCountries
+      completionRate
+      createdAt
+      createdBy
+      createdByEmail
+      currentViews
+      description
+      downloadResolution
+      expiresAt
+      geoRestriction
+      id
+      isExpired
+      isPasswordProtected
+      isWatermarked
+      lastAccessedAt
+      lastAccessedBy
+      lastAccessedFrom
+      linkType
+      maxViews
+      name
+      notifyOnDownload
+      notifyOnView
+      organizationId
+      playlistAssetIds
+      projectId
+      recipientCompany
+      recipientEmail
+      recipientName
+      recipientRole
+      revokedAt
+      revokedBy
+      revokedReason
+      status
+      streamQuality
+      totalViewDuration
+      updatedAt
+      watermarkOpacity
+      watermarkPosition
+      watermarkText
+      watermarkType
+      __typename
+    }
+    distributionLinkId
+    downloadAttempted
+    duration
+    endTime
+    geoBlockReason
+    geoBlocked
+    id
+    pauseEvents
+    percentageWatched
+    playbackSpeed
+    qualityChanges
+    screenshotAttempted
+    seekEvents
+    sessionId
+    startTime
+    updatedAt
+    viewerBrowser
+    viewerCity
+    viewerCountry
+    viewerDevice
+    viewerEmail
+    viewerIP
+    viewerName
+    viewerOS
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateDistributionViewLogMutationVariables,
+  APITypes.UpdateDistributionViewLogMutation
+>;
+export const updateDownloadRequest = /* GraphQL */ `mutation UpdateDownloadRequest(
+  $condition: ModelDownloadRequestConditionInput
+  $input: UpdateDownloadRequestInput!
+) {
+  updateDownloadRequest(condition: $condition, input: $input) {
+    applyWatermark
+    assetIds
+    burnInSubtitles
+    burnInTimecode
+    collectionId
+    completedAt
+    createdAt
+    downloadCount
+    downloadKey
+    downloadUrl
+    downloadedBy
+    errorMessage
+    expiresAt
+    fileCount
+    folderStructure
+    id
+    includeMetadata
+    includeSidecar
+    includeTranscript
+    lastDownloadedAt
+    organizationId
+    outputCodec
+    outputFormat
+    outputFrameRate
+    outputResolution
+    packageFormat
+    progress
+    requestType
+    requestedAt
+    requestedBy
+    requestedByEmail
+    startedAt
+    status
+    totalSizeBytes
+    updatedAt
+    watermarkOpacity
+    watermarkPosition
+    watermarkText
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateDownloadRequestMutationVariables,
+  APITypes.UpdateDownloadRequestMutation
+>;
+export const updateEditSession = /* GraphQL */ `mutation UpdateEditSession(
+  $condition: ModelEditSessionConditionInput
+  $input: UpdateEditSessionInput!
+) {
+  updateEditSession(condition: $condition, input: $input) {
+    addressedNotes
+    approvedAt
+    approvedBy
+    completedAt
+    createdAt
+    createdBy
+    duration
+    editorEmail
+    editorName
+    exportKey
+    frameRate
+    id
+    isCurrentVersion
+    name
+    organizationId
+    projectId
+    resolution
+    stage
+    startedAt
+    status
+    timelineKey
+    totalNotes
+    updatedAt
+    versionNumber
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateEditSessionMutationVariables,
+  APITypes.UpdateEditSessionMutation
+>;
+export const updateEquipment = /* GraphQL */ `mutation UpdateEquipment(
+  $condition: ModelEquipmentConditionInput
+  $input: UpdateEquipmentInput!
+) {
+  updateEquipment(condition: $condition, input: $input) {
+    assetTag
+    barcode
+    calibrationDate
+    category
+    checkouts {
+      nextToken
+      __typename
+    }
+    condition
+    createdAt
+    description
+    homeBase
+    id
+    imageKey
+    insurancePolicyNumber
+    insuranceValue
+    kitItems {
+      nextToken
+      __typename
+    }
+    lastMaintenanceDate
+    maintenanceNotes
+    manufacturer
+    model
+    name
+    nextMaintenanceDate
+    organizationId
+    ownershipType
+    purchaseDate
+    purchasePrice
+    rentalRate
+    replacementValue
+    serialNumber
+    specifications
+    status
+    storageLocation
+    subcategory
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateEquipmentMutationVariables,
+  APITypes.UpdateEquipmentMutation
+>;
+export const updateEquipmentCheckout = /* GraphQL */ `mutation UpdateEquipmentCheckout(
+  $condition: ModelEquipmentCheckoutConditionInput
+  $input: UpdateEquipmentCheckoutInput!
+) {
+  updateEquipmentCheckout(condition: $condition, input: $input) {
+    actualReturnDate
+    approvedBy
+    checkedOutBy
+    checkedOutByName
+    checkoutDate
+    checkoutSignature
+    conditionAtCheckout
+    conditionAtReturn
+    conditionNotes
+    createdAt
+    damageDescription
+    damageReported
+    equipment {
+      assetTag
+      barcode
+      calibrationDate
+      category
+      condition
+      createdAt
+      description
+      homeBase
+      id
+      imageKey
+      insurancePolicyNumber
+      insuranceValue
+      lastMaintenanceDate
+      maintenanceNotes
+      manufacturer
+      model
+      name
+      nextMaintenanceDate
+      organizationId
+      ownershipType
+      purchaseDate
+      purchasePrice
+      rentalRate
+      replacementValue
+      serialNumber
+      specifications
+      status
+      storageLocation
+      subcategory
+      updatedAt
+      __typename
+    }
+    equipmentId
+    expectedReturnDate
+    id
+    organizationId
+    projectId
+    purpose
+    returnSignature
+    returnedBy
+    shootLocation
+    status
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateEquipmentCheckoutMutationVariables,
+  APITypes.UpdateEquipmentCheckoutMutation
+>;
+export const updateEquipmentKit = /* GraphQL */ `mutation UpdateEquipmentKit(
+  $condition: ModelEquipmentKitConditionInput
+  $input: UpdateEquipmentKitInput!
+) {
+  updateEquipmentKit(condition: $condition, input: $input) {
+    category
+    createdAt
+    description
+    id
+    isActive
+    isTemplate
+    itemCount
+    kitContents {
+      nextToken
+      __typename
+    }
+    name
+    organizationId
+    totalValue
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateEquipmentKitMutationVariables,
+  APITypes.UpdateEquipmentKitMutation
+>;
+export const updateEquipmentKitItem = /* GraphQL */ `mutation UpdateEquipmentKitItem(
+  $condition: ModelEquipmentKitItemConditionInput
+  $input: UpdateEquipmentKitItemInput!
+) {
+  updateEquipmentKitItem(condition: $condition, input: $input) {
+    createdAt
+    equipment {
+      assetTag
+      barcode
+      calibrationDate
+      category
+      condition
+      createdAt
+      description
+      homeBase
+      id
+      imageKey
+      insurancePolicyNumber
+      insuranceValue
+      lastMaintenanceDate
+      maintenanceNotes
+      manufacturer
+      model
+      name
+      nextMaintenanceDate
+      organizationId
+      ownershipType
+      purchaseDate
+      purchasePrice
+      rentalRate
+      replacementValue
+      serialNumber
+      specifications
+      status
+      storageLocation
+      subcategory
+      updatedAt
+      __typename
+    }
+    equipmentId
+    id
+    isRequired
+    kit {
+      category
+      createdAt
+      description
+      id
+      isActive
+      isTemplate
+      itemCount
+      name
+      organizationId
+      totalValue
+      updatedAt
+      __typename
+    }
+    kitId
+    notes
+    quantity
+    sortOrder
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateEquipmentKitItemMutationVariables,
+  APITypes.UpdateEquipmentKitItemMutation
+>;
+export const updateEquipmentRental = /* GraphQL */ `mutation UpdateEquipmentRental(
+  $condition: ModelEquipmentRentalConditionInput
+  $input: UpdateEquipmentRentalInput!
+) {
+  updateEquipmentRental(condition: $condition, input: $input) {
+    contractKey
+    createdAt
+    createdBy
+    createdByEmail
+    dailyRate
+    damageCost
+    damageNotes
+    deliveryFee
+    depositAmount
+    depositPaid
+    depositPaidDate
+    description
+    discountAmount
+    equipmentCategory
+    equipmentId
+    equipmentName
+    id
+    insuranceCost
+    insuranceRate
+    invoiceKey
+    invoiceNumber
+    lateFee
+    monthlyRate
+    notes
+    organizationId
+    paymentDate
+    paymentMethod
+    paymentReference
+    paymentStatus
+    pickupDate
+    pickupFee
+    projectId
+    purchaseOrderNumber
+    quantity
+    quoteNumber
+    rentalDays
+    rentalEndDate
+    rentalStartDate
+    returnCondition
+    returnDate
+    serialNumber
+    status
+    subtotal
+    taxAmount
+    totalCost
+    updatedAt
+    usageByDay
+    vendorAddress
+    vendorContact
+    vendorEmail
+    vendorName
+    vendorPhone
+    weeklyRate
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateEquipmentRentalMutationVariables,
+  APITypes.UpdateEquipmentRentalMutation
+>;
+export const updateExpense = /* GraphQL */ `mutation UpdateExpense(
+  $condition: ModelExpenseConditionInput
+  $input: UpdateExpenseInput!
+) {
+  updateExpense(condition: $condition, input: $input) {
+    amount
+    approvedAt
+    approvedBy
+    budgetLineItemId
+    category
+    createdAt
+    createdBy
+    createdByEmail
+    currency
+    description
+    exchangeRate
+    expenseDate
+    hasReceipt
+    id
+    invoiceDate
+    invoiceNumber
+    isReimbursement
+    notes
+    organizationId
+    paymentDate
+    paymentMethod
+    paymentReference
+    paymentStatus
+    phase
+    projectId
+    receiptFileName
+    receiptKey
+    reimburseTo
+    reimburseToName
+    reimbursementStatus
+    rejectionReason
+    shootDay
+    status
+    subcategory
+    submittedAt
+    submittedBy
+    updatedAt
+    vendorId
+    vendorName
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateExpenseMutationVariables,
+  APITypes.UpdateExpenseMutation
+>;
+export const updateInvoice = /* GraphQL */ `mutation UpdateInvoice(
+  $condition: ModelInvoiceConditionInput
+  $input: UpdateInvoiceInput!
+) {
+  updateInvoice(condition: $condition, input: $input) {
+    billingPeriod
+    createdAt
+    currency
+    discount
+    dueDate
+    hostedInvoiceUrl
+    id
+    invoiceNumber
+    invoicePdfUrl
+    lineItems
+    notes
+    organization {
+      address
+      autoArchiveDays
+      billingCycleDay
+      brandAccentColor
+      brandPrimaryColor
+      brandSecondaryColor
+      city
+      country
+      createdAt
+      createdBy
+      currency
+      currentAICreditsUsed
+      currentProjectCount
+      currentStorageUsedGB
+      currentUserCount
+      customDomain
+      customFeatures
+      dataProcessingAgreementSigned
+      dataRetentionDays
+      deletedAt
+      description
+      dpaSignedAt
+      email
+      emailFromAddress
+      emailFromName
+      featuresEnabled
+      id
+      industry
+      ipWhitelist
+      isGDPRCompliant
+      isHIPAACompliant
+      isSOC2Compliant
+      locale
+      logo
+      maxAICredits
+      maxProjects
+      maxStorageGB
+      maxUsers
+      mfaRequired
+      name
+      onboardingCompleted
+      onboardingCompletedAt
+      onboardingStep
+      owner
+      phone
+      postalCode
+      sessionTimeoutMinutes
+      slug
+      ssoConfig
+      ssoEnabled
+      ssoProvider
+      state
+      status
+      stripeCustomerId
+      stripePaymentMethodId
+      stripePriceId
+      stripeSubscriptionId
+      subscriptionEndsAt
+      subscriptionStartedAt
+      subscriptionStatus
+      subscriptionTier
+      suspendedAt
+      suspendedReason
+      timezone
+      trialEndsAt
+      updatedAt
+      usageResetDate
+      website
+      __typename
+    }
+    organizationId
+    paidAt
+    paymentMethod
+    periodEnd
+    periodStart
+    status
+    stripeInvoiceId
+    subtotal
+    tax
+    total
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateInvoiceMutationVariables,
+  APITypes.UpdateInvoiceMutation
+>;
+export const updateLocationCost = /* GraphQL */ `mutation UpdateLocationCost(
+  $condition: ModelLocationCostConditionInput
+  $input: UpdateLocationCostInput!
+) {
+  updateLocationCost(condition: $condition, input: $input) {
+    callSheetId
+    cancellationFee
+    cateringFee
+    cleaningFee
+    contactEmail
+    contactName
+    contactPhone
+    contractKey
+    contractSigned
+    contractSignedDate
+    costByDay
+    createdAt
+    createdBy
+    createdByEmail
+    dailyRate
+    damageDeposit
+    depositPaid
+    depositPaidDate
+    feeType
+    halfDayRate
+    holdingFee
+    hourlyRate
+    id
+    insuranceCertKey
+    insuranceFee
+    invoiceKey
+    locationAddress
+    locationFee
+    locationName
+    locationType
+    notes
+    organizationId
+    otherFees
+    otherFeesDescription
+    overtimeRate
+    ownerName
+    parkingFee
+    paymentDate
+    paymentMethod
+    paymentReference
+    paymentStatus
+    permitFee
+    permitKey
+    powerFee
+    projectId
+    restrictions
+    securityFee
+    shootDays
+    specialRequirements
+    status
+    subtotal
+    taxAmount
+    totalCost
+    updatedAt
+    useDays
+    useEndDate
+    useStartDate
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateLocationCostMutationVariables,
+  APITypes.UpdateLocationCostMutation
+>;
+export const updateMessage = /* GraphQL */ `mutation UpdateMessage(
+  $condition: ModelMessageConditionInput
+  $input: UpdateMessageInput!
+) {
+  updateMessage(condition: $condition, input: $input) {
+    assetId
+    attachmentKeys
+    attachmentNames
+    convertedToTask
+    createdAt
+    deletedAt
+    editedAt
+    id
+    isDeleted
+    isEdited
+    mentionedUsers
+    messageText
+    messageType
+    organizationId
+    owner
+    parentMessageId
+    priority
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectId
+    readBy
+    senderEmail
+    senderId
+    senderName
+    senderRole
+    taskAssignedTo
+    taskDeadline
+    taskId
+    threadDepth
+    timecode
+    timecodeFormatted
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateMessageMutationVariables,
+  APITypes.UpdateMessageMutation
+>;
+export const updateNotification = /* GraphQL */ `mutation UpdateNotification(
+  $condition: ModelNotificationConditionInput
+  $input: UpdateNotificationInput!
+) {
+  updateNotification(condition: $condition, input: $input) {
+    actionLabel
+    actionUrl
+    assetId
+    assetName
+    createdAt
+    deliveryChannels
+    emailSent
+    emailSentAt
+    expiresAt
+    id
+    isRead
+    message
+    messageId
+    organizationId
+    owner
+    priority
+    projectId
+    projectName
+    readAt
+    reviewId
+    senderEmail
+    senderId
+    senderName
+    slackSent
+    slackSentAt
+    smsSent
+    smsSentAt
+    title
+    type
+    updatedAt
+    userId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateNotificationMutationVariables,
+  APITypes.UpdateNotificationMutation
+>;
+export const updateOrganization = /* GraphQL */ `mutation UpdateOrganization(
+  $condition: ModelOrganizationConditionInput
+  $input: UpdateOrganizationInput!
+) {
+  updateOrganization(condition: $condition, input: $input) {
+    address
+    autoArchiveDays
+    billingCycleDay
+    brandAccentColor
+    brandPrimaryColor
+    brandSecondaryColor
+    city
+    country
+    createdAt
+    createdBy
+    currency
+    currentAICreditsUsed
+    currentProjectCount
+    currentStorageUsedGB
+    currentUserCount
+    customDomain
+    customFeatures
+    dataProcessingAgreementSigned
+    dataRetentionDays
+    deletedAt
+    description
+    dpaSignedAt
+    email
+    emailFromAddress
+    emailFromName
+    featuresEnabled
+    id
+    industry
+    invitations {
+      nextToken
+      __typename
+    }
+    invoices {
+      nextToken
+      __typename
+    }
+    ipWhitelist
+    isGDPRCompliant
+    isHIPAACompliant
+    isSOC2Compliant
+    locale
+    logo
+    maxAICredits
+    maxProjects
+    maxStorageGB
+    maxUsers
+    members {
+      nextToken
+      __typename
+    }
+    mfaRequired
+    name
+    onboardingCompleted
+    onboardingCompletedAt
+    onboardingStep
+    owner
+    phone
+    postalCode
+    projects {
+      nextToken
+      __typename
+    }
+    sessionTimeoutMinutes
+    slug
+    ssoConfig
+    ssoEnabled
+    ssoProvider
+    state
+    status
+    stripeCustomerId
+    stripePaymentMethodId
+    stripePriceId
+    stripeSubscriptionId
+    subscriptionEndsAt
+    subscriptionStartedAt
+    subscriptionStatus
+    subscriptionTier
+    suspendedAt
+    suspendedReason
+    timezone
+    trialEndsAt
+    updatedAt
+    usageRecords {
+      nextToken
+      __typename
+    }
+    usageResetDate
+    website
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateOrganizationMutationVariables,
+  APITypes.UpdateOrganizationMutation
+>;
+export const updateOrganizationInvitation = /* GraphQL */ `mutation UpdateOrganizationInvitation(
+  $condition: ModelOrganizationInvitationConditionInput
+  $input: UpdateOrganizationInvitationInput!
+) {
+  updateOrganizationInvitation(condition: $condition, input: $input) {
+    acceptedAt
+    createdAt
+    declinedAt
+    email
+    expiresAt
+    id
+    inviteToken
+    invitedBy
+    invitedByEmail
+    lastReminderAt
+    message
+    organization {
+      address
+      autoArchiveDays
+      billingCycleDay
+      brandAccentColor
+      brandPrimaryColor
+      brandSecondaryColor
+      city
+      country
+      createdAt
+      createdBy
+      currency
+      currentAICreditsUsed
+      currentProjectCount
+      currentStorageUsedGB
+      currentUserCount
+      customDomain
+      customFeatures
+      dataProcessingAgreementSigned
+      dataRetentionDays
+      deletedAt
+      description
+      dpaSignedAt
+      email
+      emailFromAddress
+      emailFromName
+      featuresEnabled
+      id
+      industry
+      ipWhitelist
+      isGDPRCompliant
+      isHIPAACompliant
+      isSOC2Compliant
+      locale
+      logo
+      maxAICredits
+      maxProjects
+      maxStorageGB
+      maxUsers
+      mfaRequired
+      name
+      onboardingCompleted
+      onboardingCompletedAt
+      onboardingStep
+      owner
+      phone
+      postalCode
+      sessionTimeoutMinutes
+      slug
+      ssoConfig
+      ssoEnabled
+      ssoProvider
+      state
+      status
+      stripeCustomerId
+      stripePaymentMethodId
+      stripePriceId
+      stripeSubscriptionId
+      subscriptionEndsAt
+      subscriptionStartedAt
+      subscriptionStatus
+      subscriptionTier
+      suspendedAt
+      suspendedReason
+      timezone
+      trialEndsAt
+      updatedAt
+      usageResetDate
+      website
+      __typename
+    }
+    organizationId
+    remindersSent
+    role
+    status
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateOrganizationInvitationMutationVariables,
+  APITypes.UpdateOrganizationInvitationMutation
+>;
+export const updateOrganizationMember = /* GraphQL */ `mutation UpdateOrganizationMember(
+  $condition: ModelOrganizationMemberConditionInput
+  $input: UpdateOrganizationMemberInput!
+) {
+  updateOrganizationMember(condition: $condition, input: $input) {
+    apiKeyId
+    apiKeyLastUsed
+    avatar
+    createdAt
+    customPermissions
+    department
+    email
+    emailNotifications
+    id
+    invitedAt
+    invitedBy
+    joinedAt
+    lastActiveAt
+    name
+    organization {
+      address
+      autoArchiveDays
+      billingCycleDay
+      brandAccentColor
+      brandPrimaryColor
+      brandSecondaryColor
+      city
+      country
+      createdAt
+      createdBy
+      currency
+      currentAICreditsUsed
+      currentProjectCount
+      currentStorageUsedGB
+      currentUserCount
+      customDomain
+      customFeatures
+      dataProcessingAgreementSigned
+      dataRetentionDays
+      deletedAt
+      description
+      dpaSignedAt
+      email
+      emailFromAddress
+      emailFromName
+      featuresEnabled
+      id
+      industry
+      ipWhitelist
+      isGDPRCompliant
+      isHIPAACompliant
+      isSOC2Compliant
+      locale
+      logo
+      maxAICredits
+      maxProjects
+      maxStorageGB
+      maxUsers
+      mfaRequired
+      name
+      onboardingCompleted
+      onboardingCompletedAt
+      onboardingStep
+      owner
+      phone
+      postalCode
+      sessionTimeoutMinutes
+      slug
+      ssoConfig
+      ssoEnabled
+      ssoProvider
+      state
+      status
+      stripeCustomerId
+      stripePaymentMethodId
+      stripePriceId
+      stripeSubscriptionId
+      subscriptionEndsAt
+      subscriptionStartedAt
+      subscriptionStatus
+      subscriptionTier
+      suspendedAt
+      suspendedReason
+      timezone
+      trialEndsAt
+      updatedAt
+      usageResetDate
+      website
+      __typename
+    }
+    organizationId
+    owner
+    phone
+    role
+    slackNotifications
+    slackUserId
+    status
+    suspendedAt
+    suspendedBy
+    suspendedReason
+    title
+    updatedAt
+    userId
+    weeklyDigest
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateOrganizationMemberMutationVariables,
+  APITypes.UpdateOrganizationMemberMutation
+>;
+export const updateProject = /* GraphQL */ `mutation UpdateProject(
+  $condition: ModelProjectConditionInput
+  $input: UpdateProjectInput!
+) {
+  updateProject(condition: $condition, input: $input) {
+    activityLogs {
+      nextToken
+      __typename
+    }
+    archiveComplete
+    archiveCompletedAt
+    archiveLocation
+    assets {
+      nextToken
+      __typename
+    }
+    assetsDelivered
+    assetsDeliveredAt
+    brief {
+      accessibilityRequired
+      aiProcessedAt
+      approvedByFinance
+      approvedByLegal
+      approvedByProducer
+      brandGuidelines
+      budgetRange
+      complexity
+      copyrightOwnership
+      covidProtocolsRequired
+      createdAt
+      creativeProposals
+      crewRoles
+      deliverables
+      distributionChannels
+      embargoDate
+      equipmentNeeds
+      estimatedDuration
+      geoRights
+      hasDroneRisk
+      hasHazardousLocationRisk
+      hasMinorRisk
+      hasPublicSpaceRisk
+      hasStuntRisk
+      id
+      inspirationReferences
+      insuranceRequired
+      keyMessages
+      languageVersions
+      locationDetails
+      locationReleasesRequired
+      masterFormat
+      musicLicensing
+      organizationId
+      projectDescription
+      projectId
+      requiredPermits
+      riskLevel
+      safetyOfficerNeeded
+      scenes
+      scriptOrNotes
+      selectedProposalId
+      socialCropsRequired
+      stockFootageNeeded
+      subtitlesRequired
+      talentOnScreen
+      talentReleasesRequired
+      talentVoiceOver
+      targetAudience
+      tone
+      unionRules
+      updatedAt
+      usageRightsDuration
+      __typename
+    }
+    briefComplete
+    briefCompletedAt
+    budgetApproved
+    budgetApprovedAt
+    budgetCap
+    budgetContingency
+    budgetDistribution
+    budgetPostProduction
+    budgetPreProduction
+    budgetProduction
+    callSheets {
+      nextToken
+      __typename
+    }
+    callSheetsReady
+    callSheetsReadyAt
+    clientContactEmail
+    confidentiality
+    contractsSigned
+    contractsSignedAt
+    createdAt
+    creativeDirectorEmail
+    deadline
+    deliverablesReady
+    deliverablesReadyAt
+    deliveryConfirmedBy
+    department
+    description
+    distributionDate
+    executiveSponsorEmail
+    fieldIntelligenceFeasibilityScore
+    fieldIntelligenceHealthAlerts
+    fieldIntelligenceLastUpdated
+    fieldIntelligenceRiskAlerts
+    fieldIntelligenceWeatherData
+    finalApproved
+    finalApprovedAt
+    finalApprovedBy
+    finalAssetId
+    financeContactEmail
+    fundingSource
+    greenlightBlockers
+    greenlightClientApproved
+    greenlightClientApprovedAt
+    greenlightClientApprovedBy
+    greenlightClientComment
+    greenlightCompletedAt
+    greenlightExecutiveApproved
+    greenlightExecutiveApprovedAt
+    greenlightExecutiveApprovedBy
+    greenlightExecutiveComment
+    greenlightFinanceApproved
+    greenlightFinanceApprovedAt
+    greenlightFinanceApprovedBy
+    greenlightFinanceComment
+    greenlightLegalApproved
+    greenlightLegalApprovedAt
+    greenlightLegalApprovedBy
+    greenlightLegalComment
+    greenlightProducerApproved
+    greenlightProducerApprovedAt
+    greenlightProducerApprovedBy
+    greenlightProducerComment
+    greenlightRequirements
+    id
+    kickoffDate
+    legalApproved
+    legalApprovedAt
+    legalContactEmail
+    legalLockDeadline
+    lifecycleState
+    locationsConfirmed
+    locationsConfirmedAt
+    mediaIngested
+    messages {
+      nextToken
+      __typename
+    }
+    name
+    organization {
+      address
+      autoArchiveDays
+      billingCycleDay
+      brandAccentColor
+      brandPrimaryColor
+      brandSecondaryColor
+      city
+      country
+      createdAt
+      createdBy
+      currency
+      currentAICreditsUsed
+      currentProjectCount
+      currentStorageUsedGB
+      currentUserCount
+      customDomain
+      customFeatures
+      dataProcessingAgreementSigned
+      dataRetentionDays
+      deletedAt
+      description
+      dpaSignedAt
+      email
+      emailFromAddress
+      emailFromName
+      featuresEnabled
+      id
+      industry
+      ipWhitelist
+      isGDPRCompliant
+      isHIPAACompliant
+      isSOC2Compliant
+      locale
+      logo
+      maxAICredits
+      maxProjects
+      maxStorageGB
+      maxUsers
+      mfaRequired
+      name
+      onboardingCompleted
+      onboardingCompletedAt
+      onboardingStep
+      owner
+      phone
+      postalCode
+      sessionTimeoutMinutes
+      slug
+      ssoConfig
+      ssoEnabled
+      ssoProvider
+      state
+      status
+      stripeCustomerId
+      stripePaymentMethodId
+      stripePriceId
+      stripeSubscriptionId
+      subscriptionEndsAt
+      subscriptionStartedAt
+      subscriptionStatus
+      subscriptionTier
+      suspendedAt
+      suspendedReason
+      timezone
+      trialEndsAt
+      updatedAt
+      usageResetDate
+      website
+      __typename
+    }
+    organizationId
+    owner
+    permitsObtained
+    permitsObtainedAt
+    postProductionEndDate
+    postProductionStartDate
+    preProductionEndDate
+    preProductionStartDate
+    primaryKPI
+    principalPhotographyComplete
+    principalPhotographyCompleteAt
+    priority
+    producerEmail
+    productionEndDate
+    productionStartDate
+    projectOwnerEmail
+    projectType
+    purchaseOrderNumber
+    reviewDeadline
+    reviews {
+      nextToken
+      __typename
+    }
+    roughCutAssetId
+    roughCutComplete
+    roughCutCompleteAt
+    shootLocationCity
+    shootLocationCoordinates
+    shootLocationCountry
+    stakeholderSignoff
+    stakeholderSignoffAt
+    status
+    targetMetric
+    teamAssigned
+    teamMembers {
+      nextToken
+      __typename
+    }
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateProjectMutationVariables,
+  APITypes.UpdateProjectMutation
+>;
+export const updateProjectArchive = /* GraphQL */ `mutation UpdateProjectArchive(
+  $condition: ModelProjectArchiveConditionInput
+  $input: UpdateProjectArchiveInput!
+) {
+  updateProjectArchive(condition: $condition, input: $input) {
+    accessCount
+    aiKeyMoments
+    aiLessonsLearned
+    aiSummary
+    approvals
+    archiveReason
+    archiveStatus
+    archivedAt
+    archivedBy
+    assetGraph
+    budgetSummary
+    costPerDeliverable
+    createdAt
+    deliverables
+    greenlightHistory
+    id
+    keyAssets
+    keyAssetsMetadata
+    keywords
+    lastAccessedAt
+    legalDetails
+    legalStatus
+    masterDeliverableIds
+    metadataSummary
+    organizationId
+    productionStats
+    projectId
+    reconstructionManifest
+    regionRestrictions
+    rightsExpirations
+    roiCalculated
+    searchEmbedding
+    themes
+    timelinePhases
+    topics
+    totalCost
+    updatedAt
+    versionTree
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateProjectArchiveMutationVariables,
+  APITypes.UpdateProjectArchiveMutation
+>;
+export const updateProjectMember = /* GraphQL */ `mutation UpdateProjectMember(
+  $condition: ModelProjectMemberConditionInput
+  $input: UpdateProjectMemberInput!
+) {
+  updateProjectMember(condition: $condition, input: $input) {
+    accessExpiresAt
+    accessStartsAt
+    assignedAssetIds
+    assignedPhases
+    assignedTaskIds
+    avatar
+    createdAt
+    customPermissions
+    email
+    emailNotifications
+    externalRole
+    id
+    invitedAt
+    invitedBy
+    isExternal
+    joinedAt
+    lastActiveAt
+    name
+    organizationId
+    owner
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectId
+    projectRole
+    revokedAt
+    revokedBy
+    revokedReason
+    slackUserId
+    status
+    suspendedAt
+    suspendedBy
+    suspendedReason
+    title
+    updatedAt
+    userId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateProjectMemberMutationVariables,
+  APITypes.UpdateProjectMemberMutation
+>;
+export const updateProxyFile = /* GraphQL */ `mutation UpdateProxyFile(
+  $condition: ModelProxyFileConditionInput
+  $input: UpdateProxyFileInput!
+) {
+  updateProxyFile(condition: $condition, input: $input) {
+    assetId
+    assetVersionId
+    audioBitrate
+    audioCodec
+    bitrate
+    cdnUrl
+    codec
+    createdAt
+    createdBy
+    duration
+    errorMessage
+    fileSizeBytes
+    frameRate
+    id
+    jobId
+    lastViewedAt
+    organizationId
+    processingCompleted
+    processingDuration
+    processingStarted
+    processor
+    progress
+    proxyType
+    resolution
+    s3Bucket
+    s3Key
+    status
+    updatedAt
+    viewCount
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateProxyFileMutationVariables,
+  APITypes.UpdateProxyFileMutation
+>;
+export const updateQCReport = /* GraphQL */ `mutation UpdateQCReport(
+  $condition: ModelQCReportConditionInput
+  $input: UpdateQCReportInput!
+) {
+  updateQCReport(condition: $condition, input: $input) {
+    assetId
+    audioQuality
+    audioTechnical
+    checkResults
+    compliance
+    createdAt
+    createdBy
+    criticalIssues
+    deliverableId
+    editorial
+    failedChecks
+    graphicsText
+    id
+    majorIssues
+    minorIssues
+    name
+    organizationId
+    overallStatus
+    passedChecks
+    projectId
+    qcDate
+    qcDuration
+    qcOperator
+    qcOperatorEmail
+    reportKey
+    reportType
+    signOffNotes
+    signedOffAt
+    signedOffBy
+    totalChecks
+    updatedAt
+    videoQuality
+    videoTechnical
+    warningChecks
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateQCReportMutationVariables,
+  APITypes.UpdateQCReportMutation
+>;
+export const updateQualityScore = /* GraphQL */ `mutation UpdateQualityScore(
+  $condition: ModelQualityScoreConditionInput
+  $input: UpdateQualityScoreInput!
+) {
+  updateQualityScore(condition: $condition, input: $input) {
+    analysisDuration
+    analysisVersion
+    analyzedAt
+    analyzedBy
+    assetId
+    assetVersionId
+    audioBitrate
+    audioChannels
+    audioClippingDetected
+    audioCodec
+    audioLoudnessLUFS
+    audioNoiseFloor
+    audioPeakdB
+    audioQualityScore
+    audioSampleRate
+    audioSilencePercentage
+    checksumMD5
+    checksumSHA256
+    colorGradeConsistency
+    complianceIssues
+    compositionScore
+    contentClarity
+    corruptionDetails
+    createdAt
+    fileIntegrity
+    formatCompliance
+    grade
+    id
+    motionSmoothnessScore
+    organizationId
+    overallScore
+    projectId
+    recommendedFixes
+    updatedAt
+    videoBitDepth
+    videoBitrate
+    videoBitrateScore
+    videoCodec
+    videoColorSpace
+    videoExposureScore
+    videoFrameRate
+    videoHDR
+    videoResolution
+    videoResolutionScore
+    videoStabilityScore
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateQualityScoreMutationVariables,
+  APITypes.UpdateQualityScoreMutation
+>;
+export const updateRestoreRequest = /* GraphQL */ `mutation UpdateRestoreRequest(
+  $condition: ModelRestoreRequestConditionInput
+  $input: UpdateRestoreRequestInput!
+) {
+  updateRestoreRequest(condition: $condition, input: $input) {
+    actualCost
+    assetId
+    completedAt
+    createdAt
+    errorMessage
+    estimatedCompletion
+    estimatedCost
+    expiresAt
+    id
+    notificationSent
+    notifyOnComplete
+    organizationId
+    partialEndSeconds
+    partialReason
+    partialStartSeconds
+    projectId
+    requestType
+    requestedAt
+    requestedBy
+    requestedByEmail
+    restoreDurationDays
+    restoreTier
+    restoredKey
+    restoredSize
+    status
+    storageTierId
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateRestoreRequestMutationVariables,
+  APITypes.UpdateRestoreRequestMutation
+>;
+export const updateReview = /* GraphQL */ `mutation UpdateReview(
+  $condition: ModelReviewConditionInput
+  $input: UpdateReviewInput!
+) {
+  updateReview(condition: $condition, input: $input) {
+    asset {
+      aiConfidence
+      aiProcessedAt
+      aiTags
+      approvalRequirements
+      approvalState
+      clientApprovalNote
+      clientApproved
+      clientApprovedAt
+      clientApprovedBy
+      createdAt
+      dimensions
+      duration
+      fileSize
+      finalApprovedAt
+      finalApprovedBy
+      id
+      internalApprovalNote
+      internalApproved
+      internalApprovedAt
+      internalApprovedBy
+      isBRoll
+      isLegalLocked
+      isPlannedShot
+      legalApprovalNote
+      legalApproved
+      legalApprovedAt
+      legalApprovedBy
+      legalLockedAt
+      mimeType
+      organizationId
+      owner
+      projectId
+      s3Key
+      shotDescription
+      shotListItemId
+      storageClass
+      thumbnailKey
+      type
+      updatedAt
+      usageHeatmap
+      version
+      __typename
+    }
+    assetId
+    comments {
+      nextToken
+      __typename
+    }
+    createdAt
+    id
+    isLegalApproved
+    legalApprovedAt
+    legalApprovedBy
+    organizationId
+    owner
+    project {
+      archiveComplete
+      archiveCompletedAt
+      archiveLocation
+      assetsDelivered
+      assetsDeliveredAt
+      briefComplete
+      briefCompletedAt
+      budgetApproved
+      budgetApprovedAt
+      budgetCap
+      budgetContingency
+      budgetDistribution
+      budgetPostProduction
+      budgetPreProduction
+      budgetProduction
+      callSheetsReady
+      callSheetsReadyAt
+      clientContactEmail
+      confidentiality
+      contractsSigned
+      contractsSignedAt
+      createdAt
+      creativeDirectorEmail
+      deadline
+      deliverablesReady
+      deliverablesReadyAt
+      deliveryConfirmedBy
+      department
+      description
+      distributionDate
+      executiveSponsorEmail
+      fieldIntelligenceFeasibilityScore
+      fieldIntelligenceHealthAlerts
+      fieldIntelligenceLastUpdated
+      fieldIntelligenceRiskAlerts
+      fieldIntelligenceWeatherData
+      finalApproved
+      finalApprovedAt
+      finalApprovedBy
+      finalAssetId
+      financeContactEmail
+      fundingSource
+      greenlightBlockers
+      greenlightClientApproved
+      greenlightClientApprovedAt
+      greenlightClientApprovedBy
+      greenlightClientComment
+      greenlightCompletedAt
+      greenlightExecutiveApproved
+      greenlightExecutiveApprovedAt
+      greenlightExecutiveApprovedBy
+      greenlightExecutiveComment
+      greenlightFinanceApproved
+      greenlightFinanceApprovedAt
+      greenlightFinanceApprovedBy
+      greenlightFinanceComment
+      greenlightLegalApproved
+      greenlightLegalApprovedAt
+      greenlightLegalApprovedBy
+      greenlightLegalComment
+      greenlightProducerApproved
+      greenlightProducerApprovedAt
+      greenlightProducerApprovedBy
+      greenlightProducerComment
+      greenlightRequirements
+      id
+      kickoffDate
+      legalApproved
+      legalApprovedAt
+      legalContactEmail
+      legalLockDeadline
+      lifecycleState
+      locationsConfirmed
+      locationsConfirmedAt
+      mediaIngested
+      name
+      organizationId
+      owner
+      permitsObtained
+      permitsObtainedAt
+      postProductionEndDate
+      postProductionStartDate
+      preProductionEndDate
+      preProductionStartDate
+      primaryKPI
+      principalPhotographyComplete
+      principalPhotographyCompleteAt
+      priority
+      producerEmail
+      productionEndDate
+      productionStartDate
+      projectOwnerEmail
+      projectType
+      purchaseOrderNumber
+      reviewDeadline
+      roughCutAssetId
+      roughCutComplete
+      roughCutCompleteAt
+      shootLocationCity
+      shootLocationCoordinates
+      shootLocationCountry
+      stakeholderSignoff
+      stakeholderSignoffAt
+      status
+      targetMetric
+      teamAssigned
+      updatedAt
+      __typename
+    }
+    projectId
+    reviewerEmail
+    reviewerId
+    reviewerRole
+    status
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateReviewMutationVariables,
+  APITypes.UpdateReviewMutation
+>;
+export const updateReviewComment = /* GraphQL */ `mutation UpdateReviewComment(
+  $condition: ModelReviewCommentConditionInput
+  $input: UpdateReviewCommentInput!
+) {
+  updateReviewComment(condition: $condition, input: $input) {
+    assetId
+    attachmentKeys
+    commentText
+    commentType
+    commenterEmail
+    commenterId
+    commenterRole
+    createdAt
+    id
+    isResolved
+    linkedAssetVersionId
+    linkedTaskId
+    linkedTaskStatus
+    organizationId
+    owner
+    priority
+    projectId
+    replies {
+      nextToken
+      __typename
+    }
+    resolvedAt
+    resolvedBy
+    resolvedByEmail
+    resolvedInAssetVersionId
+    review {
+      assetId
+      createdAt
+      id
+      isLegalApproved
+      legalApprovedAt
+      legalApprovedBy
+      organizationId
+      owner
+      projectId
+      reviewerEmail
+      reviewerId
+      reviewerRole
+      status
+      updatedAt
+      __typename
+    }
+    reviewId
+    timecode
+    timecodeFormatted
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateReviewCommentMutationVariables,
+  APITypes.UpdateReviewCommentMutation
+>;
+export const updateReviewCommentReply = /* GraphQL */ `mutation UpdateReviewCommentReply(
+  $condition: ModelReviewCommentReplyConditionInput
+  $input: UpdateReviewCommentReplyInput!
+) {
+  updateReviewCommentReply(condition: $condition, input: $input) {
+    createdAt
+    id
+    owner
+    parentComment {
+      assetId
+      attachmentKeys
+      commentText
+      commentType
+      commenterEmail
+      commenterId
+      commenterRole
+      createdAt
+      id
+      isResolved
+      linkedAssetVersionId
+      linkedTaskId
+      linkedTaskStatus
+      organizationId
+      owner
+      priority
+      projectId
+      resolvedAt
+      resolvedBy
+      resolvedByEmail
+      resolvedInAssetVersionId
+      reviewId
+      timecode
+      timecodeFormatted
+      updatedAt
+      __typename
+    }
+    parentCommentId
+    replierEmail
+    replierId
+    replierRole
+    replyText
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateReviewCommentReplyMutationVariables,
+  APITypes.UpdateReviewCommentReplyMutation
+>;
+export const updateRightsDocument = /* GraphQL */ `mutation UpdateRightsDocument(
+  $condition: ModelRightsDocumentConditionInput
+  $input: UpdateRightsDocumentInput!
+) {
+  updateRightsDocument(condition: $condition, input: $input) {
+    approvalDate
+    approvedBy
+    approvedByName
+    coverageAmount
+    coverageType
+    createdAt
+    description
+    documentNumber
+    documentType
+    effectiveDate
+    expirationDate
+    fileKey
+    fileName
+    fileSize
+    id
+    isCritical
+    isLatestVersion
+    isRequired
+    issueDate
+    issuingAuthority
+    jurisdiction
+    lastReminderSent
+    locationAddress
+    locationName
+    mimeType
+    name
+    notes
+    organizationId
+    personEmail
+    personName
+    personRole
+    previousVersionId
+    projectId
+    rejectionReason
+    reminderDays
+    renewalDate
+    restrictions
+    reviewDate
+    reviewedBy
+    reviewedByName
+    shootDay
+    status
+    tags
+    thumbnailKey
+    updatedAt
+    uploadedBy
+    uploadedByName
+    version
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateRightsDocumentMutationVariables,
+  APITypes.UpdateRightsDocumentMutation
+>;
+export const updateSavedSearch = /* GraphQL */ `mutation UpdateSavedSearch(
+  $condition: ModelSavedSearchConditionInput
+  $input: UpdateSavedSearchInput!
+) {
+  updateSavedSearch(condition: $condition, input: $input) {
+    color
+    createdAt
+    createdBy
+    createdByEmail
+    description
+    displayOrder
+    filters
+    icon
+    id
+    isPinned
+    lastModifiedAt
+    lastModifiedBy
+    lastNotifiedAt
+    lastUsedAt
+    name
+    notifyEmail
+    notifyOnNewMatches
+    organizationId
+    projectId
+    scope
+    searchQuery
+    sharedWith
+    sortBy
+    sortOrder
+    updatedAt
+    usageCount
+    visibility
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateSavedSearchMutationVariables,
+  APITypes.UpdateSavedSearchMutation
+>;
+export const updateShareLink = /* GraphQL */ `mutation UpdateShareLink(
+  $condition: ModelShareLinkConditionInput
+  $input: UpdateShareLinkInput!
+) {
+  updateShareLink(condition: $condition, input: $input) {
+    accessLog
+    allowComment
+    allowDownload
+    allowPreview
+    allowedDomains
+    allowedEmails
+    createdAt
+    createdBy
+    createdByEmail
+    deactivatedAt
+    deactivatedBy
+    deactivationReason
+    downloadCount
+    downloadQuality
+    expiresAt
+    id
+    isActive
+    lastAccessedAt
+    lastAccessedBy
+    maxDownloads
+    maxViews
+    name
+    notifyEmail
+    notifyOnAccess
+    organizationId
+    password
+    requiresPassword
+    shareType
+    targetIds
+    token
+    updatedAt
+    viewCount
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateShareLinkMutationVariables,
+  APITypes.UpdateShareLinkMutation
+>;
+export const updateShotListTracker = /* GraphQL */ `mutation UpdateShotListTracker(
+  $condition: ModelShotListTrackerConditionInput
+  $input: UpdateShotListTrackerInput!
+) {
+  updateShotListTracker(condition: $condition, input: $input) {
+    briefId
+    callSheetId
+    captureStatus
+    capturedAssetIds
+    capturedAt
+    capturedBy
+    continuityNotes
+    createdAt
+    directorApproved
+    directorApprovedAt
+    dpApproved
+    dpApprovedAt
+    framing
+    id
+    movement
+    notes
+    organizationId
+    plannedDuration
+    projectId
+    propNotes
+    proposalId
+    qualityNotes
+    qualityRating
+    selectedAssetId
+    shootDay
+    shotDescription
+    shotNumber
+    shotType
+    takeCount
+    updatedAt
+    wardrobeNotes
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateShotListTrackerMutationVariables,
+  APITypes.UpdateShotListTrackerMutation
+>;
+export const updateShotLog = /* GraphQL */ `mutation UpdateShotLog(
+  $condition: ModelShotLogConditionInput
+  $input: UpdateShotLogInput!
+) {
+  updateShotLog(condition: $condition, input: $input) {
+    camera
+    cardId
+    circled
+    continuityNotes
+    createdAt
+    dprId
+    duration
+    fStop
+    fps
+    id
+    iso
+    lens
+    loggedBy
+    loggedByEmail
+    notes
+    organizationId
+    performanceNotes
+    projectId
+    scene
+    shot
+    status
+    take
+    technicalNotes
+    timecodeIn
+    timecodeOut
+    timestamp
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateShotLogMutationVariables,
+  APITypes.UpdateShotLogMutation
+>;
+export const updateSocialOutput = /* GraphQL */ `mutation UpdateSocialOutput(
+  $condition: ModelSocialOutputConditionInput
+  $input: UpdateSocialOutputInput!
+) {
+  updateSocialOutput(condition: $condition, input: $input) {
+    addEndCard
+    addWatermark
+    aspectRatio
+    audioTrack
+    captionFileKey
+    captionLanguage
+    captionStyle
+    cmsEndpoint
+    cmsIntegration
+    cmsPublishStatus
+    cmsPublishedAt
+    cmsPublishedUrl
+    createdAt
+    createdBy
+    createdByEmail
+    cropPosition
+    cropX
+    cropY
+    customHeight
+    customWidth
+    description
+    endCardDuration
+    endCardKey
+    id
+    includeCaptions
+    includeSubtitles
+    isScheduled
+    maxDuration
+    name
+    normalizeAudio
+    organizationId
+    outputBitrate
+    outputCodec
+    outputDuration
+    outputFileKey
+    outputFileSize
+    outputFormat
+    outputResolution
+    platform
+    postCallToAction
+    postCallToActionUrl
+    postCaption
+    postCategory
+    postDescription
+    postHashtags
+    postLocation
+    postMentions
+    postPrivacy
+    postTags
+    postThumbnailKey
+    postTitle
+    processingCompletedAt
+    processingError
+    processingProgress
+    processingStartedAt
+    projectId
+    scheduledPublishAt
+    socialPostId
+    socialPublishError
+    socialPublishStatus
+    socialPublishedAt
+    socialPublishedUrl
+    sourceAssetId
+    sourceVersionId
+    status
+    subtitleLanguages
+    targetLoudness
+    trimEnd
+    trimStart
+    updatedAt
+    watermarkKey
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateSocialOutputMutationVariables,
+  APITypes.UpdateSocialOutputMutation
+>;
+export const updateStorageTier = /* GraphQL */ `mutation UpdateStorageTier(
+  $condition: ModelStorageTierConditionInput
+  $input: UpdateStorageTierInput!
+) {
+  updateStorageTier(condition: $condition, input: $input) {
+    archiveReason
+    archivedAt
+    archivedBy
+    assetId
+    createdAt
+    currentStorageClass
+    fileSizeBytes
+    id
+    isArchived
+    isRestoring
+    lastChecked
+    lastCostCalculation
+    lastRestoredAt
+    lifecyclePolicyApplied
+    monthlyStorageCost
+    nextTransitionClass
+    nextTransitionDate
+    organizationId
+    originalStorageClass
+    partialRestoreExpiresAt
+    partialRestoreKey
+    partialRestoreRanges
+    projectId
+    projectedAnnualCost
+    restoreCount
+    restoreExpiresAt
+    restoreRequestedAt
+    restoreRequestedBy
+    restoreType
+    s3Bucket
+    s3Key
+    totalStorageCostToDate
+    transitionHistory
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateStorageTierMutationVariables,
+  APITypes.UpdateStorageTierMutation
+>;
+export const updateSubscriptionPlan = /* GraphQL */ `mutation UpdateSubscriptionPlan(
+  $condition: ModelSubscriptionPlanConditionInput
+  $input: UpdateSubscriptionPlanInput!
+) {
+  updateSubscriptionPlan(condition: $condition, input: $input) {
+    annualPrice
+    createdAt
+    currency
+    description
+    features
+    featuresDescription
+    id
+    isActive
+    isPopular
+    isPublic
+    maxAICreditsPerMonth
+    maxBandwidthGB
+    maxProjects
+    maxStorageGB
+    maxUsers
+    monthlyPrice
+    name
+    slug
+    sortOrder
+    stripePriceIdAnnual
+    stripePriceIdMonthly
+    tier
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateSubscriptionPlanMutationVariables,
+  APITypes.UpdateSubscriptionPlanMutation
+>;
+export const updateTask = /* GraphQL */ `mutation UpdateTask(
+  $condition: ModelTaskConditionInput
+  $input: UpdateTaskInput!
+) {
+  updateTask(condition: $condition, input: $input) {
+    actualHours
+    assignedAt
+    assignedBy
+    assignedByEmail
+    assignedToEmail
+    assignedToName
+    attachmentKeys
+    blockedBy
+    blockedReason
+    completedAt
+    completedBy
+    completedByEmail
+    createdAt
+    createdBy
+    createdByEmail
+    dependsOn
+    description
+    dueDate
+    estimatedHours
+    id
+    linkedAssetId
+    linkedAssetName
+    linkedTimecode
+    linkedTimecodeFormatted
+    organizationId
+    priority
+    progressPercentage
+    projectId
+    resolutionNote
+    resolvedInAssetVersionId
+    resolvedInAssetVersionNumber
+    sourceAssetId
+    sourceCommentId
+    sourceMessageId
+    startDate
+    status
+    tags
+    taskType
+    title
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateTaskMutationVariables,
+  APITypes.UpdateTaskMutation
+>;
+export const updateTeamMember = /* GraphQL */ `mutation UpdateTeamMember(
+  $condition: ModelTeamMemberConditionInput
+  $input: UpdateTeamMemberInput!
+) {
+  updateTeamMember(condition: $condition, input: $input) {
+    acceptedAt
+    avatar
+    company
+    contributionCount
+    createdAt
+    customRoleTitle
+    department
+    email
+    id
+    invitedAt
+    invitedBy
+    lastActiveAt
+    name
+    notifyOnApprovals
+    notifyOnAssets
+    notifyOnMessages
+    notifyOnTasks
+    organizationId
+    permissions
+    phone
+    projectId
+    removalReason
+    removedAt
+    removedBy
+    role
+    status
+    title
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateTeamMemberMutationVariables,
+  APITypes.UpdateTeamMemberMutation
+>;
+export const updateTranscription = /* GraphQL */ `mutation UpdateTranscription(
+  $condition: ModelTranscriptionConditionInput
+  $input: UpdateTranscriptionInput!
+) {
+  updateTranscription(condition: $condition, input: $input) {
+    assetId
+    assetVersionId
+    averageConfidence
+    completedAt
+    createdAt
+    createdBy
+    errorMessage
+    fullText
+    hasManualEdits
+    id
+    jobId
+    keywords
+    language
+    languageConfidence
+    lastEditedAt
+    lastEditedBy
+    lowConfidenceSegments
+    organizationId
+    progress
+    provider
+    segments
+    speakerCount
+    speakers
+    srtKey
+    status
+    transcriptKey
+    updatedAt
+    vttKey
+    wordCount
+    words
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateTranscriptionMutationVariables,
+  APITypes.UpdateTranscriptionMutation
+>;
+export const updateUsageRecord = /* GraphQL */ `mutation UpdateUsageRecord(
+  $condition: ModelUsageRecordConditionInput
+  $input: UpdateUsageRecordInput!
+) {
+  updateUsageRecord(condition: $condition, input: $input) {
+    billingPeriod
+    createdAt
+    currency
+    description
+    id
+    includedQuantity
+    organization {
+      address
+      autoArchiveDays
+      billingCycleDay
+      brandAccentColor
+      brandPrimaryColor
+      brandSecondaryColor
+      city
+      country
+      createdAt
+      createdBy
+      currency
+      currentAICreditsUsed
+      currentProjectCount
+      currentStorageUsedGB
+      currentUserCount
+      customDomain
+      customFeatures
+      dataProcessingAgreementSigned
+      dataRetentionDays
+      deletedAt
+      description
+      dpaSignedAt
+      email
+      emailFromAddress
+      emailFromName
+      featuresEnabled
+      id
+      industry
+      ipWhitelist
+      isGDPRCompliant
+      isHIPAACompliant
+      isSOC2Compliant
+      locale
+      logo
+      maxAICredits
+      maxProjects
+      maxStorageGB
+      maxUsers
+      mfaRequired
+      name
+      onboardingCompleted
+      onboardingCompletedAt
+      onboardingStep
+      owner
+      phone
+      postalCode
+      sessionTimeoutMinutes
+      slug
+      ssoConfig
+      ssoEnabled
+      ssoProvider
+      state
+      status
+      stripeCustomerId
+      stripePaymentMethodId
+      stripePriceId
+      stripeSubscriptionId
+      subscriptionEndsAt
+      subscriptionStartedAt
+      subscriptionStatus
+      subscriptionTier
+      suspendedAt
+      suspendedReason
+      timezone
+      trialEndsAt
+      updatedAt
+      usageResetDate
+      website
+      __typename
+    }
+    organizationId
+    overageCost
+    overageQuantity
+    periodEnd
+    periodStart
+    projectId
+    quantity
+    totalCost
+    unit
+    unitPrice
+    updatedAt
+    usageType
+    userId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateUsageRecordMutationVariables,
+  APITypes.UpdateUsageRecordMutation
+>;
+export const updateVFXShot = /* GraphQL */ `mutation UpdateVFXShot(
+  $condition: ModelVFXShotConditionInput
+  $input: UpdateVFXShotInput!
+) {
+  updateVFXShot(condition: $condition, input: $input) {
+    actualAmount
+    bidAmount
+    briefKey
+    complexity
+    createdAt
+    createdBy
+    currentVersion
+    deliveryStage
+    description
+    dueDate
+    frameCount
+    frameIn
+    frameOut
+    id
+    latestDeliveryKey
+    notes
+    organizationId
+    plateDelivered
+    plateDeliveredAt
+    plateKey
+    projectId
+    referenceDelivered
+    referenceDeliveredAt
+    sequence
+    shotCode
+    status
+    updatedAt
+    variance
+    vendor
+    vendorContact
+    vendorEmail
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateVFXShotMutationVariables,
+  APITypes.UpdateVFXShotMutation
+>;
+export const updateWorkflowExecutionLog = /* GraphQL */ `mutation UpdateWorkflowExecutionLog(
+  $condition: ModelWorkflowExecutionLogConditionInput
+  $input: UpdateWorkflowExecutionLogInput!
+) {
+  updateWorkflowExecutionLog(condition: $condition, input: $input) {
+    actionResults
+    assetIds
+    assetsFailed
+    assetsProcessed
+    assetsSucceeded
+    completedAt
+    createdAt
+    durationMs
+    errorDetails
+    errorMessage
+    executionLog
+    id
+    organizationId
+    startedAt
+    status
+    triggerEvent
+    triggeredBy
+    triggeredByUser
+    updatedAt
+    workflowRuleId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateWorkflowExecutionLogMutationVariables,
+  APITypes.UpdateWorkflowExecutionLogMutation
+>;
+export const updateWorkflowRule = /* GraphQL */ `mutation UpdateWorkflowRule(
+  $condition: ModelWorkflowRuleConditionInput
+  $input: UpdateWorkflowRuleInput!
+) {
+  updateWorkflowRule(condition: $condition, input: $input) {
+    actions
+    createdAt
+    createdBy
+    description
+    failedExecutions
+    id
+    isActive
+    lastExecutionAt
+    lastExecutionLog
+    lastExecutionStatus
+    lastModifiedAt
+    lastModifiedBy
+    lastRunAt
+    name
+    nextRunAt
+    organizationId
+    priority
+    projectId
+    schedule
+    scope
+    successfulExecutions
+    totalExecutions
+    triggerConditions
+    triggerType
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateWorkflowRuleMutationVariables,
+  APITypes.UpdateWorkflowRuleMutation
+>;

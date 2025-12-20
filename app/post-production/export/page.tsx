@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Icons, Card, Button, StatusBadge, Progress } from '../../components/ui';
+import { Icons, Card, Button, StatusBadge, Progress, ConfirmModal } from '../../components/ui';
 
 /**
  * EXPORT CENTER
@@ -94,6 +94,7 @@ export default function ExportPage() {
   // New export state
   const [selectedAsset, setSelectedAsset] = useState<string>('');
   const [selectedPreset, setSelectedPreset] = useState<string>('');
+  const [isConfirmExportOpen, setIsConfirmExportOpen] = useState(false);
 
   // Calculate stats
   const stats = {
@@ -117,6 +118,17 @@ export default function ExportPage() {
     acc[preset.platform].push(preset);
     return acc;
   }, {} as Record<Platform, ExportPreset[]>);
+
+  const handleDownload = (job: ExportJob) => {
+    // In production, this would use the actual downloadUrl
+    const blob = new Blob(['Video file content placeholder'], { type: 'video/mp4' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${job.assetName}-${job.platform.toLowerCase()}.${job.format.toLowerCase()}`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const handleStartExport = () => {
     if (!selectedAsset || !selectedPreset) return;
@@ -376,10 +388,7 @@ export default function ExportPage() {
                             <Button
                               variant="primary"
                               size="sm"
-                              onClick={() => {
-                                // In a real app, this would trigger a file download
-                                alert(`Downloading ${job.assetName}...`);
-                              }}
+                              onClick={() => handleDownload(job)}
                             >
                               <Icons.Download className="w-4 h-4 mr-1" />
                               Download
@@ -611,7 +620,7 @@ export default function ExportPage() {
                 </Button>
                 <Button
                   variant="primary"
-                  onClick={handleStartExport}
+                  onClick={() => setIsConfirmExportOpen(true)}
                   disabled={!selectedAsset || !selectedPreset}
                 >
                   <Icons.Download className="w-4 h-4 mr-2" />
@@ -622,6 +631,20 @@ export default function ExportPage() {
           </div>
         )}
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isConfirmExportOpen}
+        onClose={() => setIsConfirmExportOpen(false)}
+        onConfirm={() => {
+          handleStartExport();
+          setIsConfirmExportOpen(false);
+        }}
+        title="Start Export"
+        message={`Are you sure you want to start exporting to ${selectedPreset ? platformPresets.find(p => p.id === selectedPreset)?.platform : 'the selected platform'}?`}
+        confirmText="Start Export"
+        variant="default"
+      />
     </div>
   );
 }

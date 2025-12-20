@@ -1,9 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Icons, Card, StatusBadge, Progress, Button } from '../../components/ui';
+import { generateClient } from 'aws-amplify/data';
+import type { Schema } from '@/amplify/data/resource';
+import { useOrganization } from '@/app/hooks/useAmplifyData';
+import { Icons, Card, StatusBadge, Progress, Button, Skeleton } from '../../components/ui';
 
 /**
  * COMMENTS CENTER
@@ -44,8 +47,34 @@ interface CommentThread {
   replies: ReviewComment[];
 }
 
-// Data will be fetched from API
-const initialComments: ReviewComment[] = [];
+// Helper function to map API ReviewComment to ReviewComment display type
+const mapCommentToDisplay = (
+  comment: Schema['ReviewComment']['type'],
+  asset: Schema['Asset']['type'] | null,
+  project: Schema['Project']['type'] | null,
+  repliesCount: number
+): ReviewComment => {
+  return {
+    id: comment.id,
+    assetId: comment.assetId,
+    assetName: asset?.s3Key?.split('/').pop() || 'Unknown Asset',
+    projectName: project?.name || 'Unknown Project',
+    timecode: comment.timecode || null,
+    timecodeEnd: null, // Not in schema, could be added later
+    text: comment.commentText || '',
+    author: comment.commenterEmail?.split('@')[0] || 'Unknown',
+    authorRole: (comment.commenterRole as ReviewRole) || 'INTERNAL',
+    priority: (comment.priority as CommentPriority) || 'MEDIUM',
+    commentType: (comment.commentType as CommentType) || 'NOTE',
+    isResolved: comment.isResolved || false,
+    resolvedBy: comment.resolvedByEmail?.split('@')[0],
+    resolvedAt: comment.resolvedAt || undefined,
+    hasAnnotation: false, // TODO: Check if annotations exist
+    replies: repliesCount,
+    createdAt: comment.createdAt || new Date().toISOString(),
+    updatedAt: comment.updatedAt || new Date().toISOString(),
+  };
+};
 
 const PRIORITY_CONFIG: Record<CommentPriority, { color: string; bgColor: string; label: string; icon: keyof typeof Icons }> = {
   LOW: { color: 'var(--text-tertiary)', bgColor: 'var(--bg-3)', label: 'Low', icon: 'Circle' },
@@ -92,13 +121,86 @@ function formatDateStatic(dateString: string): string {
 
 export default function CommentsPage() {
   const router = useRouter();
-  const [comments, setComments] = useState<ReviewComment[]>(initialComments);
+  const { organizationId, loading: orgLoading } = useOrganization();
+  const [comments, setComments] = useState<ReviewComment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 
   // Track if component is mounted for client-only rendering
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const fetchComments = useCallback(async () => {
+    if (!organizationId) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const client = generateClient<Schema>({ authMode: 'userPool' });
+
+      // Fetch all comments for this organization
+      const { data: commentsData } = await client.models.ReviewComment.list({
+        filter: { organizationId: { eq: organizationId } }
+      });
+
+      if (!commentsData) {
+        setComments([]);
+        return;
+      }
+
+      // Fetch associated assets, projects, and reply counts
+      const commentsWithDetails: ReviewComment[] = await Promise.all(
+        commentsData.map(async (comment) => {
+          let asset: Schema['Asset']['type'] | null = null;
+          let project: Schema['Project']['type'] | null = null;
+          let repliesCount = 0;
+
+          try {
+            // Fetch asset
+            const { data: assetData } = await client.models.Asset.get({ id: comment.assetId });
+            asset = assetData;
+
+            // Fetch project
+            const { data: projectData } = await client.models.Project.get({ id: comment.projectId });
+            project = projectData;
+
+            // Count replies
+            const { data: repliesData } = await client.models.ReviewCommentReply.list({
+              filter: { parentCommentId: { eq: comment.id } }
+            });
+            repliesCount = repliesData?.length || 0;
+
+          } catch (e) {
+            console.warn('Could not fetch related data for comment:', comment.id);
+          }
+
+          return mapCommentToDisplay(comment, asset, project, repliesCount);
+        })
+      );
+
+      // Sort by created date (most recent first)
+      commentsWithDetails.sort((a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+
+      setComments(commentsWithDetails);
+
+    } catch (err) {
+      console.error('Error fetching comments:', err);
+      setError('Failed to load comments. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [organizationId]);
+
+  useEffect(() => {
+    if (organizationId) {
+      fetchComments();
+    }
+  }, [organizationId, fetchComments]);
 
   // Format relative time - only use on client after mount
   const formatRelativeTime = (dateString: string): string => {
@@ -125,6 +227,29 @@ export default function CommentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'priority' | 'asset'>('newest');
   const [selectedComment, setSelectedComment] = useState<ReviewComment | null>(null);
+
+  const handleExportReport = () => {
+    const csv = 'Timecode,Author,Role,Type,Priority,Text,Asset,Project,Resolved,Created\n' +
+      comments.map(c => [
+        formatTimecode(c.timecode),
+        c.author,
+        c.authorRole,
+        c.commentType,
+        c.priority,
+        `"${c.text.replace(/"/g, '""')}"`,
+        c.assetName,
+        c.projectName,
+        c.isResolved ? 'Yes' : 'No',
+        formatDateStatic(c.createdAt)
+      ].join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'comments-report.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   // Calculate stats
   const stats = {
@@ -228,10 +353,7 @@ export default function CommentsPage() {
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={() => {
-                  // Export comments report
-                  alert('Exporting comments report...');
-                }}
+                onClick={handleExportReport}
               >
                 <Icons.Download className="w-4 h-4 mr-2" />
                 Export Report
@@ -250,49 +372,81 @@ export default function CommentsPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-6">
           <Card className="p-4 card-cinema">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.total}</p>
+              {orgLoading || loading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.total}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">Total</p>
             </div>
           </Card>
           <Card className="p-4 card-cinema">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--warning)]">{stats.unresolved}</p>
+              {orgLoading || loading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--warning)]">{stats.unresolved}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">Unresolved</p>
             </div>
           </Card>
           <Card className="p-4 card-cinema">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--success)]">{stats.resolved}</p>
+              {orgLoading || loading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--success)]">{stats.resolved}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">Resolved</p>
             </div>
           </Card>
           <Card className="p-4 card-cinema">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--danger)]">{stats.critical}</p>
+              {orgLoading || loading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--danger)]">{stats.critical}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">Critical</p>
             </div>
           </Card>
           <Card className="p-4 card-cinema">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--warning)]">{stats.high}</p>
+              {orgLoading || loading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--warning)]">{stats.high}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">High Priority</p>
             </div>
           </Card>
           <Card className="p-4 card-cinema">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--accent)]">{stats.withAnnotations}</p>
+              {orgLoading || loading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--accent)]">{stats.withAnnotations}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">Annotations</p>
             </div>
           </Card>
           <Card className="p-4 card-cinema">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--primary)]">{stats.totalReplies}</p>
+              {orgLoading || loading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--primary)]">{stats.totalReplies}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">Replies</p>
             </div>
           </Card>
           <Card className="p-4 card-cinema">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.avgReplies}</p>
+              {orgLoading || loading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.avgReplies}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">Avg Replies</p>
             </div>
           </Card>
@@ -403,10 +557,46 @@ export default function CommentsPage() {
           </div>
         </Card>
 
+        {/* Error State */}
+        {error && (
+          <Card className="p-6 mb-6 border-[var(--danger)]">
+            <div className="flex items-center gap-3 text-[var(--danger)]">
+              <Icons.AlertCircle className="w-5 h-5" />
+              <p>{error}</p>
+              <Button variant="secondary" size="sm" onClick={fetchComments} className="ml-auto">
+                Retry
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        {/* Loading State */}
+        {(orgLoading || loading) && !error && (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="p-4 card-cinema">
+                <div className="flex gap-4">
+                  <Skeleton className="w-28 h-10 rounded" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-4 w-16" />
+                    </div>
+                    <Skeleton className="h-4 w-full mb-2" />
+                    <Skeleton className="h-4 w-3/4" />
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+
         {/* Comments List */}
-        <div className="space-y-4">
-          {sortedComments.length === 0 ? (
-            <Card className="p-12 text-center">
+        {!orgLoading && !loading && !error && (
+          <div className="space-y-4">
+            {sortedComments.length === 0 ? (
+              <Card className="p-12 text-center">
               <Icons.MessageSquare className="w-16 h-16 text-[var(--text-tertiary)] mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">No comments found</h3>
               <p className="text-[var(--text-tertiary)]">
@@ -563,12 +753,13 @@ export default function CommentsPage() {
                   </div>
                 </Card>
               );
-            })
-          )}
-        </div>
+            }))
+          }
+          </div>
+        )}
 
         {/* Results count */}
-        {sortedComments.length > 0 && (
+        {!orgLoading && !loading && !error && sortedComments.length > 0 && (
           <div className="mt-4 text-sm text-[var(--text-tertiary)] text-center">
             Showing {sortedComments.length} of {comments.length} comments
           </div>

@@ -1,12 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Icons, Card, Button } from '@/app/components/ui';
+import { generateClient } from 'aws-amplify/data';
+import type { Schema } from '@/amplify/data/resource';
+import { useOrganization } from '@/app/hooks/useAmplifyData';
+import { Icons, Card, Button, Skeleton } from '@/app/components/ui';
 
 /**
  * ARCHIVE PAGE
  * Long-term project storage and organization.
+ *
+ * Connected to Amplify Data API
  */
 
 type ArchiveStatus = 'ACTIVE' | 'ARCHIVING' | 'ARCHIVED' | 'RESTORING';
@@ -24,6 +29,9 @@ interface ArchivedProject {
   status: ArchiveStatus;
   thumbnail?: string;
   tags: string[];
+  // From API
+  project: Schema['Project']['type'];
+  assets: Schema['Asset']['type'][];
 }
 
 interface ArchiveStats {
@@ -32,15 +40,6 @@ interface ArchiveStats {
   hotStorage: string;
   coldStorage: string;
 }
-
-// Data will be fetched from API
-const initialProjects: ArchivedProject[] = [];
-const initialStats: ArchiveStats = {
-  totalProjects: 0,
-  totalSize: '0 TB',
-  hotStorage: '0 TB',
-  coldStorage: '0 TB',
-};
 
 const STATUS_CONFIG: Record<ArchiveStatus, { label: string; color: string; bgColor: string; icon: keyof typeof Icons }> = {
   ACTIVE: { label: 'Active', color: 'var(--success)', bgColor: 'var(--success-muted)', icon: 'Circle' },
@@ -56,17 +55,164 @@ const TIER_CONFIG: Record<StorageTier, { label: string; color: string; descripti
   GLACIER: { label: 'Glacier', color: 'var(--text-tertiary)', description: 'Days to restore', icon: 'Database' },
 };
 
+// Map API data to display format
+function mapProjectToArchive(
+  project: Schema['Project']['type'],
+  assets: Schema['Asset']['type'][]
+): ArchivedProject {
+  // Calculate total size from assets
+  const totalBytes = assets.reduce((sum, asset) => {
+    const fileSize = asset.fileSize || 0;
+    return sum + fileSize;
+  }, 0);
+
+  // Convert bytes to readable format
+  const formatSize = (bytes: number): string => {
+    if (bytes === 0) return '0 GB';
+    const gb = bytes / (1024 * 1024 * 1024);
+    if (gb >= 1000) return `${(gb / 1000).toFixed(2)} TB`;
+    return `${gb.toFixed(2)} GB`;
+  };
+
+  // Determine storage tier based on project status
+  const getStorageTier = (): StorageTier => {
+    if (project.status === 'ARCHIVE') return 'COLD';
+    if (project.status === 'DISTRIBUTION') return 'HOT';
+    return 'WARM';
+  };
+
+  // Determine archive status
+  const getArchiveStatus = (): ArchiveStatus => {
+    if (project.status === 'ARCHIVE') return 'ARCHIVED';
+    if (project.status === 'DISTRIBUTION') return 'ACTIVE';
+    return 'ARCHIVING';
+  };
+
+  return {
+    id: project.id,
+    name: project.name,
+    client: project.clientContactEmail?.split('@')[0] || 'Unknown Client',
+    completedDate: project.updatedAt || new Date().toISOString(),
+    archivedDate: project.updatedAt || new Date().toISOString(),
+    totalSize: formatSize(totalBytes),
+    assetCount: assets.length,
+    storageTier: getStorageTier(),
+    status: getArchiveStatus(),
+    tags: [],
+    project,
+    assets,
+  };
+}
+
 export default function ArchivePage() {
-  const [projects] = useState<ArchivedProject[]>(initialProjects);
-  const [stats] = useState<ArchiveStats>(initialStats);
+  const { organizationId, loading: orgLoading } = useOrganization();
+  const [projects, setProjects] = useState<ArchivedProject[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [tierFilter, setTierFilter] = useState<StorageTier | 'ALL'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const fetchProjects = useCallback(async () => {
+    if (!organizationId) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const client = generateClient<Schema>({ authMode: 'userPool' });
+
+      // Fetch completed or archived projects for this organization
+      const { data: projectsData } = await client.models.Project.list({
+        filter: {
+          organizationId: { eq: organizationId },
+          status: { eq: 'COMPLETED' } // Fetch completed projects for archive view
+        }
+      });
+
+      if (!projectsData) {
+        setProjects([]);
+        return;
+      }
+
+      // Fetch assets for each project
+      const projectsWithAssets: ArchivedProject[] = await Promise.all(
+        projectsData.map(async (project) => {
+          let assets: Schema['Asset']['type'][] = [];
+          try {
+            const { data: assetsData } = await client.models.Asset.list({
+              filter: { projectId: { eq: project.id } }
+            });
+            assets = assetsData || [];
+          } catch (e) {
+            console.warn('Could not fetch assets for project:', project.id);
+          }
+          return mapProjectToArchive(project, assets);
+        })
+      );
+
+      // Sort by archived date (most recent first)
+      projectsWithAssets.sort((a, b) =>
+        new Date(b.archivedDate).getTime() - new Date(a.archivedDate).getTime()
+      );
+
+      setProjects(projectsWithAssets);
+    } catch (err) {
+      console.error('Error fetching archived projects:', err);
+      setError('Failed to load archived projects. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [organizationId]);
+
+  useEffect(() => {
+    if (organizationId) {
+      fetchProjects();
+    }
+  }, [organizationId, fetchProjects]);
 
   const filteredProjects = projects.filter(p => {
     if (tierFilter !== 'ALL' && p.storageTier !== tierFilter) return false;
     if (searchQuery && !p.name.toLowerCase().includes(searchQuery.toLowerCase()) && !p.client.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
   });
+
+  const stats: ArchiveStats = {
+    totalProjects: projects.length,
+    totalSize: projects.reduce((sum, p) => {
+      const match = p.totalSize.match(/(\d+\.?\d*)\s*(GB|TB)/);
+      if (!match) return sum;
+      const value = parseFloat(match[1]);
+      const unit = match[2];
+      return sum + (unit === 'TB' ? value * 1000 : value);
+    }, 0).toFixed(2) + ' GB',
+    hotStorage: projects.filter(p => p.storageTier === 'HOT').reduce((sum, p) => {
+      const match = p.totalSize.match(/(\d+\.?\d*)\s*(GB|TB)/);
+      if (!match) return sum;
+      const value = parseFloat(match[1]);
+      const unit = match[2];
+      return sum + (unit === 'TB' ? value * 1000 : value);
+    }, 0).toFixed(2) + ' GB',
+    coldStorage: projects.filter(p => p.storageTier === 'COLD' || p.storageTier === 'GLACIER').reduce((sum, p) => {
+      const match = p.totalSize.match(/(\d+\.?\d*)\s*(GB|TB)/);
+      if (!match) return sum;
+      const value = parseFloat(match[1]);
+      const unit = match[2];
+      return sum + (unit === 'TB' ? value * 1000 : value);
+    }, 0).toFixed(2) + ' GB',
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return date.toLocaleDateString();
+  };
+
+  const isLoading = orgLoading || loading;
 
   return (
     <div className="min-h-screen bg-[var(--bg-0)]">
@@ -111,29 +257,58 @@ export default function ArchivePage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <Card className="p-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.totalProjects}</p>
+              {isLoading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.totalProjects}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">Total Projects</p>
             </div>
           </Card>
           <Card className="p-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--primary)]">{stats.totalSize}</p>
+              {isLoading ? (
+                <Skeleton className="h-8 w-16 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--primary)]">{stats.totalSize}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">Total Storage</p>
             </div>
           </Card>
           <Card className="p-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--danger)]">{stats.hotStorage}</p>
+              {isLoading ? (
+                <Skeleton className="h-8 w-16 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--danger)]">{stats.hotStorage}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">Hot Storage</p>
             </div>
           </Card>
           <Card className="p-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--text-tertiary)]">{stats.coldStorage}</p>
+              {isLoading ? (
+                <Skeleton className="h-8 w-16 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--text-tertiary)]">{stats.coldStorage}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">Cold Storage</p>
             </div>
           </Card>
         </div>
+
+        {/* Error State */}
+        {error && (
+          <Card className="p-6 mb-6 border-[var(--danger)]">
+            <div className="flex items-center gap-3 text-[var(--danger)]">
+              <Icons.AlertCircle className="w-5 h-5" />
+              <p>{error}</p>
+              <Button variant="secondary" size="sm" onClick={fetchProjects} className="ml-auto">
+                Retry
+              </Button>
+            </div>
+          </Card>
+        )}
 
         {/* Search and Filters */}
         <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">
@@ -174,9 +349,35 @@ export default function ArchivePage() {
           </div>
         </div>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="p-4">
+                <div className="flex items-start justify-between mb-3">
+                  <Skeleton className="h-6 w-20 rounded" />
+                  <Skeleton className="h-6 w-6 rounded" />
+                </div>
+                <Skeleton className="h-5 w-full mb-1" />
+                <Skeleton className="h-4 w-32 mb-3" />
+                <div className="flex items-center gap-3 mb-3">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                </div>
+                <Skeleton className="h-4 w-full" />
+              </Card>
+            ))}
+          </div>
+        )}
+
         {/* Projects Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredProjects.map(project => {
+        {!isLoading && !error && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredProjects.map(project => {
             const statusConfig = STATUS_CONFIG[project.status];
             const tierConfig = TIER_CONFIG[project.storageTier];
             const StatusIcon = Icons[statusConfig.icon];
@@ -233,7 +434,7 @@ export default function ArchivePage() {
                 </div>
 
                 <div className="flex items-center justify-between text-xs text-[var(--text-tertiary)] pt-3 border-t border-[var(--border-subtle)]">
-                  <span>Archived {project.archivedDate}</span>
+                  <span>Archived {formatDate(project.archivedDate)}</span>
                   {project.status === 'ARCHIVED' && (
                     <Button variant="ghost" size="sm" className="text-xs">
                       <Icons.Download className="w-3 h-3 mr-1" />
@@ -244,14 +445,19 @@ export default function ArchivePage() {
               </Card>
             );
           })}
-        </div>
+          </div>
+        )}
 
-        {filteredProjects.length === 0 && (
+        {/* Empty State */}
+        {!isLoading && !error && filteredProjects.length === 0 && (
           <Card className="p-12 text-center">
             <Icons.Archive className="w-12 h-12 text-[var(--text-tertiary)] mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">No archived projects found</h3>
             <p className="text-[var(--text-tertiary)] mb-4">
-              Archive completed projects for long-term storage.
+              {searchQuery || tierFilter !== 'ALL'
+                ? 'No projects match your filters.'
+                : 'Archive completed projects for long-term storage.'
+              }
             </p>
             <Button variant="primary" size="sm">
               <Icons.Plus className="w-4 h-4 mr-2" />

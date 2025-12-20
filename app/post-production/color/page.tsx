@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Icons, Card, StatusBadge, Progress, Button } from '../../components/ui';
+import { useRouter } from 'next/navigation';
+import { Icons, Card, StatusBadge, Progress, Button, Modal, Input, Textarea, ConfirmModal } from '../../components/ui';
 
 /**
  * COLOR LAB
@@ -74,11 +75,111 @@ const LUT_TYPE_COLORS: Record<string, { bg: string; text: string }> = {
 };
 
 export default function ColorLabPage() {
+  const router = useRouter();
   const [colorGrades, setColorGrades] = useState<ColorGrade[]>(initialColorGrades);
   const [luts, setLUTs] = useState<LUT[]>(initialLUTs);
   const [sessions, setSessions] = useState<ColorSession[]>(initialSessions);
   const [activeTab, setActiveTab] = useState<'grades' | 'luts' | 'sessions'>('grades');
   const [selectedLUTType, setSelectedLUTType] = useState<string>('ALL');
+
+  // Modal visibility states
+  const [showUploadLUTModal, setShowUploadLUTModal] = useState(false);
+  const [showNewSessionModal, setShowNewSessionModal] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [selectedLUTForPreview, setSelectedLUTForPreview] = useState<LUT | null>(null);
+  const [selectedLUTForApply, setSelectedLUTForApply] = useState<LUT | null>(null);
+
+  // Form data states
+  const [uploadLUTForm, setUploadLUTForm] = useState({
+    name: '',
+    type: 'CREATIVE' as LUT['type'],
+    camera: '',
+    colorSpace: '',
+  });
+
+  const [newSessionForm, setNewSessionForm] = useState({
+    name: '',
+    date: '',
+    colorist: '',
+    duration: '',
+    sequences: '',
+    notes: '',
+  });
+
+  // Handler functions
+  const handleUploadLUT = () => {
+    if (!uploadLUTForm.name) {
+      alert('Please enter a LUT name');
+      return;
+    }
+
+    const newLUT: LUT = {
+      id: `lut-${Date.now()}`,
+      name: uploadLUTForm.name,
+      type: uploadLUTForm.type,
+      format: '.cube', // Default format for now
+      camera: uploadLUTForm.camera || undefined,
+      colorSpace: uploadLUTForm.colorSpace || undefined,
+      isDefault: false,
+    };
+
+    setLUTs([...luts, newLUT]);
+    setShowUploadLUTModal(false);
+    setUploadLUTForm({
+      name: '',
+      type: 'CREATIVE',
+      camera: '',
+      colorSpace: '',
+    });
+  };
+
+  const handleCreateSession = () => {
+    if (!newSessionForm.name || !newSessionForm.date || !newSessionForm.colorist || !newSessionForm.duration) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    const newSession: ColorSession = {
+      id: `session-${Date.now()}`,
+      name: newSessionForm.name,
+      date: newSessionForm.date,
+      colorist: newSessionForm.colorist,
+      duration: parseFloat(newSessionForm.duration),
+      sequences: newSessionForm.sequences.split(',').map(s => s.trim()).filter(Boolean),
+      status: 'SCHEDULED',
+      notes: newSessionForm.notes || undefined,
+    };
+
+    setSessions([...sessions, newSession]);
+    setShowNewSessionModal(false);
+    setNewSessionForm({
+      name: '',
+      date: '',
+      colorist: '',
+      duration: '',
+      sequences: '',
+      notes: '',
+    });
+  };
+
+  const handlePreviewLUT = (lut: LUT) => {
+    setSelectedLUTForPreview(lut);
+    setShowPreviewModal(true);
+    // Log LUT info for now
+    console.log('Previewing LUT:', lut);
+  };
+
+  const handleApplyLUT = (lut: LUT) => {
+    // For now, just log. In a real app, this would update the selected grade
+    console.log('Applying LUT:', lut);
+    alert(`LUT "${lut.name}" will be applied to the selected grade`);
+  };
+
+  const handleDownloadLUT = (lut: LUT) => {
+    // For now, just log. In a real app, this would trigger a download
+    console.log('Downloading LUT:', lut);
+    alert(`LUT "${lut.name}" download started`);
+  };
 
   // Calculate stats
   const stats = {
@@ -126,11 +227,11 @@ export default function ColorLabPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="secondary" size="sm">
+              <Button variant="secondary" size="sm" onClick={() => setShowUploadLUTModal(true)}>
                 <Icons.Upload className="w-4 h-4 mr-2" />
                 Upload LUT
               </Button>
-              <Button variant="primary" size="sm">
+              <Button variant="primary" size="sm" onClick={() => setShowNewSessionModal(true)}>
                 <Icons.Plus className="w-4 h-4 mr-2" />
                 New Session
               </Button>
@@ -370,13 +471,22 @@ export default function ColorLabPage() {
                   </div>
 
                   <div className="flex items-center gap-2 pt-3 border-t border-[var(--border-subtle)]">
-                    <button className="flex-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--bg-2)] hover:bg-[var(--bg-3)] transition-colors text-[var(--text-secondary)]">
+                    <button
+                      onClick={() => handlePreviewLUT(lut)}
+                      className="flex-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--bg-2)] hover:bg-[var(--bg-3)] transition-colors text-[var(--text-secondary)]"
+                    >
                       Preview
                     </button>
-                    <button className="flex-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--primary-muted)] hover:bg-[var(--primary)] hover:text-white transition-colors text-[var(--primary)]">
+                    <button
+                      onClick={() => handleApplyLUT(lut)}
+                      className="flex-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--primary-muted)] hover:bg-[var(--primary)] hover:text-white transition-colors text-[var(--primary)]"
+                    >
                       Apply
                     </button>
-                    <button className="p-1.5 rounded-lg hover:bg-[var(--bg-2)] transition-colors">
+                    <button
+                      onClick={() => handleDownloadLUT(lut)}
+                      className="p-1.5 rounded-lg hover:bg-[var(--bg-2)] transition-colors"
+                    >
                       <Icons.Download className="w-4 h-4 text-[var(--text-tertiary)]" />
                     </button>
                   </div>
@@ -384,7 +494,10 @@ export default function ColorLabPage() {
               ))}
 
               {/* Upload New LUT Card */}
-              <button className="p-5 rounded-xl border-2 border-dashed border-[var(--border-default)] hover:border-[var(--primary)] hover:bg-[var(--bg-1)] transition-all flex flex-col items-center justify-center min-h-[200px] group">
+              <button
+                onClick={() => setShowUploadLUTModal(true)}
+                className="p-5 rounded-xl border-2 border-dashed border-[var(--border-default)] hover:border-[var(--primary)] hover:bg-[var(--bg-1)] transition-all flex flex-col items-center justify-center min-h-[200px] group"
+              >
                 <div className="w-12 h-12 rounded-full bg-[var(--bg-2)] flex items-center justify-center mb-3 group-hover:bg-[var(--primary-muted)] transition-colors">
                   <Icons.Upload className="w-6 h-6 text-[var(--text-tertiary)] group-hover:text-[var(--primary)]" />
                 </div>
@@ -458,7 +571,10 @@ export default function ColorLabPage() {
             </Card>
 
             {/* Schedule New Session */}
-            <button className="w-full p-4 rounded-xl border-2 border-dashed border-[var(--border-default)] hover:border-[var(--primary)] hover:bg-[var(--bg-1)] transition-all flex items-center justify-center gap-2 group">
+            <button
+              onClick={() => setShowNewSessionModal(true)}
+              className="w-full p-4 rounded-xl border-2 border-dashed border-[var(--border-default)] hover:border-[var(--primary)] hover:bg-[var(--bg-1)] transition-all flex items-center justify-center gap-2 group"
+            >
               <Icons.Plus className="w-5 h-5 text-[var(--text-tertiary)] group-hover:text-[var(--primary)]" />
               <span className="font-medium text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)]">
                 Schedule New Color Session
@@ -467,6 +583,266 @@ export default function ColorLabPage() {
           </div>
         )}
       </div>
+
+      {/* Upload LUT Modal */}
+      <Modal
+        isOpen={showUploadLUTModal}
+        onClose={() => setShowUploadLUTModal(false)}
+        title="Upload LUT"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              LUT Name *
+            </label>
+            <Input
+              value={uploadLUTForm.name}
+              onChange={(e) => setUploadLUTForm({ ...uploadLUTForm, name: e.target.value })}
+              placeholder="e.g., Cinematic Warm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              LUT Type *
+            </label>
+            <select
+              value={uploadLUTForm.type}
+              onChange={(e) => setUploadLUTForm({ ...uploadLUTForm, type: e.target.value as LUT['type'] })}
+              className="w-full px-4 py-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-0)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+            >
+              <option value="CREATIVE">Creative</option>
+              <option value="TECHNICAL">Technical</option>
+              <option value="SHOW_LUT">Show LUT</option>
+              <option value="CAMERA_LOG">Camera Log</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Camera (Optional)
+            </label>
+            <Input
+              value={uploadLUTForm.camera}
+              onChange={(e) => setUploadLUTForm({ ...uploadLUTForm, camera: e.target.value })}
+              placeholder="e.g., ARRI Alexa, RED Komodo"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Color Space (Optional)
+            </label>
+            <Input
+              value={uploadLUTForm.colorSpace}
+              onChange={(e) => setUploadLUTForm({ ...uploadLUTForm, colorSpace: e.target.value })}
+              placeholder="e.g., Log-C to Rec.709"
+            />
+          </div>
+
+          <div className="p-4 rounded-lg border-2 border-dashed border-[var(--border-default)] bg-[var(--bg-1)] text-center">
+            <Icons.Upload className="w-8 h-8 text-[var(--text-tertiary)] mx-auto mb-2" />
+            <p className="text-sm text-[var(--text-secondary)]">File upload coming soon</p>
+            <p className="text-xs text-[var(--text-tertiary)] mt-1">Supported formats: .cube, .3dl, .csp</p>
+          </div>
+
+          <div className="flex items-center gap-3 pt-4">
+            <Button
+              variant="secondary"
+              onClick={() => setShowUploadLUTModal(false)}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleUploadLUT}
+              className="flex-1"
+            >
+              Upload LUT
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* New Session Modal */}
+      <Modal
+        isOpen={showNewSessionModal}
+        onClose={() => setShowNewSessionModal(false)}
+        title="Schedule Color Session"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Session Name *
+            </label>
+            <Input
+              value={newSessionForm.name}
+              onChange={(e) => setNewSessionForm({ ...newSessionForm, name: e.target.value })}
+              placeholder="e.g., Episode 1 Color Review"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                Date *
+              </label>
+              <Input
+                type="date"
+                value={newSessionForm.date}
+                onChange={(e) => setNewSessionForm({ ...newSessionForm, date: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                Duration (hours) *
+              </label>
+              <Input
+                type="number"
+                value={newSessionForm.duration}
+                onChange={(e) => setNewSessionForm({ ...newSessionForm, duration: e.target.value })}
+                placeholder="e.g., 4"
+                min="0.5"
+                step="0.5"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Colorist *
+            </label>
+            <Input
+              value={newSessionForm.colorist}
+              onChange={(e) => setNewSessionForm({ ...newSessionForm, colorist: e.target.value })}
+              placeholder="e.g., John Smith"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Sequences (comma-separated)
+            </label>
+            <Input
+              value={newSessionForm.sequences}
+              onChange={(e) => setNewSessionForm({ ...newSessionForm, sequences: e.target.value })}
+              placeholder="e.g., Seq_010, Seq_020, Seq_030"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Notes (Optional)
+            </label>
+            <Textarea
+              value={newSessionForm.notes}
+              onChange={(e) => setNewSessionForm({ ...newSessionForm, notes: e.target.value })}
+              placeholder="Add any additional notes or requirements..."
+              rows={3}
+            />
+          </div>
+
+          <div className="flex items-center gap-3 pt-4">
+            <Button
+              variant="secondary"
+              onClick={() => setShowNewSessionModal(false)}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleCreateSession}
+              className="flex-1"
+            >
+              Schedule Session
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Preview LUT Modal */}
+      <Modal
+        isOpen={showPreviewModal}
+        onClose={() => setShowPreviewModal(false)}
+        title={`Preview: ${selectedLUTForPreview?.name || 'LUT'}`}
+      >
+        <div className="space-y-4">
+          {selectedLUTForPreview && (
+            <>
+              <div className="p-6 rounded-lg bg-[var(--bg-1)] border border-[var(--border-default)]">
+                <div className="flex items-center gap-4 mb-4">
+                  <div
+                    className="w-16 h-16 rounded-lg flex items-center justify-center"
+                    style={{
+                      background: selectedLUTForPreview.type === 'CREATIVE'
+                        ? 'linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb)'
+                        : selectedLUTForPreview.type === 'TECHNICAL'
+                        ? 'linear-gradient(135deg, #667eea, #764ba2)'
+                        : selectedLUTForPreview.type === 'CAMERA_LOG'
+                        ? 'linear-gradient(135deg, #11998e, #38ef7d)'
+                        : 'linear-gradient(135deg, var(--primary), var(--accent))'
+                    }}
+                  >
+                    <Icons.Palette className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-[var(--text-primary)]">
+                      {selectedLUTForPreview.name}
+                    </h4>
+                    <p className="text-sm text-[var(--text-tertiary)]">
+                      {selectedLUTForPreview.type.replace('_', ' ')} • {selectedLUTForPreview.format}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 text-sm">
+                  {selectedLUTForPreview.camera && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-[var(--text-tertiary)]">Camera:</span>
+                      <span className="text-[var(--text-primary)]">{selectedLUTForPreview.camera}</span>
+                    </div>
+                  )}
+                  {selectedLUTForPreview.colorSpace && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-[var(--text-tertiary)]">Color Space:</span>
+                      <span className="text-[var(--text-primary)]">{selectedLUTForPreview.colorSpace}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-4 rounded-lg bg-[var(--bg-1)] border border-[var(--border-default)] text-center">
+                <Icons.Eye className="w-12 h-12 text-[var(--text-tertiary)] mx-auto mb-2" />
+                <p className="text-sm text-[var(--text-secondary)]">Visual preview coming soon</p>
+                <p className="text-xs text-[var(--text-tertiary)] mt-1">LUT will be applied to sample footage</p>
+              </div>
+
+              <div className="flex items-center gap-3 pt-4">
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowPreviewModal(false)}
+                  className="flex-1"
+                >
+                  Close
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    handleApplyLUT(selectedLUTForPreview);
+                    setShowPreviewModal(false);
+                  }}
+                  className="flex-1"
+                >
+                  Apply LUT
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 }

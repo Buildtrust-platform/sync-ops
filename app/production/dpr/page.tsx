@@ -1,12 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Icons, Card, Button } from '@/app/components/ui';
+import { useRouter } from 'next/navigation';
+import { generateClient } from 'aws-amplify/data';
+import type { Schema } from '@/amplify/data/resource';
+import { useOrganization } from '@/app/hooks/useAmplifyData';
+import { Icons, Card, Button, Skeleton } from '@/app/components/ui';
 
 /**
  * DPR PAGE
  * Daily Production Report creation and management.
+ * Connected to Amplify Data API
  */
 
 type ReportStatus = 'DRAFT' | 'IN_PROGRESS' | 'SUBMITTED' | 'APPROVED';
@@ -28,10 +33,35 @@ interface DailyReport {
   notes?: string;
   submittedBy?: string;
   submittedAt?: string;
+  // From API
+  callSheet: Schema['CallSheet']['type'];
 }
 
-// Data will be fetched from API
-const initialReports: DailyReport[] = [];
+// Map API CallSheet data to display format
+function mapCallSheetToReport(callSheet: Schema['CallSheet']['type']): DailyReport {
+  // Determine status based on CallSheet status
+  const status: ReportStatus = callSheet.status === 'PUBLISHED' ? 'SUBMITTED' : 'DRAFT';
+
+  return {
+    id: callSheet.id,
+    shootDay: callSheet.shootDayNumber || 1,
+    date: callSheet.shootDate ? new Date(callSheet.shootDate).toLocaleDateString() : new Date().toLocaleDateString(),
+    status,
+    scenesScheduled: 0, // Would need to fetch scenes relationship
+    scenesCompleted: 0,
+    pagesScheduled: 0,
+    pagesCompleted: 0,
+    callTime: callSheet.generalCrewCall || '07:00',
+    firstShot: '08:00', // Not directly in CallSheet
+    wrap: callSheet.estimatedWrap || '18:00',
+    mealPenalties: 0,
+    accidents: 0,
+    notes: callSheet.specialInstructions || undefined,
+    submittedBy: callSheet.lastUpdatedBy || undefined,
+    submittedAt: callSheet.publishedAt ? new Date(callSheet.publishedAt).toLocaleString() : undefined,
+    callSheet,
+  };
+}
 
 const STATUS_CONFIG: Record<ReportStatus, { label: string; color: string; bgColor: string; icon: keyof typeof Icons }> = {
   DRAFT: { label: 'Draft', color: 'var(--text-tertiary)', bgColor: 'var(--bg-3)', icon: 'Edit' },
@@ -41,16 +71,71 @@ const STATUS_CONFIG: Record<ReportStatus, { label: string; color: string; bgColo
 };
 
 export default function DprPage() {
-  const [reports] = useState<DailyReport[]>(initialReports);
+  const router = useRouter();
+  const { organizationId, loading: orgLoading } = useOrganization();
+  const [reports, setReports] = useState<DailyReport[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedReport, setSelectedReport] = useState<DailyReport | null>(null);
+
+  const fetchCallSheets = useCallback(async () => {
+    if (!organizationId) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const client = generateClient<Schema>({ authMode: 'userPool' });
+
+      // Fetch call sheets for this organization
+      const { data: callSheetsData } = await client.models.CallSheet.list({
+        filter: { organizationId: { eq: organizationId } }
+      });
+
+      if (!callSheetsData) {
+        setReports([]);
+        return;
+      }
+
+      // Map to DailyReport format
+      const mappedReports = callSheetsData.map(mapCallSheetToReport);
+
+      // Sort by shoot date (most recent first)
+      mappedReports.sort((a, b) => {
+        const dateA = a.callSheet.shootDate ? new Date(a.callSheet.shootDate).getTime() : 0;
+        const dateB = b.callSheet.shootDate ? new Date(b.callSheet.shootDate).getTime() : 0;
+        return dateB - dateA;
+      });
+
+      setReports(mappedReports);
+
+      // Auto-select first report if none selected
+      if (mappedReports.length > 0 && !selectedReport) {
+        setSelectedReport(mappedReports[0]);
+      }
+    } catch (err) {
+      console.error('Error fetching call sheets:', err);
+      setError('Failed to load daily reports. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [organizationId, selectedReport]);
+
+  useEffect(() => {
+    if (organizationId) {
+      fetchCallSheets();
+    }
+  }, [organizationId, fetchCallSheets]);
 
   const stats = {
     totalDays: reports.length,
     totalPages: reports.reduce((sum, r) => sum + r.pagesCompleted, 0),
     avgPagesPerDay: reports.length > 0
       ? (reports.reduce((sum, r) => sum + r.pagesCompleted, 0) / reports.length).toFixed(1)
-      : 0,
+      : '0',
   };
+
+  const isLoading = orgLoading || loading;
 
   return (
     <div className="min-h-screen bg-[var(--bg-0)]">
@@ -91,23 +176,48 @@ export default function DprPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-6">
+        {/* Error State */}
+        {error && (
+          <Card className="p-6 mb-6 border-[var(--danger)]">
+            <div className="flex items-center gap-3 text-[var(--danger)]">
+              <Icons.AlertCircle className="w-5 h-5" />
+              <p>{error}</p>
+              <Button variant="secondary" size="sm" onClick={fetchCallSheets} className="ml-auto">
+                Retry
+              </Button>
+            </div>
+          </Card>
+        )}
+
         {/* Stats Row */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           <Card className="p-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.totalDays}</p>
+              {isLoading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.totalDays}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">Shoot Days</p>
             </div>
           </Card>
           <Card className="p-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--success)]">{stats.totalPages}</p>
+              {isLoading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--success)]">{stats.totalPages}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">Pages Shot</p>
             </div>
           </Card>
           <Card className="p-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--primary)]">{stats.avgPagesPerDay}</p>
+              {isLoading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-[var(--primary)]">{stats.avgPagesPerDay}</p>
+              )}
               <p className="text-xs text-[var(--text-tertiary)]">Avg Pages/Day</p>
             </div>
           </Card>
@@ -117,7 +227,24 @@ export default function DprPage() {
           {/* Reports List */}
           <div className="lg:col-span-1 space-y-3">
             <h3 className="font-semibold text-[var(--text-primary)] mb-3">Reports</h3>
-            {reports.map(report => {
+            {isLoading && (
+              <>
+                {[1, 2, 3].map((i) => (
+                  <Card key={i} className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <Skeleton className="h-5 w-16" />
+                      <Skeleton className="h-6 w-20 rounded-full" />
+                    </div>
+                    <Skeleton className="h-4 w-32 mb-2" />
+                    <div className="flex items-center gap-4">
+                      <Skeleton className="h-3 w-20" />
+                      <Skeleton className="h-3 w-20" />
+                    </div>
+                  </Card>
+                ))}
+              </>
+            )}
+            {!isLoading && reports.map(report => {
               const statusConfig = STATUS_CONFIG[report.status];
               const StatusIcon = Icons[statusConfig.icon];
               const isSelected = selectedReport?.id === report.id;
@@ -155,7 +282,32 @@ export default function DprPage() {
 
           {/* Report Detail */}
           <Card className="lg:col-span-2 p-6">
-            {selectedReport ? (
+            {isLoading ? (
+              <>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <Skeleton className="h-6 w-48 mb-2" />
+                    <Skeleton className="h-6 w-24 rounded-full" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-8 w-20" />
+                    <Skeleton className="h-8 w-20" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="p-3 bg-[var(--bg-1)] rounded-lg">
+                      <Skeleton className="h-3 w-16 mb-1" />
+                      <Skeleton className="h-5 w-12" />
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-4 mb-6">
+                  <Skeleton className="h-8 w-full rounded-full" />
+                  <Skeleton className="h-8 w-full rounded-full" />
+                </div>
+              </>
+            ) : selectedReport ? (
               <>
                 <div className="flex items-center justify-between mb-6">
                   <div>
@@ -267,7 +419,18 @@ export default function DprPage() {
               <div className="flex items-center justify-center h-64">
                 <div className="text-center">
                   <Icons.FileText className="w-12 h-12 text-[var(--text-tertiary)] mx-auto mb-4" />
-                  <p className="text-[var(--text-tertiary)]">Select a report to view details</p>
+                  <p className="text-[var(--text-tertiary)]">
+                    {reports.length === 0
+                      ? 'No reports available. Create a call sheet to get started.'
+                      : 'Select a report to view details'
+                    }
+                  </p>
+                  {reports.length === 0 && (
+                    <Button variant="primary" size="sm" className="mt-4">
+                      <Icons.Plus className="w-4 h-4 mr-2" />
+                      New Report
+                    </Button>
+                  )}
                 </div>
               </div>
             )}

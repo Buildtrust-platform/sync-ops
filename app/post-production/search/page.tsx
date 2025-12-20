@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Icons, Card, Button, StatusBadge } from '../../components/ui';
 
 /**
@@ -47,6 +48,7 @@ function formatTimecode(seconds: number): string {
 }
 
 export default function SearchPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -102,6 +104,14 @@ export default function SearchPage() {
         part
       )
     );
+  };
+
+  const handleJumpTo = (assetId: string, timecode: number) => {
+    router.push(`/assets/${assetId}/review?t=${timecode}`);
+  };
+
+  const handleCopyText = (text: string) => {
+    navigator.clipboard.writeText(text);
   };
 
   return (
@@ -339,19 +349,19 @@ export default function SearchPage() {
 
                       {/* Actions */}
                       <div className="flex flex-col gap-2">
-                        <Link href={`/assets/${result.assetId}/review?t=${result.timecode}`}>
-                          <Button variant="primary" size="sm">
-                            <Icons.Play className="w-4 h-4 mr-1" />
-                            Jump to
-                          </Button>
-                        </Link>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handleJumpTo(result.assetId, result.timecode)}
+                        >
+                          <Icons.Play className="w-4 h-4 mr-1" />
+                          Jump to
+                        </Button>
                         <Button
                           variant="secondary"
                           size="sm"
                           title="Copy text"
-                          onClick={() => {
-                            navigator.clipboard.writeText(result.text);
-                          }}
+                          onClick={() => handleCopyText(result.text)}
                         >
                           <Icons.Copy className="w-4 h-4" />
                         </Button>

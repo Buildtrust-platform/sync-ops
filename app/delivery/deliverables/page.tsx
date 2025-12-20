@@ -1,323 +1,529 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { Icons, Card, Button } from '@/app/components/ui';
+import React, { useState, useMemo } from 'react';
+import { Icons } from '@/app/components/ui/Icons';
+import { Card, StatCard } from '@/app/components/ui/Card';
+import { Button } from '@/app/components/ui/Button';
+import { StatusBadge } from '@/app/components/ui/StatusBadge';
+import { Badge } from '@/app/components/ui/Badge';
 
-/**
- * DELIVERABLES PAGE
- * Track all output requirements and final deliverables.
- */
-
-type DeliverableStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'IN_REVIEW' | 'APPROVED' | 'DELIVERED';
-type DeliverableType = 'VIDEO' | 'AUDIO' | 'GRAPHICS' | 'DOCUMENT' | 'OTHER';
+type DeliverableStatus = 'PENDING' | 'IN_PROGRESS' | 'READY' | 'DELIVERED' | 'APPROVED';
+type DeliverableFormat = 'ProRes 4444' | 'ProRes 422 HQ' | 'H.264' | 'DNxHR' | 'DCP';
+type DeliverableResolution = '4K UHD' | '1080p HD' | '720p' | 'DCP 2K';
+type DeliverableCodec = 'ProRes 4444' | 'ProRes 422 HQ' | 'H.264 High' | 'DNxHR HQX' | 'JPEG2000';
 
 interface Deliverable {
   id: string;
   name: string;
-  type: DeliverableType;
-  description: string;
-  format: string;
-  resolution?: string;
-  duration?: string;
-  fileSize?: string;
+  format: DeliverableFormat;
+  resolution: DeliverableResolution;
+  codec: DeliverableCodec;
+  duration: string;
+  fileSize: string;
   status: DeliverableStatus;
+  client: string;
   dueDate: string;
-  assignee: string;
+  deliveredDate?: string;
   version: number;
-  approvedBy?: string;
-  deliveredAt?: string;
 }
 
-// Data will be fetched from API
-const initialDeliverables: Deliverable[] = [];
+const MOCK_DATA: Deliverable[] = [
+  {
+    id: '1',
+    name: 'Main Feature Master',
+    format: 'ProRes 4444',
+    resolution: '4K UHD',
+    codec: 'ProRes 4444',
+    duration: '1:42:35',
+    fileSize: '425.3 GB',
+    status: 'APPROVED',
+    client: 'Netflix',
+    dueDate: '2025-01-15',
+    deliveredDate: '2025-01-12',
+    version: 3,
+  },
+  {
+    id: '2',
+    name: 'TV Broadcast Version',
+    format: 'ProRes 422 HQ',
+    resolution: '1080p HD',
+    codec: 'ProRes 422 HQ',
+    duration: '1:42:35',
+    fileSize: '156.8 GB',
+    status: 'DELIVERED',
+    client: 'ABC Network',
+    dueDate: '2025-01-20',
+    deliveredDate: '2025-01-18',
+    version: 2,
+  },
+  {
+    id: '3',
+    name: 'Social Media Promo',
+    format: 'H.264',
+    resolution: '1080p HD',
+    codec: 'H.264 High',
+    duration: '0:00:30',
+    fileSize: '42.1 MB',
+    status: 'READY',
+    client: 'Marketing Team',
+    dueDate: '2025-01-25',
+    version: 1,
+  },
+  {
+    id: '4',
+    name: 'DCP Package (Theater)',
+    format: 'DCP',
+    resolution: 'DCP 2K',
+    codec: 'JPEG2000',
+    duration: '1:42:35',
+    fileSize: '185.2 GB',
+    status: 'IN_PROGRESS',
+    client: 'AMC Theaters',
+    dueDate: '2025-02-01',
+    version: 1,
+  },
+  {
+    id: '5',
+    name: 'Director\'s Cut',
+    format: 'ProRes 422 HQ',
+    resolution: '4K UHD',
+    codec: 'ProRes 422 HQ',
+    duration: '2:08:15',
+    fileSize: '287.4 GB',
+    status: 'IN_PROGRESS',
+    client: 'Director',
+    dueDate: '2025-02-10',
+    version: 2,
+  },
+  {
+    id: '6',
+    name: 'Trailer - 60s',
+    format: 'H.264',
+    resolution: '1080p HD',
+    codec: 'H.264 High',
+    duration: '0:01:00',
+    fileSize: '85.3 MB',
+    status: 'APPROVED',
+    client: 'Marketing Team',
+    dueDate: '2025-01-08',
+    deliveredDate: '2025-01-07',
+    version: 1,
+  },
+  {
+    id: '7',
+    name: 'International Version',
+    format: 'DNxHR',
+    resolution: '1080p HD',
+    codec: 'DNxHR HQX',
+    duration: '1:42:35',
+    fileSize: '198.7 GB',
+    status: 'READY',
+    client: 'International Distributor',
+    dueDate: '2025-01-30',
+    version: 1,
+  },
+  {
+    id: '8',
+    name: 'Festival Screener',
+    format: 'ProRes 422 HQ',
+    resolution: '1080p HD',
+    codec: 'ProRes 422 HQ',
+    duration: '1:42:35',
+    fileSize: '156.8 GB',
+    status: 'DELIVERED',
+    client: 'Sundance Film Festival',
+    dueDate: '2024-12-15',
+    deliveredDate: '2024-12-12',
+    version: 1,
+  },
+  {
+    id: '9',
+    name: 'Behind the Scenes',
+    format: 'H.264',
+    resolution: '1080p HD',
+    codec: 'H.264 High',
+    duration: '0:15:42',
+    fileSize: '1.2 GB',
+    status: 'PENDING',
+    client: 'Marketing Team',
+    dueDate: '2025-02-05',
+    version: 1,
+  },
+  {
+    id: '10',
+    name: 'Color Grading Reference',
+    format: 'ProRes 4444',
+    resolution: '4K UHD',
+    codec: 'ProRes 4444',
+    duration: '1:42:35',
+    fileSize: '425.3 GB',
+    status: 'APPROVED',
+    client: 'Color House',
+    dueDate: '2024-12-20',
+    deliveredDate: '2024-12-18',
+    version: 2,
+  },
+  {
+    id: '11',
+    name: 'HDR Master',
+    format: 'ProRes 4444',
+    resolution: '4K UHD',
+    codec: 'ProRes 4444',
+    duration: '1:42:35',
+    fileSize: '425.3 GB',
+    status: 'IN_PROGRESS',
+    client: 'Apple TV+',
+    dueDate: '2025-02-15',
+    version: 1,
+  },
+  {
+    id: '12',
+    name: 'Audio Description Track',
+    format: 'ProRes 422 HQ',
+    resolution: '1080p HD',
+    codec: 'ProRes 422 HQ',
+    duration: '1:42:35',
+    fileSize: '156.8 GB',
+    status: 'PENDING',
+    client: 'Accessibility Services',
+    dueDate: '2025-02-20',
+    version: 1,
+  },
+];
 
-const STATUS_CONFIG: Record<DeliverableStatus, { label: string; color: string; bgColor: string; icon: keyof typeof Icons }> = {
-  NOT_STARTED: { label: 'Not Started', color: 'var(--text-tertiary)', bgColor: 'var(--bg-3)', icon: 'Circle' },
-  IN_PROGRESS: { label: 'In Progress', color: 'var(--primary)', bgColor: 'var(--primary-muted)', icon: 'Loader' },
-  IN_REVIEW: { label: 'In Review', color: 'var(--warning)', bgColor: 'var(--warning-muted)', icon: 'Eye' },
-  APPROVED: { label: 'Approved', color: 'var(--success)', bgColor: 'var(--success-muted)', icon: 'CheckCircle' },
-  DELIVERED: { label: 'Delivered', color: 'var(--accent)', bgColor: 'var(--accent-muted)', icon: 'Package' },
-};
-
-const TYPE_CONFIG: Record<DeliverableType, { label: string; icon: keyof typeof Icons; color: string }> = {
-  VIDEO: { label: 'Video', icon: 'Film', color: 'var(--primary)' },
-  AUDIO: { label: 'Audio', icon: 'Music', color: 'var(--accent)' },
-  GRAPHICS: { label: 'Graphics', icon: 'Image', color: 'var(--warning)' },
-  DOCUMENT: { label: 'Document', icon: 'FileText', color: 'var(--success)' },
-  OTHER: { label: 'Other', icon: 'File', color: 'var(--text-tertiary)' },
+const getStatusBadgeStatus = (status: DeliverableStatus) => {
+  const mapping: Record<DeliverableStatus, 'pending' | 'in_progress' | 'ready' | 'delivered' | 'approved'> = {
+    PENDING: 'pending',
+    IN_PROGRESS: 'in_progress',
+    READY: 'ready',
+    DELIVERED: 'delivered',
+    APPROVED: 'approved',
+  };
+  return mapping[status];
 };
 
 export default function DeliverablesPage() {
-  const [deliverables] = useState<Deliverable[]>(initialDeliverables);
+  const [deliverables] = useState<Deliverable[]>(MOCK_DATA);
+  const [formatFilter, setFormatFilter] = useState<DeliverableFormat | 'ALL'>('ALL');
   const [statusFilter, setStatusFilter] = useState<DeliverableStatus | 'ALL'>('ALL');
-  const [typeFilter, setTypeFilter] = useState<DeliverableType | 'ALL'>('ALL');
 
-  const filteredDeliverables = deliverables.filter(d => {
-    if (statusFilter !== 'ALL' && d.status !== statusFilter) return false;
-    if (typeFilter !== 'ALL' && d.type !== typeFilter) return false;
-    return true;
-  });
+  // Filter deliverables
+  const filteredDeliverables = useMemo(() => {
+    return deliverables.filter(del => {
+      const formatMatch = formatFilter === 'ALL' || del.format === formatFilter;
+      const statusMatch = statusFilter === 'ALL' || del.status === statusFilter;
 
-  const stats = {
-    total: deliverables.length,
-    delivered: deliverables.filter(d => d.status === 'DELIVERED').length,
-    approved: deliverables.filter(d => d.status === 'APPROVED').length,
-    inReview: deliverables.filter(d => d.status === 'IN_REVIEW').length,
-    inProgress: deliverables.filter(d => d.status === 'IN_PROGRESS').length,
+      return formatMatch && statusMatch;
+    });
+  }, [deliverables, formatFilter, statusFilter]);
+
+  // Calculate stats
+  const stats = useMemo(() => {
+    const total = deliverables.length;
+    const ready = deliverables.filter(d => d.status === 'READY').length;
+    const delivered = deliverables.filter(d => d.status === 'DELIVERED').length;
+    const pending = deliverables.filter(d => d.status === 'PENDING').length;
+
+    return { total, ready, delivered, pending };
+  }, [deliverables]);
+
+  const handleDownload = (deliverable: Deliverable) => {
+    console.log('Download:', deliverable.id);
+    // Implement download logic
   };
 
-  const progress = ((stats.delivered + stats.approved) / stats.total) * 100;
+  const handleSendToClient = (deliverable: Deliverable) => {
+    console.log('Send to client:', deliverable.id);
+    // Implement send to client logic
+  };
+
+  const handleRequestApproval = (deliverable: Deliverable) => {
+    console.log('Request approval:', deliverable.id);
+    // Implement request approval logic
+  };
+
+  const handleReRender = (deliverable: Deliverable) => {
+    console.log('Re-render:', deliverable.id);
+    // Implement re-render logic
+  };
+
+  const formatOptions: Array<{ value: DeliverableFormat | 'ALL'; label: string }> = [
+    { value: 'ALL', label: 'All Formats' },
+    { value: 'ProRes 4444', label: 'ProRes 4444' },
+    { value: 'ProRes 422 HQ', label: 'ProRes 422 HQ' },
+    { value: 'H.264', label: 'H.264' },
+    { value: 'DNxHR', label: 'DNxHR' },
+    { value: 'DCP', label: 'DCP' },
+  ];
+
+  const statusOptions: Array<{ value: DeliverableStatus | 'ALL'; label: string }> = [
+    { value: 'ALL', label: 'All Statuses' },
+    { value: 'PENDING', label: 'Pending' },
+    { value: 'IN_PROGRESS', label: 'In Progress' },
+    { value: 'READY', label: 'Ready' },
+    { value: 'DELIVERED', label: 'Delivered' },
+    { value: 'APPROVED', label: 'Approved' },
+  ];
 
   return (
-    <div className="min-h-screen bg-[var(--bg-0)]">
+    <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="border-b border-[var(--border-default)] bg-[var(--bg-1)]">
-        <div className="max-w-6xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link
-                href="/delivery"
-                className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
-              >
-                <Icons.ArrowLeft className="w-5 h-5" />
-              </Link>
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: 'var(--phase-delivery)', color: 'white' }}
-              >
-                <Icons.Package className="w-6 h-6" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-[var(--text-primary)]">Deliverables</h1>
-                <p className="text-sm text-[var(--text-secondary)]">Track all output requirements</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button variant="secondary" size="sm">
-                <Icons.Download className="w-4 h-4 mr-2" />
-                Export All
-              </Button>
-              <Button variant="primary" size="sm">
-                <Icons.Plus className="w-4 h-4 mr-2" />
-                Add Deliverable
-              </Button>
-            </div>
-          </div>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-[var(--text-primary)]">Deliverables</h1>
+          <p className="text-[var(--text-secondary)] mt-1">
+            Track final output files and delivery specifications
+          </p>
         </div>
+        <Button icon="Plus" onClick={() => console.log('Create new deliverable')}>
+          New Deliverable
+        </Button>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-6">
-        {/* Overall Progress */}
-        <Card className="p-5 mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h3 className="font-semibold text-[var(--text-primary)]">Overall Progress</h3>
-              <p className="text-sm text-[var(--text-tertiary)]">
-                {stats.delivered + stats.approved} of {stats.total} deliverables complete
-              </p>
-            </div>
-            <span className="text-2xl font-bold text-[var(--success)]">{Math.round(progress)}%</span>
-          </div>
-          <div className="w-full h-3 bg-[var(--bg-3)] rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all"
-              style={{
-                width: `${progress}%`,
-                background: `linear-gradient(90deg, var(--accent) 0%, var(--success) 100%)`,
-              }}
-            />
-          </div>
-        </Card>
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <StatCard
+          label="Total Deliverables"
+          value={stats.total}
+          icon={<Icons.Package className="w-5 h-5" />}
+        />
+        <StatCard
+          label="Ready"
+          value={stats.ready}
+          icon={<Icons.CheckCircle className="w-5 h-5" />}
+        />
+        <StatCard
+          label="Delivered"
+          value={stats.delivered}
+          icon={<Icons.Send className="w-5 h-5" />}
+        />
+        <StatCard
+          label="Pending"
+          value={stats.pending}
+          icon={<Icons.Clock className="w-5 h-5" />}
+        />
+      </div>
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-          <Card className="p-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--text-primary)]">{stats.total}</p>
-              <p className="text-xs text-[var(--text-tertiary)]">Total</p>
-            </div>
-          </Card>
-          <Card className="p-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--accent)]">{stats.delivered}</p>
-              <p className="text-xs text-[var(--text-tertiary)]">Delivered</p>
-            </div>
-          </Card>
-          <Card className="p-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--success)]">{stats.approved}</p>
-              <p className="text-xs text-[var(--text-tertiary)]">Approved</p>
-            </div>
-          </Card>
-          <Card className="p-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--warning)]">{stats.inReview}</p>
-              <p className="text-xs text-[var(--text-tertiary)]">In Review</p>
-            </div>
-          </Card>
-          <Card className="p-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-[var(--primary)]">{stats.inProgress}</p>
-              <p className="text-xs text-[var(--text-tertiary)]">In Progress</p>
-            </div>
-          </Card>
-        </div>
+      {/* Filters */}
+      <Card>
+        <div className="flex flex-wrap gap-4">
+          <div className="flex items-center gap-2">
+            <Icons.Filter className="w-4 h-4 text-[var(--text-secondary)]" />
+            <span className="text-sm font-medium text-[var(--text-secondary)]">Filters:</span>
+          </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap items-center gap-4 mb-6">
-          {/* Status Filter */}
-          <div className="flex items-center gap-2 p-1 bg-[var(--bg-1)] rounded-lg border border-[var(--border-default)]">
-            {(['ALL', 'NOT_STARTED', 'IN_PROGRESS', 'IN_REVIEW', 'APPROVED', 'DELIVERED'] as const).map(status => (
+          <div className="flex flex-wrap gap-2">
+            <span className="text-sm text-[var(--text-tertiary)]">Format:</span>
+            {formatOptions.map(option => (
               <button
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                  statusFilter === status
-                    ? 'bg-[var(--bg-0)] text-[var(--text-primary)] shadow-sm'
-                    : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
-                }`}
+                key={option.value}
+                onClick={() => setFormatFilter(option.value)}
+                className={`
+                  px-3 py-1 rounded-md text-sm font-medium transition-colors
+                  ${formatFilter === option.value
+                    ? 'bg-[var(--primary)] text-white'
+                    : 'bg-[var(--bg-2)] text-[var(--text-secondary)] hover:bg-[var(--bg-3)]'
+                  }
+                `}
               >
-                {status === 'ALL' ? 'All Status' : STATUS_CONFIG[status].label}
+                {option.label}
               </button>
             ))}
           </div>
 
-          {/* Type Filter */}
-          <div className="flex items-center gap-2 p-1 bg-[var(--bg-1)] rounded-lg border border-[var(--border-default)]">
-            {(['ALL', 'VIDEO', 'AUDIO', 'GRAPHICS', 'DOCUMENT'] as const).map(type => (
+          <div className="flex flex-wrap gap-2">
+            <span className="text-sm text-[var(--text-tertiary)]">Status:</span>
+            {statusOptions.map(option => (
               <button
-                key={type}
-                onClick={() => setTypeFilter(type)}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                  typeFilter === type
-                    ? 'bg-[var(--bg-0)] text-[var(--text-primary)] shadow-sm'
-                    : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
-                }`}
+                key={option.value}
+                onClick={() => setStatusFilter(option.value)}
+                className={`
+                  px-3 py-1 rounded-md text-sm font-medium transition-colors
+                  ${statusFilter === option.value
+                    ? 'bg-[var(--primary)] text-white'
+                    : 'bg-[var(--bg-2)] text-[var(--text-secondary)] hover:bg-[var(--bg-3)]'
+                  }
+                `}
               >
-                {type === 'ALL' ? 'All Types' : TYPE_CONFIG[type].label}
+                {option.label}
               </button>
             ))}
           </div>
         </div>
+      </Card>
 
-        {/* Deliverables Table */}
-        <Card className="overflow-hidden">
+      {/* Deliverables Table */}
+      <Card className="overflow-hidden">
+        <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-[var(--border-default)] bg-[var(--bg-1)]">
-                <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase">Deliverable</th>
-                <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase">Specs</th>
-                <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase">Assignee</th>
-                <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase">Due Date</th>
-                <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase">Status</th>
-                <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase">Actions</th>
+                <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase">
+                  Deliverable
+                </th>
+                <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase">
+                  Format
+                </th>
+                <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase">
+                  Resolution
+                </th>
+                <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase">
+                  Codec
+                </th>
+                <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase">
+                  Duration
+                </th>
+                <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase">
+                  Size
+                </th>
+                <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase">
+                  Client
+                </th>
+                <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase">
+                  Due Date
+                </th>
+                <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase">
+                  Status
+                </th>
+                <th className="text-left p-4 text-xs font-semibold text-[var(--text-tertiary)] uppercase">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-subtle)]">
-              {filteredDeliverables.map((deliverable) => {
-                const statusConfig = STATUS_CONFIG[deliverable.status];
-                const typeConfig = TYPE_CONFIG[deliverable.type];
-                const TypeIcon = Icons[typeConfig.icon];
-                const StatusIcon = Icons[statusConfig.icon];
-
-                return (
-                  <tr
-                    key={deliverable.id}
-                    className="hover:bg-[var(--bg-1)] transition-colors"
-                  >
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-10 h-10 rounded-lg flex items-center justify-center"
-                          style={{ backgroundColor: `${typeConfig.color}20` }}
-                        >
-                          <TypeIcon className="w-5 h-5" style={{ color: typeConfig.color }} />
-                        </div>
-                        <div>
-                          <p className="font-medium text-[var(--text-primary)]">{deliverable.name}</p>
-                          <p className="text-xs text-[var(--text-tertiary)]">{deliverable.description}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="text-sm">
-                        <p className="text-[var(--text-secondary)]">{deliverable.format}</p>
-                        <p className="text-xs text-[var(--text-tertiary)]">
-                          {deliverable.resolution}
-                          {deliverable.duration && ` · ${deliverable.duration}`}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="p-4 text-sm text-[var(--text-secondary)]">
-                      {deliverable.assignee}
-                      {deliverable.approvedBy && (
+              {filteredDeliverables.map(deliverable => (
+                <tr
+                  key={deliverable.id}
+                  className="hover:bg-[var(--bg-1)] transition-colors"
+                >
+                  <td className="p-4">
+                    <div>
+                      <p className="font-medium text-[var(--text-primary)]">
+                        {deliverable.name}
+                      </p>
+                      <p className="text-xs text-[var(--text-tertiary)]">v{deliverable.version}</p>
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <Badge variant="info" size="sm" icon="File">
+                      {deliverable.format}
+                    </Badge>
+                  </td>
+                  <td className="p-4 text-sm text-[var(--text-secondary)]">
+                    {deliverable.resolution}
+                  </td>
+                  <td className="p-4 text-sm text-[var(--text-secondary)]">
+                    {deliverable.codec}
+                  </td>
+                  <td className="p-4 text-sm text-[var(--text-secondary)]">
+                    {deliverable.duration}
+                  </td>
+                  <td className="p-4 text-sm text-[var(--text-secondary)]">
+                    {deliverable.fileSize}
+                  </td>
+                  <td className="p-4 text-sm text-[var(--text-secondary)]">
+                    {deliverable.client}
+                  </td>
+                  <td className="p-4">
+                    <div className="text-sm">
+                      <p className="text-[var(--text-secondary)]">
+                        {new Date(deliverable.dueDate).toLocaleDateString()}
+                      </p>
+                      {deliverable.deliveredDate && (
                         <p className="text-xs text-[var(--success)]">
-                          <Icons.Check className="w-3 h-3 inline mr-1" />
-                          {deliverable.approvedBy}
+                          Delivered: {new Date(deliverable.deliveredDate).toLocaleDateString()}
                         </p>
                       )}
-                    </td>
-                    <td className="p-4">
-                      <p className="text-sm text-[var(--text-secondary)]">{deliverable.dueDate}</p>
-                      {deliverable.deliveredAt && (
-                        <p className="text-xs text-[var(--accent)]">Delivered: {deliverable.deliveredAt}</p>
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <StatusBadge status={getStatusBadgeStatus(deliverable.status)} size="sm" />
+                  </td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      {deliverable.status === 'READY' && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="primary"
+                            icon="Download"
+                            onClick={() => handleDownload(deliverable)}
+                            title="Download"
+                          />
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            icon="Send"
+                            onClick={() => handleSendToClient(deliverable)}
+                            title="Send to Client"
+                          />
+                        </>
                       )}
-                    </td>
-                    <td className="p-4">
-                      <span
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium"
-                        style={{
-                          backgroundColor: statusConfig.bgColor,
-                          color: statusConfig.color,
-                        }}
-                      >
-                        <StatusIcon className="w-3 h-3" />
-                        {statusConfig.label}
-                      </span>
-                      {deliverable.version > 0 && (
-                        <span className="ml-2 text-xs text-[var(--text-tertiary)]">v{deliverable.version}</span>
+                      {deliverable.status === 'DELIVERED' && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="primary"
+                            icon="Download"
+                            onClick={() => handleDownload(deliverable)}
+                            title="Download"
+                          />
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            icon="CheckCircle"
+                            onClick={() => handleRequestApproval(deliverable)}
+                            title="Request Approval"
+                          />
+                        </>
                       )}
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        {(deliverable.status === 'APPROVED' || deliverable.status === 'DELIVERED') && (
-                          <Button variant="secondary" size="sm">
-                            <Icons.Download className="w-3.5 h-3.5" />
-                          </Button>
-                        )}
-                        {deliverable.status === 'IN_REVIEW' && (
-                          <Button variant="primary" size="sm">
-                            <Icons.Eye className="w-3.5 h-3.5 mr-1" />
-                            Review
-                          </Button>
-                        )}
-                        <Button variant="ghost" size="sm">
-                          <Icons.MoreVertical className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                      {deliverable.status === 'IN_PROGRESS' && (
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          icon="RefreshCw"
+                          onClick={() => handleReRender(deliverable)}
+                          title="Re-render"
+                        />
+                      )}
+                      {deliverable.status === 'APPROVED' && (
+                        <Button
+                          size="sm"
+                          variant="primary"
+                          icon="Download"
+                          onClick={() => handleDownload(deliverable)}
+                          title="Download"
+                        />
+                      )}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        icon="MoreVertical"
+                        title="More options"
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
-        </Card>
+        </div>
 
         {filteredDeliverables.length === 0 && (
-          <Card className="p-12 text-center">
-            <Icons.Package className="w-12 h-12 text-[var(--text-tertiary)] mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">No deliverables found</h3>
-            <p className="text-[var(--text-tertiary)] mb-4">
-              Add deliverables to track your output requirements.
+          <div className="py-12 text-center">
+            <Icons.Package className="w-12 h-12 mx-auto text-[var(--text-tertiary)] mb-4" />
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
+              No deliverables found
+            </h3>
+            <p className="text-[var(--text-secondary)] mb-4">
+              {formatFilter !== 'ALL' || statusFilter !== 'ALL'
+                ? 'Try adjusting your filters'
+                : 'Create your first deliverable to get started'
+              }
             </p>
-            <Button variant="primary" size="sm">
-              <Icons.Plus className="w-4 h-4 mr-2" />
-              Add Deliverable
-            </Button>
-          </Card>
+          </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

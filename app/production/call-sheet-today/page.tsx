@@ -1,15 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Icons, Card, Button } from '@/app/components/ui';
+import { generateClient } from 'aws-amplify/data';
+import type { Schema } from '@/amplify/data/resource';
+import { useOrganization } from '@/app/hooks/useAmplifyData';
+import { Icons } from '@/app/components/ui/Icons';
+import { Card } from '@/app/components/ui/Card';
+import { Button } from '@/app/components/ui/Button';
+import { Badge } from '@/app/components/ui/Badge';
+import { Skeleton } from '@/app/components/ui/Skeleton';
 
-/**
- * TODAY'S CALL SHEET PAGE
- * View the current day's shooting schedule, crew, and details.
- */
+const client = generateClient<Schema>({ authMode: 'userPool' });
 
-interface CrewMember {
+type CallSheet = Schema['CallSheet']['type'];
+type CallSheetScene = Schema['CallSheetScene']['type'];
+
+interface CrewCheckInStatus {
   name: string;
   role: string;
   callTime: string;
@@ -17,55 +24,155 @@ interface CrewMember {
   checkedInAt?: string;
 }
 
-interface Scene {
-  sceneNumber: string;
-  description: string;
-  location: string;
-  estimatedStart: string;
-  pages: number;
-  cast: string[];
-  status: 'UPCOMING' | 'SHOOTING' | 'COMPLETED';
-}
-
-// Data will be fetched from API
-const initialCallSheet = {
-  projectName: '',
-  shootDay: 0,
-  date: '',
-  generalCallTime: '',
-  firstShot: '',
-  estimatedWrap: '',
-  location: {
-    name: '',
-    address: '',
-    parking: '',
-    basecamp: '',
-  },
-  weather: {
-    condition: '',
-    high: 0,
-    low: 0,
-    sunrise: '',
-    sunset: '',
-    wind: '',
-  },
-  scenes: [] as Scene[],
-  crew: [] as CrewMember[],
-  notices: [] as { type: string; message: string }[],
-};
-
-const SCENE_STATUS_CONFIG = {
-  UPCOMING: { label: 'Upcoming', color: 'var(--text-tertiary)', bgColor: 'var(--bg-3)' },
-  SHOOTING: { label: 'Now Shooting', color: 'var(--success)', bgColor: 'var(--success-muted)' },
-  COMPLETED: { label: 'Completed', color: 'var(--primary)', bgColor: 'var(--primary-muted)' },
-};
-
 export default function CallSheetTodayPage() {
-  const [data] = useState(initialCallSheet);
+  const { organizationId, loading: orgLoading } = useOrganization();
+  const [callSheet, setCallSheet] = useState<CallSheet | null>(null);
+  const [scenes, setScenes] = useState<CallSheetScene[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const checkedInCount = data.crew.filter(c => c.checkedIn).length;
-  const completedScenes = data.scenes.filter(s => s.status === 'COMPLETED').length;
-  const currentScene = data.scenes.find(s => s.status === 'SHOOTING');
+  // Mock crew data (would come from a CrewMember model in real implementation)
+  const [crewMembers] = useState<CrewCheckInStatus[]>([
+    { name: 'Sarah Chen', role: 'Director', callTime: '07:00', checkedIn: true, checkedInAt: '06:55' },
+    { name: 'Mike Rodriguez', role: '1st AD', callTime: '06:30', checkedIn: true, checkedInAt: '06:25' },
+    { name: 'Emma Davis', role: 'DP', callTime: '07:00', checkedIn: true, checkedInAt: '07:02' },
+    { name: 'James Wilson', role: 'Gaffer', callTime: '07:30', checkedIn: false },
+    { name: 'Lisa Park', role: 'Production Designer', callTime: '07:00', checkedIn: true, checkedInAt: '06:58' },
+    { name: 'Tom Anderson', role: 'Sound Mixer', callTime: '08:00', checkedIn: false },
+  ]);
+
+  useEffect(() => {
+    if (!organizationId) return;
+
+    async function fetchCallSheet() {
+      setLoading(true);
+      setError(null);
+      try {
+        const today = new Date().toISOString().split('T')[0];
+
+        const { data: callSheets } = await client.models.CallSheet.list({
+          filter: {
+            organizationId: { eq: organizationId || undefined },
+            shootDate: { eq: today },
+          },
+        });
+
+        if (callSheets && callSheets.length > 0) {
+          const todayCallSheet = callSheets[0];
+          setCallSheet(todayCallSheet);
+
+          // Fetch scenes for this call sheet
+          const { data: callSheetScenes } = await client.models.CallSheetScene.list({
+            filter: { callSheetId: { eq: todayCallSheet.id } },
+          });
+
+          if (callSheetScenes) {
+            setScenes(callSheetScenes.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)));
+          }
+        } else {
+          setCallSheet(null);
+          setScenes([]);
+        }
+      } catch (err) {
+        console.error('Error fetching call sheet:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch call sheet');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCallSheet();
+  }, [organizationId]);
+
+  if (orgLoading || loading) {
+    return (
+      <div className="min-h-screen bg-[var(--bg-0)]">
+        <div className="border-b border-[var(--border-default)] bg-[var(--bg-1)]">
+          <div className="max-w-6xl mx-auto px-6 py-6">
+            <div className="flex items-center gap-4">
+              <Skeleton variant="rectangular" width={48} height={48} />
+              <div className="flex-1">
+                <Skeleton width={200} height={28} />
+                <Skeleton width={300} height={16} className="mt-2" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="max-w-6xl mx-auto px-6 py-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i} className="p-4">
+                <Skeleton width="100%" height={60} />
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[var(--bg-0)] flex items-center justify-center">
+        <Card className="p-8 max-w-md">
+          <Icons.AlertCircle className="w-12 h-12 text-[var(--danger)] mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] text-center mb-2">
+            Error Loading Call Sheet
+          </h3>
+          <p className="text-[var(--text-secondary)] text-center">{error}</p>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!callSheet) {
+    return (
+      <div className="min-h-screen bg-[var(--bg-0)]">
+        <div className="border-b border-[var(--border-default)] bg-[var(--bg-1)]">
+          <div className="max-w-6xl mx-auto px-6 py-6">
+            <div className="flex items-center gap-4">
+              <Link
+                href="/production"
+                className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
+              >
+                <Icons.ArrowLeft className="w-5 h-5" />
+              </Link>
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: 'var(--phase-production)', color: 'white' }}
+              >
+                <Icons.Sun className="w-6 h-6" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-[var(--text-primary)]">Today&apos;s Call Sheet</h1>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="max-w-6xl mx-auto px-6 py-12">
+          <Card className="p-12 text-center">
+            <Icons.Sun className="w-16 h-16 text-[var(--text-tertiary)] mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-2">
+              No Shoot Scheduled Today
+            </h3>
+            <p className="text-[var(--text-secondary)] mb-6">
+              There is no call sheet scheduled for today. Enjoy your day off!
+            </p>
+            <Link href="/production">
+              <Button variant="primary">Back to Production</Button>
+            </Link>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  const checkedInCount = crewMembers.filter((c) => c.checkedIn).length;
+  const completedScenes = scenes.filter((s) => s.status === 'COMPLETED').length;
+  const currentScene = scenes.find((s) => s.status === 'SCHEDULED');
 
   return (
     <div className="min-h-screen bg-[var(--bg-0)]">
@@ -89,21 +196,27 @@ export default function CallSheetTodayPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-xl font-bold text-[var(--text-primary)]">Today&apos;s Call Sheet</h1>
-                  <span className="px-2 py-0.5 rounded bg-[var(--phase-production)] text-white text-xs font-bold">
-                    DAY {data.shootDay}
-                  </span>
+                  {callSheet.shootDayNumber && (
+                    <Badge variant="success" size="sm">
+                      DAY {callSheet.shootDayNumber}
+                      {callSheet.totalShootDays && ` of ${callSheet.totalShootDays}`}
+                    </Badge>
+                  )}
                 </div>
-                <p className="text-sm text-[var(--text-secondary)]">{data.projectName} · {data.date}</p>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  {callSheet.productionTitle || 'Production'} · {new Date(callSheet.shootDate).toLocaleDateString()}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="secondary" size="sm">
-                <Icons.Download className="w-4 h-4 mr-2" />
-                Download PDF
+              <Button variant="ghost" size="sm" icon="Download">
+                PDF
               </Button>
-              <Button variant="primary" size="sm">
-                <Icons.Bell className="w-4 h-4 mr-2" />
-                Send Update
+              <Button variant="ghost" size="sm" icon="Share">
+                Share
+              </Button>
+              <Button variant="primary" size="sm" icon="Edit">
+                Edit
               </Button>
             </div>
           </div>
@@ -115,45 +228,53 @@ export default function CallSheetTodayPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <Card className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-[var(--phase-production)] text-white flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-[var(--phase-production)]/20 text-[var(--phase-production)] flex items-center justify-center">
                 <Icons.Clock className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-xs text-[var(--text-tertiary)]">General Call</p>
-                <p className="text-lg font-bold text-[var(--text-primary)]">{data.generalCallTime}</p>
+                <p className="text-lg font-bold text-[var(--text-primary)]">
+                  {callSheet.generalCrewCall || 'TBD'}
+                </p>
               </div>
             </div>
           </Card>
           <Card className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-[var(--success-muted)] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-[var(--success)]/20 flex items-center justify-center">
                 <Icons.Users className="w-5 h-5 text-[var(--success)]" />
               </div>
               <div>
                 <p className="text-xs text-[var(--text-tertiary)]">Crew Checked In</p>
-                <p className="text-lg font-bold text-[var(--success)]">{checkedInCount} / {data.crew.length}</p>
+                <p className="text-lg font-bold text-[var(--success)]">
+                  {checkedInCount} / {crewMembers.length}
+                </p>
               </div>
             </div>
           </Card>
           <Card className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-[var(--primary-muted)] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-[var(--primary)]/20 flex items-center justify-center">
                 <Icons.Film className="w-5 h-5 text-[var(--primary)]" />
               </div>
               <div>
                 <p className="text-xs text-[var(--text-tertiary)]">Scenes Completed</p>
-                <p className="text-lg font-bold text-[var(--primary)]">{completedScenes} / {data.scenes.length}</p>
+                <p className="text-lg font-bold text-[var(--primary)]">
+                  {completedScenes} / {scenes.length}
+                </p>
               </div>
             </div>
           </Card>
           <Card className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-[var(--warning-muted)] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-[var(--warning)]/20 flex items-center justify-center">
                 <Icons.Sun className="w-5 h-5 text-[var(--warning)]" />
               </div>
               <div>
                 <p className="text-xs text-[var(--text-tertiary)]">Weather</p>
-                <p className="text-lg font-bold text-[var(--text-primary)]">{data.weather.high}°F</p>
+                <p className="text-lg font-bold text-[var(--text-primary)]">
+                  {callSheet.temperature || 'N/A'}
+                </p>
               </div>
             </div>
           </Card>
@@ -162,32 +283,9 @@ export default function CallSheetTodayPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Notices */}
-            {data.notices.length > 0 && (
-              <div className="space-y-2">
-                {data.notices.map((notice, idx) => (
-                  <div
-                    key={idx}
-                    className={`p-3 rounded-lg flex items-center gap-3 ${
-                      notice.type === 'warning' ? 'bg-[var(--warning-muted)]' :
-                      notice.type === 'alert' ? 'bg-[var(--danger-muted)]' :
-                      'bg-[var(--bg-2)]'
-                    }`}
-                  >
-                    <Icons.AlertTriangle className={`w-4 h-4 ${
-                      notice.type === 'warning' ? 'text-[var(--warning)]' :
-                      notice.type === 'alert' ? 'text-[var(--danger)]' :
-                      'text-[var(--primary)]'
-                    }`} />
-                    <p className="text-sm text-[var(--text-primary)]">{notice.message}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-
             {/* Current Scene */}
             {currentScene && (
-              <Card className="p-5 border-[var(--success)] bg-[var(--success-muted)]">
+              <Card className="p-5 border-[var(--success)] bg-[var(--success)]/5">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="w-2 h-2 rounded-full bg-[var(--success)] animate-pulse" />
                   <span className="text-sm font-semibold text-[var(--success)]">NOW SHOOTING</span>
@@ -196,10 +294,18 @@ export default function CallSheetTodayPage() {
                   <div className="w-14 h-14 rounded-lg bg-[var(--bg-0)] flex items-center justify-center font-bold text-xl text-[var(--text-primary)]">
                     {currentScene.sceneNumber}
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-[var(--text-primary)]">{currentScene.description}</h3>
-                    <p className="text-sm text-[var(--text-secondary)]">{currentScene.location} · {currentScene.pages} pages</p>
-                    <p className="text-xs text-[var(--text-tertiary)] mt-1">Cast: {currentScene.cast.join(', ')}</p>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-[var(--text-primary)]">
+                      {currentScene.sceneHeading || currentScene.description}
+                    </h3>
+                    <p className="text-sm text-[var(--text-secondary)]">
+                      {currentScene.location} · {currentScene.pageCount || 0} pages
+                    </p>
+                    {currentScene.scheduledTime && (
+                      <p className="text-xs text-[var(--text-tertiary)] mt-1">
+                        Scheduled: {currentScene.scheduledTime}
+                      </p>
+                    )}
                   </div>
                 </div>
               </Card>
@@ -209,31 +315,55 @@ export default function CallSheetTodayPage() {
             <Card className="overflow-hidden">
               <div className="p-4 border-b border-[var(--border-default)]">
                 <h3 className="font-semibold text-[var(--text-primary)]">Today&apos;s Schedule</h3>
+                <p className="text-sm text-[var(--text-secondary)] mt-1">
+                  {scenes.length} scene{scenes.length !== 1 ? 's' : ''} scheduled
+                </p>
               </div>
               <div className="divide-y divide-[var(--border-subtle)]">
-                {data.scenes.map((scene) => (
-                  <div key={scene.sceneNumber} className="p-4 flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-[var(--bg-2)] flex items-center justify-center font-bold text-[var(--text-primary)]">
-                      {scene.sceneNumber}
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-[var(--text-primary)]">{scene.description}</p>
-                      <p className="text-sm text-[var(--text-tertiary)]">{scene.location} · {scene.pages} pgs</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-[var(--text-primary)]">{scene.estimatedStart}</p>
-                      <span
-                        className="text-xs px-2 py-0.5 rounded"
-                        style={{
-                          backgroundColor: SCENE_STATUS_CONFIG[scene.status].bgColor,
-                          color: SCENE_STATUS_CONFIG[scene.status].color,
-                        }}
-                      >
-                        {SCENE_STATUS_CONFIG[scene.status].label}
-                      </span>
-                    </div>
+                {scenes.length === 0 ? (
+                  <div className="p-8 text-center">
+                    <Icons.Film className="w-12 h-12 text-[var(--text-tertiary)] mx-auto mb-3" />
+                    <p className="text-[var(--text-secondary)]">No scenes scheduled</p>
                   </div>
-                ))}
+                ) : (
+                  scenes.map((scene) => (
+                    <div key={scene.id} className="p-4 flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-lg bg-[var(--bg-2)] flex items-center justify-center font-bold text-[var(--text-primary)]">
+                        {scene.sceneNumber}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-[var(--text-primary)]">
+                          {scene.sceneHeading || scene.description}
+                        </p>
+                        <p className="text-sm text-[var(--text-tertiary)]">
+                          {scene.location} · {scene.pageCount || 0} pgs
+                          {scene.estimatedDuration && ` · ${scene.estimatedDuration} min`}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        {scene.scheduledTime && (
+                          <p className="text-sm font-medium text-[var(--text-primary)]">
+                            {scene.scheduledTime}
+                          </p>
+                        )}
+                        <Badge
+                          variant={
+                            scene.status === 'COMPLETED'
+                              ? 'success'
+                              : scene.status === 'CANCELLED'
+                              ? 'danger'
+                              : scene.status === 'MOVED'
+                              ? 'warning'
+                              : 'default'
+                          }
+                          size="sm"
+                        >
+                          {scene.status || 'SCHEDULED'}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </Card>
           </div>
@@ -241,48 +371,66 @@ export default function CallSheetTodayPage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Location */}
-            <Card className="p-5">
-              <h3 className="font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-                <Icons.MapPin className="w-4 h-4 text-[var(--phase-production)]" />
-                Location
-              </h3>
-              <div className="space-y-3">
-                <div>
-                  <p className="font-medium text-[var(--text-primary)]">{data.location.name}</p>
-                  <p className="text-sm text-[var(--text-tertiary)]">{data.location.address}</p>
+            {callSheet.primaryLocation && (
+              <Card className="p-5">
+                <h3 className="font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+                  <Icons.MapPin className="w-4 h-4 text-[var(--phase-production)]" />
+                  Location
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <p className="font-medium text-[var(--text-primary)]">{callSheet.primaryLocation}</p>
+                    {callSheet.primaryLocationAddress && (
+                      <p className="text-sm text-[var(--text-tertiary)]">{callSheet.primaryLocationAddress}</p>
+                    )}
+                  </div>
+                  {(callSheet.parkingInstructions || callSheet.nearestHospital) && (
+                    <div className="pt-3 border-t border-[var(--border-subtle)] space-y-2">
+                      {callSheet.parkingInstructions && (
+                        <p className="text-sm">
+                          <span className="text-[var(--text-tertiary)]">Parking:</span>{' '}
+                          <span className="text-[var(--text-secondary)]">{callSheet.parkingInstructions}</span>
+                        </p>
+                      )}
+                      {callSheet.nearestHospital && (
+                        <p className="text-sm">
+                          <span className="text-[var(--text-tertiary)]">Hospital:</span>{' '}
+                          <span className="text-[var(--text-secondary)]">{callSheet.nearestHospital}</span>
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <div className="pt-3 border-t border-[var(--border-subtle)] space-y-2">
-                  <p className="text-sm"><span className="text-[var(--text-tertiary)]">Parking:</span> <span className="text-[var(--text-secondary)]">{data.location.parking}</span></p>
-                  <p className="text-sm"><span className="text-[var(--text-tertiary)]">Basecamp:</span> <span className="text-[var(--text-secondary)]">{data.location.basecamp}</span></p>
-                </div>
-              </div>
-            </Card>
+              </Card>
+            )}
 
             {/* Weather */}
-            <Card className="p-5">
-              <h3 className="font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-                <Icons.Sun className="w-4 h-4 text-[var(--warning)]" />
-                Weather
-              </h3>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <p className="text-[var(--text-tertiary)]">Condition</p>
-                  <p className="font-medium text-[var(--text-primary)]">{data.weather.condition}</p>
+            {callSheet.weatherForecast && (
+              <Card className="p-5">
+                <h3 className="font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+                  <Icons.Sun className="w-4 h-4 text-[var(--warning)]" />
+                  Weather
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-[var(--text-tertiary)] text-sm">Forecast</p>
+                    <p className="font-medium text-[var(--text-primary)]">{callSheet.weatherForecast}</p>
+                  </div>
+                  {callSheet.temperature && (
+                    <div>
+                      <p className="text-[var(--text-tertiary)] text-sm">Temperature</p>
+                      <p className="font-medium text-[var(--text-primary)]">{callSheet.temperature}</p>
+                    </div>
+                  )}
+                  {callSheet.sunset && (
+                    <div>
+                      <p className="text-[var(--text-tertiary)] text-sm">Sunset</p>
+                      <p className="font-medium text-[var(--text-primary)]">{callSheet.sunset}</p>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <p className="text-[var(--text-tertiary)]">High / Low</p>
-                  <p className="font-medium text-[var(--text-primary)]">{data.weather.high}° / {data.weather.low}°</p>
-                </div>
-                <div>
-                  <p className="text-[var(--text-tertiary)]">Sunrise</p>
-                  <p className="font-medium text-[var(--text-primary)]">{data.weather.sunrise}</p>
-                </div>
-                <div>
-                  <p className="text-[var(--text-tertiary)]">Sunset</p>
-                  <p className="font-medium text-[var(--text-primary)]">{data.weather.sunset}</p>
-                </div>
-              </div>
-            </Card>
+              </Card>
+            )}
 
             {/* Crew Status */}
             <Card className="p-5">
@@ -291,10 +439,14 @@ export default function CallSheetTodayPage() {
                 Crew Status
               </h3>
               <div className="space-y-2 max-h-64 overflow-y-auto">
-                {data.crew.map((member, idx) => (
+                {crewMembers.map((member, idx) => (
                   <div key={idx} className="flex items-center justify-between py-2">
                     <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${member.checkedIn ? 'bg-[var(--success)]' : 'bg-[var(--danger)]'}`} />
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          member.checkedIn ? 'bg-[var(--success)]' : 'bg-[var(--danger)]'
+                        }`}
+                      />
                       <div>
                         <p className="text-sm font-medium text-[var(--text-primary)]">{member.name}</p>
                         <p className="text-xs text-[var(--text-tertiary)]">{member.role}</p>
@@ -309,7 +461,49 @@ export default function CallSheetTodayPage() {
                   </div>
                 ))}
               </div>
+              <Button variant="secondary" size="sm" className="w-full mt-4" icon="UserPlus">
+                Check In Crew
+              </Button>
             </Card>
+
+            {/* Key Contacts */}
+            {(callSheet.directorName || callSheet.producerName || callSheet.firstADName) && (
+              <Card className="p-5">
+                <h3 className="font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+                  <Icons.User className="w-4 h-4 text-[var(--primary)]" />
+                  Key Contacts
+                </h3>
+                <div className="space-y-3 text-sm">
+                  {callSheet.directorName && (
+                    <div>
+                      <p className="text-[var(--text-tertiary)]">Director</p>
+                      <p className="font-medium text-[var(--text-primary)]">{callSheet.directorName}</p>
+                      {callSheet.directorPhone && (
+                        <p className="text-[var(--text-secondary)]">{callSheet.directorPhone}</p>
+                      )}
+                    </div>
+                  )}
+                  {callSheet.firstADName && (
+                    <div>
+                      <p className="text-[var(--text-tertiary)]">1st AD</p>
+                      <p className="font-medium text-[var(--text-primary)]">{callSheet.firstADName}</p>
+                      {callSheet.firstADPhone && (
+                        <p className="text-[var(--text-secondary)]">{callSheet.firstADPhone}</p>
+                      )}
+                    </div>
+                  )}
+                  {callSheet.producerName && (
+                    <div>
+                      <p className="text-[var(--text-tertiary)]">Producer</p>
+                      <p className="font-medium text-[var(--text-primary)]">{callSheet.producerName}</p>
+                      {callSheet.producerPhone && (
+                        <p className="text-[var(--text-secondary)]">{callSheet.producerPhone}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </Card>
+            )}
           </div>
         </div>
       </div>

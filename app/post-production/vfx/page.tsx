@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Icons, Card, StatusBadge, Progress, Button } from '../../components/ui';
+import { useRouter } from 'next/navigation';
+import { Icons, Card, StatusBadge, Progress, Button, Modal, Input, Textarea } from '../../components/ui';
 
 /**
  * VFX HUB
@@ -71,11 +72,37 @@ const formatCurrency = (amount: number): string => {
 };
 
 export default function VFXHubPage() {
+  const router = useRouter();
   const [vfxShots, setVFXShots] = useState<VFXShot[]>(initialVFXShots);
   const [vendors, setVendors] = useState<VFXVendor[]>(initialVendors);
   const [activeTab, setActiveTab] = useState<'shots' | 'vendors' | 'budget'>('shots');
   const [selectedComplexity, setSelectedComplexity] = useState<string>('ALL');
   const [selectedVendor, setSelectedVendor] = useState<string>('ALL');
+
+  // Modal states
+  const [isAddShotModalOpen, setIsAddShotModalOpen] = useState(false);
+  const [isAddVendorModalOpen, setIsAddVendorModalOpen] = useState(false);
+
+  // Form data states
+  const [shotFormData, setShotFormData] = useState({
+    shotCode: '',
+    sequence: '',
+    description: '',
+    complexity: 'MODERATE' as VFXComplexity,
+    vendor: '',
+    frameCount: '',
+    estimatedHours: '',
+    estimatedCost: '',
+    dueDate: '',
+    notes: '',
+  });
+
+  const [vendorFormData, setVendorFormData] = useState({
+    name: '',
+    specialty: [] as string[],
+    contactName: '',
+    email: '',
+  });
 
   // Calculate stats
   const stats = {
@@ -101,6 +128,83 @@ export default function VFXHubPage() {
     if (selectedVendor !== 'ALL' && shot.vendor !== selectedVendor) return false;
     return true;
   });
+
+  // Handler functions
+  const handleExportReport = () => {
+    const csv = ['Shot Code,Sequence,Description,Complexity,Vendor,Status,Frames,Est Hours,Est Cost'].join(',') + '\n' +
+      vfxShots.map(s => [s.shotCode, s.sequence, s.description, s.complexity, s.vendor || '', s.status, s.frameCount, s.estimatedHours, s.estimatedCost].join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'vfx-report.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleAddShot = () => {
+    const newShot: VFXShot = {
+      id: `shot-${Date.now()}`,
+      shotCode: shotFormData.shotCode,
+      sequence: shotFormData.sequence,
+      description: shotFormData.description,
+      complexity: shotFormData.complexity,
+      vendor: shotFormData.vendor || undefined,
+      status: 'PENDING',
+      version: 1,
+      frameCount: parseInt(shotFormData.frameCount) || 0,
+      estimatedHours: parseFloat(shotFormData.estimatedHours) || 0,
+      estimatedCost: parseFloat(shotFormData.estimatedCost) || 0,
+      dueDate: shotFormData.dueDate || undefined,
+      notes: shotFormData.notes || undefined,
+    };
+
+    setVFXShots([...vfxShots, newShot]);
+    setIsAddShotModalOpen(false);
+    setShotFormData({
+      shotCode: '',
+      sequence: '',
+      description: '',
+      complexity: 'MODERATE',
+      vendor: '',
+      frameCount: '',
+      estimatedHours: '',
+      estimatedCost: '',
+      dueDate: '',
+      notes: '',
+    });
+  };
+
+  const handleAddVendor = () => {
+    const newVendor: VFXVendor = {
+      id: `vendor-${Date.now()}`,
+      name: vendorFormData.name,
+      specialty: vendorFormData.specialty,
+      shotsAssigned: 0,
+      shotsCompleted: 0,
+      contactName: vendorFormData.contactName,
+      email: vendorFormData.email,
+      rating: 0,
+    };
+
+    setVendors([...vendors, newVendor]);
+    setIsAddVendorModalOpen(false);
+    setVendorFormData({
+      name: '',
+      specialty: [],
+      contactName: '',
+      email: '',
+    });
+  };
+
+  const handleSpecialtyChange = (specialty: string) => {
+    setVendorFormData(prev => ({
+      ...prev,
+      specialty: prev.specialty.includes(specialty)
+        ? prev.specialty.filter(s => s !== specialty)
+        : [...prev.specialty, specialty]
+    }));
+  };
 
   return (
     <div className="min-h-screen bg-[var(--bg-0)]">
@@ -128,11 +232,11 @@ export default function VFXHubPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="secondary" size="sm">
+              <Button variant="secondary" size="sm" onClick={handleExportReport}>
                 <Icons.Download className="w-4 h-4 mr-2" />
                 Export Report
               </Button>
-              <Button variant="primary" size="sm">
+              <Button variant="primary" size="sm" onClick={() => setIsAddShotModalOpen(true)}>
                 <Icons.Plus className="w-4 h-4 mr-2" />
                 Add Shot
               </Button>
@@ -427,7 +531,10 @@ export default function VFXHubPage() {
             })}
 
             {/* Add Vendor Card */}
-            <button className="p-5 rounded-xl border-2 border-dashed border-[var(--border-default)] hover:border-[var(--primary)] hover:bg-[var(--bg-1)] transition-all flex flex-col items-center justify-center min-h-[240px] group">
+            <button
+              onClick={() => setIsAddVendorModalOpen(true)}
+              className="p-5 rounded-xl border-2 border-dashed border-[var(--border-default)] hover:border-[var(--primary)] hover:bg-[var(--bg-1)] transition-all flex flex-col items-center justify-center min-h-[240px] group"
+            >
               <div className="w-12 h-12 rounded-full bg-[var(--bg-2)] flex items-center justify-center mb-3 group-hover:bg-[var(--primary-muted)] transition-colors">
                 <Icons.Plus className="w-6 h-6 text-[var(--text-tertiary)] group-hover:text-[var(--primary)]" />
               </div>
@@ -551,6 +658,238 @@ export default function VFXHubPage() {
           </div>
         )}
       </div>
+
+      {/* Add Shot Modal */}
+      <Modal
+        isOpen={isAddShotModalOpen}
+        onClose={() => setIsAddShotModalOpen(false)}
+        title="Add VFX Shot"
+      >
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                Shot Code *
+              </label>
+              <Input
+                value={shotFormData.shotCode}
+                onChange={(e) => setShotFormData({ ...shotFormData, shotCode: e.target.value })}
+                placeholder="e.g., VFX_001"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                Sequence *
+              </label>
+              <Input
+                value={shotFormData.sequence}
+                onChange={(e) => setShotFormData({ ...shotFormData, sequence: e.target.value })}
+                placeholder="e.g., SEQ_01"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Description *
+            </label>
+            <Textarea
+              value={shotFormData.description}
+              onChange={(e) => setShotFormData({ ...shotFormData, description: e.target.value })}
+              placeholder="Describe the VFX shot..."
+              rows={3}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                Complexity *
+              </label>
+              <select
+                value={shotFormData.complexity}
+                onChange={(e) => setShotFormData({ ...shotFormData, complexity: e.target.value as VFXComplexity })}
+                className="w-full px-4 py-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-0)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+              >
+                <option value="SIMPLE">Simple</option>
+                <option value="MODERATE">Moderate</option>
+                <option value="COMPLEX">Complex</option>
+                <option value="HERO">Hero</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                Vendor
+              </label>
+              <select
+                value={shotFormData.vendor}
+                onChange={(e) => setShotFormData({ ...shotFormData, vendor: e.target.value })}
+                className="w-full px-4 py-2 rounded-lg border border-[var(--border-default)] bg-[var(--bg-0)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+              >
+                <option value="">Select vendor...</option>
+                {vendors.map(v => (
+                  <option key={v.id} value={v.name}>{v.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                Frame Count *
+              </label>
+              <Input
+                type="number"
+                value={shotFormData.frameCount}
+                onChange={(e) => setShotFormData({ ...shotFormData, frameCount: e.target.value })}
+                placeholder="120"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                Est. Hours *
+              </label>
+              <Input
+                type="number"
+                step="0.5"
+                value={shotFormData.estimatedHours}
+                onChange={(e) => setShotFormData({ ...shotFormData, estimatedHours: e.target.value })}
+                placeholder="40"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                Est. Cost *
+              </label>
+              <Input
+                type="number"
+                step="100"
+                value={shotFormData.estimatedCost}
+                onChange={(e) => setShotFormData({ ...shotFormData, estimatedCost: e.target.value })}
+                placeholder="5000"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Due Date
+            </label>
+            <Input
+              type="date"
+              value={shotFormData.dueDate}
+              onChange={(e) => setShotFormData({ ...shotFormData, dueDate: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Notes
+            </label>
+            <Textarea
+              value={shotFormData.notes}
+              onChange={(e) => setShotFormData({ ...shotFormData, notes: e.target.value })}
+              placeholder="Additional notes or requirements..."
+              rows={2}
+            />
+          </div>
+
+          <div className="flex items-center gap-3 pt-4">
+            <Button
+              variant="primary"
+              onClick={handleAddShot}
+              disabled={!shotFormData.shotCode || !shotFormData.sequence || !shotFormData.description || !shotFormData.frameCount || !shotFormData.estimatedHours || !shotFormData.estimatedCost}
+            >
+              Add Shot
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => setIsAddShotModalOpen(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Add Vendor Modal */}
+      <Modal
+        isOpen={isAddVendorModalOpen}
+        onClose={() => setIsAddVendorModalOpen(false)}
+        title="Add VFX Vendor"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Vendor Name *
+            </label>
+            <Input
+              value={vendorFormData.name}
+              onChange={(e) => setVendorFormData({ ...vendorFormData, name: e.target.value })}
+              placeholder="e.g., Framestore"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Specialty (select multiple) *
+            </label>
+            <div className="space-y-2">
+              {['Compositing', 'CG Animation', 'Matte Painting', 'Rotoscoping', 'Color Grading', 'Motion Graphics', '3D Modeling', 'Simulation'].map((spec) => (
+                <label key={spec} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={vendorFormData.specialty.includes(spec)}
+                    onChange={() => handleSpecialtyChange(spec)}
+                    className="w-4 h-4 rounded border-[var(--border-default)] text-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]"
+                  />
+                  <span className="text-sm text-[var(--text-primary)]">{spec}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Contact Name *
+            </label>
+            <Input
+              value={vendorFormData.contactName}
+              onChange={(e) => setVendorFormData({ ...vendorFormData, contactName: e.target.value })}
+              placeholder="e.g., John Doe"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+              Email *
+            </label>
+            <Input
+              type="email"
+              value={vendorFormData.email}
+              onChange={(e) => setVendorFormData({ ...vendorFormData, email: e.target.value })}
+              placeholder="contact@vendor.com"
+            />
+          </div>
+
+          <div className="flex items-center gap-3 pt-4">
+            <Button
+              variant="primary"
+              onClick={handleAddVendor}
+              disabled={!vendorFormData.name || vendorFormData.specialty.length === 0 || !vendorFormData.contactName || !vendorFormData.email}
+            >
+              Add Vendor
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => setIsAddVendorModalOpen(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

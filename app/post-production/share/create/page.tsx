@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Icons, Card, Button, Progress } from '../../../components/ui';
 
 /**
@@ -50,6 +51,7 @@ const SHARE_TYPE_CONFIG: Record<ShareType, { label: string; description: string;
 };
 
 export default function CreateSharePage() {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [assets, setAssets] = useState<Asset[]>(initialAssets);
   const [settings, setSettings] = useState<ShareSettings>({
